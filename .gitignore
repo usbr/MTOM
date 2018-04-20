@@ -1,6 +1,3 @@
-Output Data/*
-!Output Data/MTOM_EnsembleOutput.xlsm
-!Output Data/ReadMe.txt
 
 rdfOutput/*
 !rdfOutput/ReadMe.txt
@@ -47,6 +44,4 @@ Icon
 **.Rproj
 .Rproj.user
 
-Inflow Forecasts/EnsembleForecast*
-!Inflow Forecasts/CBRFC_EnsembleForecast*
 !RW Files*
