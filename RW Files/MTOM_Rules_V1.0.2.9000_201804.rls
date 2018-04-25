@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.1.4 Patch
-# Created 15:00 April 24, 2018
+# Created 07:55 April 25, 2018
 # 
 RULESET
 NAME "MTOM_Rules_dev";
@@ -3776,8 +3776,8 @@ BEGIN
     RULE                 "Redistribute MWD Nov & Dec Div Request";
     DESCRIPTION          "DESCRIPTION: This rule redistributes Nov and Dec MWD requests that may be over the canal capacity.  This can occur when LBDV is initiated below Parker and there is additional supply available to MWD.<br><br>SLOTS SET: MWDDiversion:MWD.Diversion Requested; ICS Credits.AnnualCreationEC_CA<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetMonth"( @"t" ) < 11.00000000 AND ( "GetRunCycleIndex"(  ) == 1.00000000 OR "GetRunCycleIndex"(  ) == 3.00000000 );
-    NOTES                "AUTHOR, DATE: MC/JR, Unknown<br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case (Shortage).<br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules";
+    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetMonth"( @"t" ) < 11.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
+    NOTES                "AUTHOR, DATE: MC/JR, Unknown<br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case (Shortage).<br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules<br>CH, 4/25/18: Removed run cycle == 3.0 constraint since rule only fires in start year (therefore should not refire in run cycle 3 for any reason, even in shortage conditions - causes the rule to add twice the amount of water available)";
     BEGIN
 
       WITH_STATEMENT (NUMERIC InitialTotalRequest = FOR ( DATETIME date IN "GetDates"( @"t", @"24:00:00 December Max DayOfMonth, Current Year", "1 months" ) ) STAT_SUM
@@ -3818,7 +3818,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Reset the MWD DIversion and depletion requests based on the estimated available to MWD from the state apportionment and the other user diversion requests and the forecast scheduled volume for MWD.  This rule will only execute in the start timestep and set values for November and December.  This is so that if MWD sets a schedule in a timestep prior to November, the schedule can be adjusted in the last two months of the year such that there are no California overruns. <br><br>SLOTS SET: MWDDiversion:MWD.Depletion Requested; MWDDiversion:MWD.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetMonth"( @"t" ) < 11.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case.<br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case.<br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules<br>CH, 3/18: Removed run cycle == 3.0 constraint since rule only fires in start year (therefore should not refire in run cycle 3 for any reason, even in shortage conditions - causes the rule to add twice the amount of water available)";
     BEGIN
 
     DESCRIPTION          "reset the MWD DIversion and depletion requests based on the estimated <br>available to MWD from the state apportionment and the other user diversion <br>requests and the forecast scheduled volume for MWD.  <br><br>This rule will only execute in the start timestep and set values for November and December.  This is so that if MWD sets a schedule in a timestep prior to November, the schedule can be adjusted in the last two months of the year such that there are no California overruns. ";
