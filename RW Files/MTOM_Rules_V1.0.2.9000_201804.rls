@@ -1,8 +1,8 @@
 # RiverWare_Ruleset 7.1.4 Patch
-# Created 17:13 April 25, 2018
+# Created 17:56 April 25, 2018
 # 
 RULESET
-NAME "MTOM_Rules ";
+NAME "MTOM_Rules  (from MRM run) (from MRM run) (from MRM run)";
 AGENDA_ORDER ASCENDING;
 DESCRIPTION "";
 PRECISION   8;
@@ -7143,7 +7143,7 @@ BEGIN
  ELSE
   IF ( "MonthIs"( { "May" , "June" , "July" , "August" , "September" , "October" , "November" , "December" } ) )
   THEN
-   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Next Year", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000], "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ), "Max"( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "FlamingGorgeData.HClass" [], 2.00000000] - "VolumeToFlow"( "PredictedYampaFlow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), @"t" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficent to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) )
+   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Next Year", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000], "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ), "Max"( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "VolumeToFlow"( "PredictedYampaFlow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), @"t" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficent to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) )
   ELSE
    "Max"( "VolumeToFlow"( ( "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.May1TargetElevation" [0.00000000, 2.00000000] ) COMMENTED_BY "March 1 soft baseflow target is always a pool elevation of 6027 FT. During March this target may be adjusted based upon the Percent Exceedence to get the actual May 1 ULDE. -From Heather Hermansen  -HG 5/24/2013" + "PredictedFGInflow"( @"24:00:00 Current Month Max DayOfMonth, Current Year", @"24:00:00 April Max DayOfMonth, Current Year" ) ) / "NumberOfMonthsUntilMay"(  ), @"t" ), $ "FlamingGorgeData.MinFlow" [] ) COMMENTED_BY "January and February."
   ENDIF
