@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.1.4 Patch
-# Created 08:33 April 27, 2018
+# Created 13:05 April 27, 2018
 # 
 RULESET
 NAME "MTOM_Rules_dev";
@@ -7980,7 +7980,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS";
     BEGIN
 
       WITH NUMERIC creationOfCACEICS = IF ( ( ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR NOT "IsMRM"(  ) ) COMMENTED_BY "If the year is a Shortage Year, a Quantified Surplus Year, a Flood Control Year, <br>or if the run is a deterministic Min, Max or Most run, do not Create any ICS TP <br>12/18/2017 <br>" )
@@ -7999,7 +7999,7 @@ BEGIN
    ELSE
     $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Take Step 1"] COMMENTED_BY "Not Surplus or Shortage <br>"
    ENDIF
-  ENDIF , ( $ "MWDDiversionData.MWDMaximumAnnualDelivery" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Take"], $ "ICS Credits.ExtraordinaryConservationICS_CA" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Make sure the amount of Delivery taken is within the system or below the <br>Maximum Take that MWD can have. TP 12/18/2017 <br>" + creationOfCACEICS ) COMMENTED_BY "Available ICS Water <br>" } ) DO
+  ENDIF , ( $ "MWDDiversionData.MWDMaximumAnnualDelivery" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Take"], $ "ICS Credits.TotalICS_CA" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Make sure the amount of Delivery taken is within the system or below the <br>Maximum Take that MWD can have. TP 12/18/2017 <br>" + creationOfCACEICS ) COMMENTED_BY "Available ICS Water <br>" } ) DO
    { totalDeliveryOfCAICS , creationOfCACEICS }
   ENDWITH
  ENDWITH;
