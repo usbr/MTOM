@@ -1,8 +1,8 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 11:02 May 3, 2018
+# Created 14:11 May 10, 2018
 # 
 RULESET
-NAME "MTOM_Rules_dev";
+NAME "MTOM_Rules";
 AGENDA_ORDER ASCENDING;
 DESCRIPTION "";
 PRECISION   8;
