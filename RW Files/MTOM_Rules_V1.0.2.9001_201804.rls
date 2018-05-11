@@ -1,8 +1,8 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 09:12 May 10, 2018
+# Created 09:19 May 11, 2018
 # 
 RULESET
-NAME "MTOM_Rules_dev";
+NAME "MTOM_Rules_dev 1";
 AGENDA_ORDER ASCENDING;
 DESCRIPTION "";
 PRECISION   8;
@@ -80,7 +80,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for California after all schedule adjustments by summing the non-MWD diversion requests and the MWD depletion request for the current calendar year.  This rule also calculates the value of the California Final Adjusted Apportionment.<br><br>SLOTS SET: AnnualWaterUse.CaTotalAnnual; AnnualWaterUse.California_FinalAdjustedApportionment";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND ( @"t" == @"24:00:00 December 31, Current Year" OR @"t" == @"Finish Timestep" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>CH, 5/8/18: Need to update Final Adjusted Apportionment assignment to include appropriate IID ICS";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>CH, 5/11/18: Updated Final Adjusted Apportionment assignment to include IID ICS creation and delivery";
     BEGIN
 
       $ "AnnualWaterUse.CaTotalAnnual" [@"24:00:00 December 31, Current Year"] := FOR ( DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year" ) STAT_SUM
@@ -100,7 +100,7 @@ BEGIN
   THEN
    $ "AnnualWaterUse.California_Apportionment" [@"24:00:00 December 31, Current Year"]
   ELSE
-   $ "AnnualWaterUse.California_PreliminaryAdjustedApportionment" [@"24:00:00 December 31, Current Year"] + NaNToZero ( $ "ICS Credits.AnnualNVBankedinCA" ["Dec31ofYear"( @"t" )] ) - NaNToZero ( $ "ICS Credits.AnnualCreationEC_MWD" ["Dec31ofYear"( @"t" )] ) + ( NaNToZero ( $ "ICS Credits.AnnualDeliveryBiNat_MWD" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliveryEC_MWD" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliverySysEff_MWD" ["Dec31ofYear"( @"t" )] ) )
+   $ "AnnualWaterUse.California_PreliminaryAdjustedApportionment" [@"24:00:00 December 31, Current Year"] + NaNToZero ( $ "ICS Credits.AnnualNVBankedinCA" ["Dec31ofYear"( @"t" )] ) - NaNToZero ( ( $ "ICS Credits.AnnualCreationEC_MWD" ["Dec31ofYear"( @"t" )] ) + ( $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] ) ) + ( NaNToZero ( $ "ICS Credits.AnnualDeliveryBiNat_MWD" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliveryEC_MWD" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliverySysEff_MWD" ["Dec31ofYear"( @"t" )] ) ) + ( NaNToZero ( $ "ICS Credits.AnnualDeliveryBiNat_IID" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] ) )
   ENDIF
  ELSE
   $ "AnnualWaterUse.California_Apportionment" [@"24:00:00 December 31, Current Year"]
@@ -526,10 +526,10 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the value of the ICMA balance for Mexico<br><br>SLOTS SET: Mexico Shortage and Surplus.ICMA Balance";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 December 31, Current Year" OR @"t" == "RunEndDate"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE;<br>MC, 20160908: Moved slot Mexico Shortage and Surplus.AnnualCreationICMA inside parentheses so it is subject to 0.97 factor per Shana T. email on 20160831<br><br>CH, 5/8/18: Need to update with IID annual creation";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE;<br>MC, 20160908: Moved slot Mexico Shortage and Surplus.AnnualCreationICMA inside parentheses so it is subject to 0.97 factor per Shana T. email on 20160831<br><br>CH, 5/11/18: Updated ICMA balance assignment with IID annual creation";
     BEGIN
 
-      $ "Mexico Shortage and Surplus.ICMA Balance" [@"24:00:00 December 31, Current Year"] := ( $ "Mexico Shortage and Surplus.ICMA Balance" [@"24:00:00 December 31, Previous Year"] + $ "Mexico Shortage and Surplus.AnnualCreationICMA" [@"24:00:00 December 31, Current Year"] - $ "Mexico Shortage and Surplus.AnnualDeliveryICMA" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_AZ" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_MWD" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] ) * 0.97000000;
+      $ "Mexico Shortage and Surplus.ICMA Balance" [@"24:00:00 December 31, Current Year"] := ( $ "Mexico Shortage and Surplus.ICMA Balance" [@"24:00:00 December 31, Previous Year"] + $ "Mexico Shortage and Surplus.AnnualCreationICMA" [@"24:00:00 December 31, Current Year"] - $ "Mexico Shortage and Surplus.AnnualDeliveryICMA" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_AZ" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_MWD" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_IID" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] ) * 0.97000000;
 
     END;
 
@@ -4842,7 +4842,7 @@ BEGIN
    THEN
     $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
    ELSE
-    $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - $ "ICSProjectionData.California_ECICSCreationIID" ["Dec31ofYear"( @"t" )] - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
+    $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] - $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] ) - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
    ENDIF
   ENDIF
  ELSE
