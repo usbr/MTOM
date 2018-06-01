@@ -87,7 +87,7 @@ rdf_aggregate(
 ## 4. Compare results for two ensemble simulations for custom slots ##
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 scen_dir = paste0(MTOMDIR,"/Output Data/RDF Process/") #set to the folder containing the sub folders for each ensemble
-names(my_scens) = my_scens #naming #must name these
+names(scenarios) = my_scens #naming #must name these
 
 #rw_scen_aggregate() will aggregate and summarize multiple scenarios, essentially calling rdf_aggregate() for each scenario. Similar to rdf_aggregate() it relies on a user specified rwd_agg object to know how to summarize and process the scenarios.
 # The scen_dir argument should point to the directory were rdf files from different month runs are stored.
@@ -96,8 +96,7 @@ names(my_scens) = my_scens #naming #must name these
 scen_res <- rw_scen_aggregate(
   scenarios = scenarios,
   agg = rwa1,
-  scen_dir = scen_dir,
-  scen_names = my_scens
+  scen_dir = scen_dir
 )
 
 unique(scen_res$Variable) #check variable names 
@@ -180,7 +179,7 @@ source('plottingFunctions.R') #plotEOCYElev #added csVarNames()
 # source('getICPEData.R')
 
 # some sanity checks that UI is correct:
-if(!(mainScenGroup %in% names(scenarios)))
+if(!(mainScenGroup %in% names(scenarios))) 
   stop(mainScenGroup, ' is not found in scens.')
 
 # check folders
@@ -289,7 +288,7 @@ cs <- pe %>%
 
 # rm(pe) # don't need pe any longer
 
-cs <- sysCond_all %>%
+cs <- sysCond %>%
   mutate(AggName = Scenario) %>%
   filter(Variable %in% c('lbSurplus', 'lbShortage')) %>%
   mutate(AggName = Scenario) %>%
