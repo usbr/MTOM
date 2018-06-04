@@ -19,8 +19,8 @@
 # install.packages(devtools)
 
 #load libraries 
-library(ggplot2)
-library(tidyr) #dplyr
+library(tidyverse) #ggplot2,dplyr,tidyr
+
 
 #Install RWDataPlyr
 # library('devtools')
@@ -33,8 +33,10 @@ vignette("rwdataplyr-workflow", package = "RWDataPlyr")
 ## directories set up
 #Use env variable 
 MTOMDIR <- Sys.getenv("MTOM_DIR") 
-# setwd(paste0(MTOMDIR,"/rdfOutput/")) #set to the folder containing the sub folders for each ensemble
-setwd(paste0(MTOMDIR,"/Output Data/RDF Process/")) #set to the folder containing the sub folders for each ensemble
+# setwd(paste0(MTOMDIR,"/rdfOutput/")) #set to the folder containing the 
+# sub folders for each ensemble
+setwd(file.path(MTOMDIR,"Output Data","RDF Process")) #set to the folder 
+#containing the sub folders for each ensemble
 
 #OR just point to the folder 
 #rdf_dir = "C:/Users/cfelletter/Documents/MTOM/rdfOutput" run folder
@@ -42,11 +44,14 @@ setwd(paste0(MTOMDIR,"/Output Data/RDF Process/")) #set to the folder containing
 
 ## input
 scenarios = c("Apr", "May") #scenarios are folder names for the rdfs from your different runs
-# this is the order they will show up in the table & plot, so list the newest run second there should only be 2 scenarios
-my_scens = c("Apr", "May") #names for your senarios to be plotted, KEEP THESE SAME AS SCENARIOS, otherwise something is erroring
-# my_scens = c("April 2018", "May 2018") #names for your senarios to be plotted
+# this is the order they will show up in the table & plot, so list the newest 
+#run second there should only be 2 scenarios
+my_scens = c("Apr", "May") #names for your senarios to be plotted, 
+#KEEP THESE SAME AS SCENARIOS, otherwise something is erroring
+names(scenarios) = my_scens #naming #must name these for code in Sect 4 & 5 
 
-scen_dir = paste0(MTOMDIR,"/Output Data/RDF Process/") #where scenarios are folder are kept
+scen_dir = file.path(MTOMDIR,"Output Data","RDF Process") 
+#where scenarios are folder are kept
 #see RWDATPlyr Workflow for more information 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -54,7 +59,6 @@ scen_dir = paste0(MTOMDIR,"/Output Data/RDF Process/") #where scenarios are fold
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 slot = "Powell.Outflow"
 file = "res.rdf" #"MTOM.rdf"
-# variable = "FGCYOutflow" #short name for output
 
 #read in the rdf
 rdf <- read_rdf(iFile = paste0(scenarios[1],"/",file))
@@ -64,8 +68,16 @@ rdf_slot_names(rdf)
 
 # then get the minimum annual outflow for all 5 years and traces
 rdf %>% 
-  rdf_get_slot(slot) %>%
-  rwslot_annual_sum()
+  rdf_to_rwtbl() %>%
+  filter(ObjectSlot == slot) %>% 
+  group_by(Year) %>% 
+  summarise(Value = sum(Value))
+
+#data starting in January can use the below code but 
+#currently not set up for starts in months other than January
+# rdf %>% 
+#   rdf_get_slot(slot) %>%
+#   rwslot_annual_sum()
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ## 3. Results for multiple slots in an ensemble ##
@@ -77,7 +89,8 @@ rwa1 <- rwd_agg(read.csv("rw_agg_PowMead.csv", stringsAsFactors = FALSE))
 #see RWDATPlyr Workflow for more information 
 
 
-# #After the rwd_agg is specified the object is passed to rdf_aggregate() along with a few parameters specifying where the data are stored, and a tbl_df is returned:
+# #After the rwd_agg is specified the object is passed to rdf_aggregate() 
+#along with a few parameters specifying where the data are stored, and a tbl_df is returned:
 rdf_aggregate(
   rwa1,
   rdf_dir = scenarios[1]
@@ -86,12 +99,15 @@ rdf_aggregate(
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ## 4. Compare results for two ensemble simulations for custom slots ##
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-scen_dir = paste0(MTOMDIR,"/Output Data/RDF Process/") #set to the folder containing the sub folders for each ensemble
 names(scenarios) = my_scens #naming #must name these
 
-#rw_scen_aggregate() will aggregate and summarize multiple scenarios, essentially calling rdf_aggregate() for each scenario. Similar to rdf_aggregate() it relies on a user specified rwd_agg object to know how to summarize and process the scenarios.
-# The scen_dir argument should point to the directory were rdf files from different month runs are stored.
-# rw_scen_aggregate() also needs to know the scenario folders and allows the user to specify scenario names that may differ from the folder name so they are easier to use in R. 
+#rw_scen_aggregate() will aggregate and summarize multiple scenarios, 
+#essentially calling rdf_aggregate() for each scenario. Similar to rdf_aggregate() 
+#it relies on a user specified rwd_agg object to know how to summarize and 
+#process the scenarios. The scen_dir argument should point to the directory were 
+#rdf files from different month runs are stored. rw_scen_aggregate() also 
+#needs to know the scenario folders and allows the user to specify scenario names 
+#that may differ from the folder name so they are easier to use in R. 
 
 scen_res <- rw_scen_aggregate(
   scenarios = scenarios,
@@ -142,16 +158,19 @@ createSimple5yrTable <- TRUE
 #Additional inputs 
 yrs2show <- 2018:2022 # years to show the crit stats figures
 peYrs <- 2017:2022 # years to show the Mead/Powell 10/50/90 figures for
-mainScenGroup <- "May" # the mainScenGroup is the scenario to use when creating the current month's 5-year table, etc. 
-#In the plots, we want to show the previous months runs, but in the tables, we only want the current month run. 
+mainScenGroup <- "May" # the mainScenGroup is the scenario to use when creating 
+#the current month's 5-year table, etc. In the plots, we want to show the 
+#previous months runs, but in the tables, we only want the current month run. 
 colorLabel <- 'Scenario' #color plots based on 
 legendWrap <- 20 # setting to NULL will not wrap legend entries at all
 annText <- 'Results from May 2018 MTOM Run' # text that will be added to figures
 yy5 <- 2018:2022 # years to use for the simple 5-year table
-tableFootnote <- NA # for the simple 5-year table, this should either be a footnote corresponding to one of the my_scens names or NA
+tableFootnote <- NA # for the simple 5-year table, this should either be a 
+#footnote corresponding to one of the my_scens names or NA
 
 #file names 
-sysCondTable <- paste0('SysTableFull',yrs2show[1],'_',tail(yrs2show,1),'.csv') # file name for the system conditions procssed file
+sysCondTable <- paste0('SysTableFull',yrs2show[1],'_',tail(yrs2show,1),'.csv') 
+# file name for the system conditions procssed file
 eocyFigs <- 'MPEOCY.pdf' 
 critStatsProc <- 'CritStats.csv'
 critFigs <- 'CritFigs2022.pdf'
@@ -184,7 +203,8 @@ if(!(mainScenGroup %in% names(scenarios)))
 
 # check folders
 if(!file.exists(scenarios[1]) | !file.exists(scenarios[2]))
-  stop('Scenarios folder(s) do not exist or scen_dir is set up incorrectly. Please ensure Scenarios is set correctly.')
+  stop('Scenarios folder(s) do not exist or scen_dir is set up incorrectly. 
+       Please ensure Scenarios is set correctly.')
 
 if (!file.exists('results')) {
   message(paste(file.path(scen_dir, 'results'),
@@ -203,212 +223,212 @@ message('Figures and tables will be saved to: ', oFigs)
 # *****************************************************************************
 #       Process results --------------
 # *****************************************************************************
-names(scenarios) = my_scens #set scenarios names equal to my_scens 
+# should be have set scenario colm names above 
+# names(scenarios) = my_scens #set scenarios names equal to my_scens 
 
 ## Create tables, figures, and data behind figures
 if(makeFiguresAndTables){
   
-message('starting getSysCondData')
-#read the MTOM rwd_agg table #### VERIFY LB Surplus, only found Flood Control Slot
-sys_rwa <- rwd_agg(read.csv("MTOM_sys_rwa.csv", stringsAsFactors = FALSE)) 
-# aggregate for system conditions table
-sysCond <- rw_scen_aggregate(
-  scenarios = scenarios,
-  agg = sys_rwa,
-  scen_dir = scen_dir#,
-  # scen_names = my_scens
-) 
-
-message("creating system conditions table")
-
-sysCond_Curr <-  sysCond %>%
-# trim to specified years and the current main scenario group 
-dplyr::filter(Year %in% yrs2show & Scenario == mainScenGroup)
-# create the system cond. table
-sysTable <- CRSSIO::crsso_get_sys_cond_table(sysCond_Curr, yrs2show)
-# save the sys cond table
-data.table::fwrite(
-  as.data.frame(sysTable[['fullTable']]), 
-  file.path(oFigs,sysCondTable), 
-  row.names = TRUE
-)
-
-# 2) Plot Mead, Powell EOCY elvations and include previous month's results too
-#read the agg table 
-message('starting getPeData')
-
-pe_rwa <- rwd_agg(read.csv("MPPEStats.csv", stringsAsFactors = FALSE)) 
-# aggregate for system conditions table
-pe <- rw_scen_aggregate(
-  scenarios = scenarios,
-  agg = pe_rwa,
-  scen_dir = scen_dir#,
-  # scen_names = my_scens
-) %>%
+  message('starting getSysCondData')
+  #read the MTOM rwd_agg table #### VERIFY LB Surplus, only found Flood Control Slot
+  sys_rwa <- rwd_agg(read.csv("MTOM_sys_rwa.csv", stringsAsFactors = FALSE)) 
+  # aggregate for system conditions table
+  sysCond <- rw_scen_aggregate(
+    scenarios = scenarios,
+    agg = sys_rwa,
+    scen_dir = scen_dir#,
+    # scen_names = my_scens
+  ) 
   
-#The StartMonth column is used as the color variable in plotEOCYElev, and 
-# the names that should show up in the legend/differentiate scenario groups
-# are stored in the Scenario Varaible. So easiest to just copy it from Scenario to 
-# StartMonth for now
-dplyr::mutate(StartMonth = Scenario)
-
-message("EOCY elevation figures")
-
-#plot
-powellPE <- plotEOCYElev(pe, peYrs, 'Powell.Pool Elevation', 
-                         'Powell End-of-December Elevation', colorLabel,
+  message("creating system conditions table")
+  
+  sysCond_Curr <-  sysCond %>%
+  # trim to specified years and the current main scenario group 
+  dplyr::filter(Year %in% yrs2show & Scenario == mainScenGroup)
+  # create the system cond. table
+  sysTable <- CRSSIO::crsso_get_sys_cond_table(sysCond_Curr, yrs2show)
+  # save the sys cond table
+  data.table::fwrite(
+    as.data.frame(sysTable[['fullTable']]), 
+    file.path(oFigs,sysCondTable), 
+    row.names = TRUE
+  )
+  
+  # 2) Plot Mead, Powell EOCY elvations and include previous month's results too
+  #read the agg table 
+  message('starting getPeData')
+  
+  pe_rwa <- rwd_agg(read.csv("MPPEStats.csv", stringsAsFactors = FALSE)) 
+  # aggregate for system conditions table
+  pe <- rw_scen_aggregate(
+    scenarios = scenarios,
+    agg = pe_rwa,
+    scen_dir = scen_dir#,
+    # scen_names = my_scens
+  ) %>%
+    
+  #The StartMonth column is used as the color variable in plotEOCYElev, and 
+  # the names that should show up in the legend/differentiate scenario groups
+  # are stored in the Scenario Varaible. So easiest to just copy it from Scenario to 
+  # StartMonth for now
+  dplyr::mutate(StartMonth = Scenario)
+  
+  message("EOCY elevation figures")
+  
+  #plot
+  powellPE <- plotEOCYElev(pe, peYrs, 'Powell.Pool Elevation', 
+                           'Powell End-of-December Elevation', colorLabel,
+                           legendWrap = legendWrap)
+  
+  meadPE <- plotEOCYElev(pe, peYrs, 'Mead.Pool Elevation', 
+                         'Mead End-of-December Elevation', colorLabel, 
                          legendWrap = legendWrap)
-
-meadPE <- plotEOCYElev(pe, peYrs, 'Mead.Pool Elevation', 
-                       'Mead End-of-December Elevation', colorLabel, 
-                       legendWrap = legendWrap)
-
-pdf(file.path(oFigs,eocyFigs), width = 8, height = 6)
-print(powellPE)
-print(meadPE)
-dev.off()
-
-rm(powellPE, meadPE)
-
-
-# 3) Critical elevation thresholds; figures and data table
-# have sysCond for some, and read in crit stats for others
-message("starting critical stats")
-
-# compare crit stats for all scenarios
-# call once each for powell LT 3490, shortage, and surplus
-# get the necessary variables by filtering from the pe and syscond data files
-cs <- pe %>%
-  filter(
-    Variable %in% c('meadLt1000', 'meadLt1020', 'powellLt3490', 
-                    'powellLt3525', 'meadLt1025')
-  ) %>%
-  mutate(AggName = Scenario) %>% #adds new variable AggName and preserve existing
-  select(-StartMonth)
-
-# rm(pe) # don't need pe any longer
-
-cs <- sysCond %>%
-  mutate(AggName = Scenario) %>%
-  filter(Variable %in% c('lbSurplus', 'lbShortage')) %>%
-  mutate(AggName = Scenario) %>%
-  rbind(cs)
-
-unique(cs$Variable) #check I got all the variables 
-
-ptitle <- paste(
-  'Powell: Percent of Traces Less than Power Pool', 
-  "(elevation 3,490\') in Any Water Year",
-  sep = "\n"
-)
-
-p3490Fig <- compareCritStats(
-  cs, 
-  yrs2show, 
-  'powellLt3490', 
-  '', 
-  ptitle, 
-  colorLabel, 
-  legendWrap = legendWrap
-)
-
-shortTitle <- 'Lower Basin: Percent of Traces in Shortage Conditions'
-shortFig <- compareCritStats(cs, yrs2show, 'lbShortage', '', shortTitle, 
-                             colorLabel, legendWrap = legendWrap)
-surpTitle <- 'Lower Basin: Percent of Traces in Surplus Conditions'
-surpFig <- compareCritStats(cs, yrs2show, 'lbSurplus', '', surpTitle, 
-                            colorLabel, legendWrap = legendWrap)
-
-# now create figures only for the current "main scenario"
-# defaults are ok for legendTitle, legLoc, nC, and annSize
-# drop Mead LT 1025 from one plot and Mead LT 1020 from 
-# the other plot
-
-critStatsFig1 <- plotCritStats(dplyr::filter(
-  cs, 
-  Scenario == mainScenGroup, 
-  !(Variable %in% c('meadLt1020','lbSurplus'))
-), 
-yrs2show, 
-annText
-)
-
-critStatsFig2 <- plotCritStats(dplyr::filter(
-  cs, 
-  Scenario == mainScenGroup, 
-  !(Variable %in% c('meadLt1025','lbSurplus'))
-), 
-yrs2show, 
-annText
-)
-
-csVars <- csVarNames()
-# create data table to save crit stats
-cs_tbl <- cs %>%
-  dplyr::filter(
-    Year %in% yrs2show, 
+  
+  pdf(file.path(oFigs,eocyFigs), width = 8, height = 6)
+  print(powellPE)
+  print(meadPE)
+  dev.off()
+  
+  rm(powellPE, meadPE)
+  
+  
+  # 3) Critical elevation thresholds; figures and data table
+  # have sysCond for some, and read in crit stats for others
+  message("starting critical stats")
+  
+  # compare crit stats for all scenarios
+  # call once each for powell LT 3490, shortage, and surplus
+  # get the necessary variables by filtering from the pe and syscond data files
+  cs <- pe %>%
+    filter(
+      Variable %in% c('meadLt1000', 'meadLt1020', 'powellLt3490', 
+                      'powellLt3525', 'meadLt1025')
+    ) %>%
+    mutate(AggName = Scenario) %>% #adds new variable AggName and preserve existing
+    select(-StartMonth)
+  
+  # rm(pe) # don't need pe any longer
+  
+  cs <- sysCond %>%
+    mutate(AggName = Scenario) %>%
+    filter(Variable %in% c('lbSurplus', 'lbShortage')) %>%
+    mutate(AggName = Scenario) %>%
+    rbind(cs)
+  
+  unique(cs$Variable) #check I got all the variables 
+  
+  ptitle <- paste(
+    'Powell: Percent of Traces Less than Power Pool', 
+    "(elevation 3,490\') in Any Water Year",
+    sep = "\n"
+  )
+  
+  p3490Fig <- compareCritStats(
+    cs, 
+    yrs2show, 
+    'powellLt3490', 
+    '', 
+    ptitle, 
+    colorLabel, 
+    legendWrap = legendWrap
+  )
+  
+  shortTitle <- 'Lower Basin: Percent of Traces in Shortage Conditions'
+  shortFig <- compareCritStats(cs, yrs2show, 'lbShortage', '', shortTitle, 
+                               colorLabel, legendWrap = legendWrap)
+  surpTitle <- 'Lower Basin: Percent of Traces in Surplus Conditions'
+  surpFig <- compareCritStats(cs, yrs2show, 'lbSurplus', '', surpTitle, 
+                              colorLabel, legendWrap = legendWrap)
+  
+  # now create figures only for the current "main scenario"
+  # defaults are ok for legendTitle, legLoc, nC, and annSize
+  # drop Mead LT 1025 from one plot and Mead LT 1020 from 
+  # the other plot
+  
+  critStatsFig1 <- plotCritStats(dplyr::filter(
+    cs, 
     Scenario == mainScenGroup, 
-    Variable != 'lbSurplus'
-  ) %>%
-  # compute the percent of traces by averaging values 
-  group_by(Year,Variable) %>%
-  summarise(Value = mean(Value)) %>%
-  dplyr::mutate(vName = csVars[Variable]) %>%
-  # reshape to be easier to print out
-  ungroup() %>%
-  select(-Variable) %>%
-  tidyr::spread(vName, Value)
-
-# shortage surplus figure
-# defaults ok for legendTitle, nC, and legLoc
-ssPlot <- plotShortageSurplus(
-  dplyr::filter(
-    sysCond, 
-    Variable %in% c('lbShortage', 'lbSurplus'),
-    Scenario == mainScenGroup
-  ), 
-  yrs2show, 
-  mainScenGroup
-)
-
-# stacked barplot of different shortage tiers
-# default for annSize is ok
-shortStack <- plotShortStackedBar(
-  dplyr::filter(
-    sysCond, 
-    Variable %in% c('lbShortageStep1','lbShortageStep2','lbShortageStep3'),
-    Scenario == mainScenGroup
+    !(Variable %in% c('meadLt1020','lbSurplus'))
   ), 
   yrs2show, 
   annText
-)
-
-# save figures and table
-message("creating critFigs pdf")
-pdf(file.path(oFigs,critFigs),width = 8, height = 6)
-print(p3490Fig)
-print(shortFig)
-print(surpFig)
-print(critStatsFig1)
-print(critStatsFig2)
-print(ssPlot)
-print(shortStack)
-dev.off()
-data.table::fwrite(cs_tbl,file.path(oFigs,critStatsProc),row.names = F)
+  )
+  
+  critStatsFig2 <- plotCritStats(dplyr::filter(
+    cs, 
+    Scenario == mainScenGroup, 
+    !(Variable %in% c('meadLt1025','lbSurplus'))
+  ), 
+  yrs2show, 
+  annText
+  )
+  
+  csVars <- csVarNames()
+  # create data table to save crit stats
+  cs_tbl <- cs %>%
+    dplyr::filter(
+      Year %in% yrs2show, 
+      Scenario == mainScenGroup, 
+      Variable != 'lbSurplus'
+    ) %>%
+    # compute the percent of traces by averaging values 
+    group_by(Year,Variable) %>%
+    summarise(Value = mean(Value)) %>%
+    dplyr::mutate(vName = csVars[Variable]) %>%
+    # reshape to be easier to print out
+    ungroup() %>%
+    select(-Variable) %>%
+    tidyr::spread(vName, Value)
+  
+  # shortage surplus figure
+  # defaults ok for legendTitle, nC, and legLoc
+  ssPlot <- plotShortageSurplus(
+    dplyr::filter(
+      sysCond, 
+      Variable %in% c('lbShortage', 'lbSurplus'),
+      Scenario == mainScenGroup
+    ), 
+    yrs2show, 
+    mainScenGroup
+  )
+  
+  # stacked barplot of different shortage tiers
+  # default for annSize is ok
+  shortStack <- plotShortStackedBar(
+    dplyr::filter(
+      sysCond, 
+      Variable %in% c('lbShortageStep1','lbShortageStep2','lbShortageStep3'),
+      Scenario == mainScenGroup
+    ), 
+    yrs2show, 
+    annText
+  )
+  
+  # save figures and table
+  message("creating critFigs pdf")
+  pdf(file.path(oFigs,critFigs),width = 8, height = 6)
+  print(p3490Fig)
+  print(shortFig)
+  print(surpFig)
+  print(critStatsFig1)
+  print(critStatsFig2)
+  print(ssPlot)
+  print(shortStack)
+  dev.off()
+  data.table::fwrite(cs_tbl,file.path(oFigs,critStatsProc),row.names = F)
 }
 
 # 5 year simple table -------------------------
 if(createSimple5yrTable){
-## create the 5-yr simple table that compares to the previous run
-message("creating 5-year simple table")
-zz <- cs %>%
+  ## create the 5-yr simple table that compares to the previous run
+  message("creating 5-year simple table")
+  zz <- cs %>%
   mutate(Agg = Scenario)  #adds new variable AggName and preserve existing
-#%>% rbind(read_feather(file.path(resFolder,curMonthPEFile))) #don't need this since MTOM already has ICs 
-simple5Yr <- create5YrSimpleTable(zz, names(scenarios), yy5, tableFootnote)
-pdf(file.path(oFigs,simple5YrFile),width = 8, height = 8)
-print(simple5Yr)
-dev.off()
-rm(zz)
+  simple5Yr <- create5YrSimpleTable(zz, names(scenarios), yy5, tableFootnote)
+  pdf(file.path(oFigs,simple5YrFile),width = 8, height = 8)
+  print(simple5Yr)
+  dev.off()
+  rm(zz)
 }
 
 
