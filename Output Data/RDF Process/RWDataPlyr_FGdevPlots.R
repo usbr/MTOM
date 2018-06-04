@@ -38,8 +38,8 @@ setwd(paste0(MTOMDIR,"/Output Data/RDF Process/")) #set to the folder containing
 # setwd(rdf_dir) #set to the folder containing the sub folders for each ensemble
 
 ## input
-scenarios = c("Apr_FGdev", "FGdev") #scenarios are folder names for the rdfs from your different runs
-my_scens = c("Apr", "FGdev") #names for your senarios to be plotted
+scenarios = c("Apr_Most", "Apr_Most_FGdev") #scenarios are folder names for the rdfs from your different runs
+my_scens = c("Apr_Most", "Apr_Most_FGdev") #names for your senarios to be plotted
 #see RWDATPlyr Workflow for more information 
 
 

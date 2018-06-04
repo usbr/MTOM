@@ -43,16 +43,22 @@ setwd(file.path(MTOMDIR,"Output Data","RDF Process")) #set to the folder
 # setwd(rdf_dir) #set to the folder containing the sub folders for each ensemble
 
 ## input
-scenarios = c("Apr", "May") #scenarios are folder names for the rdfs from your different runs
+scenarios = c("April", "May") #scenarios are folder names for the rdfs from your different runs
 # this is the order they will show up in the table & plot, so list the newest 
 #run second there should only be 2 scenarios
-my_scens = c("Apr", "May") #names for your senarios to be plotted, 
+my_scens = c("April", "May") #names for your senarios to be plotted, 
 #KEEP THESE SAME AS SCENARIOS, otherwise something is erroring
 names(scenarios) = my_scens #naming #must name these for code in Sect 4 & 5 
 
 scen_dir = file.path(MTOMDIR,"Output Data","RDF Process") 
 #where scenarios are folder are kept
 #see RWDATPlyr Workflow for more information 
+
+first_ensemble = c(4,2) #filter out Most,Min,Max. For 38 trace offical = 4, 
+#36 trace month w Most = 2. Same order as for scenarios  
+
+
+### SEE SECTION 5 FOR ADDITIONAL INPUTS ###
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ## 2. Results for a single slot in an ensemble ##
@@ -67,11 +73,17 @@ rdf <- read_rdf(iFile = paste0(scenarios[1],"/",file))
 rdf_slot_names(rdf)
 
 # then get the minimum annual outflow for all 5 years and traces
-rdf %>% 
+res_tbl <- rdf %>% #this means "pipe" the data to the next function 
   rdf_to_rwtbl() %>%
   filter(ObjectSlot == slot) %>% 
+  #filter out Most,Min,Max
+  filter(TraceNumber >= first_ensemble[1]) %>% 
   group_by(Year) %>% 
   summarise(Value = sum(Value))
+
+print(res_tbl) #look at output
+
+rm(res_tbl) #delete
 
 #data starting in January can use the below code but 
 #currently not set up for starts in months other than January
@@ -88,13 +100,19 @@ rwa1 <- rwd_agg(read.csv("rw_agg_PowMead.csv", stringsAsFactors = FALSE))
 ?rwd_agg #function name: cy, wy, eocy, eowy, full month name, asis 
 #see RWDATPlyr Workflow for more information 
 
-
 # #After the rwd_agg is specified the object is passed to rdf_aggregate() 
 #along with a few parameters specifying where the data are stored, and a tbl_df is returned:
-rdf_aggregate(
+res <- rdf_aggregate(
   rwa1,
-  rdf_dir = scenarios[1]
-)
+  rdf_dir = scenarios[1] #which senario/run folder?
+) %>% 
+  
+  #filter out Most,Min,Max
+  dplyr::filter(TraceNumber >= first_ensemble[1]) 
+  
+View(res) #look at output
+
+rm(res) #delete
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ## 4. Compare results for two ensemble simulations for custom slots ##
@@ -113,7 +131,11 @@ scen_res <- rw_scen_aggregate(
   scenarios = scenarios,
   agg = rwa1,
   scen_dir = scen_dir
-)
+) %>% 
+  
+  #filter out Most,Min,Max
+  dplyr::filter((Scenario == scenarios[1] & TraceNumber >= first_ensemble[1]) |
+                  (Scenario == scenarios[2] & TraceNumber >= first_ensemble[2])) 
 
 unique(scen_res$Variable) #check variable names 
 
@@ -238,7 +260,12 @@ if(makeFiguresAndTables){
     agg = sys_rwa,
     scen_dir = scen_dir#,
     # scen_names = my_scens
-  ) 
+  ) %>% 
+  
+    #filter out Most,Min,Max
+    dplyr::filter((Scenario == scenarios[1] & TraceNumber >= first_ensemble[1]) |
+                    (Scenario == scenarios[2] & TraceNumber >= first_ensemble[2])) 
+  
   
   message("creating system conditions table")
   
@@ -265,13 +292,19 @@ if(makeFiguresAndTables){
     agg = pe_rwa,
     scen_dir = scen_dir#,
     # scen_names = my_scens
-  ) %>%
+  ) %>% 
     
-  #The StartMonth column is used as the color variable in plotEOCYElev, and 
-  # the names that should show up in the legend/differentiate scenario groups
-  # are stored in the Scenario Varaible. So easiest to just copy it from Scenario to 
-  # StartMonth for now
-  dplyr::mutate(StartMonth = Scenario)
+    #filter out Most,Min,Max
+    dplyr::filter((Scenario == scenarios[1] & TraceNumber >= first_ensemble[1]) |
+                    (Scenario == scenarios[2] & TraceNumber >= first_ensemble[2])) 
+  
+    %>%
+  
+    #The StartMonth column is used as the color variable in plotEOCYElev, and 
+    # the names that should show up in the legend/differentiate scenario groups
+    # are stored in the Scenario Varaible. So easiest to just copy it from Scenario to 
+    # StartMonth for now
+    dplyr::mutate(StartMonth = Scenario)
   
   message("EOCY elevation figures")
   
