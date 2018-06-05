@@ -1,0 +1,22 @@
+"",2018,2019,2020,2021,2022
+Equalization Tier,0,5.71428571428571,22.8571428571429,28.5714285714286,34.2857142857143
+Equalization - annual release > 8.23 maf,0,5.71428571428571,22.8571428571429,28.5714285714286,34.2857142857143
+Equalization - annual release = 8.23 maf,0,0,0,0,0
+Upper Elevation Balancing Tier,100,94.2857142857143,28.5714285714286,37.1428571428571,37.1428571428571
+Upper Elevation Balancing - annual release > 8.23 maf,100,85.7142857142857,20,34.2857142857143,28.5714285714286
+Upper Elevation Balancing - annual release = 8.23 maf,0,8.57142857142857,8.57142857142857,2.85714285714286,8.57142857142857
+Upper Elevation Balancing - annual release < 8.23 maf,0,0,0,0,0
+Mid-Elevation Release Tier,0,0,45.7142857142857,25.7142857142857,20
+Mid-Elevation Balancing - annual release = 8.23 maf,0,0,0,0,0
+Mid-Elevation Release Tier - annual release = 7.48 maf,0,0,45.7142857142857,25.7142857142857,20
+Lower Elevation Balancing Tier,0,0,2.85714285714286,8.57142857142857,8.57142857142857
+Lower Elevation Balancing - annual release > 8.23 maf,0,0,0,0,2.85714285714286
+Lower Elevation Balancing - annual release = 8.23 maf,0,0,0,0,0
+Lower Elevation Balancing - annual release < 8.23 maf,0,0,2.85714285714286,8.57142857142857,5.71428571428571
+"Shortage Condition - any amount (Mead <= 1,075 ft)",0,0,57.1428571428571,60,60
+"Shortage - 1st Level (Mead <= 1,075 and >= 1,050",0,0,57.1428571428571,42.8571428571429,31.4285714285714
+"Shortage - 2nd Level (Mead < 1,050 and >= 1,025",0,0,0,17.1428571428571,25.7142857142857
+"Shortage - 3rd Level (Mead < 1,025)",0,0,0,0,2.85714285714286
+"Surplus Condition - any amount (Mead>= 1,145 ft)",0,0,0,0,5.71428571428571
+Surplus - Flood Control,0,0,0,0,5.71428571428571
+Normal Year or ICS Surplus Condition,100,100,42.8571428571429,34.2857142857143,25.7142857142857
