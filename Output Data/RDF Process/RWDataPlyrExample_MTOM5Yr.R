@@ -296,9 +296,7 @@ if(makeFiguresAndTables){
     
     #filter out Most,Min,Max
     dplyr::filter((Scenario == scenarios[1] & TraceNumber >= first_ensemble[1]) |
-                    (Scenario == scenarios[2] & TraceNumber >= first_ensemble[2])) 
-  
-    %>%
+                    (Scenario == scenarios[2] & TraceNumber >= first_ensemble[2]))     %>%
   
     #The StartMonth column is used as the color variable in plotEOCYElev, and 
     # the names that should show up in the legend/differentiate scenario groups
