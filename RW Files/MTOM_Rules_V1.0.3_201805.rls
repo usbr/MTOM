@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 14:11 May 10, 2018
+# Created 15:33 June 15, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -808,7 +808,13 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"];
 
-      $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.CAPCanal_AnnualCapacity" [];
+    DESCRIPTION          "Testbed Hindcast Simulation - Allow CAP to only take water up to capacity prior to 2008  <br>";
+      $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) > 2008.00000000 )
+ THEN
+  $ "AnnualWaterUse.CAPCanal_AnnualCapacity" []
+ ELSE
+  $ "Arizona_CU_Forecast1.CAP" [@"24:00:00 December 31, Current Year"]
+ ENDIF;
 
       $ "Surplus Total Annual Schedules.CibolaValleyIID" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.CibolaValleyIID" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CibolaValleyIID" [@"24:00:00 December 31, Current Year"];
 
