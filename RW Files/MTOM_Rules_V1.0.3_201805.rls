@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 15:33 June 15, 2018
+# Created 15:38 June 15, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -917,16 +917,21 @@ BEGIN
   $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"]
  ENDIF;
 
-      $ "Surplus Volume Entitlements.CAP Quantified" [@"24:00:00 December 31, Current Year"] := WITH NUMERIC RemainingCanalCapacity = $ "AnnualWaterUse.CAPCanal_AnnualCapacity" [] - "SumAnnualCAPDivRequest"(  ) - $ "ICS Credits.AnnualDeliverySysEff_AZ" [@"24:00:00 December 31, Current Year"] DO
-  WITH NUMERIC RemainingQS_AZ = $ "Surplus.Arizona Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] - ( $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] ) DO
-   IF ( RemainingQS_AZ > 0.00000000 "acre-feet" )
-   THEN
-    "Min"( RemainingQS_AZ, RemainingCanalCapacity )
-   ELSE
-    $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"]
-   ENDIF
+      $ "Surplus Volume Entitlements.CAP Quantified" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) > 1992.00000000 )
+ THEN
+  WITH NUMERIC RemainingCanalCapacity = $ "AnnualWaterUse.CAPCanal_AnnualCapacity" [] - "SumAnnualCAPDivRequest"(  ) - $ "ICS Credits.AnnualDeliverySysEff_AZ" [@"24:00:00 December 31, Current Year"] DO
+   WITH NUMERIC RemainingQS_AZ = $ "Surplus.Arizona Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] - ( $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] ) DO
+    IF ( RemainingQS_AZ > 0.00000000 "acre-feet" )
+    THEN
+     "Min"( RemainingQS_AZ, RemainingCanalCapacity )
+    ELSE
+     $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"]
+    ENDIF
+   ENDWITH
   ENDWITH
- ENDWITH;
+ ELSE
+  0.00000000 "acre-ft"
+ ENDIF COMMENTED_BY "Testbed Hindcast Simulations - Prior to 1992 do not allow CAP to take water since canal was not built  <br>";
 
     END;
 
