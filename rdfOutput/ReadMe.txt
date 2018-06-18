@@ -1,1 +1,1 @@
-This folder contains files rdf files contained by the MRM run.
+This folder contains rdf files created by the MRM run.

@@ -1,0 +1,8 @@
+file,slot,period,summary,eval,t_s,variable
+res.rdf,Mead.Pool Elevation,eocy,NA,NA,NA,Mead.Pool Elevation
+res.rdf,Powell.Pool Elevation,eocy,NA,NA,NA,Powell.Pool Elevation
+res.rdf,Mead.Pool Elevation,cy,min,<=,1000,meadLt1000
+res.rdf,Mead.Pool Elevation,cy,min,<=,1020,meadLt1020
+res.rdf,Powell.Pool Elevation,wy,min,<=,3490,powellLt3490
+res.rdf,Powell.Pool Elevation,wy,min,<=,3525,powellLt3525
+res.rdf,Mead.Pool Elevation,cy,min,<=,1025,meadLt1025

@@ -45,3 +45,6 @@ Icon
 .Rproj.user
 
 !RW Files*
+
+#pass through sheets 
+/Output Data/EnsembleOutput.xlsx
