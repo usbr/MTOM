@@ -1,5 +1,5 @@
-install.packages(ggplot2)
-install.packages(tidyverse)
+install.packages('ggplot2')
+install.packages('tidyverse')
 
 #Install RWDataPlyr & CRSSIO
 install.packages('devtools')

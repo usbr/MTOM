@@ -14,11 +14,11 @@
 rm(list=ls()) #clear the enviornment 
 
 ## a) Install all the following if you don't have
-# install.packages(tidyverse)
-# install.packages(devtools)
+# install.packages('tidyverse')
+# install.packages('devtools')
 
 #load libraries 
-library(tidyverse) #ggplot2,dplyr,tidyr
+library('tidyverse') #ggplot2,dplyr,tidyr
 library('devtools')
 
 ## b) Directory Set Up
