@@ -45,7 +45,7 @@ scenarios = my_scens =  c("PreviousRun", "CurrentRun") #scenarios are folder nam
 #KEEP THESE SAME AS SCENARIOS, otherwise something is erroring
 names(scenarios) = my_scens #naming 
 
-first_ensemble = c(4,2) #filter out Most,Min,Max. For 38 trace offical = 4, 
+first_ensemble = c(2,2) #filter out Most,Min,Max. For 38 trace offical = 4, 
 #36 trace month w Most = 2. Same order as for scenarios  
 
 # "switches" to create/not create different figures
