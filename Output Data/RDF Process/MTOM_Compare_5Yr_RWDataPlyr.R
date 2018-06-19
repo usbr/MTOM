@@ -100,6 +100,12 @@ if("RWDataPlyr" %in% installed.packages()){
   vignette("rwdataplyr-workflow", package = "RWDataPlyr")
 }
 
+if(packageVersion("RWDataPlyr") < "0.6.1"){
+  # detach("package:RWDataPlyr")
+  devtools::install_github("BoulderCodeHub/RWDataPlyr")
+  library(CRSSIO)
+}
+
 if("CRSSIO" %in% installed.packages()){
   library(CRSSIO)
 } else {
