@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 14:45 June 19, 2018
+# Created 14:50 June 19, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -3687,7 +3687,7 @@ BEGIN
     RULE                 "Set Havasu Outflow Exp";
     DESCRIPTION          "DESCRIPTION: If the Havasu outflow is not set at the Start Timestep, set it to the BHOPS Parker Outflow, which is a user input value and comes from the 24 MS. <br><br>SLOTS SET: Havasu.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT IsNaN $ "Havasu.Outflow" [] AND @"t" <= @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 1.00000000;
+    RULE_EXEC_CONSTRAINT IsNaN $ "Havasu.Outflow" [] AND @"t" <= @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 1.00000000 AND ( $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM only <br>";
     NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160426: LC changed this from setting the first 2 months of the run to just the first month";
     BEGIN
 
@@ -3719,7 +3719,7 @@ BEGIN
   "CheckResPhysicalConstraint"( % "Mead", @"t" )
  ELSE
   9999999.00000000 "acre-ft/month"
- ENDIF, IF ( @"t" <= @"Start Timestep" )
+ ENDIF, IF ( @"t" <= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM only <br>" )
  THEN
   "VolumeToFlow"( "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" ) + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", $ "Mohave.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", $ "Havasu.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month", @"t" )
  ELSE
@@ -4078,7 +4078,7 @@ BEGIN
     BEGIN
 
       FOREACH (DATETIME date IN @"Start Timestep" TO @"Finish Timestep") DO
-            $ "HavasuToImperial:DailyOperationalGainLoss.Local Inflow" [date] := IF ( date <= @"Start Timestep + 1" )
+            $ "HavasuToImperial:DailyOperationalGainLoss.Local Inflow" [date] := IF ( date <= @"Start Timestep + 1" AND ( $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM only <br>" )
  THEN
   ( "VolumeToFlow"( $ "HavasuOutflow.ParkerScheduleRequirement" [date], date ) - $ "HavasuOutflow.BHOPSParkerOutflow" [date] )
  ELSE
