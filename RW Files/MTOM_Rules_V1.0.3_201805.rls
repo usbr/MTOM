@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 15:04 June 19, 2018
+# Created 12:18 June 20, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -942,7 +942,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
       IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"]) THEN
             $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) < 2017.00000000 )
  THEN
@@ -1354,7 +1353,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
       $ "LowerBasinDemandVariability.LowerBasinCondition" [@"24:00:00 December 31, Current Year"] := IF ( $ "Mead.Pool Elevation" [@"t - 1"] <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
  THEN
   1.00000000 COMMENTED_BY "If Mead is below 1,075 ft, then set the Basin Condition value to 1 for Shortage"
@@ -1905,7 +1903,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 06/21/2012<br><br>MC, 20171102: Added use of new slot PowellData.TARVTolerance to determine when refinement of TARV will stop.";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
       IF_STATEMENT (( @"t" == @"Start Timestep" AND ( "TierIs"( "Upper", @"t", TRUE ) OR "TierIs"( "Equalization", @"t", TRUE ) ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "At Start Timestep for initial water year when release tier is either Upper Elevation Balancing or Equalization") THEN
             WITH_STATEMENT (NUMERIC VolumeDeviation = "VolumeDeviationFromEOWYTarget"( "RelativeEOWYDate"( @"t" ) )) DO
             WITH_STATEMENT (NUMERIC ReleaseAdjustment = "ReleaseAdjustment"( VolumeDeviation, "RelativeEOWYDate"( @"t" ) )) DO
@@ -1994,7 +1991,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "In August or September start month with UEBT for outyear";
       IF_STATEMENT (( "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) ) AND "TierIs"( "Upper", @"t", FALSE )) THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Powell", "ElevationToStorage"( % "Powell", $ "Powell.Pool Elevation" ["DateToCheckEOWYElevation"( @"t", FALSE )] ) - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] ) ) > "EqLevel"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) )
@@ -2038,7 +2034,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
       IF_STATEMENT (( "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) AND "TierIs"( "Equalization", @"t", FALSE ) ) COMMENTED_BY "Outyears") THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "MaxItem"( { GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) , 8230000.00000000 "acre-feet" } );
 
@@ -2119,7 +2114,6 @@ BEGIN
 
       END_IF_STATEMENT;
 
-      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "Model needs to set the teir for the following water year if current timestep is August. - sc 02/02/11";
       IF_STATEMENT ("MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) AND @"t + 2" IN "WaterYearDatesByGroup"( 2.00000000 ) AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) )) THEN
             WITH_STATEMENT (NUMERIC Carryover = NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] )) DO
@@ -2323,7 +2317,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
       IF_STATEMENT (@"t" == @"Start Timestep" AND NOT IsNaN $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( GET @INDEX 0.00000000 FROM "WaterYearDatesByGroup"( 1.00000000 ) ) )]) THEN
             WITH_STATEMENT (LIST PowellOutflowsAndCarryover = "GetPowellReleasesCorrectedForBypass"( "GetPowellMonthlyReleases"( "WaterYearDatesByGroup"( 1.00000000 ) ) )) DO
           DESCRIPTION          "Set the outflow for the initial water year, checking for the necessity of bypass based on pool elevations";
@@ -3674,9 +3667,9 @@ BEGIN
     END;
 
     RULE                 "Havasu Rule Curve";
-    DESCRIPTION          "DESCRIPTION: In any month except the Start Timestep, set the Havasu outflow such that the reservoir pool elevation target is met.<br><br>SLOTS SET: Havasu.Outflow";
+    DESCRIPTION          "DESCRIPTION: In any month except the Start Timestep, set the Havasu outflow such that the reservoir pool elevation target is met. For testbed hindcasts, this rule executes in the Start Timestep to solve for outflow which is not input using the slot HavasuOutflow.BHOPSParkerOutflow.<br><br>SLOTS SET: Havasu.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND @"t" > @"Start Timestep";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( @"t" >= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] == 1.00000000 ) ) COMMENTED_BY "For testbed hindcasts, this rule solves for Havasu.Outflow in Start Timestep <br>" );
     NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.";
     BEGIN
 
@@ -4190,6 +4183,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
     BEGIN
 
+    BREAKPOINT AFTER_EXEC FALSE;
       FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" , "Mexico" }) DO
             FOREACH (STRING user IN "SlotToString"( "GetObject"( state CONCAT "_CU_Forecast1" ) )) DO
             "GetObject"( state CONCAT "_CU_Forecast1" ) & user [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"t" ) == "GetYear"( @"Start Timestep" ) AND "GetMonth"( @"Start Timestep" ) > 1.00000000 )
@@ -4212,6 +4206,8 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC FALSE;
+    BREAKPOINT AFTER_EXEC FALSE;
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December 31, Finish Year") DO
             $ "PaloVerde.Total Diversion Requested" [date] := IF ( date < @"Start Timestep" )
  THEN
@@ -4713,6 +4709,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC FALSE;
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"Start Timestep - 1") DO
             FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" , "Mexico" }) DO
             FOREACH (STRING user IN "SlotToString"( "GetObject"( state CONCAT "_CU_Actual" ) )) DO
@@ -5413,7 +5410,6 @@ BEGIN
 
     END;
 
-      BREAKPOINT BEFORE_EXEC TRUE;
     FUNCTION       "CalculatePowellUEBToEqualizePowellMonRel" ( LIST datesToEOWY, NUMERIC UpperColumn, NUMERIC LowerColumn, NUMERIC RemainingAnnualVolume )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
