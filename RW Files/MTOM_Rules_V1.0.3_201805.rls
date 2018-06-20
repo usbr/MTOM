@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 12:18 June 20, 2018
+# Created 14:08 June 20, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2987,7 +2987,7 @@ BEGIN
     END;
 
     RULE                 "Calculate April To July Volume Annual Slot";
-    DESCRIPTION          "DESCRIPTION: Calculates the Flaming Gorge Unregulated Inflow and Yampa River at Deerlodge April to July volumes for each year between the classification Start Year and End Year<br><br>SLOTS SET: FlamingGorgeData.AprJulVolAnnual; FlamingGorgeData.YampaAprJulVolAnnual<br><br>";
+    DESCRIPTION          "DESCRIPTION: Calculates the Flaming Gorge Unregulated Inflow and Yampa River at Deerlodge April to July volumes for each year between the classification Start Year and End Year<br><br>SLOTS SET: FlamingGorgeData.AprJulVolAnnual; FlamingGorgeData.YampaAprJulVolAnnual<br><br>S.Baker June 2018 EDITS: update where the historic data is located for MTOM Testbed Hindcast vs Operational MTOM Runs<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == "RunStartDate"(  ) AND "GetRunCycleIndex"(  ) == 2.00000000;
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160908: Changed variable reference in calculation of FlamingGorgeData.YampaAprJulVolAnnual from KNN_MTOM.HistoricYampaAtDeerlodge to YampaRiverInflow.Yampa_at_Deerlodge; ";
@@ -2995,13 +2995,23 @@ BEGIN
 
     DESCRIPTION          "Flaming Gorge Unregulated Apr-Jul Inflow volume";
       FOREACH (DATETIME time IN "GetDates"( "NumberToDate"( $ "KNN_MTOM.FGHydrologicClassificationStartYear" [] ), "NumberToDate"( $ "KNN_MTOM.FGHydrologicClassificationEndYear" [] ), "1 years" )) DO
-            $ "FlamingGorgeData.AprJulVolAnnual" ["GetDate"( "December 31, " CONCAT "GetYearAsString"( time ) )] := "SumFlowsToVolume"( $ "FlamingGorgeInflow.Unregulated", "GetDate"( "April, " CONCAT "GetYearAsString"( time ) ), "GetDate"( "July, " CONCAT "GetYearAsString"( time ) ) );
+            $ "FlamingGorgeData.AprJulVolAnnual" ["GetDate"( "December 31, " CONCAT "GetYearAsString"( time ) )] := "SumFlowsToVolume"( IF ( $ "MTOMRunType.RunType" [] == 0.00000000 )
+ THEN
+  $ "FlamingGorgeInflow.Unregulated"
+ ELSE
+  $ "HistoricData.FlamingGorgeUnregulatedInflow"
+ ENDIF COMMENTED_BY "For operational runs, use unregulated forecast slot; otherwise, use historical data slot <br>", "GetDate"( "April, " CONCAT "GetYearAsString"( time ) ), "GetDate"( "July, " CONCAT "GetYearAsString"( time ) ) );
 
       ENDFOREACH;
 
     DESCRIPTION          "Yampa Apr-Jul Inflow Vol";
       FOREACH (DATETIME time IN "GetDates"( "NumberToDate"( $ "KNN_MTOM.YampaHydrologicClassificationStartYear" [] ), "NumberToDate"( $ "KNN_MTOM.YampaHydrologicClassificationEndYear" [] ), "1 years" )) DO
-            $ "FlamingGorgeData.YampaAprJulVolAnnual" ["GetDate"( "December 31, " CONCAT "GetYearAsString"( time ) )] := "SumFlowsToVolume"( $ "YampaRiverInflow.Yampa_at_Deerlodge", "GetDate"( "April, " CONCAT "GetYearAsString"( time ) ), "GetDate"( "July, " CONCAT "GetYearAsString"( time ) ) );
+            $ "FlamingGorgeData.YampaAprJulVolAnnual" ["GetDate"( "December 31, " CONCAT "GetYearAsString"( time ) )] := "SumFlowsToVolume"( IF ( $ "MTOMRunType.RunType" [] == 0.00000000 )
+ THEN
+  $ "YampaRiverInflow.Yampa_at_Deerlodge"
+ ELSE
+  $ "HistoricData.Yampa_at_Deerlodge"
+ ENDIF COMMENTED_BY "For operational runs, use unregulated forecast slot; otherwise, use historical data slot  <br>", "GetDate"( "April, " CONCAT "GetYearAsString"( time ) ), "GetDate"( "July, " CONCAT "GetYearAsString"( time ) ) );
 
       ENDFOREACH;
 
