@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 14:08 June 20, 2018
+# Created 14:35 June 20, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -3363,6 +3363,7 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170705: Added BlueMesaData.WhitewaterOpsAssurance value to the peak and shoulder flows per Rick C.'s recommendation to improve probability of achieving ROD Whitewater targets. The daily flows are then averaged into the local variable MonthlyWhitewaterTarget in the function BlueMesaOutflowCalc<br><br>CF, 5/5/2017:  This rule was restructured so that new slots  Peak & ShoulderFlowDuration. The shoulder flow function was removed since shoulder/half-bank flow is now fixed by the ROD to 8,070. This value is stored in slot BlueMesaData.ShoulderFlowTarget. - CF 5/5/2017<br><br>TP/MC, 9/25/2015: This rule calculates the may peak flow target for the Whitewater Gage, the shoulder flow is set to 8,070 cfs as part of the 2012 ROD, the May Peak Flow Level which is a value between 0 adn 5 that is based on the 2012 ROD for the Aspinall Unit which is calculated with the Blue Mesa Unregulated Inflow for April through July.  The rule also determines the Black Canyon Peak flow that will meet the Federal Reserve Water Right and the April through July volume for Blue Mesa Reservoir unregulated inflow. This rule only fires on the first day of the year or first day of the run.";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "ROD peak flow Target";
       WITH_STATEMENT (NUMERIC peakFlow = $ "BlueMesaData.WhitewaterPeakFlowTarget" [@"24:00:00 December 31, Current Year"]) DO
           DESCRIPTION          "ROD Shoulder Flow Target";
@@ -3716,7 +3717,7 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
+      BREAKPOINT BEFORE_EXEC FALSE;
       $ "Mead.Outflow" [] := "Min"( IF ( "GetRunCycleIndex"(  ) >= 3.00000000 )
  THEN
   "CheckResPhysicalConstraint"( % "Mead", @"t" )
