@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 15:57 June 20, 2018
+# Created 12:45 June 21, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -644,7 +644,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule will reset the SNWP diversion request for Lower Basin Demand Variability outside of Surplus or Shortage.  If the local inflows above Hoover Dam are greater than the 90% historic local inflow volume then the pumping is reduced by 5%.  In the case that the local inflows are less than the 10% exceedence historic local inflow volume then the pumping is increased by 5%. The factor is applied to the monthly pumping requests and set by this rule. This rule also sets the data slot to show if LBDV was set for the Above Hoover local inflows in the AbvHooverTriggerSet slot. TP 7/27/2015<br><br>SLOTS SET: PumpingFromLakeMead:SNWP.Diversion Requested; PumpingFromLakeMead:SNWP.Depletion Requested; LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) AND NaNToZero ( $ "Surplus.Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND NaNToZero ( $ "Surplus.Quantified Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND NaNToZero ( $ "Surplus.Domestic Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND NaNToZero ( $ "Surplus.Flood Control Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015<br><br>S.Baker 06/20/2018: Added execution constraint to simulate only in operational MTOM runs. ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
@@ -673,7 +673,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule resets the CAP Diversion request based on a demand variability factor.  The Function CAPDemandVariabilityFactor will return a scale value that will either decrease the CAP Diversion Request in Non Shortage or Surplus years to 90% of the original diversion schedule if local inflows to the system below Parker Dam are greater than the 90% exceedence of historic local inflows.  If the local inflows are below the 10% exceedence of the historic local inflows, then the diversion requested can be increased in an amount equal to the difference in the State Apportionment for the year and the volume of Senior Prority user diversion requests.  This value is added to any ICS delivery if Lake Mead is above 1,100 Ft.  The sum of the remaining state apportionment and the ICS Delivery is what CAP is allowed to divert.  TP 7/27/2015<br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) AND NaNToZero ( $ "Surplus.Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND NaNToZero ( $ "Surplus.Quantified Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND NaNToZero ( $ "Surplus.Domestic Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND NaNToZero ( $ "Surplus.Flood Control Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 0.00000000 AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015<br><br>S.Baker 06/20/2018: Added execution constraint to simulate only in operational MTOM runs. ";
     BEGIN
 
       FOREACH (DATETIME date IN "DateMax"( "GetFirstDate"( @"t" ), @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
@@ -803,7 +803,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: If a the Flood Control or Exclusive Space Flag is on (greater than 0) this rule will fire and set the Surplus Schedules for all water users impacted by Flood Control Surplus. The computed schedules are the Total Annual Schedules for each water user, meaning Normal and Surplus schedules.  Flood Control Surplus is in priority over Quantified Surplus Volumes. -HMG 8/2/11<br><br>SLOTS SET: Surplus Total Annual Schedules.AzPumpersBlwImp; Surplus Total Annual Schedules.CAP; Surplus Total Annual Schedules.CibolaValleyIID; Surplus Total Annual Schedules.City of Parker; Surplus Total Annual Schedules.Gila Monster Farms; Surplus Total Annual Schedules.SNWA; Surplus Total Annual Schedules.MWD; Surplus Total Annual Schedules.Coachella; Surplus Total Annual Schedules.IID; Surplus Total Annual Schedules.Needles; Surplus Total Annual Schedules.CaPumpersAbvImp; Surplus Total Annual Schedules.Mexico<br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/2011";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/2011<br>S.Baker 06/20/2018: Added constraint to only allow historical water use in surplus by CAP prior to 2008.";
     BEGIN
 
       $ "Surplus Total Annual Schedules.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"];
@@ -905,7 +905,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule distributes the volume of quantified surplus available between MWD and CAP<br><br>SLOTS SET: Surplus Volume Entitlements.MWD Quantified; Surplus Volume Entitlements.CAP Quantified<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.";
     BEGIN
 
       $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"] := IF ( $ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] )
@@ -3001,10 +3001,10 @@ BEGIN
     END;
 
     RULE                 "Calculate April To July Volume Annual Slot";
-    DESCRIPTION          "DESCRIPTION: Calculates the Flaming Gorge Unregulated Inflow and Yampa River at Deerlodge April to July volumes for each year between the classification Start Year and End Year<br><br>SLOTS SET: FlamingGorgeData.AprJulVolAnnual; FlamingGorgeData.YampaAprJulVolAnnual<br><br>S.Baker June 2018 EDITS: update where the historic data is located for MTOM Testbed Hindcast vs Operational MTOM Runs<br><br>";
+    DESCRIPTION          "DESCRIPTION: Calculates the Flaming Gorge Unregulated Inflow and Yampa River at Deerlodge April to July volumes for each year between the classification Start Year and End Year<br><br>SLOTS SET: FlamingGorgeData.AprJulVolAnnual; FlamingGorgeData.YampaAprJulVolAnnual<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == "RunStartDate"(  ) AND "GetRunCycleIndex"(  ) == 2.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160908: Changed variable reference in calculation of FlamingGorgeData.YampaAprJulVolAnnual from KNN_MTOM.HistoricYampaAtDeerlodge to YampaRiverInflow.Yampa_at_Deerlodge; ";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160908: Changed variable reference in calculation of FlamingGorgeData.YampaAprJulVolAnnual from KNN_MTOM.HistoricYampaAtDeerlodge to YampaRiverInflow.Yampa_at_Deerlodge; <br><br>S.Baker June 2018 EDITS: update where the historic data is located for MTOM Testbed Hindcast vs Operational MTOM Runs<br>";
     BEGIN
 
     DESCRIPTION          "Flaming Gorge Unregulated Apr-Jul Inflow volume";
@@ -3662,7 +3662,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the demand downstream of Lake Mead. It should get reset if shortage or surplus schedules are applied.<br><br>SLOTS SET: Lower Basin Output.DownstreamReq<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>";
     BEGIN
 
     DESCRIPTION          "Set the data object that reports the necessary water required downstream of Mead to meet all demands. ";
@@ -3679,7 +3679,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the data object slot HavasuOutflow.ParkerRequirement to the difference between the diversions and the local inflows below Havasu<br><br>SLOTS SET: HavasuOutflow.ParkerRequirement<br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added time constraint to use historical Gila flows during the testbed simulation during high Gila flows.";
     BEGIN
 
       $ "HavasuOutflow.ParkerRequirement" [] := "SumAllDiversionsBelowVolume"( % "Havasu", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Havasu", @"t", @"t" ) + IF ( "GetDate"( "January 31, 1993" ) <= @"t" AND @"t" <= "GetDate"( "April 30, 1993" ) )
@@ -3695,7 +3695,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: In any month except the Start Timestep, set the Havasu outflow such that the reservoir pool elevation target is met. For testbed hindcasts, this rule executes in the Start Timestep to solve for outflow which is not input using the slot HavasuOutflow.BHOPSParkerOutflow.<br><br>SLOTS SET: Havasu.Outflow";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( @"t" >= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] == 1.00000000 ) ) COMMENTED_BY "For testbed hindcasts, this rule solves for Havasu.Outflow in Start Timestep <br>" );
-    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.";
+    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.";
     BEGIN
 
       $ "Havasu.Outflow" [] := "SolveOutflow"( % "Havasu", $ "Havasu.Inflow" [], "GetTargetStorage"( % "Havasu", @"t" ), $ "Havasu.Storage" [@"t - 1"], @"t" );
@@ -3706,7 +3706,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: If the Havasu outflow is not set at the Start Timestep, set it to the BHOPS Parker Outflow, which is a user input value and comes from the 24 MS. <br><br>SLOTS SET: Havasu.Outflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "Havasu.Outflow" [] AND @"t" <= @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 1.00000000 AND ( $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM only <br>";
-    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160426: LC changed this from setting the first 2 months of the run to just the first month";
+    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160426: LC changed this from setting the first 2 months of the run to just the first month<br><br>S.Baker 06/20/2018: Added execution constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.";
     BEGIN
 
       $ "Havasu.Outflow" [] := $ "HavasuOutflow.BHOPSParkerOutflow" [];
@@ -3728,7 +3728,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the Lake Mead outflow to the smaller of the sum of the lower basin demands OR the water available in Mead (if Run Cycle >=3; otherwise use 9,999,999 acre-ft/month). This rule can execute as many times as necessary to set releases to meet demands. <br><br>SLOTS SET: Mead.Outflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC FALSE;
@@ -4092,7 +4092,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the Operational Gain loss on the Havasu to Imperial Reach object by taking the difference between what is scheduled on the reach objects and what is input to the model as the Scheduled outflow from Havasu. <br><br>SLOTS SET: HavasuToImperial:DailyOperationalGainLoss.LocalInflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.";
     BEGIN
 
       FOREACH (DATETIME date IN @"Start Timestep" TO @"Finish Timestep") DO

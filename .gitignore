@@ -6,9 +6,10 @@ rdfOutput/*
 MTOM_Overview_Description.pdf
 MTOM_Stakeholder_User_Manual.pdf
 
-# ignore other backup files of zipped rules and models
+# ignore other backup files of zipped rules, models, and RiverSMART files
 *.bak.gz
 *.bak
+*bak.rms
 
 # generic files not to track
 #excel backup files
