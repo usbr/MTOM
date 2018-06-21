@@ -48,3 +48,15 @@ Icon
 
 #pass through sheets 
 /Output Data/EnsembleOutput.xlsx
+
+# Testbed Forecasts and IC data
+Inflow Forecasts/Testbed_Historical_Forecasts
+Input Data/Historical_Diversions.xlsx
+Input Data/Observed_for_MTOM_IC.xlsx
+
+# RiverSMART folders and files
+/Hydrology
+/Model
+/Scenario
+/ScenarioSet
+/Working
