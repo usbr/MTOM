@@ -1,7 +1,7 @@
 name:Run_CBRFC_Ensemble_Fcst_RFC
-owner:cfelletter
+owner:apivarnik
 description:This MRM Configuration uses each of the ensemble traces from the CBRFC's inflow forecast for the basin one at a time to drive a run of the MTOM.  It then sends selected ouput to a spreadsheet for viewing and statistical analysis. - sc 12/20/11
-create_date:2018-5-25 15:31
+create_date:2018-6-14 9:33
 number_of_runs:36
 END_PACKAGE_PREAMBLE
 start:2018-12-31 24:00
@@ -11,7 +11,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -404,7 +404,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4345373
 4398713
 4398713
@@ -433,7 +433,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -447,7 +447,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -488,8 +488,8 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-350057
-676050
+270357
+570000
 676050
 676050
 676050
@@ -502,7 +502,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 6503.13
 6520.95
 6503.13
@@ -518,7 +518,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -565,7 +565,7 @@ scale: 1
 0.00
 0.00
 0.00
-3.00
+1.00
 3.00
 END_COLUMN
 END_SLOT
@@ -635,7 +635,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 1.00
 END_COLUMN
 END_SLOT
@@ -857,10 +857,10 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-12870780
-14650062
-13973476
-15721982
+10911973
+14588067
+14537599
+15155338
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -871,10 +871,10 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-12934602
-15565173
-13973476
-15721982
+10911973
+16709111
+14537599
+15155338
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -900,8 +900,8 @@ scale: 1
 NaN
 0
 0
-63821
-978931
+0
+2121044
 0
 END_COLUMN
 END_SLOT
@@ -911,7 +911,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -954,7 +954,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -995,12 +995,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-428444
-673411
-764859
-1495493
-1003671
-1020699
+269493
+641212
+762399
+1494961
+1003624
+1020758
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1009,9 +1009,9 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 6503.13
-14142.97
+14127.65
 29603.21
 23819.82
 23819.82
@@ -1025,7 +1025,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -1097,7 +1097,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.40
-1.10
+1.40
 1.30
 1.30
 999.00
@@ -1112,7 +1112,7 @@ units: NONE
 scale: 1
 NaN
 999.00
-0.20
+0.10
 0.20
 0.20
 0.20
@@ -1364,10 +1364,10 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-13147756
-16207705
-14180505
-11378629
+13061113
+15697180
+13944878
+11114572
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1378,10 +1378,10 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-17150136
-12205325
-14180505
-11378629
+15793496
+12964797
+13944878
+11114572
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1407,7 +1407,7 @@ scale: 1
 NaN
 0
 0
-4002380
+2732383
 0
 0
 END_COLUMN
@@ -1418,7 +1418,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -1461,7 +1461,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -1502,12 +1502,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-344279
-711671
-1487312
-1002825
-1020648
-751038
+263845
+686091
+1484670
+1002672
+1020623
+751073
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1516,12 +1516,12 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
-13773.97
+NaN
+6503.13
 29684.31
 23819.82
 23819.82
-14018.48
+14018.70
 END_COLUMN
 END_SLOT
 END_RUN
@@ -1532,7 +1532,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -1564,7 +1564,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 1.00
 1.00
 END_COLUMN
@@ -1578,7 +1578,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 1.00
 1.00
 END_COLUMN
@@ -1590,7 +1590,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-0.00
+1.00
 0.00
 0.00
 0.00
@@ -1604,7 +1604,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.40
-1.30
+1.10
 1.30
 1.30
 999.00
@@ -1618,7 +1618,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 NaN
-0.40
+999.00
 0.10
 0.20
 0.20
@@ -1634,7 +1634,7 @@ scale: 1
 0.00
 0.00
 0.00
-2.00
+0.00
 2.00
 2.00
 END_COLUMN
@@ -1674,7 +1674,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -1704,7 +1704,7 @@ scale: 1
 1.00
 1.00
 1.00
-0.00
+1.00
 0.00
 0.00
 END_COLUMN
@@ -1828,7 +1828,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-0.00
+1.00
 0.00
 0.00
 0.00
@@ -1870,11 +1870,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-10689186
-13047574
-14678202
-10537632
-8629859
+9000000
+12938832
+14570280
+11116392
+8595164
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1884,11 +1884,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-10689186
-13548180
-14177596
-10537632
-8629859
+9000000
+12938832
+15253717
+11116392
+8595164
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1914,8 +1914,8 @@ scale: 1
 NaN
 0
 0
-500606
 0
+683436
 0
 END_COLUMN
 END_SLOT
@@ -1925,7 +1925,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -2009,12 +2009,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-418997
-1417583
-1002311
-1020239
-751020
-453051
+280396
+1368612
+1000603
+1019985
+750969
+448401
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -2023,11 +2023,11 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 29603.21
 23885.08
 23819.82
-14018.37
+14018.06
 1664.52
 END_COLUMN
 END_SLOT
@@ -2039,7 +2039,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -2378,8 +2378,8 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-12994138
-11111407
+12455393
+10858602
 8230000
 8230000
 END_COLUMN
@@ -2392,8 +2392,8 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-13209486
-10896059
+12455393
+10858602
 8230000
 8230000
 END_COLUMN
@@ -2421,7 +2421,7 @@ scale: 1
 NaN
 0
 0
-215348
+0
 0
 0
 END_COLUMN
@@ -2432,7 +2432,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -2475,7 +2475,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 0.00
@@ -2516,12 +2516,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-413765
-885288
-1008644
-749562
-454273
-500685
+319253
+857889
+1006921
+749380
+454235
+500765
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -2530,10 +2530,10 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 23819.82
 23885.08
-14009.32
+14008.19
 1664.52
 1664.52
 END_COLUMN
@@ -2546,7 +2546,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -2621,7 +2621,7 @@ scale: 1
 1.40
 1.30
 1.10
-1.10
+1.40
 1.40
 END_COLUMN
 END_SLOT
@@ -2650,7 +2650,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+2.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -2845,7 +2845,7 @@ scale: 1
 1.00
 0.00
 0.00
-0.00
+1.00
 1.00
 END_COLUMN
 END_SLOT
@@ -2859,7 +2859,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 0.00
 END_COLUMN
 END_SLOT
@@ -2885,9 +2885,9 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-12033156
+11011026
 8230000
-8230000
+9000000
 9000000
 END_COLUMN
 END_SLOT
@@ -2899,9 +2899,9 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-12033156
+11011026
 8230000
-8230000
+9000000
 9000000
 END_COLUMN
 END_SLOT
@@ -2939,12 +2939,12 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
 4398134
-4398134
+4399713
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -2982,7 +2982,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 0.00
 0.00
@@ -3023,12 +3023,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-382029
-953405
-745993
-453257
-500545
-418305
+268698
+924479
+744689
+453086
+500495
+418416
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3037,9 +3037,9 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 23819.82
-14025.47
+14017.35
 1664.52
 1664.52
 1664.52
@@ -3053,7 +3053,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -3072,7 +3072,7 @@ NaN
 0.00
 0.00
 1.00
-1.00
+2.00
 2.00
 END_COLUMN
 END_SLOT
@@ -3152,7 +3152,7 @@ slot_name: AbvHooverTriggerSet
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
--1.00
+0.00
 0.00
 0.00
 2.00
@@ -3310,7 +3310,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 0.00
 END_COLUMN
 END_SLOT
@@ -3324,7 +3324,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 1.00
 END_COLUMN
 END_SLOT
@@ -3392,7 +3392,7 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-9000000
+8785924
 7480000
 7480000
 7480000
@@ -3406,7 +3406,7 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-9000000
+8785924
 7480000
 7480000
 7480000
@@ -3446,7 +3446,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4398713
@@ -3489,7 +3489,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -3530,12 +3530,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-387468
-691959
-448784
-498943
-418157
-618839
+276465
+665693
+447463
+498657
+418101
+619028
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3544,7 +3544,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 6503.13
 1669.08
 1664.52
@@ -3560,7 +3560,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -3580,7 +3580,7 @@ NaN
 1.00
 1.00
 2.00
-2.00
+3.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3832,7 +3832,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3846,7 +3846,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3898,7 +3898,7 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8878279
+8762028
 7480000
 7480000
 7480000
@@ -3912,7 +3912,7 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8878279
+8762028
 7480000
 7480000
 7480000
@@ -3953,7 +3953,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -3984,7 +3984,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 1.00
 NaN
 END_COLUMN
@@ -3999,7 +3999,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 0.00
 END_COLUMN
 END_SLOT
@@ -4037,12 +4037,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-335298
-417486
-494757
-416780
-618696
-505962
+277957
+405549
+493413
+416555
+618648
+502464
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -4051,7 +4051,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 1669.08
 1664.52
@@ -4067,7 +4067,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -4085,7 +4085,7 @@ scale: 1
 NaN
 0.00
 1.00
-1.00
+2.00
 2.00
 2.00
 END_COLUMN
@@ -4323,7 +4323,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 0.00
 0.00
 END_COLUMN
@@ -4337,7 +4337,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 1.00
 1.00
 END_COLUMN
@@ -4405,7 +4405,7 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8550308
+8592245
 7480000
 7480000
 7480000
@@ -4419,7 +4419,7 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8550308
+8592245
 7480000
 7480000
 7480000
@@ -4460,7 +4460,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -4490,7 +4490,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-1.00
+0.00
 1.00
 1.00
 NaN
@@ -4505,7 +4505,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 0.00
 1.00
 END_COLUMN
@@ -4544,12 +4544,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-341602
-488801
-418757
-621209
-509653
-978506
+269292
+474433
+417339
+620909
+509615
+978536
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -4558,7 +4558,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 1669.08
 6503.13
@@ -4574,7 +4574,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -4967,7 +4967,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -4997,7 +4997,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-1.00
+0.00
 1.00
 1.00
 NaN
@@ -5051,12 +5051,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-303777
-402914
-621120
-509365
-978424
-588477
+268547
+391404
+619831
+509233
+978395
+588491
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5065,7 +5065,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 6520.95
 1664.52
@@ -5081,7 +5081,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -5423,7 +5423,7 @@ scale: 1
 7480000
 7480000
 9000000
-14362908
+14332163
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5437,7 +5437,7 @@ scale: 1
 7480000
 7480000
 9000000
-14772793
+14398889
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5474,7 +5474,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -5503,7 +5503,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -5558,12 +5558,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-315689
-609324
-509617
-978543
-588479
-1294928
+271561
+593017
+508787
+978366
+588478
+1294997
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5572,7 +5572,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 6503.13
 1669.08
 23819.82
@@ -5588,7 +5588,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -5926,11 +5926,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8731769
+8532920
 7480000
 9000000
-14298112
-11904851
+13768169
+11821444
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5940,11 +5940,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8731769
+8532920
 7480000
 9000000
-14304735
-11898228
+13768169
+11821444
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5972,7 +5972,7 @@ NaN
 0
 0
 0
-6623
+0
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5981,7 +5981,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4397134
@@ -6065,12 +6065,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-348097
-480262
-974685
-587869
-1294883
-875086
+278441
+463671
+972587
+587739
+1294852
+868006
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6079,7 +6079,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 23885.08
 6503.13
@@ -6095,7 +6095,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -6128,7 +6128,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 1.00
 END_COLUMN
 END_SLOT
@@ -6142,7 +6142,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 1.00
 END_COLUMN
 END_SLOT
@@ -6184,7 +6184,7 @@ NaN
 999.00
 999.00
 0.10
-0.20
+0.10
 0.20
 END_COLUMN
 END_SLOT
@@ -6198,7 +6198,7 @@ scale: 1
 1.00
 0.00
 0.00
-2.00
+-1.00
 2.00
 END_COLUMN
 END_SLOT
@@ -6268,7 +6268,7 @@ scale: 1
 1.00
 1.00
 1.00
-0.00
+1.00
 0.00
 END_COLUMN
 END_SLOT
@@ -6435,9 +6435,9 @@ scale: 1
 9000000
 9000000
 8230000
-14413646
-13194958
-13435161
+14293656
+12048827
+13793495
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6449,9 +6449,9 @@ scale: 1
 9000000
 9000000
 8230000
-15859794
-11748810
-13435161
+14356952
+11985532
+13793495
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6478,7 +6478,7 @@ NaN
 0
 0
 0
-1446148
+63295
 0
 END_COLUMN
 END_SLOT
@@ -6488,7 +6488,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -6572,12 +6572,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-433931
-973830
-590256
-1304356
-876816
-1092374
+275232
+934904
+588119
+1303690
+876719
+1092602
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6586,7 +6586,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 23819.82
 6520.95
 29603.21
@@ -6602,7 +6602,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -6940,11 +6940,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-9000000
+8989877
 7480000
-13405440
-14345701
-11668128
+12577871
+14309479
+12154237
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6954,11 +6954,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-9000000
+8989877
 7480000
-13405440
-14345701
-11668128
+12577871
+14309479
+12154237
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6995,7 +6995,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -7024,7 +7024,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -7079,12 +7079,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-376383
-524282
-1289949
-874865
-1092186
-545459
+275541
+504334
+1287198
+874757
+1092169
+545500
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7093,8 +7093,8 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
+NaN
 1664.52
-6503.13
 29684.31
 23819.82
 23819.82
@@ -7109,7 +7109,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -7181,7 +7181,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.40
-1.10
+1.40
 1.30
 1.30
 999.00
@@ -7208,7 +7208,7 @@ slot_name: AbvHooverTriggerSet
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-0.00
+-1.00
 0.00
 -1.00
 0.00
@@ -7448,10 +7448,10 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-11158120
-14497485
-12475729
-10847084
+11250394
+14458395
+12214625
+10870283
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7462,10 +7462,10 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-11158120
-16126104
-12475729
-10847084
+11250394
+15854713
+12214625
+10870283
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7492,7 +7492,7 @@ NaN
 0
 0
 0
-1628619
+1396318
 0
 END_COLUMN
 END_SLOT
@@ -7502,7 +7502,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -7559,7 +7559,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -7586,12 +7586,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-327941
-1246791
-875176
-1091673
-545434
-786447
+263806
+1221686
+874730
+1091601
+545420
+786670
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7600,12 +7600,12 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 29603.21
 23885.08
 23819.82
 6503.13
-14238.41
+14239.80
 END_COLUMN
 END_SLOT
 END_RUN
@@ -7616,7 +7616,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -7650,7 +7650,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7664,7 +7664,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7690,7 +7690,7 @@ scale: 1
 1.40
 1.40
 1.30
-999.00
+1.30
 1.30
 1.10
 END_COLUMN
@@ -7703,9 +7703,9 @@ units: NONE
 scale: 1
 NaN
 999.00
+0.50
 0.10
 0.10
-0.20
 999.00
 END_COLUMN
 END_SLOT
@@ -7720,7 +7720,7 @@ scale: 1
 0.00
 0.00
 0.00
-2.00
+-1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7790,7 +7790,7 @@ scale: 1
 1.00
 1.00
 1.00
-0.00
+1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7955,9 +7955,9 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-12352964
-12341658
-11827402
+11617990
+9533038
+11949585
 8230000
 END_COLUMN
 END_SLOT
@@ -7969,9 +7969,9 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-12352964
-12341658
-11827402
+11617974
+9533038
+11949585
 8230000
 END_COLUMN
 END_SLOT
@@ -8009,7 +8009,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -8037,8 +8037,8 @@ slot_name: MeetStorageTargetByDec
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-1.00
-1.00
+0.00
+0.00
 1.00
 1.00
 1.00
@@ -8052,7 +8052,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 0.00
 1.00
@@ -8093,12 +8093,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-555264
-784982
-1079459
-543586
-786299
-499881
+288901
+736234
+1074315
+543146
+786153
+495707
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -8107,11 +8107,11 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-6503.13
-14229.31
+NaN
+13926.54
 23885.08
 6503.13
-14237.49
+14236.59
 1664.52
 END_COLUMN
 END_SLOT
@@ -8123,7 +8123,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -8140,7 +8140,7 @@ units: NONE
 scale: 1
 NaN
 0.00
-0.00
+1.00
 0.00
 0.00
 0.00
@@ -8224,7 +8224,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-0.00
+2.00
 0.00
 0.00
 0.00
@@ -8252,7 +8252,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-0.00
+1.00
 0.00
 0.00
 0.00
@@ -8294,7 +8294,7 @@ units: NONE
 scale: 1
 1.00
 1.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -8378,7 +8378,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-0.00
+1.00
 0.00
 0.00
 0.00
@@ -8462,8 +8462,8 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-11691921
-10996728
+11756226
+10255002
 8230000
 8230000
 END_COLUMN
@@ -8476,8 +8476,8 @@ units: acre-ft
 scale: 1
 9000000
 9000000
-11691921
-10996728
+11756226
+10255002
 8230000
 8230000
 END_COLUMN
@@ -8516,9 +8516,9 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
-4397134
+4398713
 4397134
 4398134
 4398134
@@ -8600,12 +8600,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-315828
-1019094
-542201
-789074
-503458
-550106
+276002
+1002067
+541868
+789000
+503453
+550399
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -8614,10 +8614,10 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 23819.82
 6520.95
-14254.73
+14254.27
 1664.52
 6503.13
 END_COLUMN
@@ -8630,7 +8630,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -8972,7 +8972,7 @@ scale: 1
 9000000
 9000000
 9000000
-8104161
+7736643
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -8986,7 +8986,7 @@ scale: 1
 9000000
 9000000
 9000000
-8104161
+7736643
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9023,7 +9023,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -9052,7 +9052,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 0.00
 1.00
@@ -9107,12 +9107,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-382236
-482099
-779403
-501202
-549871
-199811
+294933
+463548
+776702
+500918
+549806
+199831
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9121,9 +9121,9 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
+NaN
 1664.52
-1664.52
-14233.55
+14216.73
 1664.52
 6503.13
 1664.52
@@ -9137,7 +9137,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -9157,7 +9157,7 @@ NaN
 0.00
 0.00
 1.00
-1.00
+2.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9395,7 +9395,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9409,7 +9409,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9477,9 +9477,9 @@ scale: 1
 9000000
 9000000
 9000000
-9000000
+8858133
 7480000
-7405606
+7243333
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9491,9 +9491,9 @@ scale: 1
 9000000
 9000000
 9000000
-9000000
+8858133
 7480000
-8304203
+8676995
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9530,7 +9530,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
 4397134
@@ -9573,7 +9573,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -9614,12 +9614,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-293027
-741523
-500205
-549154
-199759
-482834
+267422
+725724
+499808
+549145
+199753
+482969
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9628,8 +9628,8 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
-13959.39
+NaN
+13861.26
 1669.08
 6503.13
 1664.52
@@ -9644,7 +9644,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -9663,7 +9663,7 @@ NaN
 0.00
 1.00
 2.00
-2.00
+3.00
 3.00
 END_COLUMN
 END_SLOT
@@ -9915,7 +9915,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 0.00
 END_COLUMN
 END_SLOT
@@ -9929,7 +9929,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 1.00
 END_COLUMN
 END_SLOT
@@ -9982,11 +9982,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8783525
+8684015
 7480000
 7480000
-6900818
-7637822
+6550474
+7636759
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -9996,10 +9996,10 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8783525
+8684015
 7480000
 7480000
-9316926
+9500000
 9500000
 END_COLUMN
 END_SLOT
@@ -10037,7 +10037,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -10067,7 +10067,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-1.00
+0.00
 0.00
 0.00
 NaN
@@ -10121,12 +10121,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-331978
-455210
-543887
-198869
-482711
-491982
+276789
+437314
+542304
+198700
+482638
+489405
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -10135,7 +10135,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 6520.95
 1664.52
@@ -10151,7 +10151,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -10491,9 +10491,9 @@ scale: 1
 9000000
 9000000
 7480000
-7116788
-7857001
-8478722
+6837614
+7957156
+8400153
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -10505,8 +10505,8 @@ scale: 1
 9000000
 9000000
 7480000
-8490098
-8969447
+8814246
+9180057
 9500000
 END_COLUMN
 END_SLOT
@@ -10544,7 +10544,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -10573,7 +10573,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -10628,12 +10628,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-355377
-536018
-199840
-484409
-493529
-700213
+268586
+520115
+198797
+483955
+493436
+700272
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -10642,7 +10642,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 6503.13
 1669.08
 1664.52
@@ -10658,7 +10658,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -10677,7 +10677,7 @@ NaN
 0.00
 1.00
 2.00
-2.00
+3.00
 2.00
 END_COLUMN
 END_SLOT
@@ -10929,7 +10929,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 1.00
 END_COLUMN
 END_SLOT
@@ -10943,7 +10943,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 0.00
 END_COLUMN
 END_SLOT
@@ -10997,9 +10997,9 @@ units: acre-ft
 scale: 1
 9000000
 8230000
-7759490
-7772029
-8271177
+7819446
+7579456
+8897431
 7480000
 END_COLUMN
 END_SLOT
@@ -11011,8 +11011,8 @@ units: acre-ft
 scale: 1
 9000000
 8230000
-7759490
-8252904
+7819446
+8024274
 9500000
 7480000
 END_COLUMN
@@ -11051,7 +11051,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -11135,12 +11135,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-328653
-189788
-482168
-492774
-700159
-559686
+269373
+182765
+480089
+492413
+700072
+559568
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -11149,7 +11149,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 1669.08
 1664.52
@@ -11165,7 +11165,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -11558,7 +11558,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -11588,7 +11588,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-1.00
+0.00
 1.00
 1.00
 NaN
@@ -11642,12 +11642,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-292019
-503097
-498289
-701542
-559819
-529638
+262740
+493494
+497680
+701422
+559808
+529661
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -11656,7 +11656,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 1669.08
 6503.13
@@ -11672,7 +11672,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -11771,7 +11771,7 @@ slot_name: AbvHooverTriggerSet
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-0.00
+-1.00
 0.00
 2.00
 2.00
@@ -12014,7 +12014,7 @@ scale: 1
 7480000
 9000000
 9000000
-11782696
+11107997
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -12028,7 +12028,7 @@ scale: 1
 7480000
 9000000
 9000000
-11782696
+11107997
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -12065,7 +12065,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -12094,7 +12094,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -12109,7 +12109,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-1.00
+0.00
 0.00
 0.00
 1.00
@@ -12149,12 +12149,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-359344
-483347
-700840
-559508
-529605
-989226
+268568
+468917
+699033
+559305
+529569
+977694
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -12163,7 +12163,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 6520.95
 6503.13
@@ -12179,7 +12179,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -12198,7 +12198,7 @@ NaN
 0.00
 0.00
 0.00
-0.00
+1.00
 0.00
 END_COLUMN
 END_SLOT
@@ -12241,7 +12241,7 @@ scale: 1
 1.00
 1.00
 0.00
-0.00
+1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -12255,7 +12255,7 @@ scale: 1
 1.10
 1.40
 1.30
-1.30
+1.10
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -12269,6 +12269,1020 @@ NaN
 999.00
 999.00
 0.50
+999.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: LowerBasinDemandVariability
+slot_name: AbvHooverTriggerSet
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+1.00
+0.00
+0.00
+2.00
+-1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: AnnualFloodControlFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: AnnualShortageAnyTypeFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+1.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: EqualizationAbove823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+1.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: EqualizationAt823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: LBNormalCondition
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.00
+1.00
+1.00
+1.00
+0.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: LowerBalancingAbove823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: LowerBalancingAt823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: LowerBalancingBelow823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: MidElevationReleaseAt748
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: MidElevationReleaseAt823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: Step1ShortageFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+1.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: Step2ShortageFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: Step3ShortageFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: UpperBalancingAbove823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.00
+1.00
+0.00
+1.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: UpperBalancingAt823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+1.00
+0.00
+0.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: UpperBalancingBelow823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: ActualAnnualReleaseVolume
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+9000000
+9000000
+8230000
+9000000
+12187376
+8230000
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: TargetAnnualReleaseVolume
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+9000000
+9000000
+8230000
+9000000
+12187376
+8230000
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: ICS Credits
+slot_name: SacWYType
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+3.00
+4.00
+5.00
+2.00
+1.00
+2.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellToMeadData
+slot_name: CarryoverVolume
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+NaN
+0
+0
+0
+0
+0
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: AnnualWaterUse
+slot_name: California_PreliminaryAdjustedApportionment
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+4433855
+4397134
+4397134
+4397134
+4399713
+4398134
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: MeetCanyonVolumeGoal
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: MeetStorageTargetByDec
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+1.00
+1.00
+1.00
+NaN
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: MeetStorageTargetByJuly
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+1.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: MeetWhitewaterVolumeGoal
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.00
+1.00
+1.00
+1.00
+1.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: CanyonPeakFlowDetermination
+END_SLOT_PREAMBLE
+units: cfs
+scale: 1
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: BlueMesaAprilThroughJulyVolume
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+264086
+671224
+560812
+529681
+991589
+762842
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: WhitewaterVolumeGoal
+END_SLOT_PREAMBLE
+units: acre-ft/month
+scale: 1000
+NaN
+6503.13
+6520.95
+6503.13
+23819.82
+14091.80
+END_COLUMN
+END_SLOT
+END_RUN
+start:2018-12-31 24:00
+end:2023-12-31 24:00
+time_step_unit:year
+unit_quantity:1
+time_steps:6
+consecutive:0
+slot_set:Excel_Direct_InputEnsemble
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+idx_sequential:0
+END_RUN_PREAMBLE
+2018-12-31 24:00
+2019-12-31 24:00
+2020-12-31 24:00
+2021-12-31 24:00
+2022-12-31 24:00
+2023-12-31 24:00
+object_type: DataObj
+object_name: Shortage
+slot_name: Shortage Flag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+NaN
+0.00
+0.00
+1.00
+2.00
+2.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: Surplus
+slot_name: AnnualSurplusFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: Surplus
+slot_name: AnnualSurplusTypeFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: ReleaseTier
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.00
+1.00
+1.00
+2.00
+1.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: UpperElevBalBranch
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.40
+1.40
+1.40
+999.00
+1.29
+1.29
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: ControllingEqualizationCondition
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+NaN
+999.00
+999.00
+999.00
+999.00
+999.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: LowerBasinDemandVariability
+slot_name: AbvHooverTriggerSet
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+2.00
+2.00
+2.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: AnnualFloodControlFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: AnnualShortageAnyTypeFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+1.00
+1.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: EqualizationAbove823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: EqualizationAt823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: LBNormalCondition
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.00
+1.00
+1.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: LowerBalancingAbove823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: LowerBalancingAt823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: LowerBalancingBelow823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: MidElevationReleaseAt748
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+1.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: MidElevationReleaseAt823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: Step1ShortageFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+1.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: Step2ShortageFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+1.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: Step3ShortageFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: UpperBalancingAbove823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.00
+1.00
+1.00
+0.00
+1.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: UpperBalancingAt823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: CoordinatedOperationsFlagsForFreqTbl
+slot_name: UpperBalancingBelow823
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: ActualAnnualReleaseVolume
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+9000000
+9000000
+9000000
+7480000
+9000000
+9000000
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: TargetAnnualReleaseVolume
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+9000000
+9000000
+9000000
+7480000
+9000000
+9000000
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: ICS Credits
+slot_name: SacWYType
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+4.00
+5.00
+2.00
+1.00
+2.00
+3.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellToMeadData
+slot_name: CarryoverVolume
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+NaN
+0
+0
+0
+0
+0
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: AnnualWaterUse
+slot_name: California_PreliminaryAdjustedApportionment
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+4433855
+4397134
+4397134
+4398713
+4399713
+4399713
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: MeetCanyonVolumeGoal
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: MeetStorageTargetByDec
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+1.00
+1.00
+1.00
+NaN
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: MeetStorageTargetByJuly
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+1.00
+1.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: MeetWhitewaterVolumeGoal
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.00
+1.00
+1.00
+1.00
+1.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: CanyonPeakFlowDetermination
+END_SLOT_PREAMBLE
+units: cfs
+scale: 1
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: BlueMesaAprilThroughJulyVolume
+END_SLOT_PREAMBLE
+units: acre-ft
+scale: 1
+271529
+512289
+526879
+990152
+762648
+491355
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: BlueMesaData
+slot_name: WhitewaterVolumeGoal
+END_SLOT_PREAMBLE
+units: acre-ft/month
+scale: 1000
+NaN
+1664.52
+6520.95
+23819.82
+14090.60
+1664.52
+END_COLUMN
+END_SLOT
+END_RUN
+start:2018-12-31 24:00
+end:2023-12-31 24:00
+time_step_unit:year
+unit_quantity:1
+time_steps:6
+consecutive:0
+slot_set:Excel_Direct_InputEnsemble
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+idx_sequential:0
+END_RUN_PREAMBLE
+2018-12-31 24:00
+2019-12-31 24:00
+2020-12-31 24:00
+2021-12-31 24:00
+2022-12-31 24:00
+2023-12-31 24:00
+object_type: DataObj
+object_name: Shortage
+slot_name: Shortage Flag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+NaN
+0.00
+1.00
+1.00
+1.00
+1.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: Surplus
+slot_name: AnnualSurplusFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: Surplus
+slot_name: AnnualSurplusTypeFlag
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: ReleaseTier
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.00
+1.00
+1.00
+1.00
+1.00
+0.00
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: UpperElevBalBranch
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+1.40
+1.40
+1.29
+1.29
+1.29
+1.30
+END_COLUMN
+END_SLOT
+object_type: DataObj
+object_name: PowellData
+slot_name: ControllingEqualizationCondition
+END_SLOT_PREAMBLE
+units: NONE
+scale: 1
+NaN
+999.00
+999.00
+999.00
+999.00
 0.40
 END_COLUMN
 END_SLOT
@@ -12279,515 +13293,8 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
 0.00
-0.00
-0.00
--1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: AnnualFloodControlFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: AnnualShortageAnyTypeFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: EqualizationAbove823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-1.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: EqualizationAt823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: LBNormalCondition
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: LowerBalancingAbove823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: LowerBalancingAt823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: LowerBalancingBelow823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: MidElevationReleaseAt748
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: MidElevationReleaseAt823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: Step1ShortageFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: Step2ShortageFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: Step3ShortageFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: UpperBalancingAbove823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.00
-1.00
-0.00
-1.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: UpperBalancingAt823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-1.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: UpperBalancingBelow823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: ActualAnnualReleaseVolume
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-9000000
-9000000
-8230000
-9000000
-12490004
-9664696
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: TargetAnnualReleaseVolume
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-9000000
-9000000
-8230000
-9000000
-12490004
-9664696
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: ICS Credits
-slot_name: SacWYType
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-3.00
-4.00
-5.00
 2.00
-1.00
-2.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellToMeadData
-slot_name: CarryoverVolume
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-NaN
-0
-0
-0
-0
-0
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: AnnualWaterUse
-slot_name: California_PreliminaryAdjustedApportionment
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-4353115
-4397134
-4397134
-4397134
-4398134
-4398134
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: MeetCanyonVolumeGoal
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-NaN
-NaN
-NaN
-NaN
-NaN
-NaN
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: MeetStorageTargetByDec
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-1.00
-1.00
-1.00
-1.00
-NaN
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: MeetStorageTargetByJuly
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-1.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: MeetWhitewaterVolumeGoal
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: CanyonPeakFlowDetermination
-END_SLOT_PREAMBLE
-units: cfs
-scale: 1
-NaN
-NaN
-NaN
-NaN
-NaN
-NaN
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: BlueMesaAprilThroughJulyVolume
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-303288
-685684
-561518
-529751
-991600
-762743
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: WhitewaterVolumeGoal
-END_SLOT_PREAMBLE
-units: acre-ft/month
-scale: 1000
-1664.52
-6503.13
-6520.95
-6503.13
-23819.82
-14091.19
-END_COLUMN
-END_SLOT
-END_RUN
-start:2018-12-31 24:00
-end:2023-12-31 24:00
-time_step_unit:year
-unit_quantity:1
-time_steps:6
-consecutive:0
-slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
-idx_sequential:0
-END_RUN_PREAMBLE
-2018-12-31 24:00
-2019-12-31 24:00
-2020-12-31 24:00
-2021-12-31 24:00
-2022-12-31 24:00
-2023-12-31 24:00
-object_type: DataObj
-object_name: Shortage
-slot_name: Shortage Flag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-NaN
-0.00
-0.00
-1.00
-1.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: Surplus
-slot_name: AnnualSurplusFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: Surplus
-slot_name: AnnualSurplusTypeFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: ReleaseTier
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: UpperElevBalBranch
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.40
-1.40
-1.40
-1.29
-1.29
-1.29
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: ControllingEqualizationCondition
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-NaN
-999.00
-999.00
-999.00
-999.00
-999.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: LowerBasinDemandVariability
-slot_name: AbvHooverTriggerSet
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
 2.00
 2.00
 2.00
@@ -12815,7 +13322,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-0.00
+1.00
 1.00
 1.00
 1.00
@@ -12832,7 +13339,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -12857,7 +13364,7 @@ units: NONE
 scale: 1
 1.00
 1.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -12941,7 +13448,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-0.00
+1.00
 1.00
 1.00
 1.00
@@ -12986,7 +13493,7 @@ scale: 1
 1.00
 1.00
 1.00
-1.00
+0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13028,7 +13535,7 @@ scale: 1
 9000000
 9000000
 9000000
-9000000
+12463795
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13042,7 +13549,7 @@ scale: 1
 9000000
 9000000
 9000000
-9000000
+12463795
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13051,12 +13558,12 @@ slot_name: SacWYType
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-4.00
 5.00
 2.00
 1.00
 2.00
 3.00
+5.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13079,9 +13586,9 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
-4397134
+4398713
 4398713
 4399713
 4399713
@@ -13108,7 +13615,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -13123,10 +13630,10 @@ units: NONE
 scale: 1
 0.00
 0.00
-0.00
 1.00
 1.00
 0.00
+1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13163,12 +13670,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-347901
-526946
-528051
-990464
-762676
-491346
+276000
+498349
+988738
+762479
+491339
+853731
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13177,12 +13684,12 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
+NaN
 1664.52
-6503.13
-6520.95
+23885.08
+14089.55
+1664.52
 23819.82
-14090.77
-1664.52
 END_COLUMN
 END_SLOT
 END_RUN
@@ -13193,7 +13700,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -13212,8 +13719,8 @@ NaN
 0.00
 1.00
 1.00
-2.00
 1.00
+0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13252,10 +13759,10 @@ units: NONE
 scale: 1
 1.00
 1.00
-2.00
 1.00
 1.00
 0.00
+1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13266,10 +13773,10 @@ units: NONE
 scale: 1
 1.40
 1.40
-999.00
 1.29
 1.29
 1.30
+1.10
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -13279,517 +13786,10 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 NaN
-999.00
 999.00
 999.00
 999.00
 0.40
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: LowerBasinDemandVariability
-slot_name: AbvHooverTriggerSet
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-2.00
-2.00
-2.00
-2.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: AnnualFloodControlFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: AnnualShortageAnyTypeFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-1.00
-1.00
-1.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: EqualizationAbove823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: EqualizationAt823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: LBNormalCondition
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.00
-1.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: LowerBalancingAbove823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: LowerBalancingAt823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: LowerBalancingBelow823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: MidElevationReleaseAt748
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-1.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: MidElevationReleaseAt823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: Step1ShortageFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-1.00
-1.00
-0.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: Step2ShortageFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-1.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: Step3ShortageFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: UpperBalancingAbove823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.00
-1.00
-0.00
-1.00
-1.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: UpperBalancingAt823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: CoordinatedOperationsFlagsForFreqTbl
-slot_name: UpperBalancingBelow823
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: ActualAnnualReleaseVolume
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-9000000
-9000000
-7480000
-9000000
-9000000
-13670012
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: TargetAnnualReleaseVolume
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-9000000
-9000000
-7480000
-9000000
-9000000
-13670012
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: ICS Credits
-slot_name: SacWYType
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-5.00
-2.00
-1.00
-2.00
-3.00
-5.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellToMeadData
-slot_name: CarryoverVolume
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-NaN
-0
-0
-0
-0
-0
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: AnnualWaterUse
-slot_name: California_PreliminaryAdjustedApportionment
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-4353115
-4397134
-4398713
-4398713
-4399713
-4399713
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: MeetCanyonVolumeGoal
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-NaN
-NaN
-NaN
-NaN
-NaN
-NaN
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: MeetStorageTargetByDec
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-1.00
-1.00
-1.00
-1.00
-NaN
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: MeetStorageTargetByJuly
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-1.00
-1.00
-0.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: MeetWhitewaterVolumeGoal
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: CanyonPeakFlowDetermination
-END_SLOT_PREAMBLE
-units: cfs
-scale: 1
-NaN
-NaN
-NaN
-NaN
-NaN
-NaN
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: BlueMesaAprilThroughJulyVolume
-END_SLOT_PREAMBLE
-units: acre-ft
-scale: 1
-326271
-509623
-989778
-762491
-491333
-853730
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: BlueMesaData
-slot_name: WhitewaterVolumeGoal
-END_SLOT_PREAMBLE
-units: acre-ft/month
-scale: 1000
-1664.52
-1664.52
-23885.08
-14089.62
-1664.52
-23819.82
-END_COLUMN
-END_SLOT
-END_RUN
-start:2018-12-31 24:00
-end:2023-12-31 24:00
-time_step_unit:year
-unit_quantity:1
-time_steps:6
-consecutive:0
-slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
-idx_sequential:0
-END_RUN_PREAMBLE
-2018-12-31 24:00
-2019-12-31 24:00
-2020-12-31 24:00
-2021-12-31 24:00
-2022-12-31 24:00
-2023-12-31 24:00
-object_type: DataObj
-object_name: Shortage
-slot_name: Shortage Flag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-NaN
-0.00
-1.00
-1.00
-1.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: Surplus
-slot_name: AnnualSurplusFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: Surplus
-slot_name: AnnualSurplusTypeFlag
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: ReleaseTier
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.00
-1.00
-1.00
-1.00
-0.00
-1.00
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: UpperElevBalBranch
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-1.40
-1.40
-1.29
-1.29
-1.30
-1.10
-END_COLUMN
-END_SLOT
-object_type: DataObj
-object_name: PowellData
-slot_name: ControllingEqualizationCondition
-END_SLOT_PREAMBLE
-units: NONE
-scale: 1
-NaN
-999.00
-999.00
-999.00
-0.10
 999.00
 END_COLUMN
 END_SLOT
@@ -14041,7 +14041,7 @@ scale: 1
 9000000
 9000000
 9000000
-12510929
+12246555
 8230000
 END_COLUMN
 END_SLOT
@@ -14055,7 +14055,7 @@ scale: 1
 9000000
 9000000
 9000000
-12510929
+12246555
 8230000
 END_COLUMN
 END_SLOT
@@ -14093,7 +14093,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -14150,7 +14150,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -14177,12 +14177,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-346020
-972134
-763260
-491245
-853712
-272530
+268061
+947077
+762143
+491107
+853670
+272224
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -14191,9 +14191,9 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 23819.82
-14133.01
+14126.05
 1664.52
 23819.82
 1664.52
@@ -14207,7 +14207,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -14600,7 +14600,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -14629,7 +14629,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 1.00
 0.00
@@ -14684,12 +14684,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-345768
-689829
-485556
-854509
-272964
-341081
+264504
+666577
+484152
+854168
+272930
+341169
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -14698,7 +14698,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 6503.13
 1669.08
 23819.82
@@ -14714,7 +14714,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -14730,7 +14730,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 NaN
-0.00
+1.00
 1.00
 1.00
 1.00
@@ -14786,7 +14786,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.40
-1.40
+1.29
 999.00
 1.29
 1.29
@@ -14814,7 +14814,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 -1.00
-0.00
+2.00
 2.00
 2.00
 2.00
@@ -14842,7 +14842,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-0.00
+1.00
 1.00
 1.00
 1.00
@@ -14884,7 +14884,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -14968,7 +14968,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-0.00
+1.00
 1.00
 1.00
 1.00
@@ -15107,8 +15107,8 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
-4397134
+4433855
+4398713
 4398713
 4398713
 4399713
@@ -15165,7 +15165,7 @@ units: NONE
 scale: 1
 1.00
 1.00
-1.00
+0.00
 1.00
 1.00
 1.00
@@ -15191,12 +15191,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-356614
-453542
-849815
-272266
-340974
-710537
+273879
+437250
+847416
+272080
+340906
+710499
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -15205,12 +15205,12 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 23885.08
 1664.52
 1664.52
-13766.93
+13766.69
 END_COLUMN
 END_SLOT
 END_RUN
@@ -15221,7 +15221,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -15239,8 +15239,8 @@ scale: 1
 NaN
 0.00
 0.00
-0.00
-0.00
+1.00
+1.00
 1.00
 END_COLUMN
 END_SLOT
@@ -15279,7 +15279,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-0.00
+1.00
 1.00
 1.00
 1.00
@@ -15293,10 +15293,10 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.40
-1.30
-1.10
 1.40
 1.40
+1.29
+1.29
 1.29
 END_COLUMN
 END_SLOT
@@ -15307,7 +15307,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 NaN
-0.50
+999.00
 999.00
 999.00
 999.00
@@ -15323,8 +15323,8 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
-0.00
+2.00
+2.00
 2.00
 END_COLUMN
 END_SLOT
@@ -15351,8 +15351,8 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
-0.00
+1.00
+1.00
 1.00
 END_COLUMN
 END_SLOT
@@ -15363,7 +15363,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -15393,8 +15393,8 @@ scale: 1
 1.00
 1.00
 1.00
-1.00
-1.00
+0.00
+0.00
 0.00
 END_COLUMN
 END_SLOT
@@ -15477,8 +15477,8 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
-0.00
+1.00
+1.00
 1.00
 END_COLUMN
 END_SLOT
@@ -15517,8 +15517,8 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-0.00
-0.00
+1.00
+1.00
 1.00
 1.00
 1.00
@@ -15532,7 +15532,7 @@ units: NONE
 scale: 1
 0.00
 0.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -15559,8 +15559,8 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-10891795
-8230000
+9000000
+9000000
 9000000
 9000000
 9000000
@@ -15573,8 +15573,8 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-10891795
-8230000
+9000000
+9000000
 9000000
 9000000
 9000000
@@ -15614,11 +15614,11 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4397134
-4397134
-4398134
+4398713
+4399713
 4399713
 END_COLUMN
 END_SLOT
@@ -15657,7 +15657,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -15698,12 +15698,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-328787
-830619
-272610
-341017
-710550
-677821
+270339
+811629
+271963
+340831
+710496
+677978
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -15712,11 +15712,11 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
-14512.77
+NaN
+14394.82
 1669.08
 1664.52
-13767.01
+13766.68
 6503.13
 END_COLUMN
 END_SLOT
@@ -15728,7 +15728,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -15747,7 +15747,7 @@ NaN
 0.00
 1.00
 2.00
-2.00
+3.00
 3.00
 END_COLUMN
 END_SLOT
@@ -15957,7 +15957,7 @@ scale: 1
 0.00
 1.00
 0.00
-1.00
+0.00
 0.00
 END_COLUMN
 END_SLOT
@@ -15971,8 +15971,8 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 1.00
+0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -15999,7 +15999,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 0.00
 END_COLUMN
 END_SLOT
@@ -16013,7 +16013,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 1.00
 END_COLUMN
 END_SLOT
@@ -16024,7 +16024,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -16038,7 +16038,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-0.00
+1.00
 0.00
 0.00
 0.00
@@ -16066,11 +16066,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8297238
-7480000
-8163409
-7480000
 8230000
+7480000
+7134934
+8230000
+7851972
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -16080,10 +16080,10 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-8297238
+8230000
 7480000
-8582797
-7480000
+9500000
+8230000
 8230000
 END_COLUMN
 END_SLOT
@@ -16121,7 +16121,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -16205,12 +16205,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-358817
-240973
-334095
-708002
-677675
-309494
+261906
+227637
+331811
+707337
+677605
+306685
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -16219,7 +16219,7 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 1664.52
 1669.08
 6503.13
@@ -16235,7 +16235,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -16254,7 +16254,7 @@ NaN
 0.00
 1.00
 2.00
-2.00
+3.00
 2.00
 END_COLUMN
 END_SLOT
@@ -16506,7 +16506,7 @@ scale: 1
 0.00
 0.00
 1.00
-1.00
+0.00
 1.00
 END_COLUMN
 END_SLOT
@@ -16520,7 +16520,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 0.00
 END_COLUMN
 END_SLOT
@@ -16628,7 +16628,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -16712,12 +16712,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-305718
-350823
-717271
-679275
-312108
-649752
+261877
+342019
+715795
+679148
+312092
+649684
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -16726,9 +16726,9 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
+NaN
 1664.52
-1664.52
-13846.59
+13837.39
 6503.13
 1664.52
 6503.13
@@ -16742,7 +16742,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -16816,7 +16816,7 @@ scale: 1
 1.40
 1.40
 1.29
-1.29
+1.27
 999.00
 1.30
 END_COLUMN
@@ -17040,7 +17040,7 @@ scale: 1
 1.00
 1.00
 1.00
-1.00
+0.00
 0.00
 0.00
 END_COLUMN
@@ -17068,7 +17068,7 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
+1.00
 0.00
 0.00
 END_COLUMN
@@ -17082,9 +17082,9 @@ scale: 1
 9000000
 9000000
 9000000
-8233836
+8129937
 7480000
-12034997
+11792394
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -17096,9 +17096,9 @@ scale: 1
 9000000
 9000000
 9000000
-8233836
+8129937
 7480000
-12034997
+11792394
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -17135,7 +17135,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -17178,7 +17178,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 1.00
 0.00
 0.00
@@ -17219,12 +17219,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-353895
-711926
-681577
-312236
-649779
-755152
+266668
+688433
+680022
+312032
+649693
+755294
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -17233,12 +17233,12 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
-13775.56
+NaN
+6503.13
 6520.95
 1664.52
 6503.13
-14044.04
+14044.92
 END_COLUMN
 END_SLOT
 END_RUN
@@ -17249,7 +17249,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -17590,8 +17590,8 @@ scale: 1
 9000000
 7480000
 7480000
-11808591
-14422285
+10981103
+14424202
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -17604,8 +17604,8 @@ scale: 1
 9000000
 7480000
 7480000
-11808591
-15657302
+10981103
+15683426
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -17642,7 +17642,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -17671,7 +17671,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 0.00
 1.00
 1.00
@@ -17685,7 +17685,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-1.00
+0.00
 0.00
 0.00
 1.00
@@ -17726,12 +17726,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-375349
-645204
-309946
-648411
-755069
-1485596
+268047
+622743
+308930
+648048
+755001
+1485397
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -17740,11 +17740,11 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-1664.52
+NaN
 6503.13
 1669.08
 6503.13
-14043.52
+14043.10
 29603.21
 END_COLUMN
 END_SLOT
@@ -17756,7 +17756,7 @@ unit_quantity:1
 time_steps:6
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201805.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
 idx_sequential:0
 END_RUN_PREAMBLE
 2018-12-31 24:00
@@ -17804,7 +17804,7 @@ scale: 1
 0.00
 0.00
 0.00
-3.00
+1.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -17828,11 +17828,11 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.40
-1.40
+1.10
 999.00
 1.30
 1.30
-999.00
+1.30
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -17844,8 +17844,8 @@ scale: 1
 NaN
 999.00
 999.00
-0.40
-0.20
+0.50
+0.10
 0.20
 END_COLUMN
 END_SLOT
@@ -17874,7 +17874,7 @@ scale: 1
 0.00
 0.00
 0.00
-1.00
+0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -18052,7 +18052,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 1.00
-1.00
+0.00
 0.00
 0.00
 0.00
@@ -18066,7 +18066,7 @@ END_SLOT_PREAMBLE
 units: NONE
 scale: 1
 0.00
-0.00
+1.00
 0.00
 0.00
 0.00
@@ -18094,11 +18094,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-9000000
+8230000
 7480000
-12413396
-14509158
-16720608
+11806763
+14406389
+16049681
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -18108,11 +18108,11 @@ END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
 9000000
-9000000
+8230000
 7480000
-12413396
-16181479
-16720608
+11806763
+15768018
+14921660
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -18140,7 +18140,7 @@ NaN
 0
 0
 0
-1672320
+1361628
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -18149,7 +18149,7 @@ slot_name: California_PreliminaryAdjustedApportionment
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-4353115
+4433855
 4397134
 4398713
 4398713
@@ -18177,9 +18177,9 @@ slot_name: MeetStorageTargetByDec
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-1.00
 0.00
-1.00
+0.00
+0.00
 1.00
 1.00
 NaN
@@ -18233,12 +18233,12 @@ slot_name: BlueMesaAprilThroughJulyVolume
 END_SLOT_PREAMBLE
 units: acre-ft
 scale: 1
-546738
-308103
-650213
-755218
-1485656
-1534379
+292277
+280881
+643440
+754033
+1485299
+1455801
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -18247,10 +18247,10 @@ slot_name: WhitewaterVolumeGoal
 END_SLOT_PREAMBLE
 units: acre-ft/month
 scale: 1000
-6503.13
+NaN
 1664.52
 6520.95
-14044.45
+14037.09
 29603.21
 29603.21
 END_COLUMN

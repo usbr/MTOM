@@ -1,20 +1,19 @@
 name:Run_CBRFC_Ensemble_Fcst_RFC
-owner:apivarnik
+owner:gallan
 description:This MRM Configuration uses each of the ensemble traces from the CBRFC's inflow forecast for the basin one at a time to drive a run of the MTOM.  It then sends selected ouput to a spreadsheet for viewing and statistical analysis. - sc 12/20/11
-create_date:2018-6-14 9:33
+create_date:2018-7-18 13:44
 number_of_runs:36
 END_PACKAGE_PREAMBLE
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -147,7 +146,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -156,7 +154,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -223,17 +220,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -357,7 +353,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 1.00
 1.00
 1.00
@@ -375,7 +370,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -442,17 +436,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -522,6 +515,16 @@ slot_name: Flood Control Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
+0.00
 0.00
 0.00
 0.00
@@ -566,20 +569,9 @@ scale: 1
 0.00
 0.00
 1.00
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
-0.00
 1.00
 1.00
-0.00
+1.00
 0.00
 0.00
 0.00
@@ -637,17 +629,16 @@ NaN
 NaN
 NaN
 NaN
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
-1.00
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
+NaN
 1.00
 1.00
 1.00
@@ -661,17 +652,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -804,7 +794,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -813,7 +802,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -880,17 +868,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -1023,7 +1010,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1032,7 +1018,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -1099,17 +1084,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -1242,7 +1226,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1251,7 +1234,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -1318,17 +1300,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -1461,7 +1442,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1470,7 +1450,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -1537,17 +1516,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -1680,7 +1658,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1689,7 +1666,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -1756,17 +1732,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -1899,7 +1874,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -1908,7 +1882,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -1975,17 +1948,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -2118,7 +2090,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -2127,7 +2098,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -2194,17 +2164,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -2337,7 +2306,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -2346,7 +2314,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -2413,17 +2380,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -2556,7 +2522,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -2565,7 +2530,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -2632,17 +2596,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -2775,7 +2738,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -2784,7 +2746,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -2851,17 +2812,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -2994,7 +2954,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3003,7 +2962,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -3070,17 +3028,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -3213,7 +3170,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3222,7 +3178,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -3289,17 +3244,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -3432,7 +3386,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3441,7 +3394,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -3508,17 +3460,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -3651,7 +3602,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3660,7 +3610,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -3727,17 +3676,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -3870,7 +3818,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -3879,7 +3826,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -3946,17 +3892,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -4089,7 +4034,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -4098,7 +4042,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -4165,17 +4108,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -4308,7 +4250,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -4317,7 +4258,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -4384,17 +4324,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -4527,7 +4466,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -4536,7 +4474,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -4603,17 +4540,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -4746,7 +4682,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -4755,7 +4690,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -4822,17 +4756,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -4965,7 +4898,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -4974,7 +4906,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -5041,17 +4972,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -5184,7 +5114,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5193,7 +5122,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -5260,17 +5188,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -5403,7 +5330,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5412,7 +5338,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -5479,17 +5404,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -5622,7 +5546,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5631,7 +5554,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -5698,17 +5620,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -5841,7 +5762,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -5850,7 +5770,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -5917,17 +5836,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -6060,7 +5978,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6069,7 +5986,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -6136,17 +6052,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -6279,7 +6194,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6288,7 +6202,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -6355,17 +6268,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -6498,7 +6410,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6507,7 +6418,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -6574,17 +6484,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -6717,7 +6626,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6726,7 +6634,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -6793,17 +6700,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -6936,7 +6842,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -6945,7 +6850,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -7012,17 +6916,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -7155,7 +7058,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7164,7 +7066,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -7231,17 +7132,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -7374,7 +7274,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7383,7 +7282,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -7450,17 +7348,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -7593,7 +7490,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7602,7 +7498,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN
@@ -7669,17 +7564,16 @@ NaN
 END_COLUMN
 END_SLOT
 END_RUN
-start:2018-6-30 24:00
+start:2018-7-31 24:00
 end:2023-9-30 24:00
 time_step_unit:month
 unit_quantity:1
-time_steps:64
+time_steps:63
 consecutive:0
 slot_set:Excel_Direct_InputEnsemble
-rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201806.rls
+rule_set:$MTOM_DIR/RW Files/MTOM_Rules_V1.0.3_201807.rls
 idx_sequential:0
 END_RUN_PREAMBLE
-2018-6-30 24:00
 2018-7-31 24:00
 2018-8-31 24:00
 2018-9-30 24:00
@@ -7812,7 +7706,6 @@ scale: 1
 0.00
 0.00
 0.00
-0.00
 END_COLUMN
 END_SLOT
 object_type: DataObj
@@ -7821,7 +7714,6 @@ slot_name: Flood Control Surplus Flag
 END_SLOT_PREAMBLE
 units: NONE
 scale: 1
-NaN
 NaN
 NaN
 NaN

@@ -87,7 +87,7 @@ simple5YrFile <- '5yrSimple.pdf'
 #Additional plotting functions and libraries 
 #Install RWDataPlyr
 
-if("RWDataPlyr" %in% installed.packages()){
+if('RWDataPlyr' %in% installed.packages()){
   library("RWDataPlyr")
   #see https://github.com/BoulderCodeHub/RWDataPlyr
   #look at sample work flow
