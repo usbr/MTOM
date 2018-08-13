@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 16:17 August 6, 2018
+# Created 15:50 August 13, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -697,6 +697,17 @@ BEGIN
  ENDIF;
 
       ENDFOREACH;
+
+    END;
+
+    RULE                 "LB_ScheduleReset";
+    DESCRIPTION          "";
+    ACTIVE               FALSE;
+    RULE_EXEC_CONSTRAINT TRUE;
+    NOTES                "";
+    BEGIN
+
+      ? := ?;
 
     END;
 
@@ -3778,7 +3789,7 @@ BEGIN
 
     DESCRIPTION          "Reset the CAP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests). ";
       FOREACH (DATETIME date IN "GetFirstDate"( @"t" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "CAPDiversion.Total Diversion Requested" [date] := ( ( "VolumeToFlow"( $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "Arizona_CU_Forecast1.CAP" [@"24:00:00 December 31, Current Year"], date ) ) / "GetDaysBasedOnFirstDate"( @"t" ) + "VolumeToFlow"( $ "Arizona_CU_Schedules.CAP" [date], date ) );
+            $ "CAPDiversion.Total Diversion Requested" [date] := "CAP_Outyear_Schedules"( date );
 
       ENDFOREACH;
 
@@ -3794,12 +3805,7 @@ BEGIN
     DESCRIPTION          "Reset the SNWP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests).  ";
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" }) DO
-            slot [date] := IF ( "GetYear"( @"t" ) == "GetYear"( @"Start Timestep" ) )
- THEN
-  ( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] + ( "VolumeToFlow"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"], date ) ) / ( 12.00000000 - "GetMonth"( @"Start Timestep" ) + 1.00000000 ) )
- ELSE
-  ( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] + ( "VolumeToFlow"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"], date ) ) / 12.00000000 )
- ENDIF;
+            slot [date] := "SNWP_Schedules"( date );
 
       ENDFOREACH;
 
@@ -11388,6 +11394,47 @@ BEGIN
     BEGIN
 
       $ "VallecitoData.NoDamageMaxBankFlow" [];
+
+    END;
+
+  END;
+
+  UTILITY_GROUP "LB_Schedules";
+  DESCRIPTION   "";
+  ACTIVE        TRUE;
+  NOTES          "";
+  BEGIN
+
+    FUNCTION       "SNWP_Schedules" ( DATETIME date )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "";
+    BEGIN
+
+      IF ( "GetYear"( @"t" ) == "GetYear"( @"Start Timestep" ) )
+ THEN
+  ( "VolumeToFlow"( $ "Nevada_CU_Schedules.SNWP" [date], date ) + ( "VolumeToFlow"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"], date ) ) / ( 12.00000000 - "GetMonth"( @"Start Timestep" ) + 1.00000000 ) )
+ ELSE
+  ( "VolumeToFlow"( $ "Nevada_CU_Schedules.SNWP" [date], date ) + ( "VolumeToFlow"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"], date ) ) / 12.00000000 )
+ ENDIF;
+
+    END;
+
+    FUNCTION       "CAP_Outyear_Schedules" ( DATETIME date )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "";
+    BEGIN
+
+      ( ( "VolumeToFlow"( $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "Arizona_CU_Forecast1.CAP" [@"24:00:00 December 31, Current Year"], date ) ) / "GetDaysBasedOnFirstDate"( @"t" ) + "VolumeToFlow"( $ "Arizona_CU_Schedules.CAP" [date], date ) );
 
     END;
 
