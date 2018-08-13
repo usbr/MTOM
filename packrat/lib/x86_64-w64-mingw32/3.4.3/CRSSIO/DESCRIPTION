@@ -1,0 +1,33 @@
+Package: CRSSIO
+Title: Package to manage the input/output of CRSS data
+Version: 0.6.2
+Authors@R: person("Alan", "Butler", , "r.alan.butler+CRSSIO@gmail.com",
+    c("aut", "cre"))
+Description: Provides functions to generate input files commmonly used
+    by the Colorado River Simulation System (CRSS) from publicly
+    available data, as well as functions to modify these files. Figures
+    that are commonly used to QA/QC and undersand CRSS results are also
+    automated with this package.
+URL: https://github.com/BoulderCodeHub/CRSSIO
+BugReports: https://github.com/BoulderCodeHub/CRSSIO/issues
+License: CC0
+LazyData: true
+Depends: R (>= 2.10)
+Imports: CoRiverNF, dplyr, magrittr, miniUI (>= 0.1.1), ncdf4, readxl,
+    rlang, rstudioapi (>= 0.5), shiny (>= 0.13), stats, tibble, tidyr,
+    tools, utils, writexl, xts (>= 0.10.0), zoo
+Remotes: BoulderCodeHub/CoRiverNF, BoulderCodeHub/RWDataPlyr
+Suggests: knitr, RWDataPlyr, testthat
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.0.1
+GithubRepo: CRSSIO
+GithubUsername: BoulderCodeHub
+GithubRef: master
+GithubSHA1: 1b6d808f9a0bf86ae2c2a5ec18ce1c88a8c57dff
+Author: Alan Butler [aut, cre]
+Maintainer: Alan Butler <r.alan.butler+CRSSIO@gmail.com>
+Built: R 3.4.3; ; 2018-08-04 22:50:59 UTC; windows
+InstallAgent: packrat 0.4.9.10
+InstallSource: github
+Hash: e6a504a795c12811755d0ee77a6ad996
