@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 15:24 August 15, 2018
+# Created 16:03 August 15, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -705,7 +705,7 @@ BEGIN
     RULE                 "LB_ScheduleReset";
     DESCRIPTION          "";
     ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT TRUE;
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000 AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000;
     NOTES                "";
     BEGIN
 
