@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 16:03 August 15, 2018
+# Created 15:14 August 16, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -709,13 +709,32 @@ BEGIN
     NOTES                "";
     BEGIN
 
-    DESCRIPTION          "Resets SNWA Usage<br>";
+    DESCRIPTION          "Resets SNWA and CAP usage in model when switching from surplus and shortage to normal <br>operating condtion <br>";
       IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 1.00000000 OR $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 2.00000000) THEN
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" }) DO
-            slot [date] := "SNWP_Schedules"( date );
+            FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" , $ "CAPDiversion.Total Diversion Requested" }) DO
+            slot [date] := IF ( slot != $ "CAPDiversion.Total Diversion Requested" )
+ THEN
+  "SNWP_Schedules"( date )
+ ELSE
+  "CAP_Outyear_Schedules"( date )
+ ENDIF;
 
       ENDFOREACH;
+
+      ENDFOREACH;
+
+      END_IF_STATEMENT;
+
+    DESCRIPTION          "Resets MWD diversion and depletion in model when switching from suplus to normal condition<br>";
+      IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 2.00000000) THEN
+            FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            WITH_STATEMENT (NUMERIC mwdDepletionAmount = "MWD_Outyear_Schedules"( date )) DO
+            $ "MWDDiversion:MWD.Depletion Requested" [date] := mwdDepletionAmount;
+
+            $ "MWDDiversion:MWD.Diversion Requested" [date] := mwdDepletionAmount + "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date );
+
+      END_WITH_STATEMENT;
 
       ENDFOREACH;
 
