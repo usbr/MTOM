@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 16:21 August 20, 2018
+# Created 16:24 August 22, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -704,7 +704,7 @@ BEGIN
 
     RULE                 "LB_ScheduleReset";
     DESCRIPTION          "";
-    ACTIVE               FALSE;
+    ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000 AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000;
     NOTES                "";
     BEGIN
@@ -747,9 +747,21 @@ BEGIN
             $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date], date );
 
       ELSE
-            user & "Diversion Requested" [date] := "VolumeToFlow"( % "Arizona_CU_Schedules" & "user" [date], date );
+            user & "Diversion Requested" [date] := "VolumeToFlow"( % "Arizona_CU_Schedules" & "GetElementName"( user ) [date], date );
 
-      END_IF_STATEMENT;
+      END_IF_STATEMENT
+      ELSEIF_COND ( user == % "GilaAndYumaUsers:GilaMonsterFarms" )
+      ELSEIF_CLAUSE
+            $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.Gila Monster Farms" [date], date );
+      END_ELSEIF
+      ELSEIF_COND ( user == % "AzPkrToImp:Parker" )
+      ELSEIF_CLAUSE
+            $ "AzPkrToImp:Parker.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.City of Parker" [date], date );
+      END_ELSEIF
+      ELSEIF_COND ( user == % "GilaAndYumaUsers:CocopahIndRes" )
+      ELSEIF_CLAUSE
+            $ "GilaAndYumaUsers:CocopahIndRes.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.Cocopah Indian Res" [date], date );
+      END_ELSEIF;
 
       ENDFOREACH;
 
@@ -1900,7 +1912,7 @@ BEGIN
 
   POLICY_GROUP   "Powell";
   DESCRIPTION    "Annual operations of Lake Powell follow the guidelines specified in the 2007 Record of Decision for the Colorado River Interim Guidelines for Lower Basin Shortages and the Coordinated Operations for Lake Powell and Lake Mead (2007 Interim Guidelines). The 2007 Interim Guidelines specify several requirements that coordinate annual operations between Lake Powell and Lake Mead. The objective of coordinated operations is to avoid curtailment of uses in the Upper Basin, minimize shortages in the Lower Basin, and not adversely affect the yield for development available in the Upper Basin.<br>The 2007 Interim Guidelines specify annual release volumes for each of the four tiers, described herein. Operating tiers are set based upon the August projection of the following January 1 elevation, but in some cases are subject to an April adjustment.   <br>Equalization Tier <br>In water years when the Lake Powell January 1 pool elevation is projected to be greater than or equal to the Equalization elevation for the water year (see the 2007 Interim Guidelines), an amount of water greater than 8.23 MAF will be released from Lake Powell to the extent necessary to avoid spills or equalize the storage in the two reservoirs, otherwise to remain at 8.23 MAF. If, however, Lake Powell reaches the Equalization elevation and the September 30 projected Lake Mead elevation is below 1,105 feet, then additional water will be released until the first of the following occur: (i) Lake Powell and Lake Mead storages equalize, (ii) Lake Mead pool elevation reaches 1,105 feet, or (iii) Lake Powell pool elevation is equal to 20 feet less than the Equalization level for that year. <br>Upper Elevation Balancing Tier <br>If the August 24-Month Study projects the Lake Powell pool elevation for January 1 to be less than the elevation stated in the Lake Powell Equalization Elevation Table and at or above 3,575 feet, then the tier is Upper Elevation Balancing Tier. If the August 24-Month Study also projects the Lake Mead January 1 pool elevation to be greater than 1,075 feet, then 8.23 MAF will be released from Lake Powell. <br>If the August 24-Month Study projects the January 1 Lake Powell elevation to be below the elevation stated in the Lake Powell Equalization Elevation Table and at or above 3,575 feet, and the projected January 1 Lake Mead elevation is below 1,075 feet, the release from Lake Powell shall balance the contents of Lake Mead and Lake Powell, but shall be not more than 9.0 MAF and not less than 7.0 MAF in the water year. <br>When operating in the Upper Elevation Balancing Tier, if the April 24-Month Study projects the September 30 Lake Powell elevation to be greater than the elevation in the Lake Powell Equalization Elevation Table, the Equalization Tier will govern the operation of Lake Powell for the remainder of the water year (through September). <br>When operating under the Upper Elevation Balancing Tier with an 8.23 MAF release, if the April 24-Month Study projects the September 30 Lake Mead elevation to be below 1,075 feet and the September 30 Lake Powell elevation to be at or above 3,575 feet, the releases from Lake Powell shall balance the contents of Lake Mead and Lake Powell, but shall not be more than 9.0 MAF and not less than 8.23 MAF in the water year. <br>Mid-Elevation Release Tier <br>If the August 24-Month Study projects the January 1 Lake Powell pool elevation to be less than 3,575 feet and greater than or equal to 3,525 feet, the operating tier is the Mid-Elevation Release Tier. Within this tier, if the August 24-Month Study projects the Lake Mead January 1 pool elevation to be greater than 1,025 feet, Lake Powell will release 7.48 MAF. If the August 24-Month Study projects the Lake Mead January 1 pool elevation to be less than or equal to 1,025 feet, Lake Powell will release 8.23 MAF. Once established in August, this Lake Powell annual release volume is set for the duration of the upcoming water year. <br>Lower Elevation Balancing Tier <br>If the August 24-Month Study projects the Lake Powell January 1 pool elevation to be less than 3,525 feet, the operating tier is Lower Elevation Balancing Tier. The release from Lake Powell is set to balance the contents of Lakes Powell and Mead by the end of the upcoming water year, but will not be greater than 9.5 MAF and not less than 7.0 MAF. ";
-  ACTIVE         FALSE;
+  ACTIVE         TRUE;
   NOTES          "";
   BEGIN
 
