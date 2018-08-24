@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 15:30 August 23, 2018
+# Created 10:01 August 24, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -669,6 +669,20 @@ BEGIN
 
     END;
 
+    RULE                 "CAP Lower Basin Demand Variability ICS";
+    DESCRIPTION          "";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND ( $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] >= 1100.00000000 "ft" ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000;
+    NOTES                "";
+    BEGIN
+
+      FOREACH (DATETIME date IN "DateMax"( "GetFirstDate"( @"t" ), @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] + "VolumeToFlow"( 10305.00000000 "acre-ft" COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS <br>delivery to AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any <br>delivery of ICS. The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will <br>be added to any normal condition CAP Div Req already set.  <br>", date ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "CAP"];
+
+      ENDFOREACH;
+
+    END;
+
     RULE                 "Reset Monthly Forecast CAP LC Demand Variability";
     DESCRIPTION          "DESCRIPTION: This rule resets the CAP Diversion request based on a demand variability factor.  The Function CAPDemandVariabilityFactor will return a scale value that will either decrease the CAP Diversion Request in Non Shortage or Surplus years to 90% of the original diversion schedule if local inflows to the system below Parker Dam are greater than the 90% exceedence of historic local inflows.  If the local inflows are below the 10% exceedence of the historic local inflows, then the diversion requested can be increased in an amount equal to the difference in the State Apportionment for the year and the volume of Senior Prority user diversion requests.  This value is added to any ICS delivery if Lake Mead is above 1,100 Ft.  The sum of the remaining state apportionment and the ICS Delivery is what CAP is allowed to divert.  TP 7/27/2015<br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
@@ -679,12 +693,7 @@ BEGIN
       BREAKPOINT BEFORE_EXEC TRUE;
     BREAKPOINT AFTER_EXEC TRUE;
       FOREACH (DATETIME date IN "DateMax"( "GetFirstDate"( @"t" ), @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date ) + "VolumeToFlow"( IF ( ( ( $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] >= 1100.00000000 "ft" ) AND "IsMRM"(  ) ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS delivery <br>to AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any delivery of <br>ICS. The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will be added to <br>any normal condition CAP Div Req already set. " )
- THEN
-  10305.00000000 "acre-ft"
- ELSE
-  0.00000000 "acre-ft"
- ENDIF, date ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "CAP"];
+            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date );
 
           INACTIVE      $ "LowerBasinDemandVariability.BlwParkerTriggerSet" ["Dec31ofYear"( date )] := IF ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] )
  THEN
