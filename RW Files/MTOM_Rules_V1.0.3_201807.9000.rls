@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 10:01 August 24, 2018
+# Created 14:31 August 27, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -669,20 +669,6 @@ BEGIN
 
     END;
 
-    RULE                 "CAP Lower Basin Demand Variability ICS";
-    DESCRIPTION          "";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND ( $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] >= 1100.00000000 "ft" ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000;
-    NOTES                "";
-    BEGIN
-
-      FOREACH (DATETIME date IN "DateMax"( "GetFirstDate"( @"t" ), @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] + "VolumeToFlow"( 10305.00000000 "acre-ft" COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS <br>delivery to AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any <br>delivery of ICS. The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will <br>be added to any normal condition CAP Div Req already set.  <br>", date ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "CAP"];
-
-      ENDFOREACH;
-
-    END;
-
     RULE                 "Reset Monthly Forecast CAP LC Demand Variability";
     DESCRIPTION          "DESCRIPTION: This rule resets the CAP Diversion request based on a demand variability factor.  The Function CAPDemandVariabilityFactor will return a scale value that will either decrease the CAP Diversion Request in Non Shortage or Surplus years to 90% of the original diversion schedule if local inflows to the system below Parker Dam are greater than the 90% exceedence of historic local inflows.  If the local inflows are below the 10% exceedence of the historic local inflows, then the diversion requested can be increased in an amount equal to the difference in the State Apportionment for the year and the volume of Senior Prority user diversion requests.  This value is added to any ICS delivery if Lake Mead is above 1,100 Ft.  The sum of the remaining state apportionment and the ICS Delivery is what CAP is allowed to divert.  TP 7/27/2015<br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
@@ -693,7 +679,12 @@ BEGIN
       BREAKPOINT BEFORE_EXEC TRUE;
     BREAKPOINT AFTER_EXEC TRUE;
       FOREACH (DATETIME date IN "DateMax"( "GetFirstDate"( @"t" ), @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date );
+            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date ) + IF ( $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] >= 1100.00000000 "ft" )
+ THEN
+  "VolumeToFlow"( 10305.00000000 "acre-ft" COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS <br>delivery to AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any <br>delivery of ICS. The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will <br>be added to any normal condition CAP Div Req already set. CAP ICS delivery at elevations >= <br>1,100 when LB conidtion = surplus is in surplus rule logic <br>", date ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "CAP"]
+ ELSE
+  0.00000000 "acre-ft"
+ ENDIF;
 
           INACTIVE      $ "LowerBasinDemandVariability.BlwParkerTriggerSet" ["Dec31ofYear"( date )] := IF ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] )
  THEN
@@ -712,28 +703,24 @@ BEGIN
     END;
 
     RULE                 "LB_ScheduleReset";
-    DESCRIPTION          "";
+    DESCRIPTION          "This rule resets lower basin water user diversion when the lower basin condition switches between run cycles 3 and 4. The rule needs to be adjusted when all CU_schedules slots have the same name as the diversion requested slots.";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000 AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000;
     NOTES                "";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-          DESCRIPTION          "For statement resets ShortageUser subbasin when LB condition switches between run cycles <br>";
-      FOREACH (OBJECT user IN "ListSubbasin"( "ShortageUsers" )) DO
-          DESCRIPTION          "Resets ShortageUser subbasin members when LB condition switches from shortage(1) to normal <br>condtions between RC3 and RC4 <br>";
+          DESCRIPTION          "For statement resets LB_SchedCheck (non JP user and mexico) subbasin when LB condition <br>switches between run cycles   <br>";
+      FOREACH (OBJECT user IN "ListSubbasin"( "LB_SchedCheck" )) DO
+          DESCRIPTION          "Resets LB_SchedCheck subbasin members when LB condition switches from shortage(1) to normal <br>(0) condtions between RC3 and RC4    <br>";
       IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 1.00000000) THEN
-            IF_STATEMENT (user == % "MexicanTreatyDelivery:MexicoSched") THEN
-            $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date], date );
+            IF_STATEMENT (user == % "GilaAndYumaUsers:GilaMonsterFarms") THEN
+            $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.Gila Monster Farms" [date], date );
 
       ELSE
             user & "Diversion Requested" [date] := "VolumeToFlow"( % "Arizona_CU_Schedules" & "GetElementName"( user ) [date], date );
 
       END_IF_STATEMENT
-      ELSEIF_COND ( user == % "GilaAndYumaUsers:GilaMonsterFarms" )
-      ELSEIF_CLAUSE
-            $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.Gila Monster Farms" [date], date );
-      END_ELSEIF
       ELSEIF_COND ( user == % "AzPkrToImp:Parker" )
       ELSEIF_CLAUSE
             $ "AzPkrToImp:Parker.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.City of Parker" [date], date );
@@ -745,7 +732,7 @@ BEGIN
 
       END_IF_STATEMENT;
 
-          DESCRIPTION          "Resets Users in ShortageUser subbasin with surplus entitlement if there is a switch between RC3 <br>and RC4<br>";
+          DESCRIPTION          "Resets Users in LB_SchedCheck subbasin with surplus entitlement if there is a switch between <br>RC3 and RC4<br>";
       IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 2.00000000) THEN
             IF_STATEMENT (user == % "GilaAndYumaUsers:GilaMonsterFarms") THEN
             $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.Gila Monster Farms" [date], date );
@@ -763,7 +750,6 @@ BEGIN
 
           DESCRIPTION          "Resets MWD diversion and depletion in model when switching from suplus to normal condition<br>";
       IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 2.00000000) THEN
-            FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             WITH_STATEMENT (NUMERIC mwdDepletionAmount = "MWD_Outyear_Schedules"( date )) DO
             $ "MWDDiversion:MWD.Depletion Requested" [date] := mwdDepletionAmount;
 
@@ -771,21 +757,19 @@ BEGIN
 
       END_WITH_STATEMENT;
 
-      ENDFOREACH;
-
       END_IF_STATEMENT;
 
-          DESCRIPTION          "Resets SNWA and CAP schedules when basin condition siwtches in RC4<br>";
-      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" , $ "CAPDiversion.Total Diversion Requested" }) DO
-            slot [date] := IF ( slot != $ "CAPDiversion.Total Diversion Requested" )
+          DESCRIPTION          "This resets SNWP, CAP, and Mexico if the lower basin operating condition switches for shortage <br>or surplus to normal operating cindtions between run cycles    <br>";
+      FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" , $ "CAPDiversion.Total Diversion Requested" , $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" }) DO
+            slot [date] := IF ( slot == $ "CAPDiversion.Total Diversion Requested" )
  THEN
-  "SNWP_Schedules"( date )
- ELSE
   "CAP_Outyear_Schedules"( date )
- ENDIF;
-
-      ENDFOREACH;
+ ELSE
+  "SNWP_Schedules"( date )
+ ENDIF
+ ELSEIF_COND ( slot == $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" )
+ ELSEIF_CLAUSE ( "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date], date ) )
+ END_ELSEIF;
 
       ENDFOREACH;
 
