@@ -1,8 +1,8 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 12:14 August 31, 2018
+# Created 09:16 September 19, 2018
 # 
 RULESET
-NAME "MTOM_Rules 1";
+NAME "MTOM_Rules";
 AGENDA_ORDER ASCENDING;
 DESCRIPTION "";
 PRECISION   8;
@@ -578,7 +578,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This Rule assigns the values for the California ICS.  The function &quot;ICSAccountingForCA&quot; calculates the delivery and annual values based on input<br>creation values, and assigns the appropriate slots for California ICS.  The rule also re-sets the MWD Diversion request each month to the percentage<br>that is applied each month to an average Shortage delivery pattern for a year.  The rule only fires in January or the Start timestep. TP 9/10/2014<br><br>SLOTS SET: ICS Credits.AnnualDeliveryEC_CA; ICS Credits.AnnualDeliverySysEff_CA; ICS Credits.AnnualDeliveryBiNat_CA; ICS Credits.AnnualCreationEC_CA; ICS Credits.ExtraordinaryConservationICS_CA; ICS Credits.SystemEfficiencyICS_CA; ICS Credits.BiNationalICS_CA; ICS Credits.TotalICS_CA; MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested; MWDDiversion:Tijuana.Depletion Requested<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4";
     BEGIN
 
       WITH_STATEMENT (LIST caICSValues = "ICSAccountingForCA"(  )) DO
@@ -673,13 +673,13 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule resets the CAP Diversion request based on a demand variability factor.  The Function CAPDemandVariabilityFactor will return a scale value that will either decrease the CAP Diversion Request in Non Shortage or Surplus years to 90% of the original diversion schedule if local inflows to the system below Parker Dam are greater than the 90% exceedence of historic local inflows.  If the local inflows are below the 10% exceedence of the historic local inflows, then the diversion requested can be increased in an amount equal to the difference in the State Apportionment for the year and the volume of Senior Prority user diversion requests.  This value is added to any ICS delivery if Lake Mead is above 1,100 Ft.  The sum of the remaining state apportionment and the ICS Delivery is what CAP is allowed to divert.  TP 7/27/2015<br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000 AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015<br><br>S.Baker 06/20/2018: Added execution constraint to simulate only in operational MTOM runs. ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015<br><br>S.Baker 06/20/2018: Added execution constraint to simulate only in operational MTOM runs. <br>9/18/2018, AP: Added  run constraint to refire rule of the schedule check value set in run cycle 3 does not equal the LB condition in RC 4. Adjusted constraint logic to fire when LB condition is normal instead of condition not equaling surplus, shortage, etc. Cleaned up rule logic, added to note in rule";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
     BREAKPOINT AFTER_EXEC TRUE;
       FOREACH (DATETIME date IN "DateMax"( "GetFirstDate"( @"t" ), @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date ) + "VolumeToFlow"( IF ( ( $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] >= 1100.00000000 "ft" ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS delivery to <br>AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any delivery of ICS. <br>The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will be added to any <br>normal condition CAP Div Req already set. CAP logic to take diversion in LBB condition = suprlus and <br>when elevation > 1100 is in surplus logic <br>" )
+            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date ) + "VolumeToFlow"( IF ( ( $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] >= 1100.00000000 "ft" ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS <br>delivery to AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any <br>delivery of ICS. The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will <br>be added to any normal condition CAP Div Req already set. CAP logic to take diversion in LB <br>condition = suprlus and when elevation > 1100 is in surplus logic  <br>" )
  THEN
   10305.00000000 "acre-ft"
  ELSE
@@ -703,10 +703,10 @@ BEGIN
     END;
 
     RULE                 "LB_ScheduleReset";
-    DESCRIPTION          "This rule resets lower basin water user diversion when the lower basin condition switches between run cycles 3 and 4. The rule needs to be adjusted when all CU_schedules slots have the same name as the diversion requested slots.";
+    DESCRIPTION          "9/18/2018, AP: This rule resets lower basin water user diversion when the lower basin condition switches between run cycles 3 and 4 (from either shortage/surplus to normal operating condition). ";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000 AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000;
-    NOTES                "";
+    NOTES                "9/18/2018, AP: The rule needs to be cleaned up at a later date when all CU_schedules slots have the same name as the diversion requested slots.";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
@@ -1202,7 +1202,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule assigns the Banked Storage from NV in CA and AZ for each year.  As of implementation Unbanked water from CA and AZ is 0 af and will continue to be for the foreseable future.  The values of 0 acre-feet are input on those slots.  If logic is used to solve for those, then logic will have to go into this rule where appropriate. This rule only sets data objects and that data is used in subsequent rules in the Shortage, Surplus and LBDV logic. TP 7.28.2015<br><br>SLOTS SET: ICS Credits.AnnualNevadaUnused, ICS Credits.CumulativeNVBankedinCA, ICS Credits.CumulativeNVBankedinAZ, ICS Credits.AnnualNVBankedinCA, ICS Credits.AnnualNVBankedinAZ, ICS Credits.AnnualNVRecoverableCA, ICS Credits.AnnualNVRecoverableAZ, ICS Credits.AnnualNVUnBankedFromCA, ICS Credits.AnnualNVUnbankedFromAZ<br><br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4";
     BEGIN
 
       WITH_STATEMENT (NUMERIC unusedNV = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
@@ -1279,7 +1279,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This Rule assigns the values for the Nevada ICS.  The function &quot;ICSAccountingForNV&quot; calculates the annual values based on input<br>creation values, delivery values, and assigns the appropriate slots for Nevada ICS. Any diversion changes due to shortage and Delivery of ICS are adjusted in the Shortage logic.  The rule only fires in January or the Start timestep. TP 9/11/2014<br><br>SLOTS SET: ICS Credits.(AnnualCreationTribICS_NV, AnnualCreationTribDSS_NV, SystemEfficiencyICS_NV, ExtraordinaryConservationICS_NV, TributaryDSS_NV, ImportedDSS_NV, BiNationalICS_NV, TotalICS_NV, AnnualDeliveryTribDSS_NV, AnnualDeliveryImpDSS_NV, AnnualCreationImpICS_NV, AnnualCreationImpDSS_NV, ImportedICS_NV, TributaryICS_NV, AnnualDeliveryTribICS_NV, AnnualDeliveryImpICS_NV<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4";
     BEGIN
 
       WITH_STATEMENT (LIST nvICSValues = "ICSAccountingForNV"(  )) DO
@@ -1339,7 +1339,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This Rule assigns the values for the Arizona ICS.  The function &quot;ICSAccountingForAZ&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for Arizona ICS. The rule only sets informative values to data object slots and not any simulation object slots, the Lower Basin Demand Variability, Surplus and Shortage Logic will reference this data in later rules.  The rule only fires in January or the Start timestep. TP 9/10/2014<br><br>SLOTS SET: ICS Credits.AnnualDeliveryEC_AZ; ICS Credits.AnnualDeliverySysEff_AZ; ICS Credits.AnnualDeliveryBiNat_AZ; ICS Credits.ExtraordinaryConservationICS_AZ; ICS Credits.SystemEfficiencyICS_AZ; ICS Credits.BiNationalICS_AZ; ICS Credits.TotalICS_AZ<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) ) COMMENTED_BY "Rule executes in Run Cycle 3 at the Start Timestep or January, if the rule has not already <br>executed successfully or in run cycle 4 in the LB System condition switched from run cycle 3<br>";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4";
     BEGIN
 
       WITH_STATEMENT (LIST azICSValues = "ICSAccountingForAZ"(  )) DO
@@ -1424,10 +1424,10 @@ BEGIN
     END;
 
     RULE                 "Determine Mead and Lower Basin Condition";
-    DESCRIPTION          "DESCRIPTION: This rule sets a slot that determines the Condition of Lake Mead and the Lower Basin. A setting of 0 means a normal year, a 1 means shortage, a 2 means Domestic Surplus and a 3 is Quantified Surplus.  In the condition of anything that is not normal. TP 7/28/2015<br><br>SLOTS SET: LowerBasinDemandVariability.LowerBasinCondition<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule sets a slot that determines the Condition of Lake Mead and the Lower Basin. A setting of 0 means a normal year, a 1 means shortage, a 2 means Domestic Surplus and a 3 is Quantified Surplus.  In the condition of anything that is not normal. TP 7/28/2015<br>                         Sets LBDV.schedulecheck to something other than 0 if the LB condition changes in RC 3. AP 9/18/2018<br><br>SLOTS SET: LowerBasinDemandVariability.LowerBasinCondition<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000 ) COMMENTED_BY "Rule executes in Run Cycle 3 in January that is not the Start Timestep";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>9/18/2018, AP: Removed logic to determine LB operating condition and moved it into LBConditionDetermination function. Rule now sets LBDV.Schedule check value to either a 1 (shortage) or 2 (surplus) if the LB condition switches to something other than normal in run cycle 3. This value does not change after run cycle 3";
     BEGIN
 
       $ "LowerBasinDemandVariability.LowerBasinCondition" [@"24:00:00 December 31, Current Year"] := "LBConditionDetermination"(  );
@@ -3843,7 +3843,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Reset the CAP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests). <br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>AP, 9/18/2018: Moved CAP logic to function called CAP_Outyear_Schedules. Referenced function in rule.";
     BEGIN
 
     DESCRIPTION          "Reset the CAP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests). ";
@@ -3855,10 +3855,10 @@ BEGIN
     END;
 
     RULE                 "Reset Monthly Forecast Use SNWP All Years";
-    DESCRIPTION          "DESCRIPTION: Reset the SNWP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests).  <br><br>SLOTS SET: PumpingFromLakeMead:SNWP.Diversion Requested";
+    DESCRIPTION          "DESCRIPTION: Reset the SNWP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests).  Sets LBDV.ScehduleCheck value to 0 (normal operating condition)<br><br>SLOTS SET: PumpingFromLakeMead:SNWP.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>AP, 9/18/2018: Moved SNWP logic to function called SNWP_Schedules. Referenced function in rule. Changed logic in SNWP Schedules function to refernce Nevada_CU_Schedules instead of PumpingfromMead. Added LBDV.Schedule check inital set up value";
     BEGIN
 
     DESCRIPTION          "Reset the SNWP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests).  ";
@@ -3939,7 +3939,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Reset the MWD Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests).  This calculation gives the amount of water that California can take as a consumptive use amount so the diversion needs to be set to that amount plus the estimated return flow that is returned at the diversion location. <br><br>SLOTS SET: MWDDiversion:MWD.Depletion Requested; MWDDiversion:MWD.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND ( ( "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 3.00000000 AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 ) );
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case.";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case.<br><br>AP, 9/18/2018: Moved MWD  logic to function called MWD_Outyear_Schedules. Referenced function in rule. ";
     BEGIN
 
     DESCRIPTION          "Reset the MWD Diversion request based on the reset annual forecast use (difference in state apportionment and the other <br>diversion requests).  This calculation gives the amount of water that California can take as a consumptive use amount so <br>the diversion needs to be set to that amount plus the estimated return flow that is returned at the diversion location. ";
@@ -11455,7 +11455,7 @@ BEGIN
   END;
 
   UTILITY_GROUP "LB_Schedules";
-  DESCRIPTION   "";
+  DESCRIPTION   "9/18/2018, AP: This utility group is for functions used in the calculation of LB Schedules and recalculation of schedules when the tier switches between RC 3 and RC 4. ";
   ACTIVE        TRUE;
   NOTES          "";
   BEGIN
@@ -11463,7 +11463,7 @@ BEGIN
     FUNCTION       "SNWP_Schedules" ( DATETIME date )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
-    DESCRIPTION    "";
+    DESCRIPTION    "9/18/2018, AP: used in the calculation of SNWP schedules. Changed original logic to refernce Nevada_CU_Schedules instead of PumpingfromMead";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
@@ -11482,7 +11482,7 @@ BEGIN
     FUNCTION       "CAP_Outyear_Schedules" ( DATETIME date )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
-    DESCRIPTION    "";
+    DESCRIPTION    "9/18/2018, AP: logic used in the calculation of CAP outyear schedules. Logic orignally came from Reset Monthly Forecast Use CAP - all month outyears.";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
@@ -11496,7 +11496,7 @@ BEGIN
     FUNCTION       "MWD_Outyear_Schedules" ( DATETIME date )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
-    DESCRIPTION    "";
+    DESCRIPTION    "9/18/2018, AP: This function is used in the calculation of MWD schedules. Logic originally from rule Reset Monthly forecast use MWD - All months outyears";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
@@ -11510,7 +11510,7 @@ BEGIN
     FUNCTION       "LBConditionDetermination" (  )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
-    DESCRIPTION    "";
+    DESCRIPTION    "9/18/2018, AP: This fucntion determins the operating condition of the lower basin.";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
