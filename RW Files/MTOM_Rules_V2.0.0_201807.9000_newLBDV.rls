@@ -1,8 +1,8 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 13:24 September 17, 2018
+# Created 10:47 September 20, 2018
 # 
 RULESET
-NAME "MTOM_Rules";
+NAME "MTOM_Rules_oldPowellTesting";
 AGENDA_ORDER ASCENDING;
 DESCRIPTION "";
 PRECISION   8;
@@ -2356,8 +2356,6 @@ BEGIN
  ELSE
   "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", TRUE ) )
  ENDIF) DO
-          INACTIVE      $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := upperElevBranch;
-
           DESCRIPTION          "Check if branch is input before trying to set slot <br>";
       IF_STATEMENT (NOT "IsInput"( $ "PowellData.UpperElevBalBranch", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
             $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := upperElevBranch;
