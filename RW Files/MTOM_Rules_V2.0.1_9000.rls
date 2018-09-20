@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 10:08 September 20, 2018
+# Created 10:16 September 20, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -5182,7 +5182,7 @@ BEGIN
   WITH NUMERIC CarryoverVolume = NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [eoyDate] ) DO
    WITH NUMERIC PowellEffectivePool = "StorageToElevation"( % "Powell", "ElevationToStorage"( % "Powell", $ "Powell.Pool Elevation" [eowyDate] ) - CarryoverVolume ) DO
     WITH NUMERIC MeadEffectivePool = "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", $ "Mead.Pool Elevation" [eowyDate] ) + CarryoverVolume ) DO
-     IF ( MeadEffectivePool <= 1075.00000000 "ft" AND PowellEffectivePool > 3575.00000000 "ft" OR ( "IsInput"( $ "PowellData.UpperElevBalBranch", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) AND $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] == 1.40000000 ) COMMENTED_BY "If the tier specification is user input for UEB, then release what is suggested for <br>that tier. This is placed so that if a specific Tier and balancing branch for any <br>year, but specifically WY1 has been made, then the logic will honor that and <br>estimate a balancing release instead of an 8.23 MAF release. TP 10/17/2017 <br>" )
+     IF ( MeadEffectivePool <= 1075.00000000 "ft" AND PowellEffectivePool > 3575.00000000 "ft" OR ( "IsInput"( $ "PowellData.UpperElevBalBranch", eoyDate ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.40000000 ) COMMENTED_BY "If the tier specification is user input for UEB, then release what is suggested for <br>that tier. This is placed so that if a specific Tier and balancing branch for any <br>year, but specifically WY1 has been made, then the logic will honor that and <br>estimate a balancing release instead of an 8.23 MAF release. TP 10/17/2017 <br>" )
      THEN
       "EqualizationReleaseWithCarryover"( eowyDate )
      ELSE
