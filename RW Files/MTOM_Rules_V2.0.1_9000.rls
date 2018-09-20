@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 10:16 September 20, 2018
+# Created 10:25 September 20, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1749,7 +1749,7 @@ BEGIN
  ENDIF DO
   ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) ) AND ( "IsYearDemandVariabilityAndRunCycle4"( @"t + 2" ) OR "IsUEBEqualizingBranchAndRunCycle4"( eoyDate ) ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND @"t + 2" <= @"Finish Timestep"
  ENDWITH;
-    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br>MC, 20170511: The GetRunCycleIndex()==3 condition will never be satisfied due to the Execution Constraints. Compare with initial version of rule for Run Cycle 4 and correct";
+    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The GetRunCycleIndex()==3 condition will never be satisfied due to the Execution Constraints. Compare with initial version of rule for Run Cycle 4 and correct<br><br>SB, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. ";
     BEGIN
 
       IF_STATEMENT (( @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 OR "IsYearDemandVariabilityAndRunCycle4"( @"t" ) ) AND "TierIs"( "Upper", @"t", TRUE ) ) COMMENTED_BY "For Start Timestep in Run Cycle 4 with Lower Basin Demand Variability in effect and UEBT in Start Year") THEN
@@ -1773,7 +1773,7 @@ BEGIN
  ENDWITH;
 
           DESCRIPTION          "Set Upper Elevation Balancing branch, and, if necessary, Release Tier and <br>Controlling Equalization Condition";
-      WITH_STATEMENT (NUMERIC upperElevBranch = "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", TRUE ), TRUE )) DO
+      WITH_STATEMENT (NUMERIC upperElevBranch = "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", TRUE ) )) DO
             $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := upperElevBranch;
 
             IF_STATEMENT (upperElevBranch == 1.30000000) THEN
@@ -1801,7 +1801,7 @@ BEGIN
  ENDIF COMMENTED_BY "Check EOWY Powell Elevation.  If above equalization level then go to equalization teir calculation.  If not, continue...";
 
           DESCRIPTION          "Set Upper Elevation Balancing branch, and, if necessary, Release Tier and <br>Controlling Equalization Condition";
-      WITH_STATEMENT (NUMERIC upperElevBranch = "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", FALSE ), FALSE )) DO
+      WITH_STATEMENT (NUMERIC upperElevBranch = "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", FALSE ) )) DO
             $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := upperElevBranch;
 
             IF_STATEMENT (upperElevBranch == 1.30000000) THEN
@@ -2060,7 +2060,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier for out years. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3)<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 3.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND @"t + 2" <= @"Finish Timestep";
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>SB, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. ";
     BEGIN
 
     DESCRIPTION          "In August or September start month with UEBT for outyear";
@@ -2078,7 +2078,7 @@ BEGIN
  ENDIF COMMENTED_BY "Check EOWY Powell Elevation.  If above equalization level then go to equalization teir calculation.  If not, continue...";
 
           DESCRIPTION          "Set Upper Elevation Balancing branch, and, if necessary, Release Tier and <br>Controlling Equalization Condition";
-      WITH_STATEMENT (NUMERIC upperElevBranch = "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", FALSE ), FALSE )) DO
+      WITH_STATEMENT (NUMERIC upperElevBranch = "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", FALSE ) )) DO
             $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := upperElevBranch;
 
             IF_STATEMENT (upperElevBranch == 1.30000000) THEN
@@ -2272,7 +2272,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for the first WY for any release Tier designation. It also calculates and sets the Controlling Equalization Condition slot, which indicates the condition that dictated the volume to be released based on which Tier has been set. <br><br>SLOTS SET: Some combination of the following - PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition; PowellData.UpperElevBalBranch<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 3.00000000 AND @"t" == @"Start Timestep" AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep for only the first WY;  and if the rule has <br>not already fired successfully for the timestep - sc 02/02/11;TP 08/20/2014; MC, 20170511; TP <br>10/13/2017  <br>";
-    NOTES                "AUTHOR, DATE: Unknown<br><br>TP: 20171017: Added and set the rule to only set the first water year.";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>TP: 20171017: Added and set the rule to only set the first water year.<br><br>SB, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. ";
     BEGIN
 
       IF_STATEMENT (( @"t" == @"Start Timestep" AND "TierIs"( "Equalization", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "Initial water year, in an Equalization Condition in Start Year <br>") THEN
@@ -2308,7 +2308,7 @@ BEGIN
  THEN
   $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )]
  ELSE
-  "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", TRUE ), TRUE )
+  "UpperElevationBalancingBranchCalculation"( "DateToCheckEOWYElevation"( @"t", TRUE ) )
  ENDIF) DO
             $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := upperElevBranch;
 
@@ -5830,7 +5830,45 @@ BEGIN
 
     END;
 
-    FUNCTION       "UpperElevationBalancingBranchCalculation" ( DATETIME eowyDate, BOOLEAN startYear )
+    FUNCTION       "UpperElevationBalancingBranchCalculation" ( DATETIME eowyDate )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "DESCRIPTION: This function calculates a code to specify which branch of the Upper Elevation Balancing Tier is used to calculate the release volume<br><br>RETURNS: Value representing the appropriate Upper Elevation Balancing tier branch<br><br>ARGUMENTS:<br>1. DATETIME eowyDate - the end of water year date for which the branch should be calculated<br><br>CONSTRAINTS:<br><br>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: SC, 20120601<br><br>See the &quot;Interim Guidelines Flow Chart&quot; for reference.  This slot shows the branch within the Upper Elevation Balancing Tier that was taken for each year's calculation of Powell annual release volume.  It can take the following values for the following conditions:<br>1.1 - Upper Elev Bal Tier, B1 branch (8.23 MAF release)<br>1.2 - Upper Elev Bal Tier, B2 branch (release between 7 MAF and 9MAF)<br>1.3 - Upper Elev Bal Tier, B3 branch (Equalization Tier Calc)<br>1.4 - Upper Elev Bal Tier, B4 branch (release between 8.23 MAF and 9MAF)<br>999 - Any other Tier<br><br>MC, 20160908: Changed MeadProjectionDate to be dependent on input parameter eowyDate, instead of on @&quot;t&quot;; added Boolean input parameter 'startYear'  for determining which Mead PE to use; added MeadProjectedElevation variable<br><br>SB, 20180829: Changed how the 'MeadProjectedElevation' in calculated. If the projection date is within the current or previous water year, we need to look at the AugEOYMeadPEProjection value. This function is used in instances where the startYear input could be True/False depending on the controller timestep. The above change will allow the function to know where to look for the PE projection opposed to have it be input.  ";
+    BEGIN
+
+      WITH DATETIME MeadProjectionDate = "Dec31ofYear"( eowyDate - 1.00000000 "year" ) DO
+  WITH NUMERIC MeadProjectedElevation = "GetMeadProjectedPoolElevation"( MeadProjectionDate ) DO
+   IF ( $ "Powell.Pool Elevation" [eowyDate] > "EqLevel"( eowyDate ) )
+   THEN
+    1.30000000
+   ELSE
+    IF ( MeadProjectedElevation >= 1075.00000000 "ft" )
+    THEN
+     IF ( $ "Mead.Pool Elevation" [eowyDate] <= 1075.00000000 "ft" AND $ "Powell.Pool Elevation" [eowyDate] > 3575.00000000 "ft" )
+     THEN
+      1.40000000
+     ELSE
+      1.10000000
+     ENDIF COMMENTED_BY "If Mead's EOWY elevation is less than 1075' and Powell's EOWY elevation is greater than 3575' then release enough to balance <br>the storages up to 9.0 MAF and no less than 8.23 MAF annual release volume (Branch 4).  Otherwise just release 8.23 MAF (Branch 1)"
+    ELSE
+     IF ( "EnsureReleaseLimits"( "EqualizationRelease"( eowyDate ), $ "PowellData.UpperTierB2MinAnnualRelease" [], $ "PowellData.UpperTierB2MaxAnnualRelease" [] ) > 8230.00000000 "1000 acre-ft" )
+     THEN
+      1.29000000
+     ELSE
+      1.27000000
+     ENDIF COMMENTED_BY "Branch 2"
+    ENDIF
+   ENDIF COMMENTED_BY "If greater than the Equalization level, Branch 3"
+  ENDWITH COMMENTED_BY "Retrieve the pool elevation for the projection date"
+ ENDWITH COMMENTED_BY "Set the date on which to check the Mead pool elevation";
+
+    END;
+
+    FUNCTION       "UpperElevationBalancingBranchCalculation_old" ( DATETIME eowyDate, BOOLEAN startYear )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
     DESCRIPTION    "DESCRIPTION: This function calculates a code to specify which branch of the Upper Elevation Balancing Tier is used to calculate the release volume<br><br>RETURNS: Value representing the appropriate Upper Elevation Balancing tier branch<br><br>ARGUMENTS:<br>1. DATETIME eowyDate - the end of water year date for which the branch should be calculated<br>2. BOOLEAN startYear - specifies whether the water year in question is the first water year (TRUE) or an out year (FALSE)<br><br>CONSTRAINTS:<br><br>";
