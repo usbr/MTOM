@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 10:25 September 20, 2018
+# Created 10:31 September 20, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2060,7 +2060,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier for out years. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3)<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 3.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND @"t + 2" <= @"Finish Timestep";
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>SB, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. ";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>SB, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. ";
     BEGIN
 
     DESCRIPTION          "In August or September start month with UEBT for outyear";
@@ -5175,7 +5175,7 @@ BEGIN
     POST_EXEC_DIAG TRUE;
     MIN_CONSTRAINT $ "PowellData.UpperTierB4MinAnnualRelease" [];
     MAX_CONSTRAINT $ "PowellData.UpperTierB4MaxAnnualRelease" [];
-    NOTES          "DEVELOPMENT NOTES<br>MC, 20160801: Included consideration for possible untransferred carryover volume between Powell and Mead<br>MC, 20170501: Added Post-Execution Checks and removed unneeded call to user-defined function EnsureReleaseLimits, which applied the same constraints that are now in the Post-Execution Checks";
+    NOTES          "DEVELOPMENT NOTES<br>MC, 20160801: Included consideration for possible untransferred carryover volume between Powell and Mead<br>MC, 20170501: Added Post-Execution Checks and removed unneeded call to user-defined function EnsureReleaseLimits, which applied the same constraints that are now in the Post-Execution Checks<br>SB, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. ";
     BEGIN
 
       WITH DATETIME eoyDate = "Dec31ofYear"( eowyDate ) DO
