@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 10:03 September 20, 2018
+# Created 10:08 September 20, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2069,7 +2069,7 @@ BEGIN
  THEN
   ( GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) ) - $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "DateToCheckEOWYElevation"( @"t", FALSE ) )]
  ELSE
-  IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", $ "Mead.Pool Elevation" [@"24:00:00 December 31, Current Year"] ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1075.00000000 "ft" )
+  IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1075.00000000 "ft" )
   THEN
    "B1_Branch_UpperBalancingTierVolume"( "DateToCheckEOWYElevation"( @"t", FALSE ) )
   ELSE
