@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 14:51 September 21, 2018
+# Created 14:54 September 21, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2272,10 +2272,10 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for the first WY for any release Tier designation. It also calculates and sets the Controlling Equalization Condition slot, which indicates the condition that dictated the volume to be released based on which Tier has been set. <br><br>SLOTS SET: Some combination of the following - PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition; PowellData.UpperElevBalBranch<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep for only the first WY;  and if the rule has <br>not already fired successfully for the timestep - sc 02/02/11;TP 08/20/2014; MC, 20170511; TP <br>10/13/2017  <br>";
-    NOTES                "AUTHOR, DATE: Unknown<br><br>TP: 20171017: Added and set the rule to only set the first water year.<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. Edited setting of 'PowellData.UpperElevBalBranch to check if this value is input before trying to set it. This issue was initially causing this rule to exit without setting values. <br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>TP: 20171017: Added and set the rule to only set the first water year.<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. Edited setting of 'PowellData.UpperElevBalBranch to check if this value is input before trying to set it. This issue was initially causing this rule to exit without setting values. <br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4. Removed run cycle constraint in rule (2nd IF). Removed IF @t = start timestep within rules since this is an execution constraint.";
     BEGIN
 
-      IF_STATEMENT (( @"t" == @"Start Timestep" AND "TierIs"( "Equalization", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "Initial water year, in an Equalization Condition in Start Year <br>") THEN
+      IF_STATEMENT (( "TierIs"( "Equalization", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "Initial water year, in an Equalization Condition in Start Year <br>") THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", TRUE ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) , 8230000.00000000 "acre-feet" } );
 
             $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := GET @INDEX 1.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", TRUE ) );
@@ -2283,7 +2283,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "For Start Timestep in Run Cycle 3 with UEBT in Start Year";
-      IF_STATEMENT (@"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 OR "IsYearDemandVariabilityAndRunCycle4"( @"t" ) ) AND "TierIs"( "Upper", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
+      IF_STATEMENT ("TierIs"( "Upper", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := WITH DATETIME meadProjectionDate = IF ( @"t" <= @"September 30" )
  THEN
   @"24:00:00 December 31, Previous Year"
@@ -2331,7 +2331,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "For Start Timestep with Mid-Elevation tier in initial water year";
-      IF_STATEMENT (@"t" == @"Start Timestep" AND "TierIs"( "Mid", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
+      IF_STATEMENT ("TierIs"( "Mid", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "Max"( IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", $ "PowellToMeadData.AugEOYMeadPEProjection" ["DateToCheckJan1Elevation"( @"t", TRUE )] ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["DateToCheckJan1Elevation"( @"t", TRUE )] ) ) >= 1025.00000000 "ft" )
  THEN
   7480.00000000 "1000 acre-ft"
@@ -2342,7 +2342,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "For Start Timestep with Lower Balancing Release Tier in initial water year";
-      IF_STATEMENT (@"t" == @"Start Timestep" AND "TierIs"( "Lower", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
+      IF_STATEMENT ("TierIs"( "Lower", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "Min"( "Max"( "EqualizationReleaseWithCarryover"( "RelativeEOWYDate"( @"t" ) ), $ "PowellData.LowerTierMinAnnualRelease" [] ), $ "PowellData.LowerTierMaxAnnualRelease" [] );
 
       END_IF_STATEMENT;
