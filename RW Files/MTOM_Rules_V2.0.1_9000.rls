@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 10:48 September 20, 2018
+# Created 10:03 September 21, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -209,7 +209,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: In the event of Flood Control the Diversion Schedules are set to the Monthly Surplus Schedules for Flood Control. TP 7/28/2015<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Flood Control Surplus Flag; LowerBasinDemandVariability.AbvHooverTriggerSet; OthersBlwImp.AzPumpersBlwImp.Diversion Requested; AzPkrToImp:CibolaValleyIID.Diversion Requested; AzPkrToImp:Parker.Diversion Requested; GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested; CAPDiversion.Total Diversion Requested; MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested; AAC:Coachella.Diversion Requested; AAC:IID.Diversion Requested; CaPkrToImp:CaPumpersAbvImp.Diversion Requested; CaDvsToPkr:Needles.Diversion Requested; MexicanTreatyDelivery:MexicoSched.Diversion Requested; PumpingFromLakeMead:SNWP.Diversion Requested; PumpingFromLakeMead:SNWP.Depletion Requested<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 ) AND IsNaN $ "Surplus.Flood Control Surplus Flag" [] AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br>MC, 20170920: Changed beginning datetime in FOR loop from @&quot;24:00:00 January 31, Current Year&quot; to @&quot;t&quot; per Sep 19 email from Shana T. and Corinne H.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br>MC, 20170920: Changed beginning datetime in FOR loop from @&quot;24:00:00 January 31, Current Year&quot; to @&quot;t&quot; per Sep 19 email from Shana T. and Corinne H.<br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -217,7 +217,7 @@ BEGIN
 
             $ "Surplus.Flood Control Surplus Flag" [date] := 1.00000000;
 
-            $ "LowerBasinDemandVariability.AbvHooverTriggerSet" ["Dec31ofYear"( date )] := 2.00000000;
+          INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" ["Dec31ofYear"( date )] := 2.00000000;
 
           INACTIVE      $ "LowerBasinDemandVariability.BlwParkerTriggerSet" ["Dec31ofYear"( date )] := 2.00000000;
 
@@ -1380,7 +1380,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the flags that indicate a Quantified Surplus condition<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Quantified Surplus Flag; LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND @"t" == @"24:00:00 January 31, Current Year" AND IsNaN $ "Surplus.Surplus Flag" [] AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Quantified Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition. Note that the Execution Constraints for this rule depend on the Surplus.Quantified Surplus Volume slot, which isn't set until Rule 39-Copute Quantified Surplus Volume - Minute 323; so, this rule will not fire successfully until after that rule";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Quantified Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition. Note that the Execution Constraints for this rule depend on the Surplus.Quantified Surplus Volume slot, which isn't set until Rule 39-Copute Quantified Surplus Volume - Minute 323; so, this rule will not fire successfully until after that rule<br><br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -1390,7 +1390,7 @@ BEGIN
 
       ENDFOREACH;
 
-      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := 2.00000000;
+    INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := 2.00000000;
 
     END;
 
@@ -1398,7 +1398,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the flags that indicate a Domestic Surplus condition<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Domestic Surplus Flag; LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND IsNaN $ "Surplus.Surplus Flag" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Domestic Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Domestic Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition<br><br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -1408,7 +1408,7 @@ BEGIN
 
       ENDFOREACH;
 
-      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := 2.00000000;
+    INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := 2.00000000;
 
     END;
 
@@ -1494,7 +1494,7 @@ BEGIN
   ENDIF
  ENDIF;
 
-      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := IF ( $ "Mead.Pool Elevation" [@"t - 1"] <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+    INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := IF ( $ "Mead.Pool Elevation" [@"t - 1"] <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
  THEN
   2.00000000
  ENDIF;
