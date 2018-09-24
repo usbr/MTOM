@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 12:18 September 24, 2018
+# Created 15:52 September 24, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1925,8 +1925,8 @@ BEGIN
     RULE                 "Set Lower Balancing Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Lower Elevation Balancing Tier. <br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) );
-    NOTES                "AUTHOR, DATE: Unknown<br><br>TP 20171017: Removed Setting the volume for the first water year, only sets outyear volumes now<br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
+    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    NOTES                "AUTHOR, DATE: Unknown<br><br>TP 20171017: Removed Setting the volume for the first water year, only sets outyear volumes now<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
     BEGIN
 
     DESCRIPTION          "For August timestep with Lower Balancing Release Tier in next outyear";
@@ -1939,8 +1939,8 @@ BEGIN
     RULE                 "Set Mid-Elevation Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Mid-Elevation Tier for Out Years. <br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) );
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170718: Added &quot;OR StartMonthIsSeptember()&quot; to condition originally for August; Sarah B. discovered this error and proposed the fix<br><br>TP, 20171017: Removed any setting of the First water year from this Rule<br><br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
+    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170718: Added &quot;OR StartMonthIsSeptember()&quot; to condition originally for August; Sarah B. discovered this error and proposed the fix<br><br>TP, 20171017: Removed any setting of the First water year from this Rule<br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
     BEGIN
 
     DESCRIPTION          "In August with Mid-elevation tier for the next outyear";
@@ -1964,9 +1964,9 @@ BEGIN
  ELSE
   "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )
  ENDIF COMMENTED_BY "Make sure using appropriate year value" DO
-  ( "TierIs"( "Upper", @"t", TRUE ) OR "TierIs"( "Equalization", @"t", TRUE ) ) AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND ( "HasRuleFiredSuccessfully"( "Set Equalization Release Volume" ) OR ( "HasRuleFiredSuccessfully"( "Set Upper Balancing Release Volume" ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.30000000 ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( "HasRuleFiredSuccessfully"( "Set Equalization Release Volume" ) OR ( "HasRuleFiredSuccessfully"( "Set Upper Balancing Release Volume" ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.30000000 ) ) ) )
+  ( "TierIs"( "Upper", @"t", TRUE ) OR "TierIs"( "Equalization", @"t", TRUE ) ) AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND ( "HasRuleFiredSuccessfully"( "Set Equalization Release Volume" ) OR ( "HasRuleFiredSuccessfully"( "Set Upper Balancing Release Volume" ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.30000000 ) ) )
  ENDWITH;
-    NOTES                "AUTHOR, DATE: SC, 06/21/2012<br><br>MC, 20171102: Added use of new slot PowellData.TARVTolerance to determine when refinement of TARV will stop.<br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
+    NOTES                "AUTHOR, DATE: SC, 06/21/2012<br><br>MC, 20171102: Added use of new slot PowellData.TARVTolerance to determine when refinement of TARV will stop.<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
     BEGIN
 
       IF_STATEMENT (( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "At Start Timestep for initial water year when release tier is either Upper Elevation Balancing or Equalization") THEN
@@ -2053,8 +2053,8 @@ BEGIN
     RULE                 "Set Upper Balancing Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier for out years. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3)<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) );
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>S.Baker, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
+    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>S.Baker, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
     BEGIN
 
     DESCRIPTION          "In August or September start month with UEBT for outyear";
@@ -2093,8 +2093,8 @@ BEGIN
     RULE                 "Set Equalization Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for out years when the Release Tier is Equalization. It also calculates and sets the Controlling Equalization Condition slot, which indicates the equalization condition that dictated the volume to be released.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep in September or in any August; with a <br>timestep more than 2 away from the model run finish; and if the rule has not already fired successfully <br>for the timestep and only sets volumes in out years- sc 02/02/11;TP 08/20/2014; MC, 20170511; TP <br>10/17/2017  <br>";
-    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep in September or in any August; with <br>a timestep more than 2 away from the model run finish; and if the rule has not already fired <br>successfully for the timestep and only sets volumes in out years <br>";
+    NOTES                "AUTHOR, DATE: Unknown<br>Initial changes: sc 02/02/11;TP 08/20/2014; MC, 20170511; TP 10/17/2017  <br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
     BEGIN
 
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "MaxItem"( { GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) , 8230000.00000000 "acre-feet" } );
@@ -2108,7 +2108,7 @@ BEGIN
     RULE                 "Preliminary Set Out Year Release Volume To 8.23MAF";
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) );
+    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160728: Changed the local variable &quot;watYearIndex&quot; name to &quot;waterYearNumber&quot; for consistency with the rule Set Powell Outflow; make a function to do the calculation?; added the setting of Powell.Outflow values for testing with new carryover functionality<br>MC, 20170405: Can add use of user-defined function GetWaterYearNumber in calculation of local varaible waterYearNumber<br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.";
     BEGIN
 
@@ -2168,8 +2168,8 @@ BEGIN
     RULE                 "Set Release Tier";
     DESCRIPTION          "DESCRIPTION: This rule fires at the Start Timestep and in August timesteps to set the Powell Release tier, as well as preliminarily setting the Upper Elevation Balancing Branch and Controlling Equalization Condition values to 999<br><br>SLOTS SET: PowellData.ReleaseTier; PowellData.UpperElevBalBranch; PowellData.ControllingEqualizationCondition<br><br>DEVELOPMENT NOTES:<br>AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) );
-    NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.";
+    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints and removed from each IF statement in rule.";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
@@ -2183,8 +2183,8 @@ BEGIN
 
       END_IF_STATEMENT;
 
-    DESCRIPTION          "Model needs to set the teir for the following water year if current timestep is August. - sc 02/02/11";
-      IF_STATEMENT ("MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) AND @"t + 2" IN "WaterYearDatesByGroup"( 2.00000000 ) AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) )) THEN
+    DESCRIPTION          "Model needs to set the teir for the following water year if current timestep is August. <br>";
+      IF_STATEMENT ("MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) AND @"t + 2" IN "WaterYearDatesByGroup"( 2.00000000 )) THEN
             WITH_STATEMENT (NUMERIC Carryover = NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] )) DO
             WITH_STATEMENT (NUMERIC EffectivePoolElevation = "StorageToElevation"( % "Powell", $ "Powell.Storage" [@"24:00:00 December 31, Current Year"] - Carryover )) DO
             $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "PowellReleaseTier"( IF ( @"t" == @"Start Timestep" )
@@ -2205,7 +2205,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "The model will set the tier for the third year of the model run (second out year)";
-      IF_STATEMENT ("MonthIs"( { "August" } ) AND @"t + 2" IN "WaterYearDatesByGroup"( 3.00000000 ) AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) )) THEN
+      IF_STATEMENT ("MonthIs"( { "August" } ) AND @"t + 2" IN "WaterYearDatesByGroup"( 3.00000000 )) THEN
             WITH_STATEMENT (NUMERIC EffectivePoolElevation = "StorageToElevation"( % "Powell", $ "Powell.Storage" [@"24:00:00 December 31, Current Year"] - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] ) )) DO
             $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "PowellReleaseTier"( EffectivePoolElevation, "RelativeEOWYDate"( @"t + 2" ) );
 
@@ -2218,7 +2218,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "Third out year of the model run";
-      IF_STATEMENT ("MonthIs"( { "August" } ) AND @"t + 2" IN "WaterYearDatesByGroup"( 4.00000000 ) AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) )) THEN
+      IF_STATEMENT ("MonthIs"( { "August" } ) AND @"t + 2" IN "WaterYearDatesByGroup"( 4.00000000 )) THEN
             WITH_STATEMENT (NUMERIC EffectivePoolElevation = "StorageToElevation"( % "Powell", $ "Powell.Storage" [@"24:00:00 December 31, Current Year"] - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] ) )) DO
             $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "PowellReleaseTier"( EffectivePoolElevation, "RelativeEOWYDate"( @"t + 2" ) );
 
@@ -2231,7 +2231,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "Fourth out year of model run";
-      IF_STATEMENT ("MonthIs"( { "August" } ) AND @"t + 2" IN "WaterYearDatesByGroup"( 5.00000000 ) AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) )) THEN
+      IF_STATEMENT ("MonthIs"( { "August" } ) AND @"t + 2" IN "WaterYearDatesByGroup"( 5.00000000 )) THEN
             WITH_STATEMENT (NUMERIC EffectivePoolElevation = "StorageToElevation"( % "Powell", $ "Powell.Storage" [@"24:00:00 December 31, Current Year"] - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] ) )) DO
             $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "PowellReleaseTier"( EffectivePoolElevation, "RelativeEOWYDate"( @"t + 2" ) );
 
@@ -2244,7 +2244,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "Fifth out year of model run if it exists in the forecast";
-      IF_STATEMENT ("MonthIs"( { "August" } ) AND @"t + 2" IN "WaterYearDatesByGroup"( 6.00000000 ) AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) )) THEN
+      IF_STATEMENT ("MonthIs"( { "August" } ) AND @"t + 2" IN "WaterYearDatesByGroup"( 6.00000000 )) THEN
             WITH_STATEMENT (NUMERIC EffectivePoolElevation = "StorageToElevation"( % "Powell", $ "Powell.Storage" [@"24:00:00 December 31, Current Year"] - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] ) )) DO
             $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "PowellReleaseTier"( EffectivePoolElevation, "RelativeEOWYDate"( @"t + 2" ) );
 
@@ -2261,11 +2261,11 @@ BEGIN
     RULE                 "Set WY1 ReleaseVolume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for the first WY for any release Tier designation. It also calculates and sets the Controlling Equalization Condition slot, which indicates the condition that dictated the volume to be released based on which Tier has been set. <br><br>SLOTS SET: Some combination of the following - PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition; PowellData.UpperElevBalBranch<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep for only the first WY;  and if the rule has <br>not already fired successfully for the timestep - sc 02/02/11;TP 08/20/2014; MC, 20170511; TP <br>10/13/2017  <br>";
-    NOTES                "AUTHOR, DATE: Unknown<br><br>TP: 20171017: Added and set the rule to only set the first water year.<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. Edited setting of 'PowellData.UpperElevBalBranch to check if this value is input before trying to set it. This issue was initially causing this rule to exit without setting values. <br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4. Removed run cycle constraint in rule (2nd IF). Removed IF @t = start timestep within rules since this is an execution constraint.";
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep for only the first WY;  and if the rule <br>has not already fired successfully for the timestep <br>";
+    NOTES                "AUTHOR, DATE: Unknown<br>Initial changes: SC 02/02/11;TP 08/20/2014; MC, 20170511; TP 10/13/2017  <br><br>TP: 20171017: Added and set the rule to only set the first water year.<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. Edited setting of 'PowellData.UpperElevBalBranch to check if this value is input before trying to set it. This issue was initially causing this rule to exit without setting values. <br>S.Baker, 20180921: Removed run cycle constraint in rule (2nd IF). Removed IF @t = start timestep within rules since this is an execution constraint. Added IsInput(TARV) constraint to execution constraints and removed from each IF statement in rule.";
     BEGIN
 
-      IF_STATEMENT (( "TierIs"( "Equalization", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "Initial water year, in an Equalization Condition in Start Year <br>") THEN
+      IF_STATEMENT ("TierIs"( "Equalization", @"t", TRUE ) COMMENTED_BY "Initial water year, in an Equalization Condition in Start Year <br>") THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", TRUE ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) , 8230000.00000000 "acre-feet" } );
 
             $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := GET @INDEX 1.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", TRUE ) );
@@ -2273,7 +2273,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "For Start Timestep in Run Cycle 3 with UEBT in Start Year";
-      IF_STATEMENT ("TierIs"( "Upper", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
+      IF_STATEMENT ("TierIs"( "Upper", @"t", TRUE )) THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := WITH DATETIME meadProjectionDate = IF ( @"t" <= @"September 30" )
  THEN
   @"24:00:00 December 31, Previous Year"
@@ -2321,7 +2321,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "For Start Timestep with Mid-Elevation tier in initial water year";
-      IF_STATEMENT ("TierIs"( "Mid", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
+      IF_STATEMENT ("TierIs"( "Mid", @"t", TRUE )) THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "Max"( IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", $ "PowellToMeadData.AugEOYMeadPEProjection" ["DateToCheckJan1Elevation"( @"t", TRUE )] ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["DateToCheckJan1Elevation"( @"t", TRUE )] ) ) >= 1025.00000000 "ft" )
  THEN
   7480.00000000 "1000 acre-ft"
@@ -2332,7 +2332,7 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "For Start Timestep with Lower Balancing Release Tier in initial water year";
-      IF_STATEMENT ("TierIs"( "Lower", @"t", TRUE ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
+      IF_STATEMENT ("TierIs"( "Lower", @"t", TRUE )) THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "Min"( "Max"( "EqualizationReleaseWithCarryover"( "RelativeEOWYDate"( @"t" ) ), $ "PowellData.LowerTierMinAnnualRelease" [] ), $ "PowellData.LowerTierMaxAnnualRelease" [] );
 
       END_IF_STATEMENT;
@@ -2342,23 +2342,20 @@ BEGIN
     RULE                 "Set WY1 Release Tier";
     DESCRIPTION          "DESCRIPTION: This rule fires at the Start Timestep and in August timesteps to set the Powell Release tier, as well as preliminarily setting the Upper Elevation Balancing Branch and Controlling Equalization Condition values to 999, for the First Water Year<br><br>SLOTS SET: PowellData.ReleaseTier; PowellData.UpperElevBalBranch; PowellData.ControllingEqualizationCondition<br><br>DEVELOPMENT NOTES:<br>AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>TP, 20171017: Added this rule and only allow it to execute in the start timestep for the first water year";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) );
-    NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>TP, 20171017: Added this rule and only allow it to execute in the start timestep for the first water year<br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.";
+    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND IsNaN $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )];
+    NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>TP, 20171017: Added this rule and only allow it to execute in the start timestep for the first water year<br>S.Baker, 20180924: Added IsNaN(ReleaseTier) constraint to execution constraints. ";
     BEGIN
 
-    DESCRIPTION          "Model needs to set the teir for the current year if at the start timestep, regardless of month. - sc 02/02/11";
-      IF_STATEMENT (@"t" == @"Start Timestep" AND IsNaN $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )]) THEN
-            $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "PowellReleaseTier"( $ "PowellToMeadData.AugEOYPowellPEProjection" ["DateToCheckJan1Elevation"( @"t", TRUE )], "RelativeEOWYDate"( @"t" ) );
+    DESCRIPTION          "Model needs to set the teir for the current year if at the start timestep, regardless of month. <br>";
+      $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "PowellReleaseTier"( $ "PowellToMeadData.AugEOYPowellPEProjection" ["DateToCheckJan1Elevation"( @"t", TRUE )], "RelativeEOWYDate"( @"t" ) );
 
-            IF_STATEMENT (IsNaN $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )]) THEN
+      IF_STATEMENT (IsNaN $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )]) THEN
             $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := 999.00000000;
 
       END_IF_STATEMENT;
 
-            IF_STATEMENT (IsNaN $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )]) THEN
+      IF_STATEMENT (IsNaN $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )]) THEN
             $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := 999.00000000;
-
-      END_IF_STATEMENT;
 
       END_IF_STATEMENT;
 
@@ -2367,12 +2364,11 @@ BEGIN
     RULE                 "Preliminary Set WY1 Release Volume To 8.23MAF";
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) );
-    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160908: Previously added SumFlowsToVolume(...) to MaxItem; added IF-ELSE to deal with October when no previous WY release would have occurred<br><br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180921: Added new Execution Constraint to allow rule to execute in Run Cycle 4.";
+    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) );
+    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160908: Previously added SumFlowsToVolume(...) to MaxItem; added IF-ELSE to deal with October when no previous WY release would have occurred<br><br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints. ";
     BEGIN
 
-      IF_STATEMENT (NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
-            $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { 8230.00000000 "1000 acre-feet" , WITH SLOT releaseTable = IF ( "GetYear"( @"Start Timestep" ) >= 2017.00000000 )
+      $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { 8230.00000000 "1000 acre-feet" , WITH SLOT releaseTable = IF ( "GetYear"( @"Start Timestep" ) >= 2017.00000000 )
  THEN
   $ "PowellData.PowellMonthlyReleaseTable"
  ELSE
@@ -2385,8 +2381,6 @@ BEGIN
  ELSE
   0.00000000 "acre-foot"
  ENDIF COMMENTED_BY "Ensure TARV is not less than volume already released in water year" } );
-
-      END_IF_STATEMENT;
 
     END;
 
