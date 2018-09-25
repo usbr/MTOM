@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 09:24 September 25, 2018
+# Created 09:48 September 25, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1583,27 +1583,16 @@ BEGIN
   BEGIN
 
     RULE                 "Set Lower Balancing Release Volume post-LBDV";
-    DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Lower Elevation Balancing Tier. This version of the rule executes in Run Cycle 4 with Lower Basin Demand Variability in effect.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Lower Elevation Balancing Tier. This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "IsYearDemandVariabilityAndRunCycle4"( @"t + 2" ) AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a seperate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.";
     BEGIN
 
-    DESCRIPTION          "For Start Timestep with Lower Balancing Release Tier in initial water year";
-      IF_STATEMENT (@"t" == @"Start Timestep" AND "TierIs"( "Lower", @"t", TRUE )) THEN
-            $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "Min"( "Max"( "EqualizationReleaseWithCarryover"( "RelativeEOWYDate"( @"t" ) ), $ "PowellData.LowerTierMinAnnualRelease" [] ), $ "PowellData.LowerTierMaxAnnualRelease" [] );
-
-            $ "PowellData.ReleaseVolumeSetFlag" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := 1.00000000;
-
-      END_IF_STATEMENT;
-
     DESCRIPTION          "For August timestep with Lower Balancing Release Tier in next outyear";
-      IF_STATEMENT ("MonthIs"( { "August" } ) AND "TierIs"( "Lower", @"t", FALSE )) THEN
-            $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "Min"( "Max"( "EqualizationReleaseWithCarryover"( "RelativeEOWYDate"( @"t + 2" ) ), $ "PowellData.LowerTierMinAnnualRelease" [] ), $ "PowellData.LowerTierMaxAnnualRelease" [] );
+      $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "Min"( "Max"( "EqualizationReleaseWithCarryover"( "RelativeEOWYDate"( @"t + 2" ) ), $ "PowellData.LowerTierMinAnnualRelease" [] ), $ "PowellData.LowerTierMaxAnnualRelease" [] );
 
-            $ "PowellData.ReleaseVolumeSetFlag" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := 1.00000000;
-
-      END_IF_STATEMENT;
+      $ "PowellData.ReleaseVolumeSetFlag" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := 1.00000000;
 
     END;
 
