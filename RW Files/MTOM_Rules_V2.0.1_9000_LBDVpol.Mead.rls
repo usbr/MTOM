@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 16:52 September 25, 2018
+# Created 17:06 September 25, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -673,13 +673,13 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule resets the CAP Diversion request based on a demand variability factor.  The Function CAPDemandVariabilityFactor will return a scale value that will either decrease the CAP Diversion Request in Non Shortage or Surplus years to 90% of the original diversion schedule if local inflows to the system below Parker Dam are greater than the 90% exceedence of historic local inflows.  If the local inflows are below the 10% exceedence of the historic local inflows, then the diversion requested can be increased in an amount equal to the difference in the State Apportionment for the year and the volume of Senior Prority user diversion requests.  This value is added to any ICS delivery if Lake Mead is above 1,100 Ft.  The sum of the remaining state apportionment and the ICS Delivery is what CAP is allowed to divert.  TP 7/27/2015<br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000 AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015<br><br>S.Baker 06/20/2018: Added execution constraint to simulate only in operational MTOM runs. <br>AP, 9/18/2018: Added  run constraint to refire rule of the schedule check value set in run cycle 3 does not equal the LB condition in RC 4. Adjusted constraint logic to fire when LB condition is normal instead of condition not equaling surplus, shortage, etc. Cleaned up rule logic, added to note in rule<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015<br><br>S.Baker 06/20/2018: Added execution constraint to simulate only in operational MTOM runs. <br>AP, 9/18/2018: Added  run constraint to refire rule of the schedule check value set in run cycle 3 does not equal the LB condition in RC 4. Adjusted constraint logic to fire when LB condition is normal instead of condition not equaling surplus, shortage, etc. Cleaned up rule logic, added to note in rule<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
     BREAKPOINT AFTER_EXEC TRUE;
       FOREACH (DATETIME date IN "DateMax"( "GetFirstDate"( @"t" ), @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date ) + "VolumeToFlow"( IF ( ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "ft" ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS <br>delivery to AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any <br>delivery of ICS. The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will <br>be added to any normal condition CAP Div Req already set. CAP logic to take diversion in LB <br>condition = suprlus and when elevation > 1100 is in surplus logic  <br>" )
+            $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date ) + "VolumeToFlow"( IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "ft" ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS <br>delivery to AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any <br>delivery of ICS. The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will <br>be added to any normal condition CAP Div Req already set. CAP logic to take diversion in LB <br>condition = suprlus and when elevation > 1100 is in surplus logic  <br>" )
  THEN
   10305.00000000 "acre-ft"
  ELSE
@@ -836,8 +836,8 @@ BEGIN
     RULE                 "Domestic Surplus Schedules Data Volume to Simulation Flow";
     DESCRIPTION          "DESCRIPTION: This rule converts volumes allowed under Domestic Surplus into monthly flow rates and sets associated slots. Surplus flags and LBDV.AbvHooverTriggerSet flag are also set in this rule.<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Domestic Surplus Flag; LowerBasinDemandVariability.AbvHooverTriggerSet; PumpingFromLakeMead:SNWP.Diversion Requested; MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested; GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested; OthersBlwImp:AzPumpersBlwImp.Diversion Requested; CAPDiversion.Total Diversion Requested<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved the setting of Surplus.Surplus Flag and Surplus.Domestic Surplus Flag slots to new rule Set Domestic Surplus Flag; removed IsNaN Surplus.Surplus Flag[] execution constraint from this rule<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [];
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved the setting of Surplus.Surplus Flag and Surplus.Domestic Surplus Flag slots to new rule Set Domestic Surplus Flag; removed IsNaN Surplus.Surplus Flag[] execution constraint from this rule<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -957,8 +957,8 @@ BEGIN
     RULE                 "Set Domestic Surplus Schedules - Minute 323";
     DESCRIPTION          "DESCRIPTION: If a Domestic Surplus exists, meaning that Mead's Pool Elevation is greater than the Domestic Surplus Trigger, then this rule will fire in January of the Current Year and set the Total Annual Schedules for all water users impacted by Domestic Surplus. Domestic Surplus is the lowest priority surplus, meaning that a Quantified or Flood Control Surplus will override these values.  -HMG 8/2/11<br><br>SLOTS SET: Surplus Total Annual Schedules.SNWA; Surplus Total Annual Schedules.MWD; Surplus Total Annual Schedules.Gila Monster Farms; Surplus Total Annual Schedules.AzPumpersBlwImp; Surplus Total Annual Schedules.CAP<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    RULE_EXEC_CONSTRAINT "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [];
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
       $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"];
@@ -969,7 +969,7 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"];
 
-      $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] + IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "feet" )
+      $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] + IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "feet" )
  THEN
   10305.00000000 "acre-ft"
  ELSE
@@ -1397,8 +1397,8 @@ BEGIN
     RULE                 "Set Domestic Surplus Flags";
     DESCRIPTION          "DESCRIPTION: This rule sets the flags that indicate a Domestic Surplus condition<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Domestic Surplus Flag; LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND IsNaN $ "Surplus.Surplus Flag" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Domestic Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition<br><br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND IsNaN $ "Surplus.Surplus Flag" [];
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Domestic Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition<br><br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -1448,18 +1448,18 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Mexico Surplus flag as a function of Mead compared to the Mexico Surplus Table. A Mead elevation of >= 1,200 ft. receives a value of 3, a value greater than 1,170 ft and less than the level 3 elevation, receives a value of 2, a value of 1,145 ft and less than a level 2 receives a value of 0 and any other condition receives a value of 0. This flag is used in subsequent Mexico Surplus rules. TP 7/28/2015<br><br>SLOTS SET: Mexico Shortage and Surplus.Mexico Surplus Flag<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 41 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow execution in start timestep.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 41 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow execution in start timestep.";
     BEGIN
 
-      $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [2.00000000, "Elevation"] )
+      $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [2.00000000, "Elevation"] )
  THEN
   3.00000000
  ELSE
-  IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [1.00000000, "Elevation"] )
+  IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [1.00000000, "Elevation"] )
   THEN
    2.00000000
   ELSE
-   IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [0.00000000, "Elevation"] )
+   IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [0.00000000, "Elevation"] )
    THEN
     1.00000000
    ELSE
@@ -1474,18 +1474,18 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: In the event that a Lower Basin shortage is projected, this rule sets the Shortage Flag slot to indicate the level of shortage. No shortage = 0. Most severe shortage (Mead < 1025 feet) = 3. Mead < 1050 ft = 2, Mead < 1075 ft = 1. If there is a shortage or surplus then the Abv Hoover Trigger is set to a 2 and no LBDV will occur for the parties that look at the Above Hoover Trigger Set for LBDV.  (SNWP)<br><br>SLOTS SET: Shortage.Shortage Flag, LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 46 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 20180925: Changed IF statements to use function 'GetMeadProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in function to Dec Previous year. This will allow the rule to execute correctly in start timestep.";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 46 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 20180925: Changed IF statements to use function 'GetProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in function to Dec Previous year. This will allow the rule to execute correctly in start timestep.";
     BEGIN
 
-      $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [2.00000000, 0.00000000] )
+      $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [2.00000000, 0.00000000] )
  THEN
   3.00000000
  ELSE
-  IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [1.00000000, 0.00000000] )
+  IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [1.00000000, 0.00000000] )
   THEN
    2.00000000
   ELSE
-   IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+   IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
    THEN
     1.00000000
    ELSE
@@ -1494,7 +1494,7 @@ BEGIN
   ENDIF
  ENDIF;
 
-    INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+    INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
  THEN
   2.00000000
  ENDIF;
@@ -1601,12 +1601,12 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Mid-Elevation Tier. This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "In August with Mid-elevation tier for the next outyear";
-      $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1025.00000000 "ft" )
+      $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1025.00000000 "ft" )
  THEN
   7480.00000000 "1000 acre-ft"
  ELSE
@@ -1716,7 +1716,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3). This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The GetRunCycleIndex()==3 condition will never be satisfied due to the Execution Constraints. Compare with initial version of rule for Run Cycle 4 and correct<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
+    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The GetRunCycleIndex()==3 condition will never be satisfied due to the Execution Constraints. Compare with initial version of rule for Run Cycle 4 and correct<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
@@ -1725,7 +1725,7 @@ BEGIN
  THEN
   ( GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) ) - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "DateToCheckEOWYElevation"( @"t", FALSE ) )] )
  ELSE
-  IF ( ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1075.00000000 "ft" ) COMMENTED_BY "Determine which branch of UEBT to follow" )
+  IF ( ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1075.00000000 "ft" ) COMMENTED_BY "Determine which branch of UEBT to follow" )
   THEN
    "B1_Branch_UpperBalancingTierVolume"( "DateToCheckEOWYElevation"( @"t", FALSE ) )
   ELSE
@@ -2058,12 +2058,12 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Mid-Elevation Tier for Out Years. <br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170718: Added &quot;OR StartMonthIsSeptember()&quot; to condition originally for August; Sarah B. discovered this error and proposed the fix<br><br>TP, 20171017: Removed any setting of the First water year from this Rule<br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170718: Added &quot;OR StartMonthIsSeptember()&quot; to condition originally for August; Sarah B. discovered this error and proposed the fix<br><br>TP, 20171017: Removed any setting of the First water year from this Rule<br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "In August with Mid-elevation tier for the next outyear";
-      $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1025.00000000 "ft" )
+      $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1025.00000000 "ft" )
  THEN
   7480.00000000 "1000 acre-ft"
  ELSE
@@ -2174,7 +2174,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier for out years. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3)<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>S.Baker, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>S.Baker, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 20180925: Replaced function 'GetMeadProjectedPoolElevation' with function 'GetProjectedPoolElevation'.";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
@@ -2183,7 +2183,7 @@ BEGIN
  THEN
   ( GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) ) - $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "DateToCheckEOWYElevation"( @"t", FALSE ) )]
  ELSE
-  IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1075.00000000 "ft" )
+  IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1075.00000000 "ft" )
   THEN
    "B1_Branch_UpperBalancingTierVolume"( "DateToCheckEOWYElevation"( @"t", FALSE ) )
   ELSE
@@ -5278,13 +5278,13 @@ BEGIN
     POST_EXEC_DIAG TRUE;
     MIN_CONSTRAINT $ "PowellData.UpperTierB4MinAnnualRelease" [];
     MAX_CONSTRAINT $ "PowellData.UpperTierB4MaxAnnualRelease" [];
-    NOTES          "DEVELOPMENT NOTES<br>MC, 20160801: Included consideration for possible untransferred carryover volume between Powell and Mead<br>MC, 20170501: Added Post-Execution Checks and removed unneeded call to user-defined function EnsureReleaseLimits, which applied the same constraints that are now in the Post-Execution Checks<br>SB, 20180925: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. ";
+    NOTES          "DEVELOPMENT NOTES<br>MC, 20160801: Included consideration for possible untransferred carryover volume between Powell and Mead<br>MC, 20170501: Added Post-Execution Checks and removed unneeded call to user-defined function EnsureReleaseLimits, which applied the same constraints that are now in the Post-Execution Checks<br>SB, 20180925: Added function 'GetProjectedPoolElevation' instead of using Mead and Powell Pool Elevation. ";
     BEGIN
 
       WITH DATETIME eoyDate = "Dec31ofYear"( eowyDate ) DO
   WITH NUMERIC CarryoverVolume = NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [eoyDate] ) DO
-   WITH NUMERIC PowellEffectivePool = "StorageToElevation"( % "Powell", "ElevationToStorage"( % "Powell", $ "Powell.Pool Elevation" [eowyDate] ) - CarryoverVolume ) DO
-    WITH NUMERIC MeadEffectivePool = "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetMeadProjectedPoolElevation"( eowyDate ) ) + CarryoverVolume ) DO
+   WITH NUMERIC PowellEffectivePool = "StorageToElevation"( % "Powell", "ElevationToStorage"( % "Powell", "GetProjectedPoolElevation"( "Powell", eowyDate ) ) - CarryoverVolume ) DO
+    WITH NUMERIC MeadEffectivePool = "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", eowyDate ) ) + CarryoverVolume ) DO
      IF ( MeadEffectivePool <= 1075.00000000 "ft" AND PowellEffectivePool > 3575.00000000 "ft" OR ( "IsInput"( $ "PowellData.UpperElevBalBranch", eoyDate ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.40000000 ) COMMENTED_BY "If the tier specification is user input for UEB, then release what is suggested for <br>that tier. This is placed so that if a specific Tier and balancing branch for any <br>year, but specifically WY1 has been made, then the logic will honor that and <br>estimate a balancing release instead of an 8.23 MAF release. TP 10/17/2017 <br>" )
      THEN
       "EqualizationReleaseWithCarryover"( eowyDate )
@@ -5944,7 +5944,7 @@ BEGIN
     BEGIN
 
       WITH DATETIME MeadProjectionDate = "Dec31ofYear"( eowyDate - 1.00000000 "year" ) DO
-  WITH NUMERIC MeadProjectedElevation = "GetMeadProjectedPoolElevation"( MeadProjectionDate ) DO
+  WITH NUMERIC MeadProjectedElevation = "GetProjectedPoolElevation"( "Mead", MeadProjectionDate ) DO
    IF ( $ "Powell.Pool Elevation" [eowyDate] > "EqLevel"( eowyDate ) )
    THEN
     1.30000000
@@ -8383,7 +8383,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br>CH, 4/27/18: Deleted if else statements in creation of SE and Binat ICS so that AZ is allowed to created these types of ICS even in Shortage condition (only EC ICS cannot be created during a shortage). Cleaned up list the function returns and unused with statments: only 7 out of the 9 that were included are being used. <br><br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetMeadProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br>CH, 4/27/18: Deleted if else statements in creation of SE and Binat ICS so that AZ is allowed to created these types of ICS even in Shortage condition (only EC ICS cannot be created during a shortage). Cleaned up list the function returns and unused with statments: only 7 out of the 9 that were included are being used. <br><br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
     BEGIN
 
       WITH NUMERIC creationOfEC = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 ) COMMENTED_BY "This Check references the surplus value that represents Quantified Surplus in <br>the Determine Mead and Lower Basin Condition Rule. Quantified Surplus is set <br>as a value of 3 in the IsSurplusYear annual series slot. TP 7/28/2015" )
@@ -8394,13 +8394,13 @@ BEGIN
  ENDIF DO
   WITH NUMERIC creationOfSE = $ "ICS Credits.AnnualCreationSysEff_AZ" ["Dec31ofYear"( @"t" )] DO
    WITH NUMERIC creationOfBiNat = $ "ICS Credits.AnnualCreationBiNat_AZ" ["Dec31ofYear"( @"t" )] DO
-    WITH NUMERIC deliveryChargedToEC = IF ( ( ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "ft" ) AND "GetYear"( @"t" ) >= 2021.00000000 ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft or the Lower Basin is <br>in Surplus, then set the ICS delivery to Total ICS Created/10 (For now this value is 18,000 AF and <br>can be changed in the future if needed. If Lake Mead is below 1,100 ft, then do not allow any <br>delivery of ICS. Also, Arizona will only take delivery of EC ICS after the beginning of 2021. Per <br>conversation with Shana Tighi 8/4/2015 " )
+    WITH NUMERIC deliveryChargedToEC = IF ( ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "ft" ) AND "GetYear"( @"t" ) >= 2021.00000000 ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft or the Lower Basin is <br>in Surplus, then set the ICS delivery to Total ICS Created/10 (For now this value is 18,000 AF and <br>can be changed in the future if needed. If Lake Mead is below 1,100 ft, then do not allow any <br>delivery of ICS. Also, Arizona will only take delivery of EC ICS after the beginning of 2021. Per <br>conversation with Shana Tighi 8/4/2015 " )
     THEN
      "Min"( 18000.00000000 "acre-ft", $ "ICS Credits.ExtraordinaryConservationICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] )
     ELSE
      0.00000000 "acre-ft"
     ENDIF DO
-     WITH NUMERIC deliveryChargedToSE = IF ( ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "ft" ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft or the <br>Lower Basin is in Surplus, then set the ICS delivery to Total ICS Created/10. If Lake <br>Mead is below 1,100 ft, then do not allow any delivery of ICS. The logic only needs to <br>know if Lake Mead is above 1,110 ft and the delivery will be added to any allocation <br>already set by the Surplus logic. " )
+     WITH NUMERIC deliveryChargedToSE = IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "ft" ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft or the <br>Lower Basin is in Surplus, then set the ICS delivery to Total ICS Created/10. If Lake <br>Mead is below 1,100 ft, then do not allow any delivery of ICS. The logic only needs to <br>know if Lake Mead is above 1,110 ft and the delivery will be added to any allocation <br>already set by the Surplus logic. " )
      THEN
       10305.00000000 "acre-ft"
      ELSE
@@ -8980,14 +8980,14 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 4/18/2013<br><br>S.Baker, 20180925: Changed IF statements to use function 'GetMeadProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 4/18/2013<br><br>S.Baker, 20180925: Changed IF statements to use function 'GetProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
-      IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+      IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
  THEN
   TRUE
  ELSE
-  IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] )
+  IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] )
   THEN
    TRUE
   ELSE
@@ -10507,7 +10507,7 @@ BEGIN
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>CH, 4/24/18: Replaced Surplus.MaxStorage (a hardcoded value) with MaxStorage function that calculates this value as specified by Appendix A of CRSS documentation.<br>S.Baker 09/25/2018: Replace storage with ElevationToStorage() with function that determines which projected pool elevation to use (24MS or MTOM). ";
     BEGIN
 
-      "Max"( ( $ "Powell.Storage" [@"t - 1"] + "ElevationToStorage"( % "Mead", "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) ) - "MaxStorage"(  ) - ( "SumPreviousYearICScredits"(  ) + $ "Mexico Shortage and Surplus.ICMA Balance" [@"24:00:00 December 31, Previous Year"] ) ) * ( 1.00000000 + ( $ "Powell.Bank Storage Coefficient" [0.00000000, 0.00000000] + $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) / 2.00000000 ) + $ "Surplus.70RLeesFerryFlow" [] COMMENTED_BY "70th percentile non-exceedance <br>flow" - ( $ "Surplus.UBEvaporation" [] + $ "Surplus.UBDemand" [@"24:00:00 December 31, Current Year"] ) - "SumLBDemands - Include Mexico"(  ), 0.00000000 "acre-ft" );
+      "Max"( ( $ "Powell.Storage" [@"t - 1"] + "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) ) - "MaxStorage"(  ) - ( "SumPreviousYearICScredits"(  ) + $ "Mexico Shortage and Surplus.ICMA Balance" [@"24:00:00 December 31, Previous Year"] ) ) * ( 1.00000000 + ( $ "Powell.Bank Storage Coefficient" [0.00000000, 0.00000000] + $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) / 2.00000000 ) + $ "Surplus.70RLeesFerryFlow" [] COMMENTED_BY "70th percentile non-exceedance <br>flow" - ( $ "Surplus.UBEvaporation" [] + $ "Surplus.UBDemand" [@"24:00:00 December 31, Current Year"] ) - "SumLBDemands - Include Mexico"(  ), 0.00000000 "acre-ft" );
 
     END;
 
@@ -11703,10 +11703,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "AUTHOR, DATE: AP 9/18/2018<br><br>S.Baker, 20180925: Changed IF statements to use function 'GetMeadProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    NOTES          "AUTHOR, DATE: AP 9/18/2018<br><br>S.Baker, 20180925: Changed IF statements to use function 'GetProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
-      IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+      IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
  THEN
   1.00000000 COMMENTED_BY "If Mead is below 1,075 ft, then set the Basin Condition value to 1 for Shortage"
  ELSE
@@ -11714,7 +11714,7 @@ BEGIN
   THEN
    3.00000000 COMMENTED_BY "If the Quantified Surplus Volume Calculation is greater than zero, <br> then set the Basin Condition value to 3 for Quantified Surplus"
   ELSE
-   IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] )
+   IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] )
    THEN
     2.00000000 COMMENTED_BY "If Mead is greater than 1,145 ft, then set the Basin Condition value to 2 for Domestic Surplus"
    ELSE
