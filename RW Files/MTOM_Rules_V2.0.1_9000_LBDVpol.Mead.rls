@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 15:44 September 25, 2018
+# Created 15:52 September 25, 2018
 # 
 RULESET
 NAME "MTOM_Rules (from MRM run)";
@@ -1426,13 +1426,13 @@ BEGIN
     RULE                 "Determine Mead and Lower Basin Condition";
     DESCRIPTION          "DESCRIPTION: This rule sets a slot that determines the Condition of Lake Mead and the Lower Basin. A setting of 0 means a normal year, a 1 means shortage, a 2 means Domestic Surplus and a 3 is Quantified Surplus.  In the condition of anything that is not normal. TP 7/28/2015<br>                         Sets LBDV.schedulecheck to something other than 0 if the LB condition changes in RC 3. AP 9/18/2018<br><br>SLOTS SET: LowerBasinDemandVariability.LowerBasinCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000 ) COMMENTED_BY "Rule executes in Run Cycle 3/4 in January that is not the Start Timestep <br>";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>9/18/2018, AP: Removed logic to determine LB operating condition and moved it into LBConditionDetermination function. Rule now sets LBDV.Schedule check value to either a 1 (shortage) or 2 (surplus) if the LB condition switches to something other than normal in run cycle 3. This value does not change after run cycle 3";
+    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000;
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>9/18/2018, AP: Removed logic to determine LB operating condition and moved it into LBConditionDetermination function. Rule now sets LBDV.Schedule check value to either a 1 (shortage) or 2 (surplus) if the LB condition switches to something other than normal in run cycle 3. This value does not change after run cycle 3.<br>S.Baker, 20180925: Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in funcito to Dec Previous year. This will allow the rule to execute correctly in start timestep. Edited date input in second assignment to be consistent with the first assignment (shouldnt change how rule works). ";
     BEGIN
 
       $ "LowerBasinDemandVariability.LowerBasinCondition" [@"24:00:00 December 31, Current Year"] := "LBConditionDetermination"(  );
 
-      $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] := IF ( "GetRunCycleIndex"(  ) == 3.00000000 AND "LBConditionDetermination"(  ) != 0.00000000 )
+      $ "LowerBasinDemandVariability.ScheduleCheck" [@"24:00:00 December 31, Current Year"] := IF ( "GetRunCycleIndex"(  ) == 3.00000000 AND "LBConditionDetermination"(  ) != 0.00000000 )
  THEN
   IF ( "LBConditionDetermination"(  ) == 1.00000000 )
   THEN
@@ -1473,19 +1473,19 @@ BEGIN
     RULE                 "Set Shortage Flag";
     DESCRIPTION          "DESCRIPTION: In the event that a Lower Basin shortage is projected, this rule sets the Shortage Flag slot to indicate the level of shortage. No shortage = 0. Most severe shortage (Mead < 1025 feet) = 3. Mead < 1050 ft = 2, Mead < 1075 ft = 1. If there is a shortage or surplus then the Abv Hoover Trigger is set to a 2 and no LBDV will occur for the parties that look at the Above Hoover Trigger Set for LBDV.  (SNWP)<br><br>SLOTS SET: Shortage.Shortage Flag, LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 46 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 20180925: Changed IF statements to use function 'GetMeadProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000;
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 46 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 20180925: Changed IF statements to use function 'GetMeadProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in funcito to Dec Previous year. This will allow the rule to execute correctly in start timestep.";
     BEGIN
 
-      $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetMeadProjectedPoolElevation"( @"t - 1" ) < $ "Shortage.Mead Shortage Elevations" [2.00000000, 0.00000000] )
+      $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [2.00000000, 0.00000000] )
  THEN
   3.00000000
  ELSE
-  IF ( "GetMeadProjectedPoolElevation"( @"t - 1" ) < $ "Shortage.Mead Shortage Elevations" [1.00000000, 0.00000000] )
+  IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [1.00000000, 0.00000000] )
   THEN
    2.00000000
   ELSE
-   IF ( "GetMeadProjectedPoolElevation"( @"t - 1" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+   IF ( "GetMeadProjectedPoolElevation"( @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
    THEN
     1.00000000
    ELSE
