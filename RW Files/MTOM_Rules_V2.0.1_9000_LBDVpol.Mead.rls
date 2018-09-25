@@ -1,8 +1,8 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 16:25 September 25, 2018
+# Created 16:52 September 25, 2018
 # 
 RULESET
-NAME "MTOM_Rules (from MRM run)";
+NAME "MTOM_Rules";
 AGENDA_ORDER ASCENDING;
 DESCRIPTION "";
 PRECISION   8;
@@ -2003,12 +2003,24 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) );
-    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Edited execution constraints to match Powell policy group rule. ";
+    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Edited execution constraints to match Powell policy group rule. Changed rule TARV calculation to match Powell policy set rule. ";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
       IF_STATEMENT (NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
-            $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { 8230.00000000 "1000 acre-feet" , "CalcReleaseForMaxPoolElevation"( "WaterYearDatesByGroup"( 1.00000000 ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) } COMMENTED_BY "MC, 20170511: Compare with other preliminary volume rules" );
+            $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { 8230.00000000 "1000 acre-feet" , WITH SLOT releaseTable = IF ( "GetYear"( @"Start Timestep" ) >= 2017.00000000 )
+ THEN
+  $ "PowellData.PowellMonthlyReleaseTable"
+ ELSE
+  $ "PowellData.PowellMonthlyReleaseTable_preJan2017"
+ ENDIF DO
+  "Min"( "CalcReleaseForMaxPoolElevation"( "WaterYearDatesByGroup"( 1.00000000 ) ), releaseTable ["AnnualTotal", "NumColumns"( releaseTable ) - 2.00000000] )
+ ENDWITH COMMENTED_BY "Ensure enough water released so Powell does not exceed max pool elevation" , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) COMMENTED_BY "User input min annual volume was added to allow overriding automatic determination" , IF ( "GetMonth"( @"t" ) != 10.00000000 )
+ THEN
+  "SumFlowsToVolume"( $ "Powell.Outflow", "OffsetDate"( @"t", "MonthsSinceEOWY"( @"t" ), "-1 months" ), @"Start Timestep - 1" )
+ ELSE
+  0.00000000 "acre-foot"
+ ENDIF COMMENTED_BY "Ensure TARV is not less than volume already released in water year" } );
 
           DESCRIPTION          "These flags have to be reset and set again if go to LBDV <br>";
       $ "PowellData.ReleaseVolumeSetFlag" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := 0.00000000;
@@ -6544,6 +6556,30 @@ BEGIN
  ELSE
   $ "Mead.Pool Elevation" [MeadProjectionDate]
  ENDIF COMMENTED_BY "Look at the Start Timestep to determine which Mead PE projection to use <br>";
+
+    END;
+
+    FUNCTION       "GetProjectedPoolElevation" ( STRING Reservoir, DATETIME ProjectionDate )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "DESCRIPTION: This function determines which Mead or Powell pool elevation projection to use based on the start timestep and ProjectionDate. If start timestep is Jan-July, use only previous years' AugEOYPEProjection. If Aug-Dec, use the previous and current year's AugEOYPEProjection.<br><br>RETURNS: Pool elevation value from either the Aug 24MS projection or from MTOM's projection<br><br>ARGUMENTS:<br>1. STRING Reservoir - &quot;Powell&quot; or &quot;Mead&quot; the reservoir pool elevation is desired<br>2. DATETIME ProjectionDate - the EOCY date which pool elevation is desired<br><br>CONSTRAINTS:<br>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, Date: SB, 20180917";
+    BEGIN
+
+      IF ( IF ( "GetMonth"( @"Start Timestep" ) < "GetMonth"( @"August" ) )
+ THEN
+  ProjectionDate == "Dec31ofYear"( @"Start Timestep" - 1.00000000 "year" )
+ ELSE
+  ProjectionDate == "Dec31ofYear"( @"Start Timestep" ) OR ProjectionDate == "Dec31ofYear"( @"Start Timestep" - 1.00000000 "year" )
+ ENDIF )
+ THEN
+  "GetSlot"( "PowellToMeadData.AugEOY" CONCAT Reservoir CONCAT "PEProjection" ) [ProjectionDate]
+ ELSE
+  "GetSlot"( Reservoir CONCAT ".Pool Elevation" ) [ProjectionDate]
+ ENDIF COMMENTED_BY "Look at the Start Timestep to determine which PE projection to use  <br>";
 
     END;
 
