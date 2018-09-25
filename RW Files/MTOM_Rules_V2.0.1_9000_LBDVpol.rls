@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.2 Patch
-# Created 09:23 September 25, 2018
+# Created 09:24 September 25, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1578,7 +1578,7 @@ BEGIN
 
   POLICY_GROUP   "PowellAfterLBDV";
   DESCRIPTION    "";
-  ACTIVE         FALSE;
+  ACTIVE         TRUE;
   NOTES          "";
   BEGIN
 
