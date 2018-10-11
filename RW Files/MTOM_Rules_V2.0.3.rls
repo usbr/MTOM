@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.4 Patch
-# Created 19:31 October 10, 2018
+# Created 12:43 October 11, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -7436,6 +7436,30 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
+    NOTES          " CF,20181010 for FG update adding in baseflow targets for Jensen to GetFGBaseFlowMagnitudeUnconstrained<br><br>AUTHOR, DATE: Unknown";
+    BEGIN
+
+      IF ( "MonthIs"( { "March" , "April" } ) )
+ THEN
+  "Max"( "VolumeToFlow"( ( "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "FlamingGorge", "GetMay1TargetElevation"(  ) ) + "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) ) / "NumberOfMonthsUntilMay"(  ), @"t" ), $ "FlamingGorgeData.MinFlow" [] )
+ ELSE
+  IF ( "MonthIs"( { "May" , "June" , "July" , "August" , "September" , "October" , "November" , "December" } ) )
+  THEN
+   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Next Year", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000], "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ), "Max"( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "VolumeToFlow"( "PredictedYampaFlow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), @"t" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow. <br>", $ "FlamingGorgeData.MinFlow" [] ) )
+  ELSE
+   "Max"( "VolumeToFlow"( ( "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.May1TargetElevation" [0.00000000, 2.00000000] ) COMMENTED_BY "March 1 soft baseflow target is always a pool elevation of 6027 FT. During March this target may be adjusted based upon the Percent Exceedence to get the actual May 1 ULDE. -From Heather Hermansen  -HG 5/24/2013" + "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) ) / "NumberOfMonthsUntilMay"(  ), @"t" ), "Max"( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "VolumeToFlow"( "PredictedYampaFlow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), @"t" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow. <br>", $ "FlamingGorgeData.MinFlow" [] ) ) COMMENTED_BY "January and February."
+  ENDIF
+ ENDIF COMMENTED_BY " In actual operations, at March a new forecast would come out for the next April through July volume so we adjust the May 1 ULDE then. For all other months besides March and April<br> the May 1 ULDE is assumed to be the maximum May 1 pool elevation of 6027 FT. -HG 10/9/12";
+
+    END;
+
+    FUNCTION       "GetFGBaseFlowMagnitudeUnconstrained_Old" (  )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    ".acre-ft/month";
+    DESCRIPTION    "DESCRIPTION: Uses a simple water balance with predicted inflows to calculate a steady outflow rate from the current timestep to the next April to meet the May 1 ULDE regardless of base flow restrictions. <br><br>RETURNS: Outflow rate [L^3/T]<br><br>ARGUMENTS: <NONE><br><br>CONSTRAINTS:<br><br>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG TRUE;
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170315: Calculation the same for May-Dec & Jan-Feb so combine?";
     BEGIN
 
@@ -7551,6 +7575,34 @@ BEGIN
  ELSE
   "SumFlowsToVolume"( $ "FlamingGorge.Inflow", startDate, endDate )
  ENDIF;
+
+    END;
+
+    FUNCTION       "PredictedYampaFlow" ( DATETIME startDate, DATETIME endDate )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "DESCRIPTION: This function calculates the total inflow volume between the dates specified as arguments<br><br>RETURNS: Inflow volume to Yampa at Deerlodge [L^3]<br><br>ARGUMENTS<br>1. DATETIME startDate - beginning date of period for sum<br>2. DATETIME endDate - ending date of period for sum<br><br>CONSTRAINTS<br><br>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  TRUE;
+    POST_EXEC_DIAG TRUE;
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: CF,20181010 for FG update adding in baseflow targets for Jensen to GetFGBaseFlowMagnitudeUnconstrained<br>";
+    BEGIN
+
+      "SumFlowsToVolume"( $ "YampaRiverInflow.Yampa_at_Deerlodge", startDate, endDate );
+
+    END;
+
+    FUNCTION       "FGSpringReleaseStartDate" (  )
+    RETURN_TYPE    DATETIME;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Arguments: None<br><br>Description: This function determines FG spring release date based on Yampa peak magnitude and historic julian day larval razorback sucker emergence. <br><br>Formula Ax^2+Bx+C where x = $ FlamingGorgeEIS.YampaPeakDailyFlow.<br><br>Returns: Date";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  TRUE;
+    POST_EXEC_DIAG TRUE;
+    NOTES          "CF, 20181010: Use reference to new LTSPRegressionCoefficients table slot. <br><br>HP, 20170714<br><br>";
+    BEGIN
+
+      @"24:00:00 January 1, Current Year" + ( $ "FlamingGorgeData.LTSPRegressionCoefficients" [0.00000000, "A"] * ( $ "KNN_MTOM.YampaPeakDailyFlow" [@"24:00:00 December 31, Current Year"] ^ 2.00000000 / 1.00000000 "cfs^2" ) - $ "FlamingGorgeData.LTSPRegressionCoefficients" [0.00000000, "B"] * ( $ "KNN_MTOM.YampaPeakDailyFlow" [@"24:00:00 December 31, Current Year"] / 1.00000000 "cfs" ) + $ "FlamingGorgeData.LTSPRegressionCoefficients" [0.00000000, "C"] ) * 1.00000000 "day";
 
     END;
 
@@ -7986,6 +8038,91 @@ BEGIN
    "SumFlowsToVolume"( $ "FlamingGorgeInflow.Unregulated", @"24:00:00 April Max DayOfMonth, Current Year", @"24:00:00 July Max DayOfMonth, Current Year" ) COMMENTED_BY "April, May, June, July, August"
   ENDIF COMMENTED_BY "The months of September through December look at actual flows coming into the system and react if necessary to meet the March 1 elevation target."
  ENDIF;
+
+    END;
+
+    FUNCTION       "MakeDailyFlamingGorgeReleaseDateandFlowList_LTSP" ( DATETIME startdate )
+    RETURN_TYPE    LIST;
+    SCALE_UNITS    "";
+    DESCRIPTION    "HP, 20170714<br><br>Arguments: <br>     Startdate between April-July<br>     2nd Disagg Yampa Flows<br>     FG Spring Release Start Date<br><br>Description:<br>    This function is the powerhouse for FG daily disaggregation and calculates the ramp rates, number of days at powerplant capacity, number of days at bypass, and timing of the spring peak. The LTSP timing uses a function that estimates larval razorback sucker based on Yampa peak magnitude and historic julian days to larval presence. The ramp down takes into account Reach 2 Jensen flows and calculates target flows accordingly. <br><br>Returns:<br>     Daily FG hydrograph in cfs for the April-July period.<br>     	";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "HP, 20170714";
+    BEGIN
+
+      WITH LIST DateList = "GetDates"( @"24:00:00 April 1, Current Year", @"t" COMMENTED_BY "Only calculates daily schedule to the end of the current month for computation efficiency.", "1 days" ) DO
+  WITH LIST FlowList = WITH DATETIME YampaPeakDate = IF ( TRUE )
+  THEN
+   "FindYampaPeakDateForYear"(  )
+  ELSE
+   @"24:00:00 May 27, Current Year"
+  ENDIF COMMENTED_BY "Finds the Yampa peak flow date for this year, change if to FALSE to use May 27 which matches it with the dates that the expression slot was using..." DO
+   WITH NUMERIC DaysAtPPC = "Max"( "RoundToNearestDay"( "GetNumberOfDaysAtPPC"( $ "KNN_MTOM.SpringHClass" [@"t"] ) ), 1.00000000 "day" ) COMMENTED_BY "Calculate number of days that Flaming Gorge will release Power Plant Capacity (PPC), with a minimum of 1 day at PPC to meet flow recommendation, I am unsure about the minimum days in really dry years, but am using 1 for now..." DO
+    WITH NUMERIC RampUpDaysToPPC = "RoundToNearestDay"( "Max"( IF ( ( $ "FlamingGorgeData.PowerPlantCapacity" [] - $ "FlamingGorge.Outflow" [@"24:00:00 Previous Month Max DayOfMonth, Current Year"] ) <= $ "KNN_MTOM.RampUpRateNoUnits" [] * 1.00000000 "cfs" )
+    THEN
+     0.00000000 "day"
+    ELSE
+     ( $ "FlamingGorgeData.PowerPlantCapacity" [] - $ "FlamingGorge.Outflow" [@"24:00:00 Previous Month Max DayOfMonth, Current Year"] ) / ( $ "KNN_MTOM.RampUpRateNoUnits" [] * 1.00000000 "cfs" / 1.00000000 "day" )
+    ENDIF, 0.00000000 "day" ) ) COMMENTED_BY "Calculate the number of days that the flow will have to ramp to reach the PPC, or sets it to 0 if it can reach it in one jump." DO
+     WITH NUMERIC RampUpToPPCRate = ( ( $ "FlamingGorgeData.PowerPlantCapacity" [] - $ "FlamingGorge.Outflow" [@"24:00:00 Previous Month Max DayOfMonth, Current Year"] ) / ( ( RampUpDaysToPPC / 1.00000000 "day" ) + 1.00000000 ) ) COMMENTED_BY "Calculate the up ramping rate depending on the number of days so that it evenly ramps up to PPC over those days. Will not exceed the up ramp rate limit (2000 cfs)." DO
+      WITH NUMERIC RampUpDaysToBypass = "RoundToNearestDay"( "Max"( IF ( ( $ "KNN_MTOM.BypassCapacity" [] - $ "FlamingGorge.Outflow" [@"24:00:00 Previous Month Max DayOfMonth, Current Year"] ) <= $ "KNN_MTOM.RampUpRateNoUnits" [] * 1.00000000 "cfs" )
+      THEN
+       0.00000000 "day"
+      ELSE
+       ( $ "KNN_MTOM.BypassCapacity" [] - $ "FlamingGorge.Outflow" [@"24:00:00 Previous Month Max DayOfMonth, Current Year"] ) / ( $ "KNN_MTOM.RampUpRateNoUnits" [] * 1.00000000 "cfs" / 1.00000000 "day" )
+      ENDIF, 0.00000000 "day" ) ) DO
+       WITH NUMERIC DaysToDownRamp = "RoundToNearestDay"( ( $ "FlamingGorgeData.PowerPlantCapacity" [] - 2700.00000000 "cfs" ) / ( $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"24:00:00 April Max DayOfMonth, Current Year"], 0.00000000] * 1.00000000 "cfs" ) * 1.00000000 "day" ) DO
+        WITH NUMERIC DaysAtBypass = "RoundToNearestDay"( "GetDaysAtBypass"( $ "KNN_MTOM.SpringHClass" [] ) ) DO
+         WITH DATETIME FGSpringReleaseStartDate = "DateMax"( "DateMin"( "FGSpringReleaseStartDate"(  ), @"24:00:00 August 2, Current Year" - ( DaysAtPPC + RampUpDaysToPPC + DaysToDownRamp + DaysAtBypass / 2.00000000 ) COMMENTED_BY "Estimate total spring flow days...<br>" ), @"24:00:00 April 2, Current Year" ) COMMENTED_BY "Start ramping up using LTSP polynomial, but Apr 2 as a minimum to avoid breaking, and start early <br>enough to end by July 31" DO
+          FOR ( DATETIME date IN DateList ) WITH LIST flows = {  } DO
+           WITH NUMERIC i = ( date - @"24:00:00 April 1, Current Year" ) / 1.00000000 "day" DO
+            APPEND IF ( date < startdate )
+            THEN
+             $ "FlamingGorgeData.DailyFGOutflow" [date] COMMENTED_BY "CF: HP to VERIFY is this the correct slot? CRSS has $ &quot;DailyFlows.FlamingGorgeDaily&quot; but MTOM's <br>non-LTSP version of this function has  $ &quot;FlamingGorge.Outflow&quot; which would seem incorrect <br>since this should be a daily slot and Outflow is a monthly slot.  <br>"
+            ELSE
+             IF ( ( date < FGSpringReleaseStartDate ) COMMENTED_BY "Before Spring Releases start continue at base flows for the ULDE in March and April that will meet ULDE on May 1" )
+             THEN
+              IF ( FGSpringReleaseStartDate == @"April" )
+              THEN
+               $ "FlamingGorge.Outflow" [@"24:00:00 March Max DayOfMonth, Current Year"]
+              ELSE
+               $ "FlamingGorge.Outflow" [@"24:00:00 April Max DayOfMonth, Current Year"]
+              ENDIF
+             ELSE
+              IF ( ( date < FGSpringReleaseStartDate + RampUpDaysToPPC ) COMMENTED_BY "Ramping period up to Flaming Gorge PPC Release (or max release if below PPC)" )
+              THEN
+               "Min"( ( GET @INDEX i - 1.00000000 FROM flows ) + RampUpToPPCRate, "Max"( $ "FlamingGorgeData.PowerPlantCapacity" [], "Max"( "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "MinItem"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"t", @"24:00:00 July 31, Current Year" ) ) ), $ "FlamingGorgeData.MinFlow" [] ) ) ) COMMENTED_BY "Release PPC or volume necessary to stay below max PE." )
+              ELSE
+               IF ( "CountDaysAboveThreshold"( flows, $ "KNN_MTOM.BypassCapacity" [] ) < DaysAtBypass )
+               THEN
+                "Min"( ( GET @INDEX i - 1.00000000 FROM flows ) + $ "KNN_MTOM.RampUpRateNoUnits" [] * 1.00000000 "cfs", "Max"( $ "KNN_MTOM.BypassCapacity" [], "Max"( "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ), "GetFGBaseFlowMagnitude"(  ) ) ) COMMENTED_BY "Release bypass capacity or volume necessary to stay below max PE." ) COMMENTED_BY "Ramps up and continues at Bypass Cap until it has been at Bypass Cap for enough days"
+               ELSE
+                IF ( "CountDaysAboveThreshold"( flows, $ "FlamingGorgeData.PowerPlantCapacity" [] ) < DaysAtPPC )
+                THEN
+                 "Max"( ( GET @INDEX i - 1.00000000 FROM flows ) - $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"t"], 0.00000000] * 1.00000000 "cfs", "Max"( $ "FlamingGorgeData.PowerPlantCapacity" [], "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ) ) COMMENTED_BY "Downramps to base flows unless inflows will increase FG above max PE.<br>Releases volume necessary to stay below max PE." ) COMMENTED_BY "Ramps down from bypass (if it was there) then continues at PPC until it has been above PPC for enough days"
+                ELSE
+                 "Max"( ( GET @INDEX i - 1.00000000 FROM flows ) - $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"t"], 0.00000000] * 1.00000000 "cfs", "Max"( "GetFGBaseFlowMagnitude"(  ), "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ) ) COMMENTED_BY "Releases base flows or volume necessary to stay below max PE." ) COMMENTED_BY "Ramps down from PPC and then continues at the new base flow which is newly calculated each month"
+                ENDIF
+               ENDIF
+              ENDIF
+             ENDIF
+            ENDIF ONTO flows
+           ENDWITH
+          ENDFOR
+         ENDWITH
+        ENDWITH
+       ENDWITH
+      ENDWITH
+     ENDWITH
+    ENDWITH
+   ENDWITH
+  ENDWITH DO
+   FOR ( DATETIME date IN DateList ) WITH LIST DateFlowList = {  } DO
+    APPEND { date , GET @INDEX ( date - @"24:00:00 April 1, Current Year" ) / 1.00000000 "day" FROM FlowList } ONTO DateFlowList
+   ENDFOR COMMENTED_BY "This links together the date and flow in a list of 2 item lists..... e.g., &lcub;...,(5/1/12, 1200 cfs), (5/2/12, 1300 cfs), etc...&rcub;"
+  ENDWITH
+ ENDWITH;
 
     END;
 
