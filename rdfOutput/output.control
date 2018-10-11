@@ -1,0 +1,183 @@
+#Slots for RDF output
+# Sample: Mead.Inflow: file = $MTOM_DIR/Output Data/res.rdf  
+# Pattern: OBJ.SLOT: file = $CRSS_DIR/rdfOutput/TWS.rdf  
+#CF: Reformatting the file paths to use / rather than \
+#CF: Renaming the file .control rather than .controlfile.txt
+
+## Res ##
+BlueMesa.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+BlueMesa.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+BlueMesa.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+BlueMesa.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+BlueMesa.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+BlueMesa.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+BlueMesa.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+BlueMesa.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+Crystal.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Crystal.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Crystal.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+Crystal.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Crystal.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+Crystal.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Crystal.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Crystal.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+FlamingGorge.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+FlamingGorge.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+FlamingGorge.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+FlamingGorge.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+FlamingGorge.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+FlamingGorge.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+FlamingGorge.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+FlamingGorge.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+Fontenelle.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Fontenelle.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Fontenelle.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+Fontenelle.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Fontenelle.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+Fontenelle.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Fontenelle.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Fontenelle.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+Havasu.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Havasu.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Havasu.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+Havasu.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Havasu.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+Havasu.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Havasu.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Havasu.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+Mead.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Mead.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Mead.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+Mead.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Mead.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+Mead.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Mead.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Mead.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+Mohave.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Mohave.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Mohave.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+Mohave.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Mohave.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+Mohave.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Mohave.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Mohave.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+MorrowPoint.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+Powell.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Bypass: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Evaporation: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Regulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Surface Area: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Power Plant Cap Fraction: file = $MTOM_DIR/rdfOutput/res.rdf
+Powell.Peak Flow: file = $MTOM_DIR/rdfOutput/res.rdf
+
+Navajo.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Navajo.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Navajo.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Navajo.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+Navajo.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Navajo.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+Navajo.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+TaylorPark.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+TaylorPark.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+TaylorPark.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+TaylorPark.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+TaylorPark.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+TaylorPark.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+TaylorPark.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
+Vallecito.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Vallecito.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+Vallecito.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+Vallecito.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+Vallecito.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+
+## Diversions ##
+PumpingFromLakeMead:SNWP.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+MWDDiversion.Total Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+CAPDiversion.Total Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+TunnelDiversionBelowCrystalForAg.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+MexicanTreatyDelivery.Total Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+NavajoIndianIrrigationProjectNIIP.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+Azotea Tunnel.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+
+TunnelReturnFlow.Outflow: file = $MTOM_DIR/rdfOutput/diversion.rdf
+GunnisonBelowCrystal:TunnelDivBelowCrystalForAg.Outflow: file = $MTOM_DIR/rdfOutput/diversion.rdf
+GunnisonBelowCrystal:TunnelDivBelowCrystalForAg.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+
+## Flags ##
+Shortage.Shortage Flag: file = $MTOM_DIR/rdfOutput/flags.rdf
+Surplus.AnnualSurplusFlag: file = $MTOM_DIR/rdfOutput/flags.rdf
+Surplus.AnnualSurplusTypeFlag: file = $MTOM_DIR/rdfOutput/flags.rdf
+PowellData.ReleaseTier: file = $MTOM_DIR/rdfOutput/flags.rdf
+PowellData.UpperElevBalBranch: file = $MTOM_DIR/rdfOutput/flags.rdf
+
+FloodControlOutput.Flood Control Flag: file = $MTOM_DIR/rdfOutput/monthlyflags.rdf
+Surplus.Flood Control Surplus Flag: file = $MTOM_DIR/rdfOutput/monthlyflags.rdf
+PowellData.ControllingEqualizationCondition: file = $MTOM_DIR/rdfOutput/flags.rdf
+
+LowerBasinDemandVariability.AbvHooverTriggerSet: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.AnnualFloodControlFlag: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.AnnualShortageAnyTypeFlag: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.EqualizationAbove823: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.EqualizationAt823: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.LBNormalCondition: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.LowerBalancingAbove823: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.LowerBalancingAt823: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.LowerBalancingBelow823: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.MidElevationReleaseAt748: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.MidElevationReleaseAt823: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.Step1ShortageFlag: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.Step2ShortageFlag: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.Step3ShortageFlag: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.UpperBalancingAbove823: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.UpperBalancingAt823: file = $MTOM_DIR/rdfOutput/flags.rdf
+CoordinatedOperationsFlagsForFreqTbl.UpperBalancingBelow823: file = $MTOM_DIR/rdfOutput/flags.rdf
+
+PowellData.ActualAnnualReleaseVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
+PowellData.TargetAnnualReleaseVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
+
+ICS Credits.SacWYType: file = $MTOM_DIR/rdfOutput/flags.rdf: file = $MTOM_DIR/rdfOutput/flags.rdf
+
+PowellToMeadData.CarryoverVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
+AnnualWaterUse.California_PreliminaryAdjustedApportionment: file = $MTOM_DIR/rdfOutput/flags.rdf
+
+BlueMesaData.MeetCanyonVolumeGoal: file = $MTOM_DIR/rdfOutput/flags.rdf
+BlueMesaData.MeetStorageTargetByDec: file = $MTOM_DIR/rdfOutput/flags.rdf
+BlueMesaData.MeetStorageTargetByJuly: file = $MTOM_DIR/rdfOutput/flags.rdf
+BlueMesaData.MeetWhitewaterVolumeGoal: file = $MTOM_DIR/rdfOutput/flags.rdf
+BlueMesaData.CanyonPeakFlowDetermination: file = $MTOM_DIR/rdfOutput/flags.rdf
+BlueMesaData.BlueMesaAprilThroughJulyVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
+BlueMesaData.WhitewaterVolumeGoal: file = $MTOM_DIR/rdfOutput/flags.rdf
+
+#Daily
+KNN_MTOM.FlamingGorgeDaily: file = $MTOM_DIR/rdfOutput/daily.rdf
+KNN_MTOM.YampaDailyDeerlodgeDepleted: file = $MTOM_DIR/rdfOutput/daily.rdf
+KNN_MTOM.JensenDaily: file = $MTOM_DIR/rdfOutput/daily.rdf
+BlueMesaData.TargetDailyWhitewaterFlows: file = $MTOM_DIR/rdfOutput/daily.rdf
+BlueMesaData.TargetDailyBlackCanyonFlows: file = $MTOM_DIR/rdfOutput/daily.rdf
+
+

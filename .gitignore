@@ -1,6 +1,7 @@
 
 rdfOutput/*
 !rdfOutput/ReadMe.txt
+!rdfOutput/output.control
 ReportFiles
 
 MTOM_Overview_Description.pdf
