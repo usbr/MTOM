@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.2.4 Patch
-# Created 12:43 October 11, 2018
+# Created 13:05 October 11, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -8079,7 +8079,7 @@ BEGIN
            WITH NUMERIC i = ( date - @"24:00:00 April 1, Current Year" ) / 1.00000000 "day" DO
             APPEND IF ( date < startdate )
             THEN
-             $ "FlamingGorgeData.DailyFGOutflow" [date] COMMENTED_BY "CF: HP to VERIFY is this the correct slot? CRSS has $ &quot;DailyFlows.FlamingGorgeDaily&quot; but MTOM's <br>non-LTSP version of this function has  $ &quot;FlamingGorge.Outflow&quot; which would seem incorrect <br>since this should be a daily slot and Outflow is a monthly slot.  <br>"
+             $ "KNN_MTOM.FlamingGorgeDaily" [date] COMMENTED_BY "CF: MTOM's non-LTSP version of this function has  $ &quot;FlamingGorge.Outflow&quot; which was incorrect <br>since this should be a daily slot and Outflow is a monthly slot.    <br>"
             ELSE
              IF ( ( date < FGSpringReleaseStartDate ) COMMENTED_BY "Before Spring Releases start continue at base flows for the ULDE in March and April that will meet ULDE on May 1" )
              THEN
