@@ -128,6 +128,14 @@ TunnelReturnFlow.Outflow: file = $MTOM_DIR/rdfOutput/diversion.rdf
 GunnisonBelowCrystal:TunnelDivBelowCrystalForAg.Outflow: file = $MTOM_DIR/rdfOutput/diversion.rdf
 GunnisonBelowCrystal:TunnelDivBelowCrystalForAg.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
 
+## Daily ##
+KNN_MTOM.FlamingGorgeDaily: file = $MTOM_DIR/rdfOutput/daily.rdf
+KNN_MTOM.YampaDailyDeerlodgeDepleted: file = $MTOM_DIR/rdfOutput/daily.rdf
+KNN_MTOM.JensenDaily: file = $MTOM_DIR/rdfOutput/daily.rdf
+KNN_MTOM.DeerlodgeDaily: file = $MTOM_DIR/rdfOutput/daily.rdf
+BlueMesaData.TargetDailyWhitewaterFlows: file = $MTOM_DIR/rdfOutput/daily.rdf
+BlueMesaData.TargetDailyBlackCanyonFlows: file = $MTOM_DIR/rdfOutput/daily.rdf
+
 ## Flags ##
 Shortage.Shortage Flag: file = $MTOM_DIR/rdfOutput/flags.rdf
 Surplus.AnnualSurplusFlag: file = $MTOM_DIR/rdfOutput/flags.rdf
@@ -160,8 +168,6 @@ CoordinatedOperationsFlagsForFreqTbl.UpperBalancingBelow823: file = $MTOM_DIR/rd
 PowellData.ActualAnnualReleaseVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
 PowellData.TargetAnnualReleaseVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
 
-ICS Credits.SacWYType: file = $MTOM_DIR/rdfOutput/flags.rdf: file = $MTOM_DIR/rdfOutput/flags.rdf
-
 PowellToMeadData.CarryoverVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
 AnnualWaterUse.California_PreliminaryAdjustedApportionment: file = $MTOM_DIR/rdfOutput/flags.rdf
 
@@ -172,3 +178,10 @@ BlueMesaData.MeetWhitewaterVolumeGoal: file = $MTOM_DIR/rdfOutput/flags.rdf
 BlueMesaData.CanyonPeakFlowDetermination: file = $MTOM_DIR/rdfOutput/flags.rdf
 BlueMesaData.BlueMesaAprilThroughJulyVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
 BlueMesaData.WhitewaterVolumeGoal: file = $MTOM_DIR/rdfOutput/flags.rdf
+
+ICS Credits.SacWYType: file = $MTOM_DIR/rdfOutput/flags.rdf: file = $MTOM_DIR/rdfOutput/annualflags.rdf
+
+
+
+
+
