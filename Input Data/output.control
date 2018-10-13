@@ -115,6 +115,7 @@ Vallecito.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
 Vallecito.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
 Vallecito.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
 
+
 ## Diversions ##
 PumpingFromLakeMead:SNWP.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
 MWDDiversion.Total Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
@@ -128,6 +129,7 @@ TunnelReturnFlow.Outflow: file = $MTOM_DIR/rdfOutput/diversion.rdf
 GunnisonBelowCrystal:TunnelDivBelowCrystalForAg.Outflow: file = $MTOM_DIR/rdfOutput/diversion.rdf
 GunnisonBelowCrystal:TunnelDivBelowCrystalForAg.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
 
+
 ## Daily ##
 KNN_MTOM.FlamingGorgeDaily: file = $MTOM_DIR/rdfOutput/daily.rdf
 KNN_MTOM.YampaDailyDeerlodgeDepleted: file = $MTOM_DIR/rdfOutput/daily.rdf
@@ -135,6 +137,8 @@ KNN_MTOM.JensenDaily: file = $MTOM_DIR/rdfOutput/daily.rdf
 KNN_MTOM.DeerlodgeDaily: file = $MTOM_DIR/rdfOutput/daily.rdf
 BlueMesaData.TargetDailyWhitewaterFlows: file = $MTOM_DIR/rdfOutput/daily.rdf
 BlueMesaData.TargetDailyBlackCanyonFlows: file = $MTOM_DIR/rdfOutput/daily.rdf
+BlueMesaData.TargetDailyOutflowFromBlueMesa: file = $MTOM_DIR/rdfOutput/daily.rdf
+
 
 ## Flags ##
 Shortage.Shortage Flag: file = $MTOM_DIR/rdfOutput/flags.rdf
@@ -171,17 +175,35 @@ PowellData.TargetAnnualReleaseVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
 PowellToMeadData.CarryoverVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
 AnnualWaterUse.California_PreliminaryAdjustedApportionment: file = $MTOM_DIR/rdfOutput/flags.rdf
 
-BlueMesaData.MeetCanyonVolumeGoal: file = $MTOM_DIR/rdfOutput/flags.rdf
-BlueMesaData.MeetStorageTargetByDec: file = $MTOM_DIR/rdfOutput/flags.rdf
-BlueMesaData.MeetStorageTargetByJuly: file = $MTOM_DIR/rdfOutput/flags.rdf
-BlueMesaData.MeetWhitewaterVolumeGoal: file = $MTOM_DIR/rdfOutput/flags.rdf
-BlueMesaData.CanyonPeakFlowDetermination: file = $MTOM_DIR/rdfOutput/flags.rdf
-BlueMesaData.BlueMesaAprilThroughJulyVolume: file = $MTOM_DIR/rdfOutput/flags.rdf
-BlueMesaData.WhitewaterVolumeGoal: file = $MTOM_DIR/rdfOutput/flags.rdf
-
 ICS Credits.SacWYType: file = $MTOM_DIR/rdfOutput/flags.rdf: file = $MTOM_DIR/rdfOutput/annualflags.rdf
 
 
+## EIS Annual ##
 
+FlamingGorgeData.LTSPTriggerDate: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+FlamingGorgeData.YampaAprJulVolAnnual: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.WhitewaterPeakFlowTarget: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.WhitewaterVolumeGoal: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.BlueMesaAprilThroughJulyVolume: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.MayReleaseVolume: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.CanyonPeakFlowTarget: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.PeakFlowDuration: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.ShoulderFlowDuration: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.MayPeakFlowDate: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.CanyonAbove300: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.GunnisonHClass: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.MeetCanyonDecreeFlows: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.MeetCanyonFlowTarget: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.MeetStorageTargetByDec: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.MeetStorageTargetByJuly: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.MeetWhitewaterVolumeGoal: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.MeetWWBaseFlow: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
+BlueMesaData.TunnelDivCheck: file = $MTOM_DIR/rdfOutput/annualEIS.rdf
 
+## EIS Monthly ##
+
+FlamingGorgeData.YampaHClass: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
+KNN_MTOM.SpringHClass: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
+FlamingGorgeData.YampaAprJulVol: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
+BlueMesaData.ReleaseControl: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
 
