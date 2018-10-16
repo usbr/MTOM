@@ -1,5 +1,5 @@
-# RiverWare_Ruleset 7.2.2 Patch
-# Created 17:15 September 25, 2018
+# RiverWare_Ruleset 7.2.4 Patch
+# Created 17:50 October 15, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4946,9 +4946,9 @@ BEGIN
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO "Dec31ofYear"( @"Finish Timestep" ) COMMENTED_BY "This is for testing purposes, this should be Finish timestep<br>when the model is actually moved forward and all input<br>is taken care of") DO
             $ "Nevada_CU_Schedules.SNWP" [date] := $ "Nevada_CU_Schedules.SNWADiversion" [date] + $ "Nevada_CU_Schedules.BasicManagement" [date] + $ "Nevada_CU_Schedules.LMNRA Mead" [date] + $ "Nevada_CU_Schedules.BoulderCanyonProject" [date] + $ "Nevada_CU_Schedules.NvDeptFishGame" [date] + $ "Nevada_CU_Schedules.PacificCoastBuilding" [date] + $ "Nevada_CU_Schedules.City of Henderson" [date] - $ "Nevada_CU_Schedules.LVWashReturns" [date];
 
-            $ "California_CU_Schedules.MWDReturns" [date] := 8.50000000 "acre-feet" * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
+            $ "California_CU_Schedules.MWDReturns" [date] := 8.00000000 "acre-feet" * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
 
-            $ "California_CU_Schedules.MWD" [date] := $ "California_CU_Schedules.MWDDiversion" [date] - 8.50000000 "acre-feet" * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
+            $ "California_CU_Schedules.MWD" [date] := $ "California_CU_Schedules.MWDDiversion" [date] - 8.00000000 "acre-feet" * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
 
       ENDFOREACH;
 
