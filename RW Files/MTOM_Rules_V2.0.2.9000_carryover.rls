@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 10:28 October 17, 2018
+# Created 10:36 October 17, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2012,7 +2012,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) );
-    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Edited execution constraints to match Powell policy group rule. Changed rule TARV calculation to match Powell policy set rule. ";
+    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Edited execution constraints to match Powell policy group rule. Changed rule TARV calculation to match Powell policy set rule. <br><br>S.Baker, 2018/10/17: Changed column number in releaseTable[AnnualVolume, Ncol - 3]<br>MTOM was failing in testbed runs in this rule in high inflow years when Powell was trying to release a large volume. In the historical run of 1983-06, the model aborted since it sets the initial TARV to 30 MAF based on the condition releaseTable[AnnualVolume, Ncol – 2].  This caused the model to look for too high of upper bound in the function ‘CalculatePowellMonthlyRelease’.  The upper bound was being reset in function 'FindRemainingReleaseUpperBoundColumn' by adding + 1 index which cause model to look for table index that didn’t exist. When we use Ncol – 3, the TARV is initially set to 20 MAF and MTOM runs successfully finding a realistic TARV (18 MAF). ";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC FALSE;
@@ -2023,7 +2023,7 @@ BEGIN
  ELSE
   $ "PowellData.PowellMonthlyReleaseTable_preJan2017"
  ENDIF DO
-  "Min"( "CalcReleaseForMaxPoolElevation"( "WaterYearDatesByGroup"( 1.00000000 ) ), releaseTable ["AnnualTotal", "NumColumns"( releaseTable ) - 2.00000000] )
+  "Min"( "CalcReleaseForMaxPoolElevation"( "WaterYearDatesByGroup"( 1.00000000 ) ), releaseTable ["AnnualTotal", "NumColumns"( releaseTable ) - 3.00000000] )
  ENDWITH COMMENTED_BY "Ensure enough water released so Powell does not exceed max pool elevation" , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) COMMENTED_BY "User input min annual volume was added to allow overriding automatic determination" , IF ( "GetMonth"( @"t" ) != 10.00000000 )
  THEN
   "SumFlowsToVolume"( $ "Powell.Outflow", "OffsetDate"( @"t", "MonthsSinceEOWY"( @"t" ), "-1 months" ), @"Start Timestep - 1" )
@@ -2497,7 +2497,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) );
-    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160908: Previously added SumFlowsToVolume(...) to MaxItem; added IF-ELSE to deal with October when no previous WY release would have occurred<br><br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints. ";
+    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160908: Previously added SumFlowsToVolume(...) to MaxItem; added IF-ELSE to deal with October when no previous WY release would have occurred<br><br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints. <br>S.Baker, 2018/10/17: Changed column number in releaseTable[AnnualVolume, Ncol - 3]<br>MTOM was failing in testbed runs in this rule in high inflow years when Powell was trying to release a large volume. In the historical run of 1983-06, the model aborted since it sets the initial TARV to 30 MAF based on the condition releaseTable[AnnualVolume, Ncol – 2].  This caused the model to look for too high of upper bound in the function ‘CalculatePowellMonthlyRelease’.  The upper bound was being reset in function 'FindRemainingReleaseUpperBoundColumn' by adding + 1 index which cause model to look for table index that didn’t exist. When we use Ncol – 3, the TARV is initially set to 20 MAF and MTOM runs successfully finding a realistic TARV (18 MAF). ";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC FALSE;
@@ -2507,7 +2507,7 @@ BEGIN
  ELSE
   $ "PowellData.PowellMonthlyReleaseTable_preJan2017"
  ENDIF DO
-  "Min"( "CalcReleaseForMaxPoolElevation"( "WaterYearDatesByGroup"( 1.00000000 ) ), releaseTable ["AnnualTotal", "NumColumns"( releaseTable ) - 2.00000000] )
+  "Min"( "CalcReleaseForMaxPoolElevation"( "WaterYearDatesByGroup"( 1.00000000 ) ), releaseTable ["AnnualTotal", "NumColumns"( releaseTable ) - 3.00000000] )
  ENDWITH COMMENTED_BY "Ensure enough water released so Powell does not exceed max pool elevation" , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) COMMENTED_BY "User input min annual volume was added to allow overriding automatic determination" , IF ( "GetMonth"( @"t" ) != 10.00000000 )
  THEN
   "SumFlowsToVolume"( $ "Powell.Outflow", "OffsetDate"( @"t", "MonthsSinceEOWY"( @"t" ), "-1 months" ), @"Start Timestep - 1" )
