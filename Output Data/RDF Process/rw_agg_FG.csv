@@ -1,6 +1,0 @@
-file,slot,period,summary,eval,t_s,variable
-res.rdf,FlamingGorge.Pool Elevation,cy,min,NA,NA,FGMin
-res.rdf,FlamingGorge.Pool Elevation,eocy,NA,NA,NA,FGEocy
-res.rdf,FlamingGorge.Outflow,cy,sum,NA,NA,FGCyRel
-res.rdf,FlamingGorge.Outflow,May,NA,NA,NA,FGMayRel
-res.rdf,FlamingGorge.Outflow,wy,sum,NA,NA,FGWyRel

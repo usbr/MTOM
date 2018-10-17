@@ -1,14 +1,16 @@
 
 rdfOutput/*
 !rdfOutput/ReadMe.txt
+!rdfOutput/output.control
 ReportFiles
 
 MTOM_Overview_Description.pdf
 MTOM_Stakeholder_User_Manual.pdf
 
-# ignore other backup files of zipped rules and models
+# ignore other backup files of zipped rules, models, and RiverSMART files
 *.bak.gz
 *.bak
+*bak.rms
 
 # generic files not to track
 #excel backup files
@@ -48,3 +50,15 @@ Icon
 
 #pass through sheets 
 /Output Data/EnsembleOutput.xlsx
+
+# Testbed Forecasts and IC data
+Inflow Forecasts/Testbed_Historical_Forecasts
+Input Data/Historical_Diversions.xlsx
+Input Data/Observed_for_MTOM_IC.xlsx
+
+# RiverSMART folders and files
+/Hydrology
+/Model
+/Scenario
+/ScenarioSet
+/Working

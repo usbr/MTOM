@@ -1,6 +1,0 @@
-file,slot,period,summary,eval,t_s,variable
-res.rdf,Powell.Pool Elevation,eocy,NA,NA,NA,PowellEocy
-res.rdf,Mead.Pool Elevation,eocy,NA,NA,NA,MeadEocy
-res.rdf,Powell.Outflow,cy,sum,NA,NA,PowellCyRel
-res.rdf,Powell.Outflow,May,NA,NA,NA,PowellMayRel
-res.rdf,Powell.Outflow,wy,sum,NA,NA,PowellWyRel
