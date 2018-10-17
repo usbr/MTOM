@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 08:52 October 17, 2018
+# Created 09:02 October 17, 2018
 # 
 RULESET
 NAME "MTOM_Rules (from MRM run)";
@@ -5342,22 +5342,22 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 2018/10/17: Equalization needs to know about carryover volume from the previous year in this function in order to calculate the correct TARV, specifically when in equalization with a release of 8.23 MAF. This occurs in multiple places in the “EqualizationTierCalculationForRelease” function. ";
     BEGIN
 
-      WITH NUMERIC PowellVolumeOverEqLevel = "Max"( $ "Powell.Storage" [EOWYDate] - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) ), 0.00000000 "acre-ft" ) DO
+      WITH NUMERIC PowellVolumeOverEqLevel = "Max"( ( $ "Powell.Storage" [EOWYDate] - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( EOWYDate )] ) ) - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) ), 0.00000000 "acre-ft" ) DO
   WITH NUMERIC EqualizationReleaseVolume = "EqualizationRelease"( EOWYDate ) DO
    WITH NUMERIC PreliminaryReleaseVolume = "Min"( PowellVolumeOverEqLevel / ( 1.00000000 - $ "Powell.Bank Storage Coefficient" [0.00000000, 1.00000000] ) + $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( EOWYDate )], EqualizationReleaseVolume ) DO
-    WITH NUMERIC MeadElevationWithPrelimRelease = IF ( $ "Mead.Storage" [EOWYDate] + ( PreliminaryReleaseVolume - $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( EOWYDate )] ) * ( 1.00000000 - $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) >= "ElevationToStorage"( % "Mead", 1229.00000000 "feet" ) )
+    WITH NUMERIC MeadElevationWithPrelimRelease = IF ( ( $ "Mead.Storage" [EOWYDate] + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( EOWYDate )] ) ) + ( PreliminaryReleaseVolume - $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( EOWYDate )] ) * ( 1.00000000 - $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) >= "ElevationToStorage"( % "Mead", 1229.00000000 "feet" ) )
     THEN
      1229.00000000 "feet"
     ELSE
-     "StorageToElevation"( % "Mead", $ "Mead.Storage" [EOWYDate] + ( PreliminaryReleaseVolume - $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( EOWYDate )] ) * ( 1.00000000 - $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) )
+     "StorageToElevation"( % "Mead", ( $ "Mead.Storage" [EOWYDate] + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( EOWYDate )] ) ) + ( PreliminaryReleaseVolume - $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( EOWYDate )] ) * ( 1.00000000 - $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) )
     ENDIF DO
      IF ( MeadElevationWithPrelimRelease < 1105.00000000 "ft" )
      THEN
-      WITH NUMERIC totalVolumeToRaiseMeadTo1105 = "Max"( ( "ElevationToStorage"( % "Mead", 1105.00000000 "ft" ) - $ "Mead.Storage" [EOWYDate] ) / ( 1.00000000 - $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ), 0.00000000 "acre-ft" ) DO
-       WITH NUMERIC PowellVolumeOverEqLevelLess20ft = "Max"( $ "Powell.Storage" [EOWYDate] - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) - 20.00000000 "ft" ), 0.00000000 "acre-ft" ) DO
+      WITH NUMERIC totalVolumeToRaiseMeadTo1105 = "Max"( ( "ElevationToStorage"( % "Mead", 1105.00000000 "ft" ) - ( $ "Mead.Storage" [EOWYDate] + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( EOWYDate )] ) ) ) / ( 1.00000000 - $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ), 0.00000000 "acre-ft" ) DO
+       WITH NUMERIC PowellVolumeOverEqLevelLess20ft = "Max"( ( $ "Powell.Storage" [EOWYDate] - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( EOWYDate )] ) ) - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) - 20.00000000 "ft" ), 0.00000000 "acre-ft" ) DO
         IF ( EqualizationReleaseVolume < totalVolumeToRaiseMeadTo1105 AND EqualizationReleaseVolume < PowellVolumeOverEqLevelLess20ft / ( 1.00000000 - $ "Powell.Bank Storage Coefficient" [0.00000000, 1.00000000] ) )
         THEN
          { EqualizationReleaseVolume + $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( EOWYDate )] , 0.30000000 }
