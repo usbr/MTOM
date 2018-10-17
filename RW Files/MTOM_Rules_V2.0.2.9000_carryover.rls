@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 09:11 October 17, 2018
+# Created 09:33 October 17, 2018
 # 
 RULESET
 NAME "MTOM_Rules (from MRM run)";
@@ -5988,34 +5988,38 @@ BEGIN
     FUNCTION       "VolumeDeviationFromEOWYTarget" ( DATETIME EOWYDate )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
-    DESCRIPTION    "DESCRIPTION: This function calculates the volume deviation of the end-of-water-year storage at Powell and Mead from their appropriate target levels according to the Equalization Tier logic.  The condition that is operative for setting the annual volume in a given year is stored in the PowellData.ControllingEqualizationCondition slot.  See the slot for further description of what the values actually mean.  This deviation volume is then added to the annual release volume to more precisely hit the end of water year (EOWY) target.<br><br>RETURNS: Difference between Powell storage volume and the desired end of water year storage volume [L^3]<br><br>ARGUMENTS:<br>1. DATETIME EOWYDate - end of water year date used to specify the appropriate water year<br><br>CONSTRAINTS:<br><br>";
+    DESCRIPTION    "DESCRIPTION: This function calculates the volume deviation of the end-of-water-year storage at Powell and Mead from their appropriate target levels according to the Equalization Tier logic.  The condition that is operative for setting the annual volume in a given year is stored in the PowellData.ControllingEqualizationCondition slot.  See the slot for further description of what the values actually mean.  This deviation volume is then added to the annual release volume to more precisely hit the end of water year (EOWY) target. Carryover created in the current and previous water year is accounted for each time a reservoir storage is used.<br><br>RETURNS: Difference between Powell storage volume and the desired end of water year storage volume [L^3]<br><br>ARGUMENTS:<br>1. DATETIME EOWYDate - end of water year date used to specify the appropriate water year<br><br>CONSTRAINTS:<br><br>";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 2018/10/17: This function calculates a VolumeDeviation in the rule “Refine Equalization Release Volume”.  This function needs to account for carryover volume that is created for the current year; without accounting for carryover, MTOM continuously increase the TARV and eventually aborts. Added two 'WITH' statements to use<br>";
     BEGIN
 
-      IF ( NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.10000000 )
- THEN
-  $ "Powell.Storage" [EOWYDate] - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) )
- ELSE
-  IF ( NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.20000000 OR NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.30000000 OR NaNToZero ( $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( EOWYDate )] ) == 1.27000000 OR NaNToZero ( $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( EOWYDate )] ) == 1.29000000 OR NaNToZero ( $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( EOWYDate )] ) == 1.40000000 )
-  THEN
-   ( $ "Powell.Storage" [EOWYDate] - $ "Mead.Storage" [EOWYDate] ) / 2.00000000
-  ELSE
-   IF ( NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.40000000 )
+      WITH NUMERIC carryoverCurrentWY = $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "OffsetDate"( EOWYDate, 12.00000000, "1 months" ) )] DO
+  WITH NUMERIC carryoverPreviousWY = $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( EOWYDate )] DO
+   IF ( NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.10000000 )
    THEN
-    "ElevationToStorage"( % "Mead", 1105.00000000 "ft" ) - $ "Mead.Storage" [EOWYDate]
+    $ "Powell.Storage" [EOWYDate] - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) ) - carryoverCurrentWY
    ELSE
-    IF ( NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.50000000 )
+    IF ( NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.20000000 OR NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.30000000 OR NaNToZero ( $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( EOWYDate )] ) == 1.27000000 OR NaNToZero ( $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( EOWYDate )] ) == 1.29000000 OR NaNToZero ( $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( EOWYDate )] ) == 1.40000000 )
     THEN
-     $ "Powell.Storage" [EOWYDate] - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) - 20.00000000 "ft" ) - $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "OffsetDate"( EOWYDate, 12.00000000, "1 months" ) )]
+     ( ( $ "Powell.Storage" [EOWYDate] - carryoverCurrentWY - carryoverPreviousWY ) - ( $ "Mead.Storage" [EOWYDate] + carryoverCurrentWY + carryoverPreviousWY ) ) / 2.00000000
     ELSE
-     0.00000000 "acre-ft"
-    ENDIF COMMENTED_BY "Fourth possible condition is that Powell elevation needs to be at 20ft below the equalization level by the end-of-water-year"
-   ENDIF COMMENTED_BY "Third possible condition is that Mead needs to be at elevation 1105 ft by the end-of-water-year"
-  ENDIF COMMENTED_BY "Second possible condition is that the end-of-water-year storages need to be equal between Powell and Mead."
- ENDIF COMMENTED_BY "First condition is that Powell needs to be to its equalization level by end-of-water-year";
+     IF ( NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.40000000 )
+     THEN
+      "ElevationToStorage"( % "Mead", 1105.00000000 "ft" ) - ( $ "Mead.Storage" [EOWYDate] + carryoverCurrentWY + carryoverPreviousWY )
+     ELSE
+      IF ( NaNToZero ( $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( EOWYDate )] ) == 0.50000000 )
+      THEN
+       $ "Powell.Storage" [EOWYDate] - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) - 20.00000000 "ft" ) - carryoverCurrentWY - carryoverPreviousWY
+      ELSE
+       0.00000000 "acre-ft"
+      ENDIF COMMENTED_BY "Fourth possible condition is that Powell elevation needs to be at 20ft below the equalization level by the end-of-water-year"
+     ENDIF COMMENTED_BY "Third possible condition is that Mead needs to be at elevation 1105 ft by the end-of-water-year"
+    ENDIF COMMENTED_BY "Second possible condition is that the end-of-water-year storages need to be equal between Powell and Mead."
+   ENDIF
+  ENDWITH
+ ENDWITH COMMENTED_BY "First condition is that Powell needs to be to its equalization level by end-of-water-year";
 
     END;
 
