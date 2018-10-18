@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 14:28 October 16, 2018
+# Created 15:19 October 18, 2018
 # 
 RULESET
 NAME "MTOM_Rules (from MRM run)";
@@ -2923,9 +2923,8 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br>MC, 20170503: Should the rule fire for an August Start Timestep? No consideration for August date in rule, but will use July 1 based on logic";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC FALSE;
     DESCRIPTION          "Rule fires in Apr, May, June, July and August to set the daily release schedule which is put together in the function. It must fire each month to know where the reservoir was at at the end of the previous month and update the remaining daily schedule as far as base flow <br>goes. Daily releases are not changed back in time and only replace the rest of the remaining daily schedule through July 31. -tv 8.17.12";
-      FOREACH (LIST dateandflow IN "MakeDailyFlamingGorgeReleaseDateandFlowList"( IF ( "MonthIs"( { "April" } ) )
+      FOREACH (LIST dateandflow IN "MakeDailyFlamingGorgeReleaseDateandFlowList_LTSP"( IF ( "MonthIs"( { "April" } ) )
  THEN
   @"24:00:00 April 1, Current Year"
  ELSE
@@ -7445,9 +7444,9 @@ BEGIN
  ELSE
   IF ( "MonthIs"( { "May" , "June" , "July" , "August" , "September" , "October" , "November" , "December" } ) )
   THEN
-   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Next Year", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000], "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ), "Max"( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "VolumeToFlow"( "PredictedYampaFlow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), @"t" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow. <br>", $ "FlamingGorgeData.MinFlow" [] ) )
+   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Next Year", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000], "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) )
   ELSE
-   "Max"( "VolumeToFlow"( ( "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.May1TargetElevation" [0.00000000, 2.00000000] ) COMMENTED_BY "March 1 soft baseflow target is always a pool elevation of 6027 FT. During March this target may be adjusted based upon the Percent Exceedence to get the actual May 1 ULDE. -From Heather Hermansen  -HG 5/24/2013" + "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) ) / "NumberOfMonthsUntilMay"(  ), @"t" ), "Max"( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "VolumeToFlow"( "PredictedYampaFlow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), @"t" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow. <br>", $ "FlamingGorgeData.MinFlow" [] ) ) COMMENTED_BY "January and February."
+   "Max"( "VolumeToFlow"( ( "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.May1TargetElevation" [0.00000000, 2.00000000] ) COMMENTED_BY "March 1 soft baseflow target is always a pool elevation of 6027 FT. During March this target may be adjusted based upon the Percent Exceedence to get the actual May 1 ULDE. -From Heather Hermansen  -HG 5/24/2013" + "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) ) / "NumberOfMonthsUntilMay"(  ), @"t" ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) ) COMMENTED_BY "January and February."
   ENDIF
  ENDIF COMMENTED_BY " In actual operations, at March a new forecast would come out for the next April through July volume so we adjust the May 1 ULDE then. For all other months besides March and April<br> the May 1 ULDE is assumed to be the maximum May 1 pool elevation of 6027 FT. -HG 10/9/12";
 
@@ -8057,7 +8056,7 @@ BEGIN
     NOTES          "HP, 20170714";
     BEGIN
 
-      WITH LIST DateList = "GetDates"( @"24:00:00 April 1, Current Year", @"t" COMMENTED_BY "Only calculates daily schedule to the end of the current month for computation efficiency.", "1 days" ) DO
+      WITH LIST DateList = "GetDates"( @"24:00:00 April 1, Current Year", @"24:00:00 July 31, Current Year", "1 days" ) DO
   WITH LIST FlowList = WITH DATETIME YampaPeakDate = IF ( TRUE )
   THEN
    "FindYampaPeakDateForYear"(  )
@@ -8098,17 +8097,17 @@ BEGIN
              ELSE
               IF ( ( date < FGSpringReleaseStartDate + RampUpDaysToPPC ) COMMENTED_BY "Ramping period up to Flaming Gorge PPC Release (or max release if below PPC)" )
               THEN
-               "Min"( ( GET @INDEX i - 1.00000000 FROM flows ) + RampUpToPPCRate, "Max"( $ "FlamingGorgeData.PowerPlantCapacity" [], "Max"( "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "MinItem"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"t", @"24:00:00 July 31, Current Year" ) ) ), $ "FlamingGorgeData.MinFlow" [] ) ) ) COMMENTED_BY "Release PPC or volume necessary to stay below max PE." )
+               "Min"( ( GET @INDEX i - 1.00000000 FROM flows ) + RampUpToPPCRate, "Max"( $ "FlamingGorgeData.PowerPlantCapacity" [], "Max"( "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "MinItem"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"t", @"24:00:00 July 31, Current Year" ) ) ), $ "FlamingGorgeData.MinFlow" [] ) COMMENTED_BY "This is what the below issues should have to match CRSS!  <br>" ) ) COMMENTED_BY "Release PPC or volume necessary to stay below max PE." )
               ELSE
                IF ( "CountDaysAboveThreshold"( flows, $ "KNN_MTOM.BypassCapacity" [] ) < DaysAtBypass )
                THEN
-                "Min"( ( GET @INDEX i - 1.00000000 FROM flows ) + $ "KNN_MTOM.RampUpRateNoUnits" [] * 1.00000000 "cfs", "Max"( $ "KNN_MTOM.BypassCapacity" [], "Max"( "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ), "GetFGBaseFlowMagnitude"(  ) ) ) COMMENTED_BY "Release bypass capacity or volume necessary to stay below max PE." ) COMMENTED_BY "Ramps up and continues at Bypass Cap until it has been at Bypass Cap for enough days"
+                "Min"( ( GET @INDEX i - 1.00000000 FROM flows ) + $ "KNN_MTOM.RampUpRateNoUnits" [] * 1.00000000 "cfs", "Max"( $ "KNN_MTOM.BypassCapacity" [], "Max"( "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "MinItem"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"t", @"24:00:00 July 31, Current Year" ) ) ), $ "FlamingGorgeData.MinFlow" [] ) COMMENTED_BY "CF: Updated from  GetFGBaseFlowMagnitudeUnconstrained() to ensure FG baseflow will be <br>sufficent to meet the lower baseflow limit set for the Green at Jensen (Reach 2) by the EIS. The <br>flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>" ) ) COMMENTED_BY "Release bypass capacity or volume necessary to stay below max PE. <br>" ) COMMENTED_BY "Ramps up and continues at Bypass Cap until it has been at Bypass Cap for enough days"
                ELSE
                 IF ( "CountDaysAboveThreshold"( flows, $ "FlamingGorgeData.PowerPlantCapacity" [] ) < DaysAtPPC )
                 THEN
                  "Max"( ( GET @INDEX i - 1.00000000 FROM flows ) - $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"t"], 0.00000000] * 1.00000000 "cfs", "Max"( $ "FlamingGorgeData.PowerPlantCapacity" [], "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ) ) COMMENTED_BY "Downramps to base flows unless inflows will increase FG above max PE.<br>Releases volume necessary to stay below max PE." ) COMMENTED_BY "Ramps down from bypass (if it was there) then continues at PPC until it has been above PPC for enough days"
                 ELSE
-                 "Max"( ( GET @INDEX i - 1.00000000 FROM flows ) - $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"t"], 0.00000000] * 1.00000000 "cfs", "Max"( "GetFGBaseFlowMagnitude"(  ), "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ) ) COMMENTED_BY "Releases base flows or volume necessary to stay below max PE." ) COMMENTED_BY "Ramps down from PPC and then continues at the new base flow which is newly calculated each month"
+                 "Max"( ( GET @INDEX i - 1.00000000 FROM flows ) - $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"t"], 0.00000000] * 1.00000000 "cfs", "Max"( "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "MinItem"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"t", @"24:00:00 July 31, Current Year" ) ) ), $ "FlamingGorgeData.MinFlow" [] ) COMMENTED_BY "CF: Updated from  GetFGBaseFlowMagnitudeUnconstrained() to ensure FG baseflow will be <br>sufficent to meet the lower baseflow limit set for the Green at Jensen (Reach 2) by the EIS. The <br>flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", "TargetHWGivenInflowforOneMonth"( $ "FlamingGorgeData.MaxPE" [] ) ) COMMENTED_BY "Releases base flows or volume necessary to stay below max PE." ) COMMENTED_BY "Ramps down from PPC and then continues at the new base flow which is newly calculated each month"
                 ENDIF
                ENDIF
               ENDIF
