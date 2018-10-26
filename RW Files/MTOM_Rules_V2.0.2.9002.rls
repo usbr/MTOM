@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 10:42 October 26, 2018
+# Created 12:59 October 26, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -611,7 +611,7 @@ BEGIN
             WITH_STATEMENT (NUMERIC totalCreationECICS = GET @INDEX 3.00000000 FROM caICSValues) DO
           DESCRIPTION          "Adjust the MWD Diversion Request to reduce the request if there is not enough total ICS in the system for the total delivery to California.  The reduction will be <br>the difference between the determined delivery to california above the state apportionment minus the availalbe ICS volume.  MWD takes the reduction. ";
       FOREACH (DATETIME date IN "DateMax"( @"24:00:00 January Max DayOfMonth, Current Year", @"t" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC newMWDDivAmount = "VolumeToFlow"( "Min"( $ "MWDDiversionData.MWDMaximumAnnualDelivery" [], "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) + ( ( totalDeliveryCAICS - GET @INDEX 8.00000000 FROM caICSValues ) - totalCreationECICS ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery <br>that might be occuring in a given scenario, or decrease the delivery if any <br>creation of water for a given scenario. TP 12/22/2017 <br>" ) * $ "Shortage.MonthlyPercents" ["GetMonth"( date ) - 1.00000000, "Equal"], date )) DO
+            WITH_STATEMENT (NUMERIC newMWDDivAmount = "VolumeToFlow"( "Min"( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [], "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) + ( ( totalDeliveryCAICS - GET @INDEX 8.00000000 FROM caICSValues ) - totalCreationECICS ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery <br>that might be occuring in a given scenario, or decrease the delivery if any <br>creation of water for a given scenario. TP 12/22/2017 <br>" ) * $ "Shortage.MonthlyPercents" ["GetMonth"( date ) - 1.00000000, "Equal"], date )) DO
             $ "MWDDiversion:MWD.Diversion Requested" [date] := newMWDDivAmount;
 
             $ "MWDDiversion:MWD.Depletion Requested" [date] := newMWDDivAmount - "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date );
@@ -901,7 +901,7 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Quantified and FC" [@"24:00:00 December 31, Current Year"] + ( $ "ICS Credits.AnnualDeliveryImpICS_NV" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDeliveryTribICS_NV" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Annual Delivery of ICS from Nevada of Imported and Tributary ICS Water";
 
-      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := $ "MWDAndCAPReach:MWDDiversion.Diversion Capacity" [];
+      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [];
 
       $ "Surplus Total Annual Schedules.Coachella" [@"24:00:00 December 31, Current Year"] := $ "California_CU_Forecast1.Coachella" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CA Ag" [@"24:00:00 December 31, Current Year"] * $ "Surplus.Share of CA Ag Surplus" [0.00000000, 0.00000000] + 100000.00000000 "acre-ft";
 
@@ -1028,9 +1028,9 @@ BEGIN
  ELSE
   IF ( $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-ft" AND $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-ft" )
   THEN
-   250000.00000000 "acre-ft" - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"]
+   $ "Surplus.Default Surplus Entitlements" [0.00000000, 1.00000000] - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"]
   ELSE
-   250000.00000000 "acre-ft"
+   $ "Surplus.Default Surplus Entitlements" [0.00000000, 1.00000000]
   ENDIF
  ENDIF;
 
@@ -3976,12 +3976,12 @@ BEGIN
   "FlowToVolume"( $ "MWDDiversion.Total Diversion Requested" [date], date )
  ENDFOR) DO
           DESCRIPTION          "<br>If Nov or Dec diversion request exceeds canal capacity, redistribute the excess request to months between the current month and October of the current year.<br>";
-      WITH_STATEMENT (NUMERIC NovExcessRequest = "Max"( $ "MWDDiversion.Total Diversion Requested" [@"24:00:00 November Max DayOfMonth, Current Year"] - $ "MWDDiversionData.MWDCanal_DailyCapacity" [], 0.00000000 "acre-feet/month" )) DO
-            WITH_STATEMENT (NUMERIC DecExcessRequest = "Max"( $ "MWDDiversion.Total Diversion Requested" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "MWDDiversionData.MWDCanal_DailyCapacity" [], 0.00000000 "acre-feet/month" )) DO
+      WITH_STATEMENT (NUMERIC NovExcessRequest = "Max"( $ "MWDDiversion.Total Diversion Requested" [@"24:00:00 November Max DayOfMonth, Current Year"] - $ "MWDAndCAPReach:MWDDiversion.Diversion Capacity" [], 0.00000000 "acre-feet/month" )) DO
+            WITH_STATEMENT (NUMERIC DecExcessRequest = "Max"( $ "MWDDiversion.Total Diversion Requested" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "MWDAndCAPReach:MWDDiversion.Diversion Capacity" [], 0.00000000 "acre-feet/month" )) DO
             IF_STATEMENT (NovExcessRequest + DecExcessRequest > 0.00000000 "acre-feet/month") THEN
           DESCRIPTION          "Redistribute excess diversion requests";
       FOREACH (DATETIME date IN "GetDates"( @"t", @"24:00:00 December Max DayOfMonth, Current Year", "1 months" )) DO
-            $ "MWDDiversion:MWD.Diversion Requested" [date] := ( GET @INDEX "GetMonth"( date ) - 1.00000000 FROM "CheckAndAdjustToCapacity"( $ "MWDDiversion.Total Diversion Requested", $ "MWDDiversionData.MWDCanal_DailyCapacity" [] ) ) - $ "MWDDiversion:Tijuana.Diversion Requested" [date];
+            $ "MWDDiversion:MWD.Diversion Requested" [date] := ( GET @INDEX "GetMonth"( date ) - 1.00000000 FROM "CheckAndAdjustToCapacity"( $ "MWDDiversion.Total Diversion Requested", $ "MWDAndCAPReach:MWDDiversion.Diversion Capacity" [] ) ) - $ "MWDDiversion:Tijuana.Diversion Requested" [date];
 
       ENDFOREACH;
 
@@ -8446,7 +8446,7 @@ BEGIN
  THEN
   0.00000000 "acre-ft"
  ELSE
-  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_CA" [@"24:00:00 December 31, Previous Year"] ), 0.00000000 "acre-ft" ) COMMENTED_BY "Account Space <br>" , $ "ICS Credits.MeadBankParameters" ["California", "Max Put"] COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) - $ "MWDDiversionData.MWDMinimumAnnualDelivery" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
+  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_CA" [@"24:00:00 December 31, Previous Year"] ), 0.00000000 "acre-ft" ) COMMENTED_BY "Account Space <br>" , $ "ICS Credits.MeadBankParameters" ["California", "Max Put"] COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) - $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
  ENDIF DO
   WITH NUMERIC totalDeliveryOfCAICS = "MinItem"( { IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NOT "IsMRM"(  ) )
   THEN
@@ -8458,7 +8458,7 @@ BEGIN
    ELSE
     $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Take Step 1"] COMMENTED_BY "Not Surplus or Shortage <br>"
    ENDIF
-  ENDIF , ( $ "MWDDiversionData.MWDMaximumAnnualDelivery" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Take"], $ "ICS Credits.TotalICS_CA" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Make sure the amount of Delivery taken is within the system or below the <br>Maximum Take that MWD can have. TP 12/18/2017 <br>" + creationOfCACEICS ) COMMENTED_BY "Available ICS Water <br>" } ) DO
+  ENDIF , ( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Take"], $ "ICS Credits.TotalICS_CA" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Make sure the amount of Delivery taken is within the system or below the <br>Maximum Take that MWD can have. TP 12/18/2017 <br>" + creationOfCACEICS ) COMMENTED_BY "Available ICS Water <br>" } ) DO
    { totalDeliveryOfCAICS , creationOfCACEICS }
   ENDWITH
  ENDWITH;
