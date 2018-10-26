@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 08:30 October 26, 2018
+# Created 10:42 October 26, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -901,7 +901,7 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Quantified and FC" [@"24:00:00 December 31, Current Year"] + ( $ "ICS Credits.AnnualDeliveryImpICS_NV" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDeliveryTribICS_NV" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Annual Delivery of ICS from Nevada of Imported and Tributary ICS Water";
 
-      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := 1250000.00000000 "acre-ft";
+      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := $ "MWDAndCAPReach:MWDDiversion.Diversion Capacity" [];
 
       $ "Surplus Total Annual Schedules.Coachella" [@"24:00:00 December 31, Current Year"] := $ "California_CU_Forecast1.Coachella" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CA Ag" [@"24:00:00 December 31, Current Year"] * $ "Surplus.Share of CA Ag Surplus" [0.00000000, 0.00000000] + 100000.00000000 "acre-ft";
 
@@ -911,7 +911,7 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.CaPumpersAbvImp" [@"24:00:00 December 31, Current Year"] := $ "California_CU_Forecast1.CaPumpersAbvImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CaPumpersAbvImp" [@"24:00:00 December 31, Current Year"];
 
-      $ "Surplus Total Annual Schedules.Mexico" [@"24:00:00 December 31, Current Year"] := 1700000.00000000 "acre-ft";
+      $ "Surplus Total Annual Schedules.Mexico" [@"24:00:00 December 31, Current Year"] := $ "Mexico Shortage and Surplus.Mexico Flood Control Delivery" [];
 
     END;
 
@@ -4934,9 +4934,7 @@ BEGIN
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO "Dec31ofYear"( @"Finish Timestep" ) COMMENTED_BY "This is for testing purposes, this should be Finish timestep<br>when the model is actually moved forward and all input<br>is taken care of") DO
             $ "Nevada_CU_Schedules.SNWP" [date] := $ "Nevada_CU_Schedules.SNWADiversion" [date] + $ "Nevada_CU_Schedules.BasicManagement" [date] + $ "Nevada_CU_Schedules.LMNRA Mead" [date] + $ "Nevada_CU_Schedules.BoulderCanyonProject" [date] + $ "Nevada_CU_Schedules.NvDeptFishGame" [date] + $ "Nevada_CU_Schedules.PacificCoastBuilding" [date] + $ "Nevada_CU_Schedules.City of Henderson" [date] - $ "Nevada_CU_Schedules.LVWashReturns" [date];
 
-            $ "California_CU_Schedules.MWDReturns" [date] := $ "MWDDiversionData.MWDDailyReturnFlow" [] * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
-
-            $ "California_CU_Schedules.MWD" [date] := $ "California_CU_Schedules.MWDDiversion" [date] - 8.00000000 "acre-feet" * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
+            $ "California_CU_Schedules.MWD" [date] := $ "California_CU_Schedules.MWDDiversion" [date] - $ "MWDAndCAPReach:MWDDiversion.Return Flow" [date];
 
       ENDFOREACH;
 
