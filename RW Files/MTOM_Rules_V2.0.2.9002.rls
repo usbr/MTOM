@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 08:12 October 26, 2018
+# Created 08:20 October 26, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -954,7 +954,7 @@ BEGIN
 
     END;
 
-    RULE                 "Set Domestic Surplus Schedules - Minute 323";
+    RULE                 "Set Domestic Surplus Schedules";
     DESCRIPTION          "DESCRIPTION: If a Domestic Surplus exists, meaning that Mead's Pool Elevation is greater than the Domestic Surplus Trigger, then this rule will fire in January of the Current Year and set the Total Annual Schedules for all water users impacted by Domestic Surplus. Domestic Surplus is the lowest priority surplus, meaning that a Quantified or Flood Control Surplus will override these values.  -HMG 8/2/11<br><br>SLOTS SET: Surplus Total Annual Schedules.SNWA; Surplus Total Annual Schedules.MWD; Surplus Total Annual Schedules.Gila Monster Farms; Surplus Total Annual Schedules.AzPumpersBlwImp; Surplus Total Annual Schedules.CAP<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [];
@@ -1012,7 +1012,7 @@ BEGIN
 
     END;
 
-    RULE                 "Set Domestic and FC Surplus Entitlement Vols for MWD - Minute 323";
+    RULE                 "Set Domestic and FC Surplus Entitlement Vols for MWD";
     DESCRIPTION          "DESCRIPTION: In Domestic Surplus then MWD gets 1,250 KAF less the MWD Diversion to date, less 1/3 the Mexico Shortage and surplus volume if the year is prior to 2017, after 2017 then the calculation is 250 KAF less 1/3 the Mexico annual surplus value. In a flood control year MWD is entitled to a Full Canal so their entitlement is the current diversion plus what it takes to fill the canal. TP 7/28/2015<br><br>SLOTS SET: Surplus Volume Entitlements.MWD Domestic; Surplus Volume Entitlements.MWD FC<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -1043,7 +1043,7 @@ BEGIN
 
     END;
 
-    RULE                 "Set Domestic and FC Surplus Entitlement Vols for CAP - Minute 323";
+    RULE                 "Set Domestic and FC Surplus Entitlement Vols for CAP";
     DESCRIPTION          "DESCRIPTION: If the year is greater than 2017, then determine the Domestic Surplus entitlement for CAP which is calculated as 100 KAF - 1/3*Mexico Annual Surplus - (Surplus entitlements for Gila Monster Farms + AZ pumpers blw Imp).  If the system is in Flood Control, the CAP FC volume is set to 1,835 KAF less the current CAP Diversion Request so that they are entitled to a full canal volume of 1,835 KAF in a year of Flood Control. TP 7/28/2015<br><br>SLOTS SET: Surplus Volume Entitlements.CAP Domestic, Surplus Volume Entitlements.CAP FC<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -1081,7 +1081,7 @@ BEGIN
 
     END;
 
-    RULE                 "Set Outyear Surplus Schedules for Mexico - Minute 323";
+    RULE                 "Set Outyear Surplus Schedules for Mexico";
     DESCRIPTION          "DESCRIPTION: This rule uses the volume associated with the Mexico Surplus Flag to set the Mexico diversion request for surplus according to the Mexico Surplus Table TP 7/28/2015<br><br>SLOTS SET: MexicanTreatyDelivery:MexicoSched.Diversion Requested, Mexico Shortage and Surplus.Mexico Annual Surplus<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
@@ -1105,7 +1105,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Set Mexico Outyear Shortage Schedules - Minute 323";
+    RULE                 "Set Mexico Outyear Shortage Schedules";
     DESCRIPTION          "DESCRIPTION: This rule sets a shortage diversion amount to the water use object MexicanTreatyDelivery:MexicoSched. The Mexico schedule is reduced by the shortage volume. The Mexico shortage volume is specified in IBWC Minute 323.<br><br>SLOTS SET: MexicanTreatyDelivery:MexicoSched.Diversion Requested, Mexico Shortage and Surplus.Mexico Annual Shortage<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
@@ -1412,7 +1412,7 @@ BEGIN
 
     END;
 
-    RULE                 "Compute Quantified Surplus Volume - Minute 323";
+    RULE                 "Compute Quantified Surplus Volume";
     DESCRIPTION          "DESCRIPTION: This rule computes the total volume of Quantified Surplus water for the year. This slot only computes once per year in January and is NOT recalculated if Lower Basin demands are revised. If this value is postitive, there is a Quantified Surplus determination and water use schedules are revised as appropriate. <br>Equation:   Surplus Volume = (Powell Storage + Mead Storage - maxstorage - previous year ICS credits)*(1+avgBankStorcoef) + runoff - UBDemand - LBDemand <br>Variable Definitions:<br>  Powell Storage = Powell storage at beginning of the year (December month-end) <br>  Mead Storage = Mead storage at the beginning of the year (December month-end) <br>  Max Storage = 47.96 maf <br>  Previous year ICS credits - cumulative ICS credits over entire Lower Basin over all years <br>  avgBankStorcoef = average of Powell and Mead bank storage coefficients <br>  Runoff = 17.4 maf (70th percentile non-exceedence flow) <br>  UBDemand = Upper Basin depletion scheduled for the year + average evaporation loss in the Upper Basin (same as in 602a calculation, 560 kaf) <br>  LBDemand = sum of depletions below Powell + evaporation losses in the Lower Basin (avg 900 kaf) ? avg gains below Powell (Powell to Mead and below Mead) <br><br>-HMG 8/2/11<br><br>SLOTS SET: Surplus.Quantified Surplus Volume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year";
@@ -1444,7 +1444,7 @@ BEGIN
 
     END;
 
-    RULE                 "Set Mexico Surplus Flag - Minute 323";
+    RULE                 "Set Mexico Surplus Flag";
     DESCRIPTION          "DESCRIPTION: This rule sets the Mexico Surplus flag as a function of Mead compared to the Mexico Surplus Table. A Mead elevation of >= 1,200 ft. receives a value of 3, a value greater than 1,170 ft and less than the level 3 elevation, receives a value of 2, a value of 1,145 ft and less than a level 2 receives a value of 0 and any other condition receives a value of 0. This flag is used in subsequent Mexico Surplus rules. TP 7/28/2015<br><br>SLOTS SET: Mexico Shortage and Surplus.Mexico Surplus Flag<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep";
@@ -10637,7 +10637,7 @@ BEGIN
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>CH, 4/24/18: Replaced Surplus.MaxStorage (a hardcoded value) with MaxStorage function that calculates this value as specified by Appendix A of CRSS documentation.<br>S.Baker 09/25/2018: Replace storage with ElevationToStorage() with function that determines which projected pool elevation to use (24MS or MTOM). ";
     BEGIN
 
-      "Max"( ( "ElevationToStorage"( % "Powell", "GetProjectedPoolElevation"( "Powell", @"24:00:00 December 31, Previous Year" ) ) + "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) ) - "MaxStorage"(  ) - ( "SumPreviousYearICScredits"(  ) + $ "Mexico Shortage and Surplus.ICMA Balance" [@"24:00:00 December 31, Previous Year"] ) ) * ( 1.00000000 + ( $ "Powell.Bank Storage Coefficient" [0.00000000, 0.00000000] + $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) / 2.00000000 ) + $ "Surplus.70RLeesFerryFlow" [] COMMENTED_BY "70th percentile non-exceedance <br>flow" - ( $ "Surplus.UBEvaporation" [] + $ "Surplus.UBDemand" [@"24:00:00 December 31, Current Year"] ) - "SumLBDemands - Include Mexico"(  ), 0.00000000 "acre-ft" );
+      "Max"( ( "ElevationToStorage"( % "Powell", "GetProjectedPoolElevation"( "Powell", @"24:00:00 December 31, Previous Year" ) ) + "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) ) - "MaxStorage"(  ) - ( "SumPreviousYearICScredits"(  ) + $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Previous Year"] ) ) * ( 1.00000000 + ( $ "Powell.Bank Storage Coefficient" [0.00000000, 0.00000000] + $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) / 2.00000000 ) + $ "Surplus.70RLeesFerryFlow" [] COMMENTED_BY "70th percentile non-exceedance <br>flow" - ( $ "Surplus.UBEvaporation" [] + $ "Surplus.UBDemand" [@"24:00:00 December 31, Current Year"] ) - "SumLBDemands - Include Mexico"(  ), 0.00000000 "acre-ft" );
 
     END;
 
