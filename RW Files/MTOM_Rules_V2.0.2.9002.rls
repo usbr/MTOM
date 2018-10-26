@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 12:59 October 26, 2018
+# Created 13:50 October 26, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -890,7 +890,7 @@ BEGIN
  THEN
   $ "AnnualWaterUse.CAPCanal_AnnualCapacity" []
  ELSE
-  $ "Arizona_CU_Forecast1.CAP" [@"24:00:00 December 31, Current Year"]
+  $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"]
  ENDIF;
 
       $ "Surplus Total Annual Schedules.CibolaValleyIID" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.CibolaValleyIID" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CibolaValleyIID" [@"24:00:00 December 31, Current Year"];
@@ -899,7 +899,7 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"];
 
-      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Quantified and FC" [@"24:00:00 December 31, Current Year"] + ( $ "ICS Credits.AnnualDeliveryImpICS_NV" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDeliveryTribICS_NV" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Annual Delivery of ICS from Nevada of Imported and Tributary ICS Water";
+      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Quantified and FC" [@"24:00:00 December 31, Current Year"] + ( $ "ICS Credits.AnnualDeliveryImpICS_NV" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDeliveryTribICS_NV" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Annual Delivery of ICS from Nevada of Imported and Tributary ICS Water";
 
       $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [];
 
@@ -950,7 +950,7 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := ( $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Quantified" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDeliverySysEff_AZ" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "CAP Diversion Request plus Quantified CAP entitlement plus ICS Available";
 
-      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Quantified and FC" [@"24:00:00 December 31, Current Year"] + ( $ "ICS Credits.AnnualDeliveryImpICS_NV" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDeliveryTribICS_NV" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Annual Delivery of ICS from Nevada of Imported and Tributary ICS Water";
+      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Quantified and FC" [@"24:00:00 December 31, Current Year"] + ( $ "ICS Credits.AnnualDeliveryImpICS_NV" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDeliveryTribICS_NV" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Annual Delivery of ICS from Nevada of Imported and Tributary ICS Water";
 
     END;
 
@@ -961,9 +961,9 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
-      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"];
+      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"];
 
-      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := "Min"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualNVBankedinCA" [@"24:00:00 December 31, Current Year"] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"], 1250000.00000000 "acre-ft" - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"] );
+      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := "Min"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualNVBankedinCA" [@"24:00:00 December 31, Current Year"] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"], $ "Surplus.Default Surplus Entitlements" [0.00000000, 1.00000000] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"] );
 
       $ "Surplus Total Annual Schedules.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"];
 
@@ -1055,7 +1055,7 @@ BEGIN
  THEN
   0.00000000 "acre-ft"
  ELSE
-  100000.00000000 "acre-ft" - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"] - ( $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] )
+  $ "Surplus.Default Surplus Entitlements" [0.00000000, 0.00000000] - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"] - ( $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] )
  ENDIF;
 
       END_IF_STATEMENT;
