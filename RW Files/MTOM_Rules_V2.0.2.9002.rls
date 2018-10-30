@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 09:41 October 30, 2018
+# Created 10:58 October 30, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -526,7 +526,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the value of the ICMA balance for Mexico<br><br>SLOTS SET: Mexico Shortage and Surplus.ICMA Balance";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 December 31, Current Year" OR @"t" == "RunEndDate"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE;<br>MC, 20160908: Moved slot Mexico Shortage and Surplus.AnnualCreationICMA inside parentheses so it is subject to 0.97 factor per Shana T. email on 20160831";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE;<br>MC, 20160908: Moved slot Mexico Shortage and Surplus.AnnualCreationICMA inside parentheses so it is subject to 0.97 factor per Shana T. email on 20160831<br><br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots";
     BEGIN
 
       $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Current Year"] := ( $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Previous Year"] + $ "Mexico Shortage and Surplus.AnnualCreationMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] - $ "Mexico Shortage and Surplus.AnnualDeliveryMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_AZ" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_CA" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] ) * 0.97000000;
@@ -578,7 +578,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This Rule assigns the values for the California ICS.  The function &quot;ICSAccountingForCA&quot; calculates the delivery and annual values based on input<br>creation values, and assigns the appropriate slots for California ICS.  The rule also re-sets the MWD Diversion request each month to the percentage<br>that is applied each month to an average Shortage delivery pattern for a year.  The rule only fires in January or the Start timestep. TP 9/10/2014<br><br>SLOTS SET: ICS Credits.AnnualDeliveryEC_CA; ICS Credits.AnnualDeliverySysEff_CA; ICS Credits.AnnualDeliveryBiNat_CA; ICS Credits.AnnualCreationEC_CA; ICS Credits.ExtraordinaryConservationICS_CA; ICS Credits.SystemEfficiencyICS_CA; ICS Credits.BiNationalICS_CA; ICS Credits.TotalICS_CA; MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested; MWDDiversion:Tijuana.Depletion Requested<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4<br><br>GCAA, 20181030: Replaced reference to MWDDiversionData slot with reference to AnnualWaterUse slot for MWD's Annual Canal Capacity ";
     BEGIN
 
       WITH_STATEMENT (LIST caICSValues = "ICSAccountingForCA"(  )) DO
@@ -880,7 +880,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: If a the Flood Control or Exclusive Space Flag is on (greater than 0) this rule will fire and set the Surplus Schedules for all water users impacted by Flood Control Surplus. The computed schedules are the Total Annual Schedules for each water user, meaning Normal and Surplus schedules.  Flood Control Surplus is in priority over Quantified Surplus Volumes. -HMG 8/2/11<br><br>SLOTS SET: Surplus Total Annual Schedules.AzPumpersBlwImp; Surplus Total Annual Schedules.CAP; Surplus Total Annual Schedules.CibolaValleyIID; Surplus Total Annual Schedules.City of Parker; Surplus Total Annual Schedules.Gila Monster Farms; Surplus Total Annual Schedules.SNWA; Surplus Total Annual Schedules.MWD; Surplus Total Annual Schedules.Coachella; Surplus Total Annual Schedules.IID; Surplus Total Annual Schedules.Needles; Surplus Total Annual Schedules.CaPumpersAbvImp; Surplus Total Annual Schedules.Mexico<br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/2011<br>S.Baker 06/20/2018: Added constraint to only allow historical water use in surplus by CAP prior to 2008.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/2011<br>S.Baker 06/20/2018: Added constraint to only allow historical water use in surplus by CAP prior to 2008.<br><br>GCAA, 10302018: Replaced hardcoded values for MWDCanal_AnnualCapacity and Mexico Flood Control Delivery.  Corrected references to Forecast1 slots for CAP and SNWP to the Reset slots";
     BEGIN
 
       $ "Surplus Total Annual Schedules.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"];
@@ -919,7 +919,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: If there is a positive Quantified Surplus Volume this rule will fire and set the Total Annual Schedules for all water Users Impacted by Quantified Surplus. The Total Annual Schedules include both the Normal and Surplus Schedules. Rule fires only once per year during January. Quantified Surplus is higher in priority than Domestic Surplus, but lower in priority than Flood Control Surplus. Therefore, this rule will override any Domestic Surplus Schedules, but may then be overriden by Flood Control Surplus Schedules if a Flood Control Surplus exists. -HMG 8/2/11<br><br>SLOTS SET: Surplus Total Annual Schedules.MWD; Surplus Total Annual Schedules.Coachella; Surplus Total Annual Schedules.IID; Surplus Total Annual Schedules.AzPumpersBlwImp; Surplus Total Annual Schedules.Gila Monster Farms; Surplus Total Annual Schedules.City of Parker; Surplus Total Annual Schedules.CibolaValleyIID; Surplus Total Annual Schedules.CAP; Surplus Total Annual Schedules.SNWA<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br><br>GCAA, 20181030: Corrected reference to the Forecast1 SNWP slot to the SNWPResetAnnualFC slot.  Removed &quot;- Minute 323&quot; from rule name.";
     BEGIN
 
       $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"];
@@ -958,7 +958,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: If a Domestic Surplus exists, meaning that Mead's Pool Elevation is greater than the Domestic Surplus Trigger, then this rule will fire in January of the Current Year and set the Total Annual Schedules for all water users impacted by Domestic Surplus. Domestic Surplus is the lowest priority surplus, meaning that a Quantified or Flood Control Surplus will override these values.  -HMG 8/2/11<br><br>SLOTS SET: Surplus Total Annual Schedules.SNWA; Surplus Total Annual Schedules.MWD; Surplus Total Annual Schedules.Gila Monster Farms; Surplus Total Annual Schedules.AzPumpersBlwImp; Surplus Total Annual Schedules.CAP<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br><br>GCAA, 20181030: Changed reference from the Forecast1 slots to ResetAnnualFC slots and replaced hardcoded MWD annual canal capacity with the MWDCanal_AnnualCapacity slot. Removed &quot;- Minute 323&quot; from rule name.";
     BEGIN
 
       $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"];
@@ -982,7 +982,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule distributes the volume of quantified surplus available between MWD and CAP<br><br>SLOTS SET: Surplus Volume Entitlements.MWD Quantified; Surplus Volume Entitlements.CAP Quantified<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name. Replaced hardcoded MWD surplus entitlement values with reference to DefaultSurplusEntitlement slot";
     BEGIN
 
       $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"] := IF ( $ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] )
@@ -1016,7 +1016,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: In Domestic Surplus then MWD gets 1,250 KAF less the MWD Diversion to date, less 1/3 the Mexico Shortage and surplus volume if the year is prior to 2017, after 2017 then the calculation is 250 KAF less 1/3 the Mexico annual surplus value. In a flood control year MWD is entitled to a Full Canal so their entitlement is the current diversion plus what it takes to fill the canal. TP 7/28/2015<br><br>SLOTS SET: Surplus Volume Entitlements.MWD Domestic; Surplus Volume Entitlements.MWD FC<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from name, replaced hardcoded CAP surplus entitlement value with reference to Surplus Volume Entitlements.CAP Domestic slot, replaced hardcoded share of surplus by state value with ShareofMexicoSurplusbyState() function, and replaced CAP surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot.";
     BEGIN
 
       IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"]) THEN
@@ -1047,7 +1047,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: If the year is greater than 2017, then determine the Domestic Surplus entitlement for CAP which is calculated as 100 KAF - 1/3*Mexico Annual Surplus - (Surplus entitlements for Gila Monster Farms + AZ pumpers blw Imp).  If the system is in Flood Control, the CAP FC volume is set to 1,835 KAF less the current CAP Diversion Request so that they are entitled to a full canal volume of 1,835 KAF in a year of Flood Control. TP 7/28/2015<br><br>SLOTS SET: Surplus Volume Entitlements.CAP Domestic, Surplus Volume Entitlements.CAP FC<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Replaced hardcoded CAP default surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot, replaced share of Mexico surplus by state value with ShareofMexicoSurplusbyState() function, and removed &quot;-Minute 323&quot; from rule name.";
     BEGIN
 
       IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"]) THEN
@@ -1085,7 +1085,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule uses the volume associated with the Mexico Surplus Flag to set the Mexico diversion request for surplus according to the Mexico Surplus Table TP 7/28/2015<br><br>SLOTS SET: MexicanTreatyDelivery:MexicoSched.Diversion Requested, Mexico Shortage and Surplus.Mexico Annual Surplus<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -1109,7 +1109,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets a shortage diversion amount to the water use object MexicanTreatyDelivery:MexicoSched. The Mexico schedule is reduced by the shortage volume. The Mexico shortage volume is specified in IBWC Minute 323.<br><br>SLOTS SET: MexicanTreatyDelivery:MexicoSched.Diversion Requested, Mexico Shortage and Surplus.Mexico Annual Shortage<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -1416,7 +1416,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule computes the total volume of Quantified Surplus water for the year. This slot only computes once per year in January and is NOT recalculated if Lower Basin demands are revised. If this value is postitive, there is a Quantified Surplus determination and water use schedules are revised as appropriate. <br>Equation:   Surplus Volume = (Powell Storage + Mead Storage - maxstorage - previous year ICS credits)*(1+avgBankStorcoef) + runoff - UBDemand - LBDemand <br>Variable Definitions:<br>  Powell Storage = Powell storage at beginning of the year (December month-end) <br>  Mead Storage = Mead storage at the beginning of the year (December month-end) <br>  Max Storage = 47.96 maf <br>  Previous year ICS credits - cumulative ICS credits over entire Lower Basin over all years <br>  avgBankStorcoef = average of Powell and Mead bank storage coefficients <br>  Runoff = 17.4 maf (70th percentile non-exceedence flow) <br>  UBDemand = Upper Basin depletion scheduled for the year + average evaporation loss in the Upper Basin (same as in 602a calculation, 560 kaf) <br>  LBDemand = sum of depletions below Powell + evaporation losses in the Lower Basin (avg 900 kaf) ? avg gains below Powell (Powell to Mead and below Mead) <br><br>-HMG 8/2/11<br><br>SLOTS SET: Surplus.Quantified Surplus Volume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br>MC, 20160114: There is a function, QuantifiedSurplusVolume, with the same calculation in it.  Are both necessary?<br>MC, 20170512: Need to edit Execution Constraints to ensure execution in January?";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br>MC, 20160114: There is a function, QuantifiedSurplusVolume, with the same calculation in it.  Are both necessary?<br>MC, 20170512: Need to edit Execution Constraints to ensure execution in January?<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
     BEGIN
 
       $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] := "QuantifiedSurplusVolume"(  );
@@ -1448,7 +1448,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Mexico Surplus flag as a function of Mead compared to the Mexico Surplus Table. A Mead elevation of >= 1,200 ft. receives a value of 3, a value greater than 1,170 ft and less than the level 3 elevation, receives a value of 2, a value of 1,145 ft and less than a level 2 receives a value of 0 and any other condition receives a value of 0. This flag is used in subsequent Mexico Surplus rules. TP 7/28/2015<br><br>SLOTS SET: Mexico Shortage and Surplus.Mexico Surplus Flag<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 41 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow execution in start timestep.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 41 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow execution in start timestep.<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
     BEGIN
 
       $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [2.00000000, "Elevation"] )
@@ -3969,7 +3969,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule redistributes Nov and Dec MWD requests that may be over the canal capacity.  This can occur when LBDV is initiated below Parker and there is additional supply available to MWD.<br><br>SLOTS SET: MWDDiversion:MWD.Diversion Requested; ICS Credits.AnnualCreationEC_CA<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetMonth"( @"t" ) < 11.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: MC/JR, Unknown<br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case (Shortage).<br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules<br>CH, 4/25/18: Removed run cycle == 3.0 constraint since rule only fires in start year (therefore should not refire in run cycle 3 for any reason, even in shortage conditions - causes the rule to add twice the amount of water available)";
+    NOTES                "AUTHOR, DATE: MC/JR, Unknown<br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case (Shortage).<br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules<br>CH, 4/25/18: Removed run cycle == 3.0 constraint since rule only fires in start year (therefore should not refire in run cycle 3 for any reason, even in shortage conditions - causes the rule to add twice the amount of water available)<br>GCAA, 20181030: Changed reference from MWDDiversionData.MWDCanal_DailyCapacity slot to MWDAndCAPRech: MWDDiversion. Diversion Capacity slot";
     BEGIN
 
       WITH_STATEMENT (NUMERIC InitialTotalRequest = FOR ( DATETIME date IN "GetDates"( @"t", @"24:00:00 December Max DayOfMonth, Current Year", "1 months" ) ) STAT_SUM
@@ -4928,7 +4928,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the consumptive use schedules for Nevada and California. -CE 9/17/13. Set the SNWP and MWD schedules based on the input consumptive use schedules for the various entities listed.  For SNWP this includes all groups with schedules for which the SNWP diversion delivers water.  For MWD, the return flow schedule is assumed to be constant at 8.5 acre-feet per day.  The MWDDiversion slot is input and so the returns schedule and the MWD (consumptive use portion) is set by this rule. <br><br>SLOTS SET: Nevada_CU_Schedules.SNWP; California_CU_Schedules.MWDReturns; California_CU_Schedules.MWD<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed statement solving for California_CU_Schedules.MWDReturns and removed the part of the statement solving for MWDReturns from the California_CU_Schedules.MWD calculation.";
     BEGIN
 
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO "Dec31ofYear"( @"Finish Timestep" ) COMMENTED_BY "This is for testing purposes, this should be Finish timestep<br>when the model is actually moved forward and all input<br>is taken care of") DO
@@ -8439,7 +8439,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>GCAA, 20181030: Changed reference from MWDDiversionData.MWDMaximumAnnualDelivery to AnnualWaterUse.MWDCanal_AnnualCapacity slot";
     BEGIN
 
       WITH NUMERIC creationOfCACEICS = IF ( ( ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR NOT "IsMRM"(  ) ) COMMENTED_BY "If the year is a Shortage Year, a Quantified Surplus Year, a Flood Control Year, <br>or if the run is a deterministic Min, Max or Most run, do not Create any ICS TP <br>12/18/2017 <br>" )
@@ -10632,7 +10632,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>CH, 4/24/18: Replaced Surplus.MaxStorage (a hardcoded value) with MaxStorage function that calculates this value as specified by Appendix A of CRSS documentation.<br>S.Baker 09/25/2018: Replace storage with ElevationToStorage() with function that determines which projected pool elevation to use (24MS or MTOM). ";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>CH, 4/24/18: Replaced Surplus.MaxStorage (a hardcoded value) with MaxStorage function that calculates this value as specified by Appendix A of CRSS documentation.<br>S.Baker 09/25/2018: Replace storage with ElevationToStorage() with function that determines which projected pool elevation to use (24MS or MTOM). <br>GCAA, 20181030: Replaced reference from ICMA balance to Mexico Water Reserve balance";
     BEGIN
 
       "Max"( ( "ElevationToStorage"( % "Powell", "GetProjectedPoolElevation"( "Powell", @"24:00:00 December 31, Previous Year" ) ) + "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) ) - "MaxStorage"(  ) - ( "SumPreviousYearICScredits"(  ) + $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Previous Year"] ) ) * ( 1.00000000 + ( $ "Powell.Bank Storage Coefficient" [0.00000000, 0.00000000] + $ "Mead.Bank Storage Coefficient" [0.00000000, 0.00000000] ) / 2.00000000 ) + $ "Surplus.70RLeesFerryFlow" [] COMMENTED_BY "70th percentile non-exceedance <br>flow" - ( $ "Surplus.UBEvaporation" [] + $ "Surplus.UBDemand" [@"24:00:00 December 31, Current Year"] ) - "SumLBDemands - Include Mexico"(  ), 0.00000000 "acre-ft" );
@@ -10722,7 +10722,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "";
+    NOTES          "DEVELOPMENT NOTES:<br><br>GCAA, 20181030: Function added per Minute 323";
     BEGIN
 
       1.00000000 / 3.00000000;
