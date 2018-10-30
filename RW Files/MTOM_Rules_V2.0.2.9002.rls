@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 10:58 October 30, 2018
+# Created 11:48 October 30, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -3976,12 +3976,12 @@ BEGIN
   "FlowToVolume"( $ "MWDDiversion.Total Diversion Requested" [date], date )
  ENDFOR) DO
           DESCRIPTION          "<br>If Nov or Dec diversion request exceeds canal capacity, redistribute the excess request to months between the current month and October of the current year.<br>";
-      WITH_STATEMENT (NUMERIC NovExcessRequest = "Max"( $ "MWDDiversion.Total Diversion Requested" [@"24:00:00 November Max DayOfMonth, Current Year"] - $ "MWDAndCAPReach:MWDDiversion.Diversion Capacity" [], 0.00000000 "acre-feet/month" )) DO
-            WITH_STATEMENT (NUMERIC DecExcessRequest = "Max"( $ "MWDDiversion.Total Diversion Requested" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "MWDAndCAPReach:MWDDiversion.Diversion Capacity" [], 0.00000000 "acre-feet/month" )) DO
+      WITH_STATEMENT (NUMERIC NovExcessRequest = "Max"( $ "MWDDiversion.Total Diversion Requested" [@"24:00:00 November Max DayOfMonth, Current Year"] - $ "MWDDiversionData.MWDCanal_DailyCapacity" [], 0.00000000 "acre-feet/month" )) DO
+            WITH_STATEMENT (NUMERIC DecExcessRequest = "Max"( $ "MWDDiversion.Total Diversion Requested" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "MWDDiversionData.MWDCanal_DailyCapacity" [], 0.00000000 "acre-feet/month" )) DO
             IF_STATEMENT (NovExcessRequest + DecExcessRequest > 0.00000000 "acre-feet/month") THEN
           DESCRIPTION          "Redistribute excess diversion requests";
       FOREACH (DATETIME date IN "GetDates"( @"t", @"24:00:00 December Max DayOfMonth, Current Year", "1 months" )) DO
-            $ "MWDDiversion:MWD.Diversion Requested" [date] := ( GET @INDEX "GetMonth"( date ) - 1.00000000 FROM "CheckAndAdjustToCapacity"( $ "MWDDiversion.Total Diversion Requested", $ "MWDAndCAPReach:MWDDiversion.Diversion Capacity" [] ) ) - $ "MWDDiversion:Tijuana.Diversion Requested" [date];
+            $ "MWDDiversion:MWD.Diversion Requested" [date] := ( GET @INDEX "GetMonth"( date ) - 1.00000000 FROM "CheckAndAdjustToCapacity"( $ "MWDDiversion.Total Diversion Requested", $ "MWDDiversionData.MWDCanal_DailyCapacity" [] ) ) - $ "MWDDiversion:Tijuana.Diversion Requested" [date];
 
       ENDFOREACH;
 
