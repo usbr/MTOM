@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 13:50 October 26, 2018
+# Created 09:41 October 30, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -516,13 +516,13 @@ BEGIN
 
   END;
 
-  POLICY_GROUP   "Mexico Water Reserve Accounting";
+  POLICY_GROUP   "Mexico ICMA";
   DESCRIPTION    "";
   ACTIVE         TRUE;
   NOTES          "";
   BEGIN
 
-    RULE                 "Mexico Water Reserve Accounting";
+    RULE                 "Mexico ICMA Accounting";
     DESCRIPTION          "DESCRIPTION: This rule calculates the value of the ICMA balance for Mexico<br><br>SLOTS SET: Mexico Shortage and Surplus.ICMA Balance";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 December 31, Current Year" OR @"t" == "RunEndDate"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000;
@@ -963,7 +963,7 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"];
 
-      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := "Min"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualNVBankedinCA" [@"24:00:00 December 31, Current Year"] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"], $ "Surplus.Default Surplus Entitlements" [0.00000000, 1.00000000] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"] );
+      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := "Min"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualNVBankedinCA" [@"24:00:00 December 31, Current Year"] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"], $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"] );
 
       $ "Surplus Total Annual Schedules.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"];
 
@@ -4934,7 +4934,7 @@ BEGIN
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO "Dec31ofYear"( @"Finish Timestep" ) COMMENTED_BY "This is for testing purposes, this should be Finish timestep<br>when the model is actually moved forward and all input<br>is taken care of") DO
             $ "Nevada_CU_Schedules.SNWP" [date] := $ "Nevada_CU_Schedules.SNWADiversion" [date] + $ "Nevada_CU_Schedules.BasicManagement" [date] + $ "Nevada_CU_Schedules.LMNRA Mead" [date] + $ "Nevada_CU_Schedules.BoulderCanyonProject" [date] + $ "Nevada_CU_Schedules.NvDeptFishGame" [date] + $ "Nevada_CU_Schedules.PacificCoastBuilding" [date] + $ "Nevada_CU_Schedules.City of Henderson" [date] - $ "Nevada_CU_Schedules.LVWashReturns" [date];
 
-            $ "California_CU_Schedules.MWD" [date] := $ "California_CU_Schedules.MWDDiversion" [date] - $ "MWDAndCAPReach:MWDDiversion.Return Flow" [date];
+            $ "California_CU_Schedules.MWD" [date] := $ "California_CU_Schedules.MWDDiversion" [date] - $ "California_CU_Schedules.MWDReturns" [date];
 
       ENDFOREACH;
 
@@ -8446,7 +8446,7 @@ BEGIN
  THEN
   0.00000000 "acre-ft"
  ELSE
-  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_CA" [@"24:00:00 December 31, Previous Year"] ), 0.00000000 "acre-ft" ) COMMENTED_BY "Account Space <br>" , $ "ICS Credits.MeadBankParameters" ["California", "Max Put"] COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) - $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
+  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_CA" [@"24:00:00 December 31, Previous Year"] ), 0.00000000 "acre-ft" ) COMMENTED_BY "Account Space <br>" , $ "ICS Credits.MeadBankParameters" ["California", "Max Put"] COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) - $ "AnnualWaterUse.MWDMinimumAnnualDelivery" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
  ENDIF DO
   WITH NUMERIC totalDeliveryOfCAICS = "MinItem"( { IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NOT "IsMRM"(  ) )
   THEN
