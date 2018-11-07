@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 11:48 October 30, 2018
+# Created 07:25 November 7, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -516,7 +516,7 @@ BEGIN
 
   END;
 
-  POLICY_GROUP   "Mexico ICMA";
+  POLICY_GROUP   "Mexico Water Reserve";
   DESCRIPTION    "";
   ACTIVE         TRUE;
   NOTES          "";
