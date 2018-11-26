@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 11:10 November 26, 2018
+# Created 11:17 November 26, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1628,7 +1628,7 @@ BEGIN
  ENDIF DO
   "HasRuleFiredSuccessfully"( "Set Equalization Release Volume post-LBDV" ) OR ( "HasRuleFiredSuccessfully"( "Set Upper Balancing Release Volume post-LBDV" ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.30000000 ) AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND ( "TierIs"( "Upper", @"t", TRUE ) OR "TierIs"( "Equalization", @"t", TRUE ) )
  ENDWITH;
-    NOTES                "S.Baker, 2018/10/17: Copied from normal Powell policy set and changed execution constraints for Run Cycle 4 and LBDV. Go to original rule for development details prior to this date. ";
+    NOTES                "S.Baker, 2018/10/17: Copied from normal Powell policy set and changed execution constraints for Run Cycle 4 and LBDV. Go to original rule for development details prior to this date. <br>S.Baker, 2018/11/26: [edited to match normal Powell rule for RC #3] Added WITH statement to store TARV and use in IF statement to look if solved TARV was equal to previous TARV. Then, allow for setting of the PowellData.ReleaseVolumeSetFlag when TARV solved in the current iteration is equal to the previously set TARV. This is necessary for solving for the carryover release pattern from Powell. This occurs normally when TARV is not changed from 8.23 MAF. ";
     BEGIN
 
       IF_STATEMENT (( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "At Start Timestep for initial water year when release tier is either Upper Elevation Balancing or Equalization") THEN
@@ -1677,8 +1677,8 @@ BEGIN
   "FlowToVolume"( $ "Powell.Outflow" [dates], dates )
  ENDFOR) DO
           DESCRIPTION          "MC, 20171102: This version added to handle carryover situation by setting ReleaseVolumeSetFlag <br>";
-      IF_STATEMENT ("Abs"( $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] - ( CurrentAnnualRelease + VolumeDeviation ) - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) + 1.00000000 "year" )] ) ) > ( $ "PowellData.TARVTolerance" [] * $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] ) COMMENTED_BY "The tolerance of the TARV slot; if the proposed change is less than this value the slot value won't change <br>") THEN
-            $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "MaxItem"( { IF ( "Abs"( ReleaseAdjustment ) > 0.00000000 "acre-ft" )
+      IF_STATEMENT ("Abs"( $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] - ( CurrentAnnualRelease + VolumeDeviation ) - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) + 1.00000000 "year" )] ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] ) ) > ( $ "PowellData.TARVTolerance" [] * $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] ) COMMENTED_BY "The tolerance of the TARV slot; if the proposed change is less than this value the slot value won't change <br>") THEN
+            WITH_STATEMENT (NUMERIC PowellnewTARV = "MaxItem"( { IF ( "Abs"( ReleaseAdjustment ) > 0.00000000 "acre-ft" )
  THEN
   ( CurrentAnnualRelease - IF ( $ "PowellData.UpperElevBalBranch" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 999.00000000 )
   THEN
@@ -1693,7 +1693,15 @@ BEGIN
   7000000.00000000 "acre-feet"
  ELSE
   8230000.00000000 "acre-feet"
- ENDIF COMMENTED_BY "If in UEB 1.2, the Min annual release is 7.0 MAF <br>" } );
+ ENDIF COMMENTED_BY "If in UEB 1.2, the Min annual release is 7.0 MAF <br>" } )) DO
+            $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := PowellnewTARV;
+
+            IF_STATEMENT (PowellnewTARV == $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )]) THEN
+            $ "PowellData.ReleaseVolumeSetFlag" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := 1.00000000;
+
+      END_IF_STATEMENT;
+
+      END_WITH_STATEMENT;
 
       ELSE
             $ "PowellData.ReleaseVolumeSetFlag" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := 1.00000000;
