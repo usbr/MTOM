@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 13:32 November 26, 2018
+# Created 13:48 November 26, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -6254,7 +6254,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES:<br>AUTHOR, DATE: SC, 20110325<br><br>MC, 20160728: This version of the function takes a second argument, TotalVolumeToRelease, instead of using an annual volume calculated by the user-defined function CurrentAnnualVolume; it was originally created for use in handling carryover years<br><br>MC, 20171024: Tried to combine all functions that develop release schedules into a single one here. Old version renamed GetPowellMonthlyReleases_pre20171024; this version finds bounding release schedule columns based on remaining volume, which Paul D. previously indicated should be okay<br><br>S.Baker, 2018/10/17: <br>(1) 'AnnualCarryoverVolume' - Function needs to know the carryover volume no matter the equalization tier. <br>(2) 'RemainingMonthlyReleases' - The ?CalculatePowellUEBToEqualizePowellMonRel? function uses ?Powell.Peak Flow? which isn?t solved for until Powell has successfully dispatched. Therefore, the statement setting the ?RemainingMonthlyRelease? checks to see of Powell.Outflow is NaN. This normally occurs when the TARV is initially set to 8.23 MAF. Once Powell resets the TARV, the function will re-execute and will enter the function ?CalculatePowellUEBToEqualizePowellMonRel? if Powell is equalizing with an April adjustment. <br>(3) IF statement for ?RemainingMonthlyReleases? - A new conditions was added to ensure the model didn?t enter this part of the function unless it was not an April Adjustment. Originally, the model would solve for carryover, but would spread the carryover out by spilling water out of Powell in this part of the function. ";
+    NOTES          "DEVELOPMENT NOTES:<br>AUTHOR, DATE: SC, 20110325<br><br>MC, 20160728: This version of the function takes a second argument, TotalVolumeToRelease, instead of using an annual volume calculated by the user-defined function CurrentAnnualVolume; it was originally created for use in handling carryover years<br><br>MC, 20171024: Tried to combine all functions that develop release schedules into a single one here. Old version renamed GetPowellMonthlyReleases_pre20171024; this version finds bounding release schedule columns based on remaining volume, which Paul D. previously indicated should be okay<br><br>S.Baker, 2018/10/17: <br>(1) 'AnnualCarryoverVolume' - Function needs to know the carryover volume no matter the equalization tier. <br>(2) 'RemainingMonthlyReleases' - The ?CalculatePowellUEBToEqualizePowellMonRel? function uses ?Powell.Peak Flow? which isn?t solved for until Powell has successfully dispatched. Therefore, the statement setting the ?RemainingMonthlyRelease? checks to see of Powell.Outflow is NaN. This normally occurs when the TARV is initially set to 8.23 MAF. Once Powell resets the TARV, the function will re-execute and will enter the function ?CalculatePowellUEBToEqualizePowellMonRel? if Powell is equalizing with an April adjustment. <br>(3) IF statement for ?RemainingMonthlyReleases? - A new conditions was added to ensure the model didn?t enter this part of the function unless it was not an April Adjustment. Originally, the model would solve for carryover, but would spread the carryover out by spilling water out of Powell in this part of the function. <br><br>S.Baker, 2018/11/26: subracted VolumeReleasedPreRun from TARV in the calculation of RemaininWYRelease.";
     BEGIN
 
       WITH DATETIME WaterYear = "Dec31ofYear"( "RelativeEOWYDate"( GET @INDEX 0.00000000 FROM datesToEOWY ) ) DO
@@ -6276,7 +6276,7 @@ BEGIN
       THEN
        TargetAnnualVolume + AnnualCarryoverVolume - VolumeReleasedPreRun
       ELSE
-       TargetAnnualVolume
+       TargetAnnualVolume - VolumeReleasedPreRun
       ENDIF COMMENTED_BY "If carryover still needs to be released, use TARV. Carryover will <br>be added in the CalculateCarryoverReleases function.  <br>" DO
        WITH NUMERIC UpperColumnBound = "FindRemainingReleaseUpperBoundColumn"( RemainingWYRelease, datesToEOWY ) COMMENTED_BY "If the dates end with a water year end, use remaining release to determine column bound<br>If run ends in Dec, using remaining release function leads to all annual volume being released in <br>Oct, Nov, Dec  <br>" DO
         WITH NUMERIC LowerColumnBound = "FindRemainingReleaseLowerBoundColumn"( RemainingWYRelease, datesToEOWY, UpperColumnBound ) DO
