@@ -10,6 +10,7 @@ MTOM_Stakeholder_User_Manual.pdf
 # ignore other backup files of zipped rules, models, and RiverSMART files
 *.bak.gz
 *.bak
+*.rsm
 *bak.rms
 
 # generic files not to track
