@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 16:01 November 29, 2018
+# Created 11:07 November 30, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -8551,7 +8551,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br>CH, 4/27/18: Deleted if else statements in creation of SE and Binat ICS so that AZ is allowed to created these types of ICS even in Shortage condition (only EC ICS cannot be created during a shortage). Cleaned up list the function returns and unused with statments: only 7 out of the 9 that were included are being used. <br><br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br>CH, 4/27/18: Deleted if else statements in creation of SE and Binat ICS so that AZ is allowed to created these types of ICS even in Shortage condition (only EC ICS cannot be created during a shortage). Cleaned up list the function returns and unused with statments: only 7 out of the 9 that were included are being used. <br><br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).<br><br>AP, 11/30/18: Changed all evap tax references  from *0.97 to the EvapTaxAdjustment function, changed all system tax references  from *0.95 to the SystemTaxAdjustment function,";
     BEGIN
 
       WITH NUMERIC creationOfEC = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 ) COMMENTED_BY "This Check references the surplus value that represents Quantified Surplus in <br>the Determine Mead and Lower Basin Condition Rule. Quantified Surplus is set <br>as a value of 3 in the IsSurplusYear annual series slot. TP 7/28/2015" )
@@ -8577,9 +8577,9 @@ BEGIN
       WITH NUMERIC deliveryChargedToBiNat = 0.00000000 "acre-ft" DO
        WITH NUMERIC ECICSAZ = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 ) )
        THEN
-        $ "ICS Credits.ExtraordinaryConservationICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryChargedToEC + creationOfEC * 0.95000000
+        $ "ICS Credits.ExtraordinaryConservationICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryChargedToEC + creationOfEC * "SystemTaxAdjustment"(  )
        ELSE
-        ( $ "ICS Credits.ExtraordinaryConservationICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryChargedToEC ) * 0.97000000 + creationOfEC * 0.95000000
+        ( $ "ICS Credits.ExtraordinaryConservationICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryChargedToEC ) * "EvapTaxAdjustment"(  ) + creationOfEC * "SystemTaxAdjustment"(  )
        ENDIF COMMENTED_BY "Resulting ExtraordinaryConservation ICS " DO
         WITH NUMERIC SEICSAZ = ( $ "ICS Credits.SystemEfficiencyICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfSE - deliveryChargedToSE ) COMMENTED_BY "Resulting System Efficiency ICS " DO
          WITH NUMERIC BiNatICSAZ = ( $ "ICS Credits.BiNationalICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfBiNat - deliveryChargedToBiNat ) COMMENTED_BY "Resulting Bi National ICS " DO
@@ -8658,7 +8658,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 11/28/18: Updated deliveryofImpICS/deliveryofTribICS logic. Changed all system tax references  from *0.95 to the SystemTaxAdjustment function<br>";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 11/29/18: Updated deliveryofImpICS/deliveryofTribICS logic. Changed all system tax references  from *0.95 to the SystemTaxAdjustment function<br><br>AP, 11/30/18: Changed all evap tax references  from *0.97 to the EvapTaxAdjustment function<br>";
     BEGIN
 
       WITH NUMERIC creationTribICS_NV = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
@@ -8755,7 +8755,7 @@ BEGIN
                 THEN
                  $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )]
                 ELSE
-                 ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] ) * 0.97000000 + creationEC * "SystemTaxAdjustment"(  )
+                 ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] ) * "EvapTaxAdjustment"(  ) + creationEC * "SystemTaxAdjustment"(  )
                 ENDIF COMMENTED_BY "Resulting ExtraordinaryConservation ICS. In the case that the previous year was a Quantified Surplus year, the <br>Tributary and Imported ICS would have been delivered and that is accounted for in the equation below. " DO
                  WITH NUMERIC SEICSNV = ( $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationSE - $ "ICS Credits.AnnualDeliverySysEff_NV" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Resulting System Efficiency ICS " DO
                   WITH NUMERIC BiNatICSNV = ( $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationBiNat - $ "ICS Credits.AnnualDeliveryBiNat_NV" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Resulting Bi National ICS " DO
@@ -8842,6 +8842,20 @@ BEGIN
     BEGIN
 
       1.00000000 - $ "ICS Credits.SystemTaxPercent" [];
+
+    END;
+
+    FUNCTION       "EvapTaxAdjustment" (  )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "DESCRIPTION: Used to calculate the &quot;evap tax&quot; charged to ICS water<br><br>RETURNS: Coefficient to multiply ICS volume by to assess tax [NONE]<br><br>ARGUMENTS: <NONE><br><br>CONSTRAINTS: <NONE>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "AUTHOR, DATE: AP 20181130<br><br>Created to get rid of hardcoded evap tax percent in ruleset. Similar to SystemTaxAdjustment Function";
+    BEGIN
+
+      1.00000000 - $ "ICS Credits.EvapTaxPercent" [];
 
     END;
 
