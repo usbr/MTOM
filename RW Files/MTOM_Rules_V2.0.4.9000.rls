@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 13:00 December 3, 2018
+# Created 13:23 December 4, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -583,25 +583,31 @@ BEGIN
 
       WITH_STATEMENT (LIST iidICSValues = "ICSAccountingForIID"(  )) DO
             WITH_STATEMENT (LIST mwdICSValues = "ICSAccountingForMWD"(  )) DO
+          DESCRIPTION          "Annual Delivery BiNational ICS <br>";
+      $ "ICS Credits.AnnualDeliveryBiNat_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 2.00000000 FROM mwdICSValues;
+
+            $ "ICS Credits.AnnualDeliveryBiNat_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM iidICSValues;
+
+            $ "ICS Credits.AnnualDeliveryBiNat_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 2.00000000 FROM mwdICSValues ) + GET @INDEX 0.00000000 FROM iidICSValues;
+
           DESCRIPTION          "Annual Extraordinary ICS Delivery <br>";
       $ "ICS Credits.AnnualDeliveryEC_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM mwdICSValues;
 
-            $ "ICS Credits.AnnualDeliveryEC_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 0.00000000 FROM mwdICSValues ) + $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )];
+            $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM iidICSValues;
+
+            $ "ICS Credits.AnnualDeliveryEC_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 0.00000000 FROM mwdICSValues ) + GET @INDEX 1.00000000 FROM iidICSValues;
 
           DESCRIPTION          "Annual Delivery System Efficiency ICS <br>";
       $ "ICS Credits.AnnualDeliverySysEff_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM mwdICSValues;
 
             $ "ICS Credits.AnnualDeliverySysEff_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM mwdICSValues;
 
-          DESCRIPTION          "Annual Delivery BiNational ICS <br>";
-      $ "ICS Credits.AnnualDeliveryBiNat_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 2.00000000 FROM mwdICSValues;
-
-            $ "ICS Credits.AnnualDeliveryBiNat_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 2.00000000 FROM mwdICSValues ) + $ "ICS Credits.AnnualDeliveryBiNat_IID" ["Dec31ofYear"( @"t" )];
-
           DESCRIPTION          "Annual Creation Extraordinary Conservation ICS  <br>";
       $ "ICS Credits.AnnualCreationEC_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 3.00000000 FROM mwdICSValues;
 
-            $ "ICS Credits.AnnualCreationEC_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 3.00000000 FROM mwdICSValues ) - $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )];
+            $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 2.00000000 FROM iidICSValues;
+
+            $ "ICS Credits.AnnualCreationEC_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 3.00000000 FROM mwdICSValues ) + GET @INDEX 2.00000000 FROM iidICSValues;
 
           DESCRIPTION          "Annual Creation BiNational ICS <br>";
       $ "ICS Credits.AnnualCreationBiNat_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.AnnualCreationBiNat_IID" ["Dec31ofYear"( @"t" )] + $ "ICS Credits.AnnualCreationBiNat_MWD" ["Dec31ofYear"( @"t" )];
@@ -612,9 +618,9 @@ BEGIN
           DESCRIPTION          "Extraordinary Conservation ICS Balances <br>";
       $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 4.00000000 FROM mwdICSValues;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM iidICSValues;
+            $ "ICS Credits.ExtraordinaryConservationICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 3.00000000 FROM iidICSValues;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 4.00000000 FROM mwdICSValues ) + GET @INDEX 0.00000000 FROM iidICSValues;
+            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 4.00000000 FROM mwdICSValues ) + GET @INDEX 3.00000000 FROM iidICSValues;
 
           DESCRIPTION          "System Efficiency ICS Balances <br>";
       $ "ICS Credits.SystemEfficiencyICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 5.00000000 FROM mwdICSValues;
@@ -624,16 +630,16 @@ BEGIN
           DESCRIPTION          "BiNational ICS  <br>";
       $ "ICS Credits.BiNationalICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 6.00000000 FROM mwdICSValues;
 
-            $ "ICS Credits.BiNationalICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM iidICSValues;
+            $ "ICS Credits.BiNationalICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 4.00000000 FROM iidICSValues;
 
-            $ "ICS Credits.BiNationalICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 1.00000000 FROM iidICSValues ) + GET @INDEX 6.00000000 FROM mwdICSValues;
+            $ "ICS Credits.BiNationalICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 4.00000000 FROM iidICSValues ) + GET @INDEX 6.00000000 FROM mwdICSValues;
 
           DESCRIPTION          "Total ICS Balances <br>";
       $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 7.00000000 FROM mwdICSValues;
 
-            $ "ICS Credits.TotalICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 2.00000000 FROM iidICSValues;
+            $ "ICS Credits.TotalICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 5.00000000 FROM iidICSValues;
 
-            $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 7.00000000 FROM mwdICSValues ) + GET @INDEX 2.00000000 FROM iidICSValues;
+            $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 7.00000000 FROM mwdICSValues ) + GET @INDEX 5.00000000 FROM iidICSValues;
 
             IF_STATEMENT ("IsMRM"(  ) AND ( "GetYear"( @"t" ) != "GetYear"( @"Start Timestep" ) OR @"t" == @"24:00:00 January Max DayOfMonth, Start Year" )) THEN
             WITH_STATEMENT (NUMERIC totalDeliveryMWDICS = GET @INDEX 9.00000000 FROM mwdICSValues) DO
@@ -707,8 +713,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015<br><br>S.Baker 06/20/2018: Added execution constraint to simulate only in operational MTOM runs. <br>AP, 9/18/2018: Added  run constraint to refire rule of the schedule check value set in run cycle 3 does not equal the LB condition in RC 4. Adjusted constraint logic to fire when LB condition is normal instead of condition not equaling surplus, shortage, etc. Cleaned up rule logic, added to note in rule<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
-    BREAKPOINT AFTER_EXEC FALSE;
       FOREACH (DATETIME date IN "DateMax"( "GetFirstDate"( @"t" ), @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "CAPDiversion.Total Diversion Requested" [date] := $ "CAPDiversion.Total Diversion Requested" [date] * "CAPDemandVariabilityFactor"( date ) + "VolumeToFlow"( IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= 1100.00000000 "ft" ) COMMENTED_BY "If the Projected January Lake Mead Elevation is to be greater than 1,100 ft, then set the ICS <br>delivery to AZ System Efficiency 2014 Volume/10. If Lake Mead is below 1,100 do not allow any <br>delivery of ICS. The logic only needs to know if Lake Mead is above 1,110 ft and the delivery will <br>be added to any normal condition CAP Div Req already set. CAP logic to take diversion in LB <br>condition = suprlus and when elevation > 1100 is in surplus logic  <br>" )
  THEN
@@ -1620,7 +1624,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "For August timestep with Lower Balancing Release Tier in next outyear";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "Min"( "Max"( "EqualizationReleaseWithCarryover"( "RelativeEOWYDate"( @"t + 2" ) ), $ "PowellData.LowerTierMinAnnualRelease" [] ), $ "PowellData.LowerTierMaxAnnualRelease" [] );
 
@@ -1635,7 +1638,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "In August with Mid-elevation tier for the next outyear";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1025.00000000 "ft" )
  THEN
@@ -1767,7 +1769,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The GetRunCycleIndex()==3 condition will never be satisfied due to the Execution Constraints. Compare with initial version of rule for Run Cycle 4 and correct<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead Pool Elevation. This will allow MTOM to determine which PE projection to use (ie. AugEOYProjectedMeadPE).";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "In August or September start month with UEBT for outyear";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Powell", "ElevationToStorage"( % "Powell", $ "Powell.Pool Elevation" ["DateToCheckEOWYElevation"( @"t", FALSE )] ) - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] ) ) > "EqLevel"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) )
  THEN
@@ -1808,7 +1809,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint. Disabled PowellData.ReleaseVolumeSetFlag since this flag should be set in the Refine Equalization rule. <br>S.Baker, 2018/10/17: updated run cycle execution constraint to RC == 4 (was 3 which was incorrect).";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "Outyear with Equalization";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) );
 
@@ -1825,7 +1825,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 02/02/2011 (copied to LBDV from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint. <br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier post-LBDV&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. The priority issue was causing incorrectly calculated Release Tiers in the post-LBDV rules. When the ruleset got to the rule &quot;Set Release Tier post-LBDV&quot; the release for the water year was still set to a higher TARV (9.0MAF). This caused the rules to calculate the wrong release. MTOM then reset the TARV to 8.23MAF in &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. Switching the order of the rules allows for the TARV to be reset to 8.23MAF before calculating the release tier. ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "Model needs to set the teir for the following water year if current timestep is August. <br>";
       IF_STATEMENT ("MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) AND @"t + 2" IN "WaterYearDatesByGroup"( 2.00000000 )) THEN
             WITH_STATEMENT (NUMERIC Carryover = NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] )) DO
@@ -1908,7 +1907,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. <br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier post-LBDV&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. The priority issue was causing incorrectly calculated Release Tiers in the post-LBDV rules. When the ruleset got to the rule &quot;Set Release Tier post-LBDV&quot; the release for the water year was still set to a higher TARV (9.0MAF). This caused the rules to calculate the wrong release. MTOM then reset the TARV to 8.23MAF in &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. Switching the order of the rules allows for the TARV to be reset to 8.23MAF before calculating the release tier. ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
       WITH_STATEMENT (NUMERIC waterYearNumber = "GetYear"( @"t" ) - "GetYear"( @"Start Timestep" ) + IF ( "GetMonth"( @"Start Timestep" ) > 9.00000000 )
  THEN
   1.00000000
@@ -1949,7 +1947,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown (copied rule from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint. ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
       IF_STATEMENT ("TierIs"( "Equalization", @"t", TRUE ) COMMENTED_BY "Initial water year, in an Equalization Condition in Start Year <br>") THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", TRUE ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) , 8230000.00000000 "acre-feet" } );
 
@@ -2031,7 +2028,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 02/02/2011 (copied rule from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "Model needs to set the teir for the current year if at the start timestep, regardless of month. <br>";
       $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "PowellReleaseTier"( $ "PowellToMeadData.AugEOYPowellPEProjection" ["DateToCheckJan1Elevation"( @"t", TRUE )], "RelativeEOWYDate"( @"t" ) );
 
@@ -2054,7 +2050,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Edited execution constraints to match Powell policy group rule. Changed rule TARV calculation to match Powell policy set rule. <br><br>S.Baker, 2018/10/17: Changed column number in releaseTable[AnnualVolume, Ncol - 3]<br>MTOM was failing in testbed runs in this rule in high inflow years when Powell was trying to release a large volume. In the historical run of 1983-06, the model aborted since it sets the initial TARV to 30 MAF based on the condition releaseTable[AnnualVolume, Ncol ? 2].  This caused the model to look for too high of upper bound in the function ?CalculatePowellMonthlyRelease?.  The upper bound was being reset in function 'FindRemainingReleaseUpperBoundColumn' by adding + 1 index which cause model to look for table index that didn?t exist. When we use Ncol ? 3, the TARV is initially set to 20 MAF and MTOM runs successfully finding a realistic TARV (18 MAF). ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
       IF_STATEMENT (NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { 8230.00000000 "1000 acre-feet" , WITH SLOT releaseTable = IF ( "GetYear"( @"Start Timestep" ) >= 2017.00000000 )
  THEN
@@ -2094,7 +2089,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>TP 20171017: Removed Setting the volume for the first water year, only sets outyear volumes now<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "For August timestep with Lower Balancing Release Tier in next outyear";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "Min"( "Max"( "EqualizationReleaseWithCarryover"( "RelativeEOWYDate"( @"t + 2" ) ), $ "PowellData.LowerTierMinAnnualRelease" [] ), $ "PowellData.LowerTierMaxAnnualRelease" [] );
 
@@ -2109,7 +2103,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170718: Added &quot;OR StartMonthIsSeptember()&quot; to condition originally for August; Sarah B. discovered this error and proposed the fix<br><br>TP, 20171017: Removed any setting of the First water year from this Rule<br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "In August with Mid-elevation tier for the next outyear";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1025.00000000 "ft" )
  THEN
@@ -2136,7 +2129,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 06/21/2012<br><br>MC, 20171102: Added use of new slot PowellData.TARVTolerance to determine when refinement of TARV will stop.<br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement. Add time step run constraint to match IFs in rule.<br><br>S.Baker, 2018/10/17 & 2018/11/26: (edited #1 at later date)<br>(1) Added WITH statement to store TARV and use in IF statement to look if solved TARV was equal to previous TARV. Then, allow for setting of the PowellData.ReleaseVolumeSetFlag when TARV solved in the current iteration is equal to the previously set TARV. This is necessary for solving for the carryover release pattern from Powell. This occurs normally when TARV is not changed from 8.23 MAF. <br>(2) When calculating if the [ TARV - (CurrentAnnualRelease + VolumeDeviation) ] is within the TARV tolerance, carryover needs to be subtracted from the calculated volume. If there was a carryover volume calculated from the current year, the CurrentAnnualRelease would not account for this carryover volume that could not be released from Powell. <br>(3) When taking the MaxItem, the first IF statement needs to account for negative values for ReleaseAdjustment. This is done by taking the absolute value of ReleaseAdjustment. <br>(4) The calculation resulting from a true IF statement (in the MaxItem function) needs to account for carryover. The new TARV calculation should account be: [ CurrentAnnualRelease - Carryover(from last year if not UEB) + Release Adjust + Carryover(from current year) ] ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
       IF_STATEMENT (( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "At Start Timestep for initial water year when release tier is either Upper Elevation Balancing or Equalization") THEN
             WITH_STATEMENT (NUMERIC VolumeDeviation = "VolumeDeviationFromEOWYTarget"( "RelativeEOWYDate"( @"t" ) )) DO
             WITH_STATEMENT (NUMERIC ReleaseAdjustment = "ReleaseAdjustment"( VolumeDeviation, "RelativeEOWYDate"( @"t" ) )) DO
@@ -2242,7 +2234,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>S.Baker, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 20180925: Replaced function 'GetMeadProjectedPoolElevation' with function 'GetProjectedPoolElevation'.";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "In August or September start month with UEBT for outyear";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Powell", "ElevationToStorage"( % "Powell", $ "Powell.Pool Elevation" ["DateToCheckEOWYElevation"( @"t", FALSE )] ) - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] ) ) > "EqLevel"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) )
  THEN
@@ -2283,7 +2274,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br>Initial changes: sc 02/02/11;TP 08/20/2014; MC, 20170511; TP 10/17/2017  <br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement. Disabled PowellData.ReleaseVolumeSetFlag since this flag should be set in the Refine Equalization rule. ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "MaxItem"( { GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) , 8230000.00000000 "acre-feet" } );
 
       $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := GET @INDEX 1.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) );
@@ -2299,7 +2289,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints and removed from each IF statement in rule.<br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot;. This doesn't cause problems in the normal Powell policy group since the rule &quot;Set Release Tier&quot; doesn't have the EOCY Powell Pool Elevation. Therefore, the rule &quot;Set Release Tier&quot; is skipped until the rule &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot; has executed successfully. The rule priorities were changed to make the ruleset more efficiently. ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "Model needs to set the teir for the following water year if current timestep is August. <br>";
       IF_STATEMENT ("MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) AND @"t + 2" IN "WaterYearDatesByGroup"( 2.00000000 )) THEN
             WITH_STATEMENT (NUMERIC Carryover = NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] )) DO
@@ -2382,7 +2371,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160728: Changed the local variable &quot;watYearIndex&quot; name to &quot;waterYearNumber&quot; for consistency with the rule Set Powell Outflow; make a function to do the calculation?; added the setting of Powell.Outflow values for testing with new carryover functionality<br>MC, 20170405: Can add use of user-defined function GetWaterYearNumber in calculation of local varaible waterYearNumber<br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot;. This doesn't cause problems in the normal Powell policy group since the rule &quot;Set Release Tier&quot; doesn't have the EOCY Powell Pool Elevation. Therefore, the rule &quot;Set Release Tier&quot; is skipped until the rule &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot; has executed successfully. The rule priorities were changed to make the ruleset more efficiently. ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
       WITH_STATEMENT (NUMERIC waterYearNumber = ( "GetYear"( @"t" ) - "GetYear"( @"Start Timestep" ) + IF ( "GetMonth"( @"Start Timestep" ) > 9.00000000 )
  THEN
   1.00000000
@@ -2442,7 +2430,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br>Initial changes: SC 02/02/11;TP 08/20/2014; MC, 20170511; TP 10/13/2017  <br><br>TP: 20171017: Added and set the rule to only set the first water year.<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. Edited setting of 'PowellData.UpperElevBalBranch to check if this value is input before trying to set it. This issue was initially causing this rule to exit without setting values. <br>S.Baker, 20180921: Removed run cycle constraint in rule (2nd IF). Removed IF @t = start timestep within rules since this is an execution constraint. Added IsInput(TARV) constraint to execution constraints and removed from each IF statement in rule.";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
       IF_STATEMENT ("TierIs"( "Equalization", @"t", TRUE ) COMMENTED_BY "Initial water year, in an Equalization Condition in Start Year <br>") THEN
             $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", TRUE ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) , 8230000.00000000 "acre-feet" } );
 
@@ -2524,7 +2511,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>TP, 20171017: Added this rule and only allow it to execute in the start timestep for the first water year<br>S.Baker, 20180924: Added IsNaN(ReleaseTier) constraint to execution constraints. <br><br><br>";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
     DESCRIPTION          "Model needs to set the teir for the current year if at the start timestep, regardless of month. <br>";
       $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "PowellReleaseTier"( $ "PowellToMeadData.AugEOYPowellPEProjection" ["DateToCheckJan1Elevation"( @"t", TRUE )], "RelativeEOWYDate"( @"t" ) );
 
@@ -2547,7 +2533,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160908: Previously added SumFlowsToVolume(...) to MaxItem; added IF-ELSE to deal with October when no previous WY release would have occurred<br><br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints. <br>S.Baker, 2018/10/17: Changed column number in releaseTable[AnnualVolume, Ncol - 3]<br>MTOM was failing in testbed runs in this rule in high inflow years when Powell was trying to release a large volume. In the historical run of 1983-06, the model aborted since it sets the initial TARV to 30 MAF based on the condition releaseTable[AnnualVolume, Ncol ? 2].  This caused the model to look for too high of upper bound in the function ?CalculatePowellMonthlyRelease?.  The upper bound was being reset in function 'FindRemainingReleaseUpperBoundColumn' by adding + 1 index which cause model to look for table index that didn?t exist. When we use Ncol ? 3, the TARV is initially set to 20 MAF and MTOM runs successfully finding a realistic TARV (18 MAF). ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] := "MaxItem"( { 8230.00000000 "1000 acre-feet" , WITH SLOT releaseTable = IF ( "GetYear"( @"Start Timestep" ) >= 2017.00000000 )
  THEN
   $ "PowellData.PowellMonthlyReleaseTable"
@@ -2915,7 +2900,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC FALSE;
       FOREACH (DATETIME date IN "GetDates"( @"24:00:00 Current Month Min DayOfMonth, Current Year", @"24:00:00 Current Month Max DayOfMonth, Current Year", "1 days" )) DO
             $ "KNN_MTOM.FlamingGorgeDaily" [date] := $ "FlamingGorge.Outflow" [];
 
@@ -2932,7 +2916,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC FALSE;
       WITH_STATEMENT (NUMERIC SummedDaily = "VolumeToFlow"( "SumFlowsToVolume"( $ "KNN_MTOM.FlamingGorgeDaily", @"24:00:00 Current Month Min DayOfMonth, Current Year", @"24:00:00 Current Month Max DayOfMonth, Current Year" ), @"t" )) DO
             WITH_STATEMENT (NUMERIC OutflowToMaxPE = "SolveOutflow"( % "FlamingGorge", $ "FlamingGorge.Inflow" [], "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.MaxPE" [] ), $ "FlamingGorge.Storage" [@"t - 1"], @"t" )) DO
             $ "FlamingGorge.Outflow" [] := "Max"( SummedDaily, OutflowToMaxPE );
@@ -2950,7 +2933,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC FALSE;
       WITH_STATEMENT (NUMERIC RampRate = $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"t"], 0.00000000] * 1.00000000 "cfs") DO
             WITH_STATEMENT (NUMERIC DaysToDownRamp = "RoundToNearestDay"( ( $ "KNN_MTOM.FlamingGorgeDaily" [@"24:00:00 July Max DayOfMonth, Current Year"] - $ "FlamingGorge.Outflow" [] ) / RampRate * 1.00000000 "day" )) DO
             IF_STATEMENT ($ "KNN_MTOM.FlamingGorgeDaily" [@"24:00:00 July Max DayOfMonth, Current Year"] > $ "FlamingGorge.Outflow" [] + RampRate) THEN
@@ -3029,7 +3011,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20180312: Modified this rule between the FEB18 and MAR18 MTOM runs to only call the function GetFGBaseFlowMagnitude, which was also modified to ensure the outflow is sufficient to keep the reservoir below the Max PE";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC FALSE;
       $ "FlamingGorge.Outflow" [] := "GetFGBaseFlowMagnitude"(  );
 
     END;
@@ -3053,7 +3034,6 @@ BEGIN
 
       ENDFOREACH;
 
-    BREAKPOINT AFTER_EXEC FALSE;
     DESCRIPTION          "Yampa";
       FOREACH (NUMERIC index IN { 0.00000000 , 1.00000000 , 2.00000000 , 3.00000000 , 4.00000000 }) DO
             IF_STATEMENT ($ "FlamingGorgeData.YampaAprJulPercentExceedance" [] <= $ "FlamingGorgeData.HydrologicClassPercentileLimits" [index, 1.00000000]) THEN
@@ -3075,7 +3055,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC FALSE;
       FOREACH (NUMERIC index IN { 0.00000000 , 1.00000000 , 2.00000000 , 3.00000000 , 4.00000000 }) DO
             IF_STATEMENT ($ "KNN_MTOM.AprJulPercentExceedanceBaseFlow" [] <= $ "FlamingGorgeData.HydrologicClassPercentileLimits" [index, 1.00000000]) THEN
             IF_STATEMENT (IsNaN $ "KNN_MTOM.BaseFlowHClass" []) THEN
@@ -5056,7 +5035,7 @@ BEGIN
    THEN
     $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
    ELSE
-    $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - $ "ICSProjectionData.California_ECICSCreationIID" ["Dec31ofYear"( @"t" )] - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
+    $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] - $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] ) - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
    ENDIF
   ENDIF
  ELSE
@@ -7663,7 +7642,6 @@ BEGIN
 
     END;
 
-    BREAKPOINT AFTER_EXEC FALSE;
     FUNCTION       "PredictedYampaFlow" ( DATETIME startDate, DATETIME endDate )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
@@ -8503,6 +8481,8 @@ BEGIN
   NOTES          "";
   BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "DeliveryAndCreationMWDICS" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -8517,7 +8497,7 @@ BEGIN
  THEN
   0.00000000 "acre-ft"
  ELSE
-  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December 31, Previous Year"] ), 0.00000000 "acre-ft" ) COMMENTED_BY "Account Space <br>" , ( $ "ICS Credits.MeadBankParameters" ["California", "Max Put"] - $ "ICS Credits.AnnualCreationEC_IID" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) - $ "AnnualWaterUse.MWDMinimumAnnualDelivery" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
+  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December 31, Previous Year"] ), 0.00000000 "acre-ft" ) COMMENTED_BY "Account Space <br>" , ( $ "ICS Credits.MeadBankParameters" ["California", "Max Put"] - $ "ICSProjectionData.AnnualCreationEC_IID_Default" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) - $ "AnnualWaterUse.MWDMinimumAnnualDelivery" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
  ENDIF DO
   WITH NUMERIC totalDeliveryOfMWDICS = "MinItem"( { IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NOT "IsMRM"(  ) )
   THEN
@@ -8529,7 +8509,7 @@ BEGIN
    ELSE
     $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Take Step 1"] COMMENTED_BY "Not Surplus or Shortage <br>"
    ENDIF
-  ENDIF , ( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Take"] - ( $ "ICS Credits.AnnualDeliveryBiNat_IID" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDeliveryEC_IID" [@"24:00:00 December 31, Current Year"] ), $ "ICS Credits.TotalICS_MWD" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Make sure the amount of Delivery taken is within the MWD ICS bank or below <br>the Maximum Take that MWD can have. TP 12/18/2017  <br>" + creationOfMWDECICS * "SystemTaxAdjustment"(  ) ) COMMENTED_BY "Available ICS Water <br>" } ) DO
+  ENDIF , ( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Take"] - ( $ "ICSProjectionData.AnnualDeliveryBiNat_IID_Default" [@"24:00:00 December 31, Current Year"] + $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December 31, Current Year"] ), $ "ICS Credits.TotalICS_MWD" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Make sure the amount of Delivery taken is within the MWD ICS bank or below <br>the Maximum Take that MWD can have. TP 12/18/2017  <br>" + creationOfMWDECICS * "SystemTaxAdjustment"(  ) ) COMMENTED_BY "Available ICS Water <br>" } ) DO
    { totalDeliveryOfMWDICS , creationOfMWDECICS }
   ENDWITH
  ENDWITH;
@@ -8629,6 +8609,8 @@ BEGIN
 
     END;
 
+      BREAKPOINT BEFORE_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "ICSAccountingForMWD" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -8663,7 +8645,7 @@ BEGIN
     ELSE
      $ "ICS Credits.AnnualCreationBiNat_MWD" ["Dec31ofYear"( @"t" )]
     ENDIF COMMENTED_BY "If the LB Condition is shortage, do not create any ICS water <br>" DO
-     WITH NUMERIC deliveryChargedToEC = "Min"( totalDeliveryOfMWDICS, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfMWDECICS ) DO
+     WITH NUMERIC deliveryChargedToEC = "Min"( totalDeliveryOfMWDICS, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfMWDECICS * "SystemTaxAdjustment"(  ) ) DO
       WITH NUMERIC deliveryChargedToSE = "Min"( totalDeliveryOfMWDICS - deliveryChargedToEC, $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationSysEff_MWD" ["Dec31ofYear"( @"t" )] ) DO
        WITH NUMERIC deliveryChargedToBiNat = "Min"( totalDeliveryOfMWDICS - deliveryChargedToEC - deliveryChargedToSE, $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_MWD" ["Dec31ofYear"( @"t" )] ) DO
         WITH NUMERIC mwdDiversionReduction = "Max"( totalDeliveryOfMWDICS - deliveryChargedToEC - deliveryChargedToSE - deliveryChargedToBiNat, 0.00000000 "acre-ft" ) DO
@@ -8824,6 +8806,8 @@ BEGIN
 
     END;
 
+      BREAKPOINT BEFORE_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "ICSAccountingForIID" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -8834,15 +8818,36 @@ BEGIN
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: CH, 5/10/18";
     BEGIN
 
-      WITH NUMERIC ECICSIID = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
+      WITH NUMERIC AnnualDeliveryBiNat = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
  THEN
-  $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationEC_IID" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment"(  )
+  0.00000000 "acre-ft"
  ELSE
-  ( $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_IID" [@"24:00:00 December Max DayOfMonth, Current Year"] ) * 0.97000000 + $ "ICS Credits.AnnualCreationEC_IID" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment"(  )
- ENDIF COMMENTED_BY "Current year's EC ICS balance - no delivery in shortage condition <br>" DO
-  WITH NUMERIC BiNatICSIID = ( $ "ICS Credits.BiNationalICS_IID" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_IID" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliveryBiNat_IID" [@"24:00:00 December Max DayOfMonth, Current Year"] ) COMMENTED_BY "Current year's BiNat ICS balance <br>" DO
-   WITH NUMERIC totalICSIID = ECICSIID + BiNatICSIID DO
-    { ECICSIID , BiNatICSIID , totalICSIID }
+  $ "ICSProjectionData.AnnualDeliveryBiNat_IID_Default" [@"24:00:00 December 31, Current Year"]
+ ENDIF DO
+  WITH NUMERIC AnnualDeliveryEC = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
+  THEN
+   0.00000000 "acre-ft"
+  ELSE
+   $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December 31, Current Year"]
+  ENDIF DO
+   WITH NUMERIC AnnualCreationEC = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
+   THEN
+    0.00000000 "acre-ft"
+   ELSE
+    $ "ICSProjectionData.AnnualCreationEC_IID_Default" [@"24:00:00 December 31, Current Year"]
+   ENDIF DO
+    WITH NUMERIC ECICSIID = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
+    THEN
+     $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December Max DayOfMonth, Previous Year"] + AnnualCreationEC * "SystemTaxAdjustment"(  )
+    ELSE
+     ( $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December Max DayOfMonth, Previous Year"] - AnnualDeliveryEC ) * "EvapTaxAdjustment"(  ) + AnnualCreationEC * "SystemTaxAdjustment"(  )
+    ENDIF COMMENTED_BY "Current year's EC ICS balance - no delivery in shortage condition <br>" DO
+     WITH NUMERIC BiNatICSIID = ( $ "ICS Credits.BiNationalICS_IID" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_IID" [@"24:00:00 December Max DayOfMonth, Current Year"] - AnnualDeliveryBiNat ) COMMENTED_BY "Current year's BiNat ICS balance <br>" DO
+      WITH NUMERIC totalICSIID = ECICSIID + BiNatICSIID DO
+       { AnnualDeliveryBiNat , AnnualDeliveryEC , AnnualCreationEC , ECICSIID , BiNatICSIID , totalICSIID }
+      ENDWITH
+     ENDWITH
+    ENDWITH
    ENDWITH
   ENDWITH
  ENDWITH;
@@ -9791,7 +9796,7 @@ BEGIN
 
   UTILITY_GROUP "Flood Control Functions";
   DESCRIPTION   "";
-  ACTIVE        FALSE;
+  ACTIVE        TRUE;
   NOTES          "";
   BEGIN
 
