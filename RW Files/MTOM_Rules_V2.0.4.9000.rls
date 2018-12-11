@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 13:23 December 4, 2018
+# Created 16:15 December 10, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -5035,7 +5035,7 @@ BEGIN
    THEN
     $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
    ELSE
-    $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] - $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] ) - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
+    $ "AnnualWaterUse.CA_BasicApportionment" [] - $ "ICSProjectionData.California_EstimatedPayback" ["Dec31ofYear"( @"t" )] - ( $ "ICSProjectionData.AnnualCreationEC_IID_Default" ["Dec31ofYear"( @"t" )] - $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" ["Dec31ofYear"( @"t" )] ) - $ "ICSProjectionData.CA_SystemConservation" ["Dec31ofYear"( @"t" )]
    ENDIF
   ENDIF
  ELSE
