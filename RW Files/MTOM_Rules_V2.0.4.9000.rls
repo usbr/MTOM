@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 16:15 December 10, 2018
+# Created 16:40 December 11, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -544,29 +544,41 @@ BEGIN
     RULE                 "Flood Control ICS Reduction";
     DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re calculates and assignes the Total ICS Volumes for each state. TP 11/4/2014<br><br>SLOTS SET: ICS Credits.ExtraordinaryConservationICS_CA; ICS Credits.ExtraordinaryConservationICS_NV; ICS Credits.ExtraordinaryConservationICS_AZ; ICS Credits.TotalICS_CA; ICS Credits.TotalICS_NV; ICS Credits.TotalICS_AZ; ICS Credits.AnnualDeliveryEC_CA; ICS Credits.AnnualDeliveryEC_NV; ICS Credits.AnnualDeliveryEC_AZ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND NaNToZero ( $ "FloodControlOutput.Flood Control Flag" [@"t"] ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND NaNToZero ( $ "Surplus.Flood Control Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) AND ( @"t" == @"24:00:00 December Max DayOfMonth, Current Year" OR @"t" == @"Finish Timestep" );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC floodControlVol = $ "FloodControlOutput.FCrelease" [@"t"]) DO
-            WITH_STATEMENT (LIST stateECBalances = "FloodControlECICSBalance"( "FlowToVolume"( floodControlVol, @"t" ) )) DO
-            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 3.00000000 FROM stateECBalances;
+      WITH_STATEMENT (NUMERIC floodControlVol = "SumFlowsToVolume"( $ "Lower Basin Output.MexicoExcessFlow", @"24:00:00 January Max DayOfMonth, Current Year", "DateMin"( @"24:00:00 December Max DayOfMonth, Current Year", @"Finish Timestep" ) )) DO
+            WITH_STATEMENT (LIST stateECBalances = "FloodControlECICSBalance"( floodControlVol )) DO
+            $ "ICS Credits.AnnualDeliveryEC_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 4.00000000 FROM stateECBalances;
+            $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 5.00000000 FROM stateECBalances;
+            $ "ICS Credits.AnnualDeliveryEC_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
-            $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 6.00000000 FROM stateECBalances;
+          INACTIVE      $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.AnnualDeliveryEC_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.ExtraordinaryConservationICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 2.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 1.00000000 FROM stateECBalances ) + GET @INDEX 2.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.ExtraordinaryConservationICS_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 3.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.ExtraordinaryConservationICS_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 4.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 5.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.TotalICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 6.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 5.00000000 FROM stateECBalances ) + GET @INDEX 6.00000000 FROM stateECBalances;
 
             $ "ICS Credits.TotalICS_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 7.00000000 FROM stateECBalances;
 
             $ "ICS Credits.TotalICS_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 8.00000000 FROM stateECBalances;
-
-            $ "ICS Credits.AnnualDeliveryEC_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
-
-            $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM stateECBalances;
-
-            $ "ICS Credits.AnnualDeliveryEC_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 2.00000000 FROM stateECBalances;
 
       END_WITH_STATEMENT;
 
@@ -8481,8 +8493,6 @@ BEGIN
   NOTES          "";
   BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
-    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "DeliveryAndCreationMWDICS" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -8516,6 +8526,8 @@ BEGIN
 
     END;
 
+      BREAKPOINT BEFORE_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "FloodControlECICSBalance" ( NUMERIC fcvolume )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -8523,31 +8535,33 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split, edited to more accurately reflect ICS  flood control in interim guidlines (% ICS change)";
     BEGIN
 
-      WITH NUMERIC caECICS = $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] DO
-  WITH NUMERIC nvECICS = $ "ICS Credits.ExtraordinaryConservationICS_NV" ["Dec31ofYear"( @"t" )] DO
-   WITH NUMERIC azECICS = $ "ICS Credits.ExtraordinaryConservationICS_AZ" ["Dec31ofYear"( @"t" )] DO
-    WITH NUMERIC totalECICS = caECICS + nvECICS + azECICS DO
-     WITH NUMERIC caOtherICS = $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] - caECICS DO
-      WITH NUMERIC nvOtherICS = $ "ICS Credits.TotalICS_NV" ["Dec31ofYear"( @"t" )] - nvECICS DO
-       WITH NUMERIC azOtherICS = $ "ICS Credits.TotalICS_AZ" ["Dec31ofYear"( @"t" )] - azECICS DO
-        IF ( fcvolume < totalECICS )
-        THEN
-         WITH NUMERIC volRatio = fcvolume / totalECICS DO
-          WITH LIST stateECBalLista = { volRatio * caECICS , volRatio * nvECICS , volRatio * azECICS } DO
-           WITH LIST totalECBalList = { caOtherICS + GET @INDEX 0.00000000 FROM stateECBalLista , nvOtherICS + GET @INDEX 1.00000000 FROM stateECBalLista , azOtherICS + GET @INDEX 2.00000000 FROM stateECBalLista } DO
-            { 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , GET @INDEX 0.00000000 FROM stateECBalLista , GET @INDEX 1.00000000 FROM stateECBalLista , GET @INDEX 2.00000000 FROM stateECBalLista , GET @INDEX 0.00000000 FROM totalECBalList , GET @INDEX 1.00000000 FROM totalECBalList , GET @INDEX 2.00000000 FROM totalECBalList }
+      WITH NUMERIC mwdECICS = $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] DO
+  WITH NUMERIC iidECICS = $ "ICS Credits.ExtraordinaryConservationICS_IID" ["Dec31ofYear"( @"t" )] DO
+   WITH NUMERIC nvECICS = $ "ICS Credits.ExtraordinaryConservationICS_NV" ["Dec31ofYear"( @"t" )] DO
+    WITH NUMERIC azECICS = $ "ICS Credits.ExtraordinaryConservationICS_AZ" ["Dec31ofYear"( @"t" )] DO
+     WITH NUMERIC totalECICS = mwdECICS + iidECICS + nvECICS + azECICS DO
+      WITH NUMERIC mwdOtherICS = $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] - mwdECICS DO
+       WITH NUMERIC iidOtherICS = $ "ICS Credits.TotalICS_IID" ["Dec31ofYear"( @"t" )] - iidECICS DO
+        WITH NUMERIC nvOtherICS = $ "ICS Credits.TotalICS_NV" ["Dec31ofYear"( @"t" )] - nvECICS DO
+         WITH NUMERIC azOtherICS = $ "ICS Credits.TotalICS_AZ" ["Dec31ofYear"( @"t" )] - azECICS DO
+          IF ( fcvolume < totalECICS )
+          THEN
+           WITH LIST stateECBalLista = { mwdECICS - ( mwdECICS / totalECICS ) * fcvolume , iidECICS - ( iidECICS / totalECICS ) * fcvolume , nvECICS - ( nvECICS / totalECICS ) * fcvolume , azECICS - ( azECICS / totalECICS ) * fcvolume } DO
+            WITH LIST totalECBalList = { mwdOtherICS + GET @INDEX 0.00000000 FROM stateECBalLista , iidOtherICS + GET @INDEX 1.00000000 FROM stateECBalLista , nvOtherICS + GET @INDEX 2.00000000 FROM stateECBalLista , azOtherICS + GET @INDEX 3.00000000 FROM stateECBalLista } DO
+             { 0.00000000 "acre-ft" , GET @INDEX 0.00000000 FROM stateECBalLista , GET @INDEX 1.00000000 FROM stateECBalLista , GET @INDEX 2.00000000 FROM stateECBalLista , GET @INDEX 3.00000000 FROM stateECBalLista , GET @INDEX 0.00000000 FROM totalECBalList , GET @INDEX 1.00000000 FROM totalECBalList , GET @INDEX 2.00000000 FROM totalECBalList , GET @INDEX 3.00000000 FROM totalECBalList }
+            ENDWITH
            ENDWITH
-          ENDWITH
+          ELSE
+           { 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , mwdOtherICS , iidOtherICS , nvOtherICS , azOtherICS } COMMENTED_BY "if the FC volume is greater than the EC ICS total delivery volume and EC ICS volume, then reduce the state values for delivery and volume to 0 AF and the total ICS volume for each state <br>will be equal to the other ICS Volumes in the system. "
+          ENDIF COMMENTED_BY "If the Flood Control is greater than the delivery volume, but less than the total EC ICS volume plus the EC ICS Delivery, reduce the state EC ICS volume by the amount<br>of the Flood Control volume less the EC ICS total delivery volume. Reduce the current EC ICS volumes for each state by the ratio derived and reduce the Total ICS Volume <br>for each state by the difference each state volume of EC ICS "
          ENDWITH
-        ELSE
-         { 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , 0.00000000 "acre-ft" , caOtherICS , nvOtherICS , azOtherICS } COMMENTED_BY "if the FC volume is greater than the EC ICS total delivery volume and EC ICS volume, then reduce the state values for delivery and volume to 0 AF and the total ICS volume for each state <br>will be equal to the other ICS Volumes in the system. "
-        ENDIF COMMENTED_BY "If the Flood Control is greater than the delivery volume, but less than the total EC ICS volume plus the EC ICS Delivery, reduce the state EC ICS volume by the amount<br>of the Flood Control volume less the EC ICS total delivery volume. Reduce the current EC ICS volumes for each state by the ratio derived and reduce the Total ICS Volume <br>for each state by the difference each state volume of EC ICS "
+        ENDWITH
        ENDWITH
-      ENDWITH
-     ENDWITH COMMENTED_BY "Get the Total ICS Volume for each stat minuse the EC water"
+      ENDWITH COMMENTED_BY "Get the Total ICS Volume for each stat minuse the EC water"
+     ENDWITH
     ENDWITH
    ENDWITH
   ENDWITH
@@ -8609,8 +8623,6 @@ BEGIN
 
     END;
 
-      BREAKPOINT BEFORE_EXEC TRUE;
-    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "ICSAccountingForMWD" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -8806,8 +8818,6 @@ BEGIN
 
     END;
 
-      BREAKPOINT BEFORE_EXEC TRUE;
-    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "ICSAccountingForIID" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
