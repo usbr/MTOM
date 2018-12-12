@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 16:40 December 11, 2018
+# Created 08:24 December 12, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -556,7 +556,7 @@ BEGIN
 
             $ "ICS Credits.AnnualDeliveryEC_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
-          INACTIVE      $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+            $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
             $ "ICS Credits.AnnualDeliveryEC_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
@@ -1377,6 +1377,9 @@ BEGIN
 
           DESCRIPTION          "Delivery of Imported ICS NV - Quantified Surplus Year";
       $ "ICS Credits.AnnualDeliveryImpICS_NV" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 15.00000000 FROM nvICSValues );
+
+          DESCRIPTION          "Delivery of ECICS NV<br>";
+      $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 16.00000000 FROM nvICSValues );
 
       END_WITH_STATEMENT;
 
@@ -8720,82 +8723,89 @@ BEGIN
     ELSE
      0.00000000 "acre-ft"
     ENDIF DO
-     WITH NUMERIC deliveryTribDSS_NV = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
+     WITH NUMERIC deliveryECICS = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 ) )
      THEN
-      WITH NUMERIC shortageVolume = $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) - 1.00000000, "Nevada"] DO
-       IF ( $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] <= $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume )
-       THEN
-        0.00000000 "acre-feet"
-       ELSE
-        "Min"( $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] - ( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume ), creationTribDSS_NV * "SystemTaxAdjustment"(  ) )
-       ENDIF COMMENTED_BY "Deliver TribDSS, up to available created, to make up shortage"
-      ENDWITH COMMENTED_BY "LowerBasinDemandVariability.LowerBasinCondition = 1 indicates Shortage, but the value of the <br>Shortage flag indicates the level and is needed to calculate shortage volume"
+      0.00000000 "acre-ft"
      ELSE
-      0.00000000 "acre-feet"
+      $ "ICSProjectionData.AnnualDeliveryEC_NV_default" ["Dec31ofYear"( @"t" )]
      ENDIF DO
-      WITH NUMERIC deliveryImpDSS_NV = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
+      WITH NUMERIC deliveryTribDSS_NV = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
       THEN
        WITH NUMERIC shortageVolume = $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) - 1.00000000, "Nevada"] DO
-        IF ( $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] <= $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume + deliveryTribDSS_NV )
+        IF ( $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] <= $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume )
         THEN
          0.00000000 "acre-feet"
         ELSE
-         "Min"( $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] - ( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume + deliveryTribDSS_NV ), creationTribDSS_NV * "SystemTaxAdjustment"(  ) )
-        ENDIF COMMENTED_BY "Deliver ImpDSS, up to available created, to make up shortage after TribDSS used"
-       ENDWITH
+         "Min"( $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] - ( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume ), creationTribDSS_NV * "SystemTaxAdjustment"(  ) )
+        ENDIF COMMENTED_BY "Deliver TribDSS, up to available created, to make up shortage"
+       ENDWITH COMMENTED_BY "LowerBasinDemandVariability.LowerBasinCondition = 1 indicates Shortage, but the value of the <br>Shortage flag indicates the level and is needed to calculate shortage volume"
       ELSE
        0.00000000 "acre-feet"
       ENDIF DO
-       WITH NUMERIC deliveryofTribICS = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 ) COMMENTED_BY "Quantified Surplus" )
+       WITH NUMERIC deliveryImpDSS_NV = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
        THEN
-        creationTribICS_NV * "SystemTaxAdjustment"(  )
+        WITH NUMERIC shortageVolume = $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) - 1.00000000, "Nevada"] DO
+         IF ( $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] <= $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume + deliveryTribDSS_NV )
+         THEN
+          0.00000000 "acre-feet"
+         ELSE
+          "Min"( $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] - ( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume + deliveryTribDSS_NV ), creationTribDSS_NV * "SystemTaxAdjustment"(  ) )
+         ENDIF COMMENTED_BY "Deliver ImpDSS, up to available created, to make up shortage after TribDSS used"
+        ENDWITH
        ELSE
-        ( $ "ICS Credits.AnnualDeliveryTrib_NV" ["Dec31ofYear"( @"t" )] )
-       ENDIF
-       ELSEIF_COND ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 ) COMMENTED_BY "Shortage <br>" )
-       ELSEIF_CLAUSE ( 0.00000000 "acre-ft" )
-       END_ELSEIF DO
-        WITH NUMERIC deliveryofImpICS = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Quantified Surplus<br>" == 3.00000000 )
+        0.00000000 "acre-feet"
+       ENDIF DO
+        WITH NUMERIC deliveryofTribICS = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 ) COMMENTED_BY "Quantified Surplus" )
         THEN
-         creationIMPICS_NV * "SystemTaxAdjustment"(  )
+         creationTribICS_NV * "SystemTaxAdjustment"(  )
         ELSE
-         ( $ "ICS Credits.AnnualDeliveryImp_NV" ["Dec31ofYear"( @"t" )] )
+         ( $ "ICS Credits.AnnualDeliveryTrib_NV" ["Dec31ofYear"( @"t" )] )
         ENDIF
         ELSEIF_COND ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 ) COMMENTED_BY "Shortage <br>" )
         ELSEIF_CLAUSE ( 0.00000000 "acre-ft" )
         END_ELSEIF DO
-         WITH NUMERIC creationEC = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 ) COMMENTED_BY "This Check references the surplus value that represents Quantified Surplus in <br>the Determine Mead and Lower Basin Condition Rule. Quantified Surplus is set <br>as a value of 3 in the IsSurplusYear annual series slot. TP 7/28/2015" )
+         WITH NUMERIC deliveryofImpICS = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Quantified Surplus<br>" == 3.00000000 )
          THEN
-          0.00000000 "acre-ft"
+          creationIMPICS_NV * "SystemTaxAdjustment"(  )
          ELSE
-          $ "ICS Credits.AnnualCreationEC_NV" ["Dec31ofYear"( @"t" )]
-         ENDIF DO
-          WITH NUMERIC creationSE = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 )
+          ( $ "ICS Credits.AnnualDeliveryImp_NV" ["Dec31ofYear"( @"t" )] )
+         ENDIF
+         ELSEIF_COND ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 ) COMMENTED_BY "Shortage <br>" )
+         ELSEIF_CLAUSE ( 0.00000000 "acre-ft" )
+         END_ELSEIF DO
+          WITH NUMERIC creationEC = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 ) COMMENTED_BY "This Check references the surplus value that represents Quantified Surplus in <br>the Determine Mead and Lower Basin Condition Rule. Quantified Surplus is set <br>as a value of 3 in the IsSurplusYear annual series slot. TP 7/28/2015" )
           THEN
            0.00000000 "acre-ft"
           ELSE
-           $ "ICS Credits.AnnualCreationSysEff_NV" ["Dec31ofYear"( @"t" )]
+           $ "ICS Credits.AnnualCreationEC_NV" ["Dec31ofYear"( @"t" )]
           ENDIF DO
-           WITH NUMERIC creationBiNat = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 )
+           WITH NUMERIC creationSE = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 )
            THEN
             0.00000000 "acre-ft"
            ELSE
-            $ "ICS Credits.AnnualCreationBiNat_NV" ["Dec31ofYear"( @"t" )]
+            $ "ICS Credits.AnnualCreationSysEff_NV" ["Dec31ofYear"( @"t" )]
            ENDIF DO
-            WITH NUMERIC tribICSNV = creationTribICS_NV * "SystemTaxAdjustment"(  ) - $ "ICS Credits.AnnualDeliveryTrib_NV" ["Dec31ofYear"( @"t" )] DO
-             WITH NUMERIC impICSNV = creationIMPICS_NV * "SystemTaxAdjustment"(  ) - $ "ICS Credits.AnnualDeliveryImp_NV" ["Dec31ofYear"( @"t" )] DO
-              WITH NUMERIC tribDSSICSNV = creationTribDSS_NV * "SystemTaxAdjustment"(  ) - deliveryTribDSS_NV DO
-               WITH NUMERIC impDSSICSNV = creationImpDSS_NV * "SystemTaxAdjustment"(  ) - deliveryImpDSS_NV DO
-                WITH NUMERIC ECICSNV = IF ( $ "Mead.Pool Elevation" [@"t - 1"] <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
-                THEN
-                 $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )]
-                ELSE
-                 ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] ) * "EvapTaxAdjustment"(  ) + creationEC * "SystemTaxAdjustment"(  )
-                ENDIF COMMENTED_BY "Resulting ExtraordinaryConservation ICS. In the case that the previous year was a Quantified Surplus year, the <br>Tributary and Imported ICS would have been delivered and that is accounted for in the equation below. " DO
-                 WITH NUMERIC SEICSNV = ( $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationSE - $ "ICS Credits.AnnualDeliverySysEff_NV" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Resulting System Efficiency ICS " DO
-                  WITH NUMERIC BiNatICSNV = ( $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationBiNat - $ "ICS Credits.AnnualDeliveryBiNat_NV" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Resulting Bi National ICS " DO
-                   WITH NUMERIC totalICSNV = ( tribICSNV + impICSNV + ECICSNV + SEICSNV + BiNatICSNV ) COMMENTED_BY "Total ICS" DO
-                    { creationTribICS_NV , creationTribDSS_NV , SEICSNV , ECICSNV , tribDSSICSNV , impDSSICSNV , BiNatICSNV , totalICSNV , deliveryTribDSS_NV , deliveryImpDSS_NV , creationIMPICS_NV , creationImpDSS_NV , impICSNV , tribICSNV , deliveryofTribICS , deliveryofImpICS }
+            WITH NUMERIC creationBiNat = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 3.00000000 )
+            THEN
+             0.00000000 "acre-ft"
+            ELSE
+             $ "ICS Credits.AnnualCreationBiNat_NV" ["Dec31ofYear"( @"t" )]
+            ENDIF DO
+             WITH NUMERIC tribICSNV = creationTribICS_NV * "SystemTaxAdjustment"(  ) - $ "ICS Credits.AnnualDeliveryTrib_NV" ["Dec31ofYear"( @"t" )] DO
+              WITH NUMERIC impICSNV = creationIMPICS_NV * "SystemTaxAdjustment"(  ) - $ "ICS Credits.AnnualDeliveryImp_NV" ["Dec31ofYear"( @"t" )] DO
+               WITH NUMERIC tribDSSICSNV = creationTribDSS_NV * "SystemTaxAdjustment"(  ) - deliveryTribDSS_NV DO
+                WITH NUMERIC impDSSICSNV = creationImpDSS_NV * "SystemTaxAdjustment"(  ) - deliveryImpDSS_NV DO
+                 WITH NUMERIC ECICSNV = IF ( $ "Mead.Pool Elevation" [@"t - 1"] <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+                 THEN
+                  $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryECICS
+                 ELSE
+                  ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryECICS ) * "EvapTaxAdjustment"(  ) + creationEC * "SystemTaxAdjustment"(  )
+                 ENDIF COMMENTED_BY "Resulting ExtraordinaryConservation ICS. In the case that the previous year was a Quantified Surplus year, the <br>Tributary and Imported ICS would have been delivered and that is accounted for in the equation below. " DO
+                  WITH NUMERIC SEICSNV = ( $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationSE - $ "ICS Credits.AnnualDeliverySysEff_NV" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Resulting System Efficiency ICS " DO
+                   WITH NUMERIC BiNatICSNV = ( $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationBiNat - $ "ICS Credits.AnnualDeliveryBiNat_NV" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Resulting Bi National ICS " DO
+                    WITH NUMERIC totalICSNV = ( tribICSNV + impICSNV + ECICSNV + SEICSNV + BiNatICSNV ) COMMENTED_BY "Total ICS" DO
+                     { creationTribICS_NV , creationTribDSS_NV , SEICSNV , ECICSNV , tribDSSICSNV , impDSSICSNV , BiNatICSNV , totalICSNV , deliveryTribDSS_NV , deliveryImpDSS_NV , creationIMPICS_NV , creationImpDSS_NV , impICSNV , tribICSNV , deliveryofTribICS , deliveryofImpICS , deliveryECICS }
+                    ENDWITH
                    ENDWITH
                   ENDWITH
                  ENDWITH
