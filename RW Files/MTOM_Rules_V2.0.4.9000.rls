@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 08:24 December 12, 2018
+# Created 10:17 December 14, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -100,7 +100,7 @@ BEGIN
   THEN
    $ "AnnualWaterUse.California_Apportionment" [@"24:00:00 December 31, Current Year"]
   ELSE
-   $ "AnnualWaterUse.California_PreliminaryAdjustedApportionment" [@"24:00:00 December 31, Current Year"] + NaNToZero ( $ "ICS Credits.AnnualNVBankedinCA" ["Dec31ofYear"( @"t" )] ) - NaNToZero ( $ "ICS Credits.AnnualCreationEC_CA" ["Dec31ofYear"( @"t" )] ) + ( NaNToZero ( $ "ICS Credits.AnnualDeliveryBiNat_CA" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliveryEC_CA" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliverySysEff_CA" ["Dec31ofYear"( @"t" )] ) )
+   $ "AnnualWaterUse.California_PreliminaryAdjustedApportionment" [@"24:00:00 December 31, Current Year"] + NaNToZero ( $ "ICS Credits.AnnualNVBankedinCA" ["Dec31ofYear"( @"t" )] ) - NaNToZero ( $ "ICS Credits.AnnualCreationEC_MWD" ["Dec31ofYear"( @"t" )] ) + ( NaNToZero ( $ "ICS Credits.AnnualDeliveryBiNat_CA" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliveryEC_MWD" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliverySysEff_CA" ["Dec31ofYear"( @"t" )] ) )
   ENDIF
  ELSE
   $ "AnnualWaterUse.California_Apportionment" [@"24:00:00 December 31, Current Year"]
@@ -544,10 +544,12 @@ BEGIN
     RULE                 "Flood Control ICS Reduction";
     DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re calculates and assignes the Total ICS Volumes for each state. TP 11/4/2014<br><br>SLOTS SET: ICS Credits.ExtraordinaryConservationICS_CA; ICS Credits.ExtraordinaryConservationICS_NV; ICS Credits.ExtraordinaryConservationICS_AZ; ICS Credits.TotalICS_CA; ICS Credits.TotalICS_NV; ICS Credits.TotalICS_AZ; ICS Credits.AnnualDeliveryEC_CA; ICS Credits.AnnualDeliveryEC_NV; ICS Credits.AnnualDeliveryEC_AZ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND NaNToZero ( $ "Surplus.Flood Control Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) AND ( @"t" == @"24:00:00 December Max DayOfMonth, Current Year" OR @"t" == @"Finish Timestep" );
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND NaNToZero ( $ "Surplus.Flood Control Surplus Flag" ["Dec31ofYear"( @"t" )] ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) AND ( @"t" == @"24:00:00 December Max DayOfMonth, Current Year" OR @"t" == @"Finish Timestep" );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (NUMERIC floodControlVol = "SumFlowsToVolume"( $ "Lower Basin Output.MexicoExcessFlow", @"24:00:00 January Max DayOfMonth, Current Year", "DateMin"( @"24:00:00 December Max DayOfMonth, Current Year", @"Finish Timestep" ) )) DO
             WITH_STATEMENT (LIST stateECBalances = "FloodControlECICSBalance"( floodControlVol )) DO
             $ "ICS Credits.AnnualDeliveryEC_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
@@ -559,6 +561,16 @@ BEGIN
             $ "ICS Credits.AnnualDeliveryEC_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
             $ "ICS Credits.AnnualDeliveryEC_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.AnnualCreationEC_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.AnnualCreationEC_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+
+          INACTIVE      $ "ICS Credits.AnnualCreationEC_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+
+          INACTIVE      $ "ICS Credits.AnnualCreationEC_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
             $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM stateECBalances;
 
@@ -672,6 +684,14 @@ BEGIN
       END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
+
+      END_IF_STATEMENT;
+
+            IF_STATEMENT (( ( GET @INDEX 1.00000000 FROM iidICSValues ) + GET @INDEX 2.00000000 FROM iidICSValues ) != $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualCreationEC_IID_Default" ["Dec31ofYear"( @"t" )]) THEN
+            FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            $ "AAC:IID.Diversion Requested" [date] := $ "AAC:IID.Diversion Requested" [date] + "VolumeToFlow"( ( ( GET @INDEX 2.00000000 FROM iidICSValues ) - GET @INDEX 1.00000000 FROM iidICSValues ) * $ "Shortage.MonthlyPercents" ["GetMonth"( date ) - 1.00000000, "Equal"], date );
+
+      ENDFOREACH;
 
       END_IF_STATEMENT;
 
@@ -1182,7 +1202,7 @@ BEGIN
    WITH NUMERIC NonSNWANevadaDivReqs = FOR ( DATETIME date2 IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
     "FlowToVolume"( $ "FtMohaveIndRes:NV.Diversion Requested" [date2], date ) + "FlowToVolume"( $ "NvDvsToPkr:BigBend.Diversion Requested" [date2], date ) + "FlowToVolume"( $ "NvDvsToPkr:SCE.Diversion Requested" [date2], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Nv Mohave.Diversion Requested" [date2], date )
    ENDFOR DO
-    ( ( 300000.00000000 "acre-ft" - NonSNWANevadaDivReqs ) + dssDeliveries - shortageVolume ) COMMENTED_BY "Annual SNWP volume = (AZ annual allotment - Priority users diversions <br>+ Developed Shortage Supplies - Shortage volume)"
+    ( ( "Min"( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume, $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] ) - NonSNWANevadaDivReqs ) + dssDeliveries ) COMMENTED_BY "Annual SNWP volume = (NV annual allotment - Priority users diversions + Developed Shortage <br>Supplies - Shortage volume) <br>"
    ENDWITH
   ENDWITH
  ENDWITH * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Average"] COMMENTED_BY "Multiply by monthly percentage to get monthly volume", date ) COMMENTED_BY "Calculate the monthly SNWP diversion request under Shortage as a flow rate") DO
@@ -8506,7 +8526,7 @@ BEGIN
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>CH, 5/8/18: In MWD EC ICS creation assignment, maximum creation of MWD EC ICS edited to be CA max put - IID EC creation; in MWD ICS delivery assignment, available ICS water edited to be min of (MWD max take - IID total ICS) and (total MWD ICS + creation EC ICS*system tax) in order to separate MWD ICS creation and delivery from IID ICS creation and delivery <br>CH, 5/10/18: renamed function and internal variables to refer to MWD ICS instead of CA ICS to avoid confusion";
     BEGIN
 
-      WITH NUMERIC creationOfMWDECICS = IF ( ( ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR NOT "IsMRM"(  ) ) COMMENTED_BY "If the year is a Shortage Year, a Quantified Surplus Year, a Flood Control Year, <br>or if the run is a deterministic Min, Max or Most run, do not Create any ICS TP <br>12/18/2017 <br>" )
+      WITH NUMERIC creationOfMWDECICS = IF ( ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NOT "IsMRM"(  ) ) COMMENTED_BY "If the year is a Shortage Year, a Quantified Surplus Year, a Flood Control Year, <br>or if the run is a deterministic Min, Max or Most run, do not Create any ICS TP <br>12/18/2017 <br>" )
  THEN
   0.00000000 "acre-ft"
  ELSE
@@ -8514,7 +8534,7 @@ BEGIN
  ENDIF DO
   WITH NUMERIC totalDeliveryOfMWDICS = "MinItem"( { IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NOT "IsMRM"(  ) )
   THEN
-   0.00000000 "acre-ft" COMMENTED_BY "Shortage Years <br>"
+   0.00000000 "acre-ft" COMMENTED_BY "Shortage and flood control<br>"
   ELSE
    IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
    THEN
@@ -8529,7 +8549,6 @@ BEGIN
 
     END;
 
-      BREAKPOINT BEFORE_EXEC TRUE;
     BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "FloodControlECICSBalance" ( NUMERIC fcvolume )
     RETURN_TYPE    LIST;
@@ -8603,12 +8622,12 @@ BEGIN
       0.00000000 "acre-ft"
      ENDIF DO
       WITH NUMERIC deliveryChargedToBiNat = 0.00000000 "acre-ft" DO
-       WITH NUMERIC ECICSAZ = IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 ) )
+       WITH NUMERIC ECICSAZ = "Min"( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"], IF ( ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 ) )
        THEN
         $ "ICS Credits.ExtraordinaryConservationICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryChargedToEC + creationOfEC * "SystemTaxAdjustment"(  )
        ELSE
         ( $ "ICS Credits.ExtraordinaryConservationICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryChargedToEC ) * "EvapTaxAdjustment"(  ) + creationOfEC * "SystemTaxAdjustment"(  )
-       ENDIF COMMENTED_BY "Resulting ExtraordinaryConservation ICS " DO
+       ENDIF ) COMMENTED_BY "Resulting ExtraordinaryConservation ICS " DO
         WITH NUMERIC SEICSAZ = ( $ "ICS Credits.SystemEfficiencyICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfSE - deliveryChargedToSE ) COMMENTED_BY "Resulting System Efficiency ICS " DO
          WITH NUMERIC BiNatICSAZ = ( $ "ICS Credits.BiNationalICS_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfBiNat - deliveryChargedToBiNat ) COMMENTED_BY "Resulting Bi National ICS " DO
           WITH NUMERIC totalICSAZ = ( ECICSAZ + SEICSAZ + BiNatICSAZ ) COMMENTED_BY "Total ICS" DO
@@ -8636,44 +8655,36 @@ BEGIN
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br>CH, 5/10/18: Renamed function from ICSAccountingForCA to ICSAccountingForMWD and renamed internal variables to refer to MWD ICS instead of CA ICS";
     BEGIN
 
-      WITH NUMERIC totalDeliveryOfMWDICS = IF ( NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
- THEN
-  0.00000000 "acre-ft"
- ELSE
-  GET @INDEX 0.00000000 FROM "DeliveryAndCreationMWDICS"(  )
- ENDIF COMMENTED_BY "In shortage years no delivery of ICS is possible" DO
-  WITH NUMERIC creationOfMWDECICS = IF ( NaNToZero ( $ "Surplus.Quantified Surplus Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 OR NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
-  THEN
-   0.00000000 "acre-ft"
-  ELSE
-   GET @INDEX 1.00000000 FROM "DeliveryAndCreationMWDICS"(  )
-  ENDIF COMMENTED_BY "If the LB Condition is Quantified Surplus or shortage, do not create any ICS water" DO
-   WITH NUMERIC creationMWDSE = IF ( NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
-   THEN
-    0.00000000 "acre-ft"
-   ELSE
-    $ "ICS Credits.AnnualCreationSysEff_MWD" ["Dec31ofYear"( @"t" )]
-   ENDIF COMMENTED_BY "If the LB Condition is shortage, do not create any ICS water. Investments in long <br>term projects and these would be known and they would be scheduled by a date <br>where they can start getting credits after the completion of those projects, can <br>be created under any condition.  ST 9/11/2015 <br>" DO
-    WITH NUMERIC creationMWDBiNat = IF ( NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
+      WITH LIST CreationandDelivery = "DeliveryAndCreationMWDICS"(  ) DO
+  WITH NUMERIC totalDeliveryOfMWDICS = GET @INDEX 0.00000000 FROM CreationandDelivery DO
+   WITH NUMERIC creationOfMWDECICS = GET @INDEX 1.00000000 FROM CreationandDelivery DO
+    WITH NUMERIC creationMWDSE = IF ( NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
     THEN
      0.00000000 "acre-ft"
     ELSE
-     $ "ICS Credits.AnnualCreationBiNat_MWD" ["Dec31ofYear"( @"t" )]
-    ENDIF COMMENTED_BY "If the LB Condition is shortage, do not create any ICS water <br>" DO
-     WITH NUMERIC deliveryChargedToEC = "Min"( totalDeliveryOfMWDICS, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfMWDECICS * "SystemTaxAdjustment"(  ) ) DO
-      WITH NUMERIC deliveryChargedToSE = "Min"( totalDeliveryOfMWDICS - deliveryChargedToEC, $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationSysEff_MWD" ["Dec31ofYear"( @"t" )] ) DO
-       WITH NUMERIC deliveryChargedToBiNat = "Min"( totalDeliveryOfMWDICS - deliveryChargedToEC - deliveryChargedToSE, $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_MWD" ["Dec31ofYear"( @"t" )] ) DO
-        WITH NUMERIC mwdDiversionReduction = "Max"( totalDeliveryOfMWDICS - deliveryChargedToEC - deliveryChargedToSE - deliveryChargedToBiNat, 0.00000000 "acre-ft" ) DO
-         WITH NUMERIC ECICSMWD = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
-         THEN
-          $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfMWDECICS * "SystemTaxAdjustment"(  ) - deliveryChargedToEC
-         ELSE
-          ( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryChargedToEC ) * 0.97000000 + creationOfMWDECICS * "SystemTaxAdjustment"(  )
-         ENDIF COMMENTED_BY "Resulting ExtraOrdinaryConservation ICS " DO
-          WITH NUMERIC SEICSMWD = ( $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationMWDSE - deliveryChargedToSE ) COMMENTED_BY "Resulting System Efficiency ICS " DO
-           WITH NUMERIC BiNatICSMWD = ( $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationMWDBiNat - deliveryChargedToBiNat ) COMMENTED_BY "Resulting Bi National ICS " DO
-            WITH NUMERIC totalICSMWD = ( ECICSMWD + SEICSMWD + BiNatICSMWD ) COMMENTED_BY "Total ICS" DO
-             { deliveryChargedToEC , deliveryChargedToSE , deliveryChargedToBiNat , creationOfMWDECICS , ECICSMWD , SEICSMWD , BiNatICSMWD , totalICSMWD , mwdDiversionReduction , totalDeliveryOfMWDICS }
+     $ "ICS Credits.AnnualCreationSysEff_MWD" ["Dec31ofYear"( @"t" )]
+    ENDIF COMMENTED_BY "If the LB Condition is shortage, do not create any ICS water. Investments in long <br>term projects and these would be known and they would be scheduled by a date <br>where they can start getting credits after the completion of those projects, can <br>be created under any condition.  ST 9/11/2015 <br>" DO
+     WITH NUMERIC creationMWDBiNat = IF ( NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
+     THEN
+      0.00000000 "acre-ft"
+     ELSE
+      $ "ICS Credits.AnnualCreationBiNat_MWD" ["Dec31ofYear"( @"t" )]
+     ENDIF COMMENTED_BY "If the LB Condition is shortage, do not create any ICS water <br>" DO
+      WITH NUMERIC deliveryChargedToEC = "Min"( totalDeliveryOfMWDICS, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfMWDECICS * "SystemTaxAdjustment"(  ) ) DO
+       WITH NUMERIC deliveryChargedToSE = "Min"( totalDeliveryOfMWDICS - deliveryChargedToEC, $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationSysEff_MWD" ["Dec31ofYear"( @"t" )] ) DO
+        WITH NUMERIC deliveryChargedToBiNat = "Min"( totalDeliveryOfMWDICS - deliveryChargedToEC - deliveryChargedToSE, $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_MWD" ["Dec31ofYear"( @"t" )] ) DO
+         WITH NUMERIC mwdDiversionReduction = "Max"( totalDeliveryOfMWDICS - deliveryChargedToEC - deliveryChargedToSE - deliveryChargedToBiNat, 0.00000000 "acre-ft" ) DO
+          WITH NUMERIC ECICSMWD = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
+          THEN
+           $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationOfMWDECICS * "SystemTaxAdjustment"(  ) - deliveryChargedToEC
+          ELSE
+           ( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryChargedToEC ) * "EvapTaxAdjustment"(  ) + creationOfMWDECICS * "SystemTaxAdjustment"(  )
+          ENDIF COMMENTED_BY "Resulting ExtraOrdinaryConservation ICS " DO
+           WITH NUMERIC SEICSMWD = ( $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationMWDSE - deliveryChargedToSE ) COMMENTED_BY "Resulting System Efficiency ICS " DO
+            WITH NUMERIC BiNatICSMWD = ( $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationMWDBiNat - deliveryChargedToBiNat ) COMMENTED_BY "Resulting Bi National ICS " DO
+             WITH NUMERIC totalICSMWD = ( ECICSMWD + SEICSMWD + BiNatICSMWD ) COMMENTED_BY "Total ICS" DO
+              { deliveryChargedToEC , deliveryChargedToSE , deliveryChargedToBiNat , creationOfMWDECICS , ECICSMWD , SEICSMWD , BiNatICSMWD , totalICSMWD , mwdDiversionReduction , totalDeliveryOfMWDICS }
+             ENDWITH
             ENDWITH
            ENDWITH
           ENDWITH
@@ -8795,12 +8806,12 @@ BEGIN
               WITH NUMERIC impICSNV = creationIMPICS_NV * "SystemTaxAdjustment"(  ) - $ "ICS Credits.AnnualDeliveryImp_NV" ["Dec31ofYear"( @"t" )] DO
                WITH NUMERIC tribDSSICSNV = creationTribDSS_NV * "SystemTaxAdjustment"(  ) - deliveryTribDSS_NV DO
                 WITH NUMERIC impDSSICSNV = creationImpDSS_NV * "SystemTaxAdjustment"(  ) - deliveryImpDSS_NV DO
-                 WITH NUMERIC ECICSNV = IF ( $ "Mead.Pool Elevation" [@"t - 1"] <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+                 WITH NUMERIC ECICSNV = "Min"( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"], IF ( $ "Mead.Pool Elevation" [@"t - 1"] <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
                  THEN
                   $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryECICS
                  ELSE
                   ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - deliveryECICS ) * "EvapTaxAdjustment"(  ) + creationEC * "SystemTaxAdjustment"(  )
-                 ENDIF COMMENTED_BY "Resulting ExtraordinaryConservation ICS. In the case that the previous year was a Quantified Surplus year, the <br>Tributary and Imported ICS would have been delivered and that is accounted for in the equation below. " DO
+                 ENDIF ) COMMENTED_BY "Resulting ExtraordinaryConservation ICS. In the case that the previous year was a Quantified Surplus year, the <br>Tributary and Imported ICS would have been delivered and that is accounted for in the equation below. " DO
                   WITH NUMERIC SEICSNV = ( $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationSE - $ "ICS Credits.AnnualDeliverySysEff_NV" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Resulting System Efficiency ICS " DO
                    WITH NUMERIC BiNatICSNV = ( $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationBiNat - $ "ICS Credits.AnnualDeliveryBiNat_NV" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "Resulting Bi National ICS " DO
                     WITH NUMERIC totalICSNV = ( tribICSNV + impICSNV + ECICSNV + SEICSNV + BiNatICSNV ) COMMENTED_BY "Total ICS" DO
