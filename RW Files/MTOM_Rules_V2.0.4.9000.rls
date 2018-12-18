@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 17:10 December 14, 2018
+# Created 11:01 December 18, 2018
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -548,8 +548,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
-    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (NUMERIC floodControlVol = "SumFlowsToVolume"( $ "Lower Basin Output.MexicoExcessFlow", @"24:00:00 January Max DayOfMonth, Current Year", "DateMin"( @"24:00:00 December Max DayOfMonth, Current Year", @"Finish Timestep" ) )) DO
             WITH_STATEMENT (LIST stateECBalances = "FloodControlECICSBalance"( floodControlVol )) DO
             $ "ICS Credits.AnnualDeliveryEC_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
@@ -571,6 +569,8 @@ BEGIN
           INACTIVE      $ "ICS Credits.AnnualCreationEC_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
           INACTIVE      $ "ICS Credits.AnnualCreationEC_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
+
+            $ "ICS Credits.AnnualDeliverySysEff_AZ" ["Dec31ofYear"( @"t" )] := GET @INDEX 0.00000000 FROM stateECBalances;
 
             $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM stateECBalances;
 
@@ -605,6 +605,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br>CH, 5/10/18: Added assignments for: IID EC ICS balance, IID Binat ICS balance, and total IID ICS (binat + EC) and edited total CA ICS assignment to include total MWD and total IID in order to distinguish MWD ICS creation/delivery/balance from IID ICS creation/delivery/balance ";
     BEGIN
 
+    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (LIST iidICSValues = "ICSAccountingForIID"(  )) DO
             WITH_STATEMENT (LIST mwdICSValues = "ICSAccountingForMWD"(  )) DO
           DESCRIPTION          "Annual Delivery BiNational ICS <br>";
@@ -665,7 +666,8 @@ BEGIN
 
             $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 7.00000000 FROM mwdICSValues ) + GET @INDEX 5.00000000 FROM iidICSValues;
 
-            IF_STATEMENT ("IsMRM"(  ) AND ( "GetYear"( @"t" ) != "GetYear"( @"Start Timestep" ) OR @"t" == @"24:00:00 January Max DayOfMonth, Start Year" )) THEN
+            BREAKPOINT BEFORE_EXEC TRUE;
+      IF_STATEMENT ("IsMRM"(  ) AND ( "GetYear"( @"t" ) != "GetYear"( @"Start Timestep" ) OR @"t" == @"24:00:00 January Max DayOfMonth, Start Year" )) THEN
             WITH_STATEMENT (NUMERIC totalDeliveryMWDICS = GET @INDEX 9.00000000 FROM mwdICSValues) DO
             WITH_STATEMENT (NUMERIC totalCreationECICS = GET @INDEX 3.00000000 FROM mwdICSValues) DO
           DESCRIPTION          "Adjust the MWD Diversion Request to reduce the request if there is not enough total ICS in the system for the total delivery to California.  The reduction will be <br>the difference between the determined delivery to california above the state apportionment minus the availalbe ICS volume.  MWD takes the reduction. ";
@@ -4208,7 +4210,7 @@ BEGIN
     BEGIN
 
     DESCRIPTION          "Set the MWD Forecast annual diversion to the state apportionment (in the deterministic run or in <br><br>the first year of the run, use the input state apportionment, in an outyear use the adjusted state <br><br>apportionment), less any senior users to MWD diversion requested. ";
-      $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] := IF ( "IsMRM"(  ) )
+      $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] := "Min"( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [], IF ( "IsMRM"(  ) )
  THEN
   IF ( "GetYear"( @"t" ) == "GetYear"( @"Start Timestep" ) )
   THEN
@@ -4227,7 +4229,7 @@ BEGIN
     "FlowToVolume"( diversionSite & "Diversion Requested" [date], date )
    ENDIF
   ENDFOR
- ENDFOR COMMENTED_BY "Sum all Non MWD Diversion Requests";
+ ENDFOR COMMENTED_BY "Sum all Non MWD Diversion Requests" );
 
     END;
 
@@ -8516,6 +8518,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
+    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "DeliveryAndCreationMWDICS" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -8554,7 +8557,6 @@ BEGIN
 
     END;
 
-    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "FloodControlECICSBalance" ( NUMERIC fcvolume )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
