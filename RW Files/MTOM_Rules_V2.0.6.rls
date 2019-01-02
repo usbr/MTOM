@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 11:01 December 18, 2018
+# Created 09:52 January 2, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -10417,12 +10417,12 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown <br>MC, 20170530: 1.) Replaced @&quot;t&quot; by date because both rules calling this function pass @&quot;t&quot; as date; 2.) Changed the original misleading name GetDaysBasedOnFirstDate to current name because the function is actually calculating a number of months, not days (reverted back for consistency with CRSS?)";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown <br>MC, 20170530: 1.) Replaced @&quot;t&quot; by date because both rules calling this function pass @&quot;t&quot; as date; 2.) Changed the original misleading name GetDaysBasedOnFirstDate to current name because the function is actually calculating a number of months, not days (reverted back for consistency with CRSS?)<br><br>ST, 20181231: updated logic to match 24 MS";
     BEGIN
 
-      IF ( date == @"Start Timestep" )
+      IF ( date == @"Start Timestep + 1" )
  THEN
-  12.00000000 - "GetMonth"( @"t" )
+  11.00000000
  ELSE
   12.00000000
  ENDIF;
