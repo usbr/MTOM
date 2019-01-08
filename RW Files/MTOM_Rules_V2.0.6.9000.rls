@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 19:00 January 7, 2019
+# Created 11:32 January 8, 2019
 # 
 RULESET
 NAME "MTOM_Rules 1";
@@ -7544,6 +7544,30 @@ BEGIN
 
       IF ( "MonthIs"( { "April" } ) )
  THEN
+  "Max"( "TargetHWGivenInflowEvap"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Current Year", "GetMay1TargetElevation"(  ) COMMENTED_BY "CF: This has been changed to a hydrologic year classification calculated target as per HP. <br>Previously was a static target. <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ) COMMENTED_BY "CF, 20190107: Change to match CRSS?   <br>", "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow. <br>", $ "FlamingGorgeData.MinFlow" [] ) )
+ ELSE
+  IF ( "MonthIs"( { "May" , "June" , "July" , "August" , "September" , "October" , "November" , "December" } ) )
+  THEN
+   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Next Year", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000], "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) )
+  ELSE
+   "Max"( "TargetHWGivenInflowEvap"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Current Year", "GetMay1TargetElevation"(  ) COMMENTED_BY "CF: This has been changed to a hydrologic year classification calculated target as per HP. <br>Previously was a static target. <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ) COMMENTED_BY "CF, 20190107: Change from VolToFlow to TargetHW to match CRSS.   <br>", "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) ) COMMENTED_BY "January - March. COMBINE with April? <br>"
+  ENDIF
+ ENDIF COMMENTED_BY "COMBINE with Jan-Mar? <br>";
+
+    END;
+
+    FUNCTION       "GetFGBaseFlowMagnitudeUnconstrained_9000" (  )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    ".acre-ft/month";
+    DESCRIPTION    "DESCRIPTION: Uses a simple water balance with predicted inflows to calculate a steady outflow rate from the current timestep to the next April to meet the May 1 ULDE regardless of base flow restrictions. <br><br>RETURNS: Outflow rate [L^3/T]<br><br>ARGUMENTS: <NONE><br><br>CONSTRAINTS:<br><br>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG TRUE;
+    NOTES          " CF,20181010 for FG update adding in baseflow targets for Jensen to GetFGBaseFlowMagnitudeUnconstrained<br><br>AUTHOR, DATE: Unknown";
+    BEGIN
+
+      IF ( "MonthIs"( { "April" } ) )
+ THEN
   "Max"( "VolumeToFlow"( ( "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "FlamingGorge", "GetMay1TargetElevation"(  ) ) + "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) ) / "NumberOfMonthsUntilMay"(  ), @"t" ) COMMENTED_BY "CF, 20190107: Change to match CRSS?   <br>", "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow. <br>", $ "FlamingGorgeData.MinFlow" [] ) )
  ELSE
   IF ( "MonthIs"( { "May" , "June" , "July" , "August" , "September" , "October" , "November" , "December" } ) )
@@ -7552,7 +7576,7 @@ BEGIN
   ELSE
    "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Current Year", "GetMay1TargetElevation"(  ) COMMENTED_BY "CF: This has been changed to a hydrologic year classification calculated target as per HP. <br>Previously was a static target. <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ) COMMENTED_BY "CF, 20190107: Change from VolToFlow to TargetHW to match CRSS.   <br>", "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) ) COMMENTED_BY "January - March. <br>"
   ENDIF
- ENDIF COMMENTED_BY " In actual operations, at March a new forecast would come out for the next April through July volume so we adjust the May 1 ULDE then. For all other months besides March and April<br> the May 1 ULDE is assumed to be the maximum May 1 pool elevation of 6027 FT. -HG 10/9/12";
+ ENDIF COMMENTED_BY "";
 
     END;
 
@@ -7744,6 +7768,25 @@ BEGIN
     BEGIN
 
       ( ( "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "FlamingGorge", elevation ) + "FlowToVolume"( $ "FlamingGorge.Inflow" [], @"t" ) ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], $ "FlamingGorge.Storage" [@"t - 1"], @"24:00:00 Current Month Max DayOfMonth, Current Year", @"24:00:00 Current Month Max DayOfMonth, Current Year" ) ) / 1.00000000 "month";
+
+    END;
+
+    FUNCTION       "TargetHWGivenInflowEvap" ( OBJECT Res, DATETIME TargetBeginDate, DATETIME TargetEndDate, NUMERIC TargetPE, NUMERIC TotalInflow, NUMERIC PrvStorage )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "DESCRIPTION: This function returns the release for the current month to attain the specified pool elevation value, &quot;elevation&quot;, based on a water balance using inflow and evaporation<br><br>RETURNS: Monthly outflow rate [L^3/T]<br><br>ARGUMENTS<br>1. NUMERIC elevation - desired pool elevation to reach<br><br>CONSTRAINTS:<br><br>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    BEGIN
+
+      IF ( TargetEndDate == TargetBeginDate )
+ THEN
+  "VolumeToFlow"( ( ( "ElevationToStorage"( Res, Res & "Pool Elevation" ["OffsetDate"( TargetBeginDate, - 1.00000000, "1 Months" ) COMMENTED_BY "CF: more generic than @t-1 <br>"] ) - "ElevationToStorage"( Res, TargetPE ) + TotalInflow ) - "EstimateEvaporation"( Res, Res & "Storage" ["OffsetDate"( TargetBeginDate, - 1.00000000, "1 Months" )], Res & "Storage" [TargetEndDate], TargetBeginDate, TargetEndDate ) ), TargetEndDate ) COMMENTED_BY "CF: This is TargetHWGivenInflowforOneMonth() but using VolumeToFlow rather than /&quot;1 month&quot; <br>which is incorrect since assumes 31 days and only 30 days in April. <br>"
+ ELSE
+  ( ( ( "ElevationToStorage"( Res, Res & "Pool Elevation" ["OffsetDate"( TargetBeginDate, - 1.00000000, "1 Months" )] ) COMMENTED_BY "Prv PE <br>" - "ElevationToStorage"( Res, TargetPE ) COMMENTED_BY "Target PE <br>" + TotalInflow ) - "EstimateEvaporation"( Res, Res & "Storage" ["OffsetDate"( TargetBeginDate, - 1.00000000, "1 Months" )], Res & "Storage" [TargetEndDate], TargetBeginDate, TargetEndDate ) ) / ( TargetEndDate - TargetBeginDate ) COMMENTED_BY "CF: Replace NumberOfMonthsUntilMay() to make generic and to calculate correctly <br>" ) COMMENTED_BY "CF: New Mass Balance including Evap for multiple months. <br>"
+ ENDIF;
 
     END;
 
