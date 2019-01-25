@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 12:57 January 15, 2019
+# Created 15:47 January 25, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2904,21 +2904,6 @@ BEGIN
   ACTIVE         TRUE;
   NOTES          "";
   BEGIN
-
-    RULE                 "Release to Prevent MaxPE";
-    DESCRIPTION          "Execution Constraint: March, April <br>  <br>Description: Release at whatever rate is necessary to meet the May 1 upper limit draw-down elevation (ULDE) from the EIS.  Note that if the reservoir is already below the ULDE, then the outflow will be constrained to the minimum base flow for the current year type. <br><br>HP: March-April are the only months that do not have BC constraints regulated by the ROD. The constraint here is a physical constraint, no magnitude constraints are applied to Mar-Apr unlike other months (Baseflow Operations Rule) <br>  <br>Slots Set: FlamingGorge.Outflow ";
-    ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "CF, 20181212: Added a constraint on outflow via FGConstrainedOutflow() to allow running VIC hydrology.";
-    BEGIN
-
-      IF_STATEMENT ($ "FlamingGorge.Outflow" [] < "TargetHWGivenInflowOneMonth"( % "FlamingGorge", @"t - 1", @"t", $ "FlamingGorgeData.MaxPE" [] COMMENTED_BY "CF: Prv fct (TargetHWGivenInflowforOneMonth) just took in Elevation but this matches <br>TargetHW arguements and is more explicit.   <br>", "FlowToVolume"( $ "FlamingGorge.Inflow" [], @"t" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.MaxPE" [] ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t - 1", @"t" ), $ "FlamingGorge.Storage" [@"t - 1"] )) THEN
-          DESCRIPTION          "If it is March or April, then release whatever necessary to meet the May 1 ULDE";
-      $ "FlamingGorge.Outflow" [] := "TargetHWGivenInflowOneMonth"( % "FlamingGorge", @"t - 1", @"t", $ "FlamingGorgeData.MaxPE" [] COMMENTED_BY "CF: Prv fct (TargetHWGivenInflowforOneMonth) just took in Elevation but this matches <br>TargetHW arguements and is more explicit.   <br>", "FlowToVolume"( $ "FlamingGorge.Inflow" [], @"t" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.MaxPE" [] ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t - 1", @"t" ), $ "FlamingGorge.Storage" [@"t - 1"] );
-
-      END_IF_STATEMENT;
-
-    END;
 
     RULE                 "Calculate Daily Jensen Flows";
     DESCRIPTION          "DESCRIPTION: Calculates the daily Jensen flow using daily FG releases and daily Yampa flows with the assumption that FG releases are lagged one day.<br><br>SLOTS SET: KNN_MTOM.JensenDaily<br><br>";
@@ -7729,7 +7714,7 @@ BEGIN
     FUNCTION       "PredictedFGInflow" ( DATETIME startDate, DATETIME endDate )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
-    DESCRIPTION    "DESCRIPTION: This function calculates the total inflow volume between the dates specified as arguments<br><br>RETURNS: Inflow volume to Flaming Gorge [L^3]<br><br>ARGUMENTS<br>1. DATETIME startDate - beginning date of period for sum<br>2. DATETIME endDate - ending date of period for sum<br><br>CONSTRAINTS<br><br>";
+    DESCRIPTION    "DESCRIPTION: This function calculates the total inflow volume between the dates specified as arguments<br><br>RETURNS: Inflow volume to Flaming Gorge [L^3]<br><br>CF: ForecastData.FlamingGorgeInflow is set by Fontenelle rule ForecastFutureFGInflow-total average. This is the 50% Exceedance.  <br><br>ARGUMENTS<br>1. DATETIME startDate - beginning date of period for sum<br>2. DATETIME endDate - ending date of period for sum<br><br>CONSTRAINTS<br><br>";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
@@ -7804,7 +7789,7 @@ BEGIN
     ACTIVE         FALSE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES          "CF 20190125: No longer needed. Replace by TargetHWGivenInflowOneMonth<br><br>DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
     BEGIN
 
       ( ( "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "FlamingGorge", elevation ) + "FlowToVolume"( $ "FlamingGorge.Inflow" [], @"t" ) ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], $ "FlamingGorge.Storage" [@"t - 1"], @"24:00:00 Current Month Max DayOfMonth, Current Year", @"24:00:00 Current Month Max DayOfMonth, Current Year" ) ) / 1.00000000 "month";
@@ -7847,7 +7832,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "CF,20190109: New mass balance function called by GetFGBaseFlowMagnitudeUnconstrained which accounts for evaporation.<br><br>AUTHOR, DATE:  CF,20190109";
+    NOTES          "CF,20190109: New mass balance function called by GetFGBaseFlowMagnitudeUnconstrained which accounts for evaporation. Replaces old ...forOneMonth() function. This is more generic.<br><br>AUTHOR, DATE:  CF,20190109";
     BEGIN
 
       "VolumeToFlow"( ( PrvStorage - "ElevationToStorage"( Res, TargetPE ) + TotalInflow ), TargetEndDate );
@@ -7861,7 +7846,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    NOTES          " CF,20190109: Call new mass balance function TargetHWGivenInflowEvap which accounts for evaporation. Jan-Feb no use GetMay1TargetElevation() according to direction from HP about use of % exceedance to calculate PE target. Jan-April combined since same. <br><br>CF,20181010: for FG update adding in baseflow targets for Jensen to GetFGBaseFlowMagnitudeUnconstrained<br><br>AUTHOR, DATE: Unknown";
+    NOTES          "CF 20190125: Updated to use TargetHWGivenInflowOneMonth<br><br>CF,20190109: TargetHWGivenInflow now take Inflow - EstEvap to account for evaporation. Jan-Feb now uses GetMay1TargetElevation() according to direction from HP about use of % exceedance to calculate PE target. Mar-April do not use BF targets at Jensen. <br><br>CF,20181010: for FG update adding in baseflow targets for Jensen to GetFGBaseFlowMagnitudeUnconstrained<br><br>AUTHOR, DATE: Unknown";
     BEGIN
 
       IF ( "MonthIs"( { "January" , "February" , "March" } ) )
@@ -8241,7 +8226,7 @@ BEGIN
     ACTIVE         FALSE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES          "CF 20190125: No longer needed. Replaced by LTSP. <br><br>DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
     BEGIN
 
       WITH LIST DateList = "GetDates"( @"24:00:00 April 1, Current Year", @"24:00:00 July 31, Current Year" COMMENTED_BY "Only calculates daily schedule to the end of the current month for computation efficiency.", "1 days" ) DO
@@ -8350,7 +8335,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "";
+    NOTES          "CF 20190125: Updated to use TargetHWGivenInflowOneMonth";
     BEGIN
 
       WITH NUMERIC RampRate = $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"24:00:00 April Max DayOfMonth, Current Year"], 0.00000000] * 1.00000000 "cfs" DO
@@ -8388,7 +8373,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "HP, 20170714";
+    NOTES          "CF 20190125: Updated to use TargetHWGivenInflowOneMonth<br><br>HP, 20170714";
     BEGIN
 
       WITH LIST DateList = "GetDates"( @"24:00:00 April 1, Current Year", @"t" COMMENTED_BY "Only calculates daily schedule to the end of the current month for computation efficiency.", "1 days" ) DO
