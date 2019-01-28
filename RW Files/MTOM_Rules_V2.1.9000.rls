@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.3.1 Patch
-# Created 15:45 January 25, 2019
+# Created 10:41 January 28, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -605,7 +605,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br>CH, 5/10/18: Added assignments for: IID EC ICS balance, IID Binat ICS balance, and total IID ICS (binat + EC) and edited total CA ICS assignment to include total MWD and total IID in order to distinguish MWD ICS creation/delivery/balance from IID ICS creation/delivery/balance ";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC FALSE;
       WITH_STATEMENT (LIST iidICSValues = "ICSAccountingForIID"(  )) DO
             WITH_STATEMENT (LIST mwdICSValues = "ICSAccountingForMWD"(  )) DO
           DESCRIPTION          "Annual Delivery BiNational ICS <br>";
@@ -666,7 +666,7 @@ BEGIN
 
             $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 7.00000000 FROM mwdICSValues ) + GET @INDEX 5.00000000 FROM iidICSValues;
 
-            BREAKPOINT BEFORE_EXEC TRUE;
+            BREAKPOINT BEFORE_EXEC FALSE;
       IF_STATEMENT ("IsMRM"(  ) AND ( "GetYear"( @"t" ) != "GetYear"( @"Start Timestep" ) OR @"t" == @"24:00:00 January Max DayOfMonth, Start Year" )) THEN
             WITH_STATEMENT (NUMERIC totalDeliveryMWDICS = GET @INDEX 9.00000000 FROM mwdICSValues) DO
             WITH_STATEMENT (NUMERIC totalCreationECICS = GET @INDEX 3.00000000 FROM mwdICSValues) DO
@@ -2968,7 +2968,7 @@ BEGIN
     RULE                 "Min Flow in Extremely Dry Years with Low Storage";
     DESCRIPTION          "Execution Constraint: NA <br>  <br>Description: Flaming Gorge releases 800 cfs to protect the remaining water in storage if Flaming Gorge pool elevation is below MinReleaseTrigger and there is extremely low hydrology (.98 exceedance). This is reduce this further via funcion constraint when FG can't release 800 cfs without draining the live storage. <br><br>The rule sets the LowReleaseFlag when FG is releasing max water in FG (second IF) or MinFlow in HClass = 0 and PE < MinReleaseTrigger (first IF). <br><br>Slots Set: FlamingGorge.Outflow, FlamingGorgeData.LowReleaseFlag Execution Constraint: Not May, June or July ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT TRUE;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
     NOTES                "CF, 20181212: Exec Const removed, rule now fires in all timesteps. Rule moved earlier in priority than Sum Daily. Added a constraint on outflow via FGConstrainedOutflow() to MinFlow. AbsoluteMinRelease no longer needed since it was changed to MinFlow of 800 cfs based on the latest FEIS according to HP.  Rule sets the LowReleaseFlag when FG is releasing max water in FG or MinFlow in HClass = 0 and PE < MinReleaseTrigger. Fixes to allow running VIC. ";
     BEGIN
 
@@ -3056,7 +3056,7 @@ BEGIN
     RULE                 "Release to Meet ULDE";
     DESCRIPTION          "Execution Constraint: March, April <br>  <br>Description: Release at whatever rate is necessary to meet the May 1 upper limit draw-down elevation (ULDE) from the EIS.  Note that if the reservoir is already below the ULDE, then the outflow will be constrained to the minimum base flow for the current year type. <br><br>HP: March-April are the only months that do not have BC constraints regulated by the ROD. The constraint here is a physical constraint, no magnitude constraints are applied to Mar-Apr unlike other months (Baseflow Operations Rule) <br>  <br>Slots Set: FlamingGorge.Outflow ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "MonthIs"( { "March" , "April" } );
+    RULE_EXEC_CONSTRAINT "MonthIs"( { "March" , "April" } ) AND "GetRunCycleIndex"(  ) == 2.00000000;
     NOTES                "CF, 20181212: Added a constraint on outflow via FGConstrainedOutflow() to allow running VIC hydrology.";
     BEGIN
 
@@ -3101,7 +3101,19 @@ BEGIN
     RULE                 "Base Flow Operations";
     DESCRIPTION          "Execution Constraint: Not March, April <br>  <br>Description: Sets the base flows for all months except March and April.  Base flow releases are set to stay below maximum pool elevation (PE), minimum flows or stay within the base flow range based on the hydrologic classification.  <br><br>Slots Set: FlamingGorge.Outflow ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT "MonthIs"( { "March" , "April" } );
+    RULE_EXEC_CONSTRAINT NOT "MonthIs"( { "March" , "April" } ) AND "GetRunCycleIndex"(  ) == 2.00000000;
+    NOTES                "CF, 20181212: Added a constraint on outflow via FGConstrainedOutflow() to allow running VIC hydrology.";
+    BEGIN
+
+    BREAKPOINT AFTER_EXEC TRUE;
+      $ "FlamingGorge.Outflow" COMMENTED_BY "Sets the base flows for all months except March and April.  Base flow releases are set to stay<br>below maximum pool elevation (6039 ft), minimum flows or stay within the base flow range <br>based on the hydrologic classification." [] := "FGConstrainedOutflow"( "Max"( "Max"( "TargetHWGivenInflowOneMonth"( % "FlamingGorge", @"t - 1", @"t", $ "FlamingGorgeData.MaxPE" [] COMMENTED_BY "CF: Prv fct (TargetHWGivenInflowforOneMonth) just took in Elevation but this matches <br>TargetHW arguements and is more explicit.   <br>", "FlowToVolume"( $ "FlamingGorge.Inflow" [], @"t" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.MaxPE" [] ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t - 1", @"t" COMMENTED_BY "Old rules did @t-1 <br>" ), $ "FlamingGorge.Storage" [@"t - 1"] ) COMMENTED_BY "This will only be positive if PE @t-1 is > than MaxPE and will only control if release needed to get <br>back to MaxPE is greater than MinFlow and BaseFlow.  <br>", $ "FlamingGorgeData.MinFlow" [] ), "GetFGBaseFlowMagnitude"(  ) ) );
+
+    END;
+
+    RULE                 "Base Flow Operations_old";
+    DESCRIPTION          "Execution Constraint: Not March, April <br>  <br>Description: Sets the base flows for all months except March and April.  Base flow releases are set to stay below maximum pool elevation (PE), minimum flows or stay within the base flow range based on the hydrologic classification.  <br><br>Slots Set: FlamingGorge.Outflow ";
+    ACTIVE               FALSE;
+    RULE_EXEC_CONSTRAINT NOT "MonthIs"( { "March" , "April" } ) AND "GetRunCycleIndex"(  ) == 2.00000000;
     NOTES                "CF, 20181212: Added a constraint on outflow via FGConstrainedOutflow() to allow running VIC hydrology.";
     BEGIN
 
@@ -7569,17 +7581,22 @@ BEGIN
     NOTES          "CF 20190125: Updated to use TargetHWGivenInflowOneMonth<br><br>CF,20190109: TargetHWGivenInflow now take Inflow - EstEvap to account for evaporation. Jan-Feb now uses GetMay1TargetElevation() according to direction from HP about use of % exceedance to calculate PE target. Mar-April do not use BF targets at Jensen. <br><br>CF,20181010: for FG update adding in baseflow targets for Jensen to GetFGBaseFlowMagnitudeUnconstrained<br><br>AUTHOR, DATE: Unknown";
     BEGIN
 
-      IF ( "MonthIs"( { "January" , "February" , "March" } ) )
+      IF ( "MonthIs"( { "January" , "February" } ) )
  THEN
   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Current Year", "GetMay1TargetElevation"(  ) COMMENTED_BY "CF: This has been changed to a hydrologic year classification calculated target as per HP. <br>Previously was a static target. <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", "GetMay1TargetElevation"(  ) ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ) COMMENTED_BY "CF, 20190107: Changed to use Evap. <br>", "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow. <br>", $ "FlamingGorgeData.MinFlow" [] ) )
  ELSE
-  IF ( "MonthIs"( { "April" } ) )
+  IF ( "MonthIs"( { "March" } ) )
   THEN
-   "Max"( "TargetHWGivenInflowOneMonth"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Current Year", "GetMay1TargetElevation"(  ) COMMENTED_BY "CF: This has been changed to a hydrologic year classification calculated target as per HP. <br>Previously was a static target. <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", "GetMay1TargetElevation"(  ) ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ) COMMENTED_BY "CF, 20190107: Changed to use Evap. <br>", "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow. <br>", $ "FlamingGorgeData.MinFlow" [] ) )
+   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Current Year", "GetMay1TargetElevation"(  ) COMMENTED_BY "CF: This has been changed to a hydrologic year classification calculated target as per HP. <br>Previously was a static target. <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", "GetMay1TargetElevation"(  ) ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ) COMMENTED_BY "CF, 20190107: Changed to use Evap. <br>", $ "FlamingGorgeData.MinFlow" [] )
   ELSE
-   "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Next Year", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000] COMMENTED_BY "CF: This is the May 1 drawdown level of 6027ft. In Aug - Dec this the the target elevation from <br>the to EIS. This is the target until Jan when the hydrologic year classification can be calculated.   <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000] ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) ) COMMENTED_BY "CF: May-Dec assume static target of 6027 for May 1, Next Year.  <br>"
-  ENDIF COMMENTED_BY "CF:April, this include Evap in fct. <br>"
- ENDIF COMMENTED_BY "CF: Jan-Mar use GetMay1Target based on exceedance.  <br>";
+   IF ( "MonthIs"( { "April" } ) COMMENTED_BY "CF:April, this include Evap in fct. The EIS has no Jensen targets in March and April, in these <br>months release are used to meet the UDLE.   <br>" )
+   THEN
+    "Max"( "TargetHWGivenInflowOneMonth"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Current Year", "GetMay1TargetElevation"(  ) COMMENTED_BY "CF: This has been changed to a hydrologic year classification calculated target as per HP. <br>Previously was a static target. <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Current Year" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", "GetMay1TargetElevation"(  ) ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t", @"24:00:00 April Max DayOfMonth, Current Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ) COMMENTED_BY "CF, 20190107: Changed to use Evap. <br>", $ "FlamingGorgeData.MinFlow" [] )
+   ELSE
+    "Max"( "TargetHWGivenInflow"( % "FlamingGorge", @"t", @"24:00:00 April Max DayOfMonth, Next Year", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000] COMMENTED_BY "CF: This is the May 1 drawdown level of 6027ft. In Aug - Dec this the the target elevation from <br>the to EIS. This is the target until Jan when the hydrologic year classification can be calculated.   <br>", "PredictedFGInflow"( @"t", @"24:00:00 April Max DayOfMonth, Next Year" ) - "EstimateEvaporation"( % "FlamingGorge", $ "FlamingGorge.Storage" [@"t - 1"], "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.May1TargetElevation" [3.00000000, 2.00000000] ) COMMENTED_BY "The End Stor is that of the target. <br>", @"t", @"24:00:00 April Max DayOfMonth, Next Year" ), $ "FlamingGorge.Storage" [@"t - 1"] ), "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - $ "YampaRiverInflow.Yampa_at_Deerlodge" [@"t"] COMMENTED_BY "CF: PredictedYampaFlow() not needed since its just a call of this slot @t   <br>" ) COMMENTED_BY "CF: This ensures FG baseflow will be sufficient to meet the lower baseflow limit set for the Green <br>at Jensen by the EIS. The flow at Jensen is the FG baseflow plus the predicted Yampa flow.  <br>", $ "FlamingGorgeData.MinFlow" [] ) ) COMMENTED_BY "CF: May-Dec assume static target of 6027 for May 1, Next Year.  <br>"
+   ENDIF
+  ENDIF COMMENTED_BY "CF: The EIS has no Jensen targets in March and April, in these months release are used to meet <br>the UDLE.  <br>"
+ ENDIF COMMENTED_BY "CF: Jan-Feb use GetMay1Target based on exceedance.   <br>";
 
     END;
 
@@ -8544,7 +8561,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    BREAKPOINT AFTER_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC FALSE;
     FUNCTION       "DeliveryAndCreationMWDICS" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
