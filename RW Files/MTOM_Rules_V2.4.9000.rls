@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.4
-# Created 09:56 April 24, 2019
+# Created 15:33 April 24, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -3450,169 +3450,27 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Set Release Control Indicator";
-    DESCRIPTION          "DESCRIPTION: This rule determines which constraint dictated the Blue Mesa outflow by comparing the outflow to the outflows required to meet the various conditions<br><br>SLOTS SET: BlueMesaData.ReleaseControl<br><br><br><br>";
-    ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "AUTHOR, DATE: MC, 201707<br><br>MC, 20170906: Added calculations of NoReleaseStorage, SpillwayStorage, VolumeAboveSpillway, and ReleaseableVolumeRate and replaced maxPossibleOutflow with ReleaseableVolumeRate in indicator-setting conditional";
-    BEGIN
-
-      WITH_STATEMENT (NUMERIC MonthlyWhitewaterTarget = IF ( ( "GetMonth"( @"t" ) == 5.00000000 OR "GetMonth"( @"t" ) == 6.00000000 ) AND ( $ "BlueMesa.Storage" [@"t - 1"] + "FlowToVolume"( $ "BlueMesa.Inflow" [@"t"], @"t" ) > "ElevationToStorage"( % "BlueMesa", 7487.90000000 "feet" ) OR $ "BlueMesaData.GunnisonHClass" [@"24:00:00 December 31, Current Year"] < 3.00000000 ) )
- THEN
-  FOR ( DATETIME date IN "GetDates"( "GetStartDayOfMonth"(  ), "GetEndDayOfMonth"(  ), "1 days" ) ) STAT_AVE
-   $ "BlueMesaData.TargetDailyWhitewaterFlows" [date]
-  ENDFOR
- ELSE
-  $ "BlueMesaData.BaseFlowTarget" [@"t"]
- ENDIF) DO
-            WITH_STATEMENT (NUMERIC MonthlyCanyonFlows = IF ( $ "BlueMesaData.MeetCanyonDecreeFlows" [] == 1.00000000 )
- THEN
-  FOR ( DATETIME date IN "GetDates"( "GetStartDayOfMonth"(  ), "GetEndDayOfMonth"(  ), "1 days" ) ) STAT_AVE
-   $ "BlueMesaData.TargetDailyBlackCanyonFlows" [date]
-  ENDFOR
- ELSE
-  0.00000000 "acre-ft/month"
- ENDIF) DO
-            WITH_STATEMENT (NUMERIC MeetDownstreamFlowTargets = "SolveBlueMesaReleaseForDownstreamTargets"( MonthlyWhitewaterTarget, @"t", MonthlyCanyonFlows )) DO
-            WITH_STATEMENT (NUMERIC ReleaseToMeetBMMaxPE = "SolveOutflow"( % "BlueMesa", % "BlueMesa" & "Inflow" [@"t"], "ElevationToStorage"( % "BlueMesa", $ "BlueMesaData.MaximumPoolElevation" [] ), "ElevationToStorage"( % "BlueMesa", $ "BlueMesa.Pool Elevation" [@"t - 1"] ), @"t" )) DO
-            WITH_STATEMENT (NUMERIC ReleaseToMeetBMTargetPE = "Max"( "SolveOutflow"( % "BlueMesa", % "BlueMesa" & "Inflow" [@"t"], "ElevationToStorage"( % "BlueMesa", $ "BlueMesaData.BlueMesaGuide" [@"t", "Target Elevation"] ), "ElevationToStorage"( % "BlueMesa", $ "BlueMesa.Pool Elevation" [@"t - 1"] ), @"t" ), 0.00000000 "cfs" COMMENTED_BY "IF the reservoir is below MaxPoolElevation = 7,519.4 feet, the SolveOutflow function will calculate a negative outflow, this <br>prevents that from being included in solving the Blue Mesa Outflow TP 9/22/2015" )) DO
-            WITH_STATEMENT (NUMERIC MaxReleaseToAvoidMinPE = WITH NUMERIC tunnelDiv = $ "TunnelDiversionBelowCrystalForAg.Diversion Requested" [@"t"] DO
-  WITH NUMERIC WaterAvailToCanyon = "Max"( "SolveOutflow"( % "BlueMesa", % "BlueMesa" & "Inflow" [@"t"], "ElevationToStorage"( % "BlueMesa", $ "BlueMesaData.MinimumPowerElevation" [] COMMENTED_BY "Input Minimum Pool Elevation on the Blue Mesa Data Object" ), "ElevationToStorage"( % "BlueMesa", $ "BlueMesa.Pool Elevation" [@"t - 1"] ), @"t" ), % "BlueMesa" & "Inflow" [@"t"] ) DO
-   WITH NUMERIC GainsAbvCrystal = $ "GunnisonAboveCrystal:InterveningAboveCrystal.Local Inflow" [@"t"] + $ "GunnisonAboveMorrowPoint:InterveningAboveMorrowPoint.Local Inflow" [@"t"] DO
-    WITH NUMERIC GainsBMToGJ = GainsAbvCrystal + $ "GunnisonBelowCrystal:GunnisonNrGJ_Whitewater.Local Inflow" [@"t"] DO
-     WITH NUMERIC flowLevel = $ "BlueMesaData.GunnisonHClass" [@"24:00:00 December 31, Current Year"] DO
-      WITH NUMERIC WaterRigtsAtWW = $ "BlueMesaData.BaseFlowTarget" [@"t", flowLevel] DO
-       "Max"( tunnelDiv + "MinItem"( { WaterAvailToCanyon , "MaxItem"( { WaterRigtsAtWW - GainsBMToGJ , $ "BlueMesaData.MinimumBlackCanyonFlow" [@"t"] - GainsAbvCrystal , 0.00000000 "cfs" } ) , IF ( $ "BlueMesa.Pool Elevation" [@"t - 1"] <= $ "BlueMesaData.MinimumPowerElevation" [] )
-       THEN
-        "Max"( 300.00000000 "cfs" - GainsAbvCrystal, 0.00000000 "cfs" )
-       ELSE
-        "Max"( "SolveOutflow"( % "BlueMesa", % "BlueMesa" & "Inflow" [@"t"], "ElevationToStorage"( % "BlueMesa", $ "BlueMesaData.MinimumPowerElevation" [] ), "ElevationToStorage"( % "BlueMesa", $ "BlueMesa.Pool Elevation" [@"t - 1"] ), @"t" ) - tunnelDiv, 0.00000000 "cfs" )
-       ENDIF } ), "Max"( "SolveOutflow"( % "BlueMesa", % "BlueMesa" & "Inflow" [@"t"], "ElevationToStorage"( % "BlueMesa", $ "BlueMesaData.MinimumPowerElevation" [] ), "ElevationToStorage"( % "BlueMesa", $ "BlueMesa.Pool Elevation" [@"t - 1"] ), @"t" ), 0.00000000 "cfs" ) )
-      ENDWITH
-     ENDWITH
-    ENDWITH
-   ENDWITH
-  ENDWITH
- ENDWITH) DO
-            WITH_STATEMENT (NUMERIC MaxReleaseToPreventCrystalOverflow = "SolveBlueMesaReleaseForCrystalReleaseTarget"( $ "BlueMesaData.CrystalMaxOutflow" [@"t"], @"t" )) DO
-            WITH_STATEMENT (NUMERIC BMPoolElevWithNoRelease = "TableInterpolation"( $ "BlueMesa.Elevation Volume Table", 1.00000000, 0.00000000, $ "BlueMesa.Storage" [@"t - 1"] + "FlowToVolume"( $ "BlueMesa.Inflow" [@"t"], @"t" ), @"t" )) DO
-            WITH_STATEMENT (NUMERIC NoReleaseStorage = "ElevationToStorage"( % "BlueMesa", BMPoolElevWithNoRelease ) COMMENTED_BY "Calculate storage volume without release") DO
-            WITH_STATEMENT (NUMERIC SpillwayStorage = "ElevationToStorage"( % "BlueMesa", $ "BlueMesaData.SpillwayElevation" [] ) COMMENTED_BY "Calculate storage at spillway invert") DO
-            WITH_STATEMENT (NUMERIC VolumeAboveSpillway = NoReleaseStorage - SpillwayStorage) DO
-            WITH_STATEMENT (NUMERIC ReleaseableVolumeRate = VolumeAboveSpillway / 1.00000000 "month" + $ "BlueMesa.Maximum Controlled Release" [0.00000000, 0.00000000]) DO
-            WITH_STATEMENT (NUMERIC maxPossibleOutflow = "TableInterpolation"( $ "BlueMesaData.BlueMesa_MaxOutflowTable", 0.00000000, 1.00000000, BMPoolElevWithNoRelease, @"t" )) DO
-            WITH_STATEMENT (NUMERIC maxOutflowToBottom = "SolveOutflow"( % "BlueMesa", % "BlueMesa" & "Inflow" [@"t"], "ElevationToStorage"( % "BlueMesa", $ "BlueMesaData.MaxDeadPoolElevation" [] + 0.10000000 "feet" ) COMMENTED_BY "The minimum elevation is a tenth of a foot high to prevent the reservoir from failing from the <br>mass balance for the reservoir. TP 9/28/2015", "ElevationToStorage"( % "BlueMesa", $ "BlueMesa.Pool Elevation" [@"t - 1"] ), @"t" )) DO
-            WITH_STATEMENT (NUMERIC TargetReleaseFromBM = "Max"( "MinItem"( { "MaxItem"( { MeetDownstreamFlowTargets , ReleaseToMeetBMTargetPE } ) , MaxReleaseToPreventCrystalOverflow , MaxReleaseToAvoidMinPE , ReleaseableVolumeRate COMMENTED_BY "Replaced maxPossibleOutflow with ReleaseableVolumeRate" , maxOutflowToBottom } ), ReleaseToMeetBMMaxPE COMMENTED_BY "Release necessary to prevent Flood Control" )) DO
-            $ "BlueMesaData.ReleaseControl" [@"t"] := IF ( $ "BlueMesa.Outflow" [@"t"] == MeetDownstreamFlowTargets )
- THEN
-  1.00000000
- ELSE
-  IF ( $ "BlueMesa.Outflow" [@"t"] == ReleaseToMeetBMTargetPE )
-  THEN
-   2.00000000
-  ELSE
-   IF ( $ "BlueMesa.Outflow" [@"t"] == MaxReleaseToPreventCrystalOverflow )
-   THEN
-    3.00000000
-   ELSE
-    IF ( $ "BlueMesa.Outflow" [@"t"] == MaxReleaseToAvoidMinPE )
-    THEN
-     4.00000000
-    ELSE
-     IF ( $ "BlueMesa.Outflow" [@"t"] == ReleaseableVolumeRate )
-     THEN
-      5.00000000
-     ELSE
-      IF ( $ "BlueMesa.Outflow" [@"t"] == maxOutflowToBottom )
-      THEN
-       6.00000000
-      ELSE
-       IF ( $ "BlueMesa.Outflow" [@"t"] == ReleaseToMeetBMMaxPE )
-       THEN
-        7.00000000
-       ELSE
-        0.00000000
-       ENDIF
-      ENDIF
-     ENDIF
-    ENDIF
-   ENDIF
-  ENDIF
- ENDIF;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-    END;
-
     RULE                 "Crystal Outflow";
     DESCRIPTION          "Execution Constraint: Only fires if the rule has not successfully fired yet. <br>  <br>Description: Crystal and Morrow Point Reservoirs just need to pass inflow which Blue Mesa is sending down to meet flow requirements while accounting for evaporation in order to maintain a constant storage. Blue Mesa releases do not attempt to get Crystal to its storage target if it not already there. Instead Crystal holds back/releases more water in the first timestep to meet this goal. This logic should be revisited later. UBConstrainedOutflow() prevents this from exceeding min/max constraints.  <br>  <br>Slots Set: Crystal.Outflow ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT "HasRuleFiredSuccessfully"( "ThisRule" );
-    NOTES                "CF,20190409: Get Crystal to target Elevation by holding back water.<br><br>CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
-    BEGIN
-
-      $ "Crystal.Outflow" [@"t"] := "UBConstrainedOutflow"( % "Crystal", "VolumeToFlow"( "ElevationToStorage"( % "Crystal", $ "Crystal.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "Crystal", $ "BlueMesaData.StorageTargetCrystal" [] ), @"t" ) + $ "Crystal.Inflow" [@"t"] - "VolumeToFlow"( "EstimateEvaporation"( % "Crystal", $ "Crystal.Storage" [@"t - 1"], "ElevationToStorage"( % "Crystal", $ "BlueMesaData.StorageTargetCrystal" [] ), @"t", @"t" ), @"t" ) );
-
-    END;
-
-    RULE                 "Crystal Outflow_NoEvap";
-    DESCRIPTION          "Execution Constraint: Only fires if the rule has not successfully fired yet. <br>  <br>Description: Crystal and Morrow Point Reservoirs just need to pass inflow which Blue Mesa is sending down to meet flow requirements while accounting for evaporation in order to maintain a constant storage. Blue Mesa releases do not attempt to get Crystal to its storage target if it not already there. Instead Crystal holds back/releases more water in the first timestep to meet this goal. This logic should be revisited later. UBConstrainedOutflow() prevents this from exceeding min/max constraints.  <br>  <br>Slots Set: Crystal.Outflow ";
-    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT NOT "HasRuleFiredSuccessfully"( "ThisRule" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "CF,20190409: Get Crystal to target Elevation by holding back water.<br><br>CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
+    NOTES                "CF,20190403: Moved in from Apr 2019 Offc CRSS. <br><br>CF,20190409: Get Crystal to target Elevation by holding back water.<br><br>CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
     BEGIN
 
-      $ "Crystal.Outflow" [@"t"] := "UBConstrainedOutflow"( % "Crystal", "VolumeToFlow"( "ElevationToStorage"( % "Crystal", $ "Crystal.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "Crystal", $ "BlueMesaData.StorageTargetCrystal" [] ), @"t" ) + $ "Crystal.Inflow" [@"t"] );
+    BREAKPOINT AFTER_EXEC TRUE;
+      $ "Crystal.Outflow" [@"t"] := "UBConstrainedOutflow"( % "Crystal", "VolumeToFlow"( "ElevationToStorage"( % "Crystal", $ "Crystal.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "Crystal", $ "BlueMesaData.StorageTargetCrystal" [] ), @"t" ) + $ "Crystal.Inflow" [@"t"] - "VolumeToFlow"( "EstimateEvaporation"( % "Crystal", $ "Crystal.Storage" [@"t - 1"], "ElevationToStorage"( % "Crystal", $ "BlueMesaData.StorageTargetCrystal" [] ), @"t", @"t" ), @"t" ) );
 
     END;
 
     RULE                 "Morrow Point Outflow";
     DESCRIPTION          "Execution Constraint: Only fires if the rule has not successfully fired yet. <br>  <br>Description: Crystal and Morrow Point Reservoirs just need to pass inflow which Blue Mesa is sending down to meet flow requirements while accounting for evaporation in order to maintain a constant storage. Blue Mesa also releases to get Morrow Point to its storage target if it not already there. UBConstrainedOutflow() prevents this from exceeding min/max constraints.  <br>  <br>Slots Set: MorrowPoint.Outflow ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT "HasRuleFiredSuccessfully"( "ThisRule" );
-    NOTES                "CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
-    BEGIN
-
-      $ "MorrowPoint.Outflow" [@"t"] := "UBConstrainedOutflow"( % "MorrowPoint", $ "MorrowPoint.Inflow" [@"t"] - "VolumeToFlow"( "EstimateEvaporation"( % "MorrowPoint", $ "MorrowPoint.Storage" [@"t - 1"], "ElevationToStorage"( % "MorrowPoint", $ "BlueMesaData.StorageTargetMorrowPoint" [] ) COMMENTED_BY "CF: MP should reach target by end of timestep. <br>", @"t", @"t" ) + ( "ElevationToStorage"( % "MorrowPoint", $ "BlueMesaData.StorageTargetMorrowPoint" [] ) - $ "MorrowPoint.Storage" [@"t - 1"] ) COMMENTED_BY "CF: Vol to get MP to target. <br>", @"t" ) );
-
-    END;
-
-    RULE                 "Morrow Point Outflow_NoEvap";
-    DESCRIPTION          "Execution Constraint: Only fires if the rule has not successfully fired yet. <br>  <br>Description: Crystal and Morrow Point Reservoirs just need to pass inflow which Blue Mesa is sending down to meet flow requirements while accounting for evaporation in order to maintain a constant storage. Blue Mesa also releases to get Morrow Point to its storage target if it not already there. UBConstrainedOutflow() prevents this from exceeding min/max constraints.  <br>  <br>Slots Set: MorrowPoint.Outflow ";
-    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT NOT "HasRuleFiredSuccessfully"( "ThisRule" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
+    NOTES                "CF,20190403: Moved in from Apr 2019 Offc CRSS. <br><br>CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
     BEGIN
 
-      $ "MorrowPoint.Outflow" [@"t"] := "UBConstrainedOutflow"( % "MorrowPoint", "VolumeToFlow"( "ElevationToStorage"( % "MorrowPoint", $ "MorrowPoint.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "MorrowPoint", $ "BlueMesaData.StorageTargetCrystal" [] ), @"t" ) + $ "MorrowPoint.Inflow" [@"t"] );
+    BREAKPOINT AFTER_EXEC TRUE;
+      $ "MorrowPoint.Outflow" [@"t"] := "UBConstrainedOutflow"( % "MorrowPoint", $ "MorrowPoint.Inflow" [@"t"] - "VolumeToFlow"( "EstimateEvaporation"( % "MorrowPoint", $ "MorrowPoint.Storage" [@"t - 1"], "ElevationToStorage"( % "MorrowPoint", $ "BlueMesaData.StorageTargetMorrowPoint" [] ) COMMENTED_BY "CF: MP should reach target by end of timestep. <br>", @"t", @"t" ) + ( "ElevationToStorage"( % "MorrowPoint", $ "BlueMesaData.StorageTargetMorrowPoint" [] ) - $ "MorrowPoint.Storage" [@"t - 1"] ) COMMENTED_BY "CF: Vol to get MP to target. <br>", @"t" ) );
 
     END;
 
@@ -3814,26 +3672,6 @@ BEGIN
       END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
-
-    END;
-
-    RULE                 "Set Morrow Point and Crystal Storage";
-    DESCRIPTION          "DESCRIPTION: This rule sets the storage on Crystal and Morrow Point Reservoirs for the entire run on the first timestep to the storage on the initial timestep.  These reservoirs just need to pass Blue Mesa outflow to meet flow requirements. This is done per Paul Davidson's recommendation. - sc 01/02/10<br><br>SLOTS SET: Crystal.Storage; MorrowPoint.Storage<br><br>";
-    ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: SC, 01/02/2010";
-    BEGIN
-
-    DESCRIPTION          "Since the MTOM Model is a monthly model, the Crystal and Morrow Point <br>Reservoirs are going to be treated as reservoirs that pass inflow.  The model <br>does this by setting the storage to a constant value for the entire model run. ";
-      FOREACH (DATETIME date IN @"Start Timestep" TO @"Finish Timestep") DO
-            $ "Crystal.Storage" [date] := $ "Crystal.Storage" [@"t - 1"];
-
-      ENDFOREACH;
-
-      FOREACH (DATETIME date IN @"Start Timestep" TO @"Finish Timestep") DO
-            $ "MorrowPoint.Storage" [date] := $ "MorrowPoint.Storage" [@"t - 1"];
-
-      ENDFOREACH;
 
     END;
 
@@ -9812,39 +9650,6 @@ BEGIN
    ENDWITH
   ENDWITH COMMENTED_BY "Calculate flows needed in Black Canyon"
  ENDWITH COMMENTED_BY "Calculate flows needed at Whitewater gage";
-
-    END;
-
-    FUNCTION       "SolveBlueMesaReleaseForDownstreamTargets_old" ( NUMERIC TargetWhitewaterFlow, DATETIME date, NUMERIC TargetCanyonFlow )
-    RETURN_TYPE    NUMERIC;
-    SCALE_UNITS    "cfs";
-    DESCRIPTION    "DESCRIPTION: This function calculates the Blue Mesa release necessary to achieve both the flow target through Black Canyon and the flow target at the Whitewater gage. The flow targets and a date for the release are passed to the function as arguments, and the release to meet each target is calculated using a simple water balance for the river reach appropriate for the target. The maximum of the two releases required to meet the targets is then chosen to ensure both are met.<br><br>RETURNS: Blue Mesa release [L^3/T]<br><br>ARGUMENTS:<br>1. NUMERIC TargetWhitewaterFlow - flow rate required at the Whitewater gage<br>2. DATETIME date - date for which the release is desired<br>3. NUMERIC TargetCanyonFlow - flow rate required through Black Canyon<br><br>CONSTRAINTS: <NONE><br><br><br>";
-    ACTIVE         TRUE;
-    PRE_EXEC_DIAG  TRUE;
-    POST_EXEC_DIAG TRUE;
-    NOTES          "<br>DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170705: Added adjustment to local inflows for dates in May because local inflow value includes changes in Paonia and Ridgway storages that are not available to meet downstream targets (i.e., the local inflows are unregulated but regulated flows are what actually contribute to target flows). The value added is the average difference between regulated and unregulated flows for 1980-2017 based on data received from Rick C. <br>MC, 20161123: This function receives target Whitewater and Black Canyon flows, as well as a date. It returns the Blue Mesa Reservoir release value necessary to achieve both of the passed-in flow targets by calculating a water balance between the reservoir and each target location, and setting the release to the maximum needed to attain the targets.  (used in updated BlueMesaOpsOutline_November2016.docx)";
-    BEGIN
-
-      "Max"( ( TargetWhitewaterFlow + $ "TunnelDiversionBelowCrystalForAg.Diversion Requested" [date] - $ "GunnisonAboveCrystal:InterveningAboveCrystal.Local Inflow" [date] - $ "GunnisonAboveMorrowPoint:InterveningAboveMorrowPoint.Local Inflow" [date] - ( $ "GainsCrystalToGJ.GainsCrystalToGJ" [date] - IF ( "GetMonth"( date ) == 5.00000000 )
- THEN
-  $ "BlueMesaData.CrystalToGJ_MayAdjustment" []
- ELSE
-  0.00000000 "acre-feet/month"
- ENDIF COMMENTED_BY "In May, adjust local inflows for reservoir storages" ) ) COMMENTED_BY "Blue Mesa Release to meet the Whitewater Target and the <br>Gunnison Tunnel Diversion while leveraging the gains between <br>Blue Mesa and Grand Junction TP/MC 9/22/2015", ( TargetCanyonFlow + $ "TunnelDiversionBelowCrystalForAg.Diversion Requested" [date] - $ "GunnisonAboveCrystal:InterveningAboveCrystal.Local Inflow" [date] - $ "GunnisonAboveMorrowPoint:InterveningAboveMorrowPoint.Local Inflow" [date] ) COMMENTED_BY "Blue Mesa Release to meet the minimum Black Canyon Flows <br>and the Gunnison Tunnel Diversion while leveraging the gains <br>between BM and the Tunnel. TP/MC 9/22/2105" );
-
-    END;
-
-    FUNCTION       "SolveBlueMesaReleaseForCrystalReleaseTarget_old" ( NUMERIC TargetCrystalRelease, DATETIME date )
-    RETURN_TYPE    NUMERIC;
-    SCALE_UNITS    "cfs";
-    DESCRIPTION    "DESCRIPTION: This function takes a numeric release target and a date.  It returns the value of the release from Blue Mesa Reservoir that is necessary to hit the passed-in release target for Crystal Reservoir  The function does this by doing a water balance in the reach of the river between Blue Mesa and Crystal Res and solving for the release from Crystal Res. - sc 12/28/10<br><br>RETURNS: Release rate [L^3/T]<br><br>ARGUMENTS:<br>1. NUMERIC TargetCrystalRelease - release rate desired from Crystal<br>2. DATETIME date - date on which the release is desired<br><br>CONSTRAINTS: Value on BlueMesaData.BlueMesaMinRelease slot (Minimum)<br><br>";
-    ACTIVE         TRUE;
-    PRE_EXEC_DIAG  TRUE;
-    POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: sc 12/28/10";
-    BEGIN
-
-      "Max"( TargetCrystalRelease - $ "GunnisonAboveCrystal:InterveningAboveCrystal.Local Inflow" [date] - $ "GunnisonAboveMorrowPoint:InterveningAboveMorrowPoint.Local Inflow" [date], $ "BlueMesaData.BlueMesaMinRelease" [] );
 
     END;
 

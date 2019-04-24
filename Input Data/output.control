@@ -14,6 +14,15 @@ BlueMesa.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
 BlueMesa.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
 BlueMesa.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
 
+MorrowPoint.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Inflow: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Pool Elevation: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
+MorrowPoint.Unregulated Spill: file = $MTOM_DIR/rdfOutput/res.rdf
+
 Crystal.Outflow: file = $MTOM_DIR/rdfOutput/res.rdf
 Crystal.Bank Storage: file = $MTOM_DIR/rdfOutput/res.rdf
 Crystal.Energy: file = $MTOM_DIR/rdfOutput/res.rdf
@@ -206,4 +215,8 @@ FlamingGorgeData.YampaHClass: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
 KNN_MTOM.SpringHClass: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
 FlamingGorgeData.YampaAprJulVol: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
 BlueMesaData.ReleaseControl: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
+#Add whitewater target the first of which is in cfs and the second in ac-ft
+GunnisonBelowCrystal.Outflow: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
+GunnisonBelowCrystal:GunnisonNrGJ_Whitewater.Outflow: file = $MTOM_DIR/rdfOutput/monthlyEIS.rdf
+
 
