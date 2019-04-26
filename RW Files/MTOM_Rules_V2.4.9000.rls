@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.4
-# Created 15:33 April 24, 2019
+# Created 14:13 April 26, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -3457,7 +3457,7 @@ BEGIN
     NOTES                "CF,20190403: Moved in from Apr 2019 Offc CRSS. <br><br>CF,20190409: Get Crystal to target Elevation by holding back water.<br><br>CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC FALSE;
       $ "Crystal.Outflow" [@"t"] := "UBConstrainedOutflow"( % "Crystal", "VolumeToFlow"( "ElevationToStorage"( % "Crystal", $ "Crystal.Pool Elevation" [@"t - 1"] ) - "ElevationToStorage"( % "Crystal", $ "BlueMesaData.StorageTargetCrystal" [] ), @"t" ) + $ "Crystal.Inflow" [@"t"] - "VolumeToFlow"( "EstimateEvaporation"( % "Crystal", $ "Crystal.Storage" [@"t - 1"], "ElevationToStorage"( % "Crystal", $ "BlueMesaData.StorageTargetCrystal" [] ), @"t", @"t" ), @"t" ) );
 
     END;
@@ -3469,7 +3469,7 @@ BEGIN
     NOTES                "CF,20190403: Moved in from Apr 2019 Offc CRSS. <br><br>CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC FALSE;
       $ "MorrowPoint.Outflow" [@"t"] := "UBConstrainedOutflow"( % "MorrowPoint", $ "MorrowPoint.Inflow" [@"t"] - "VolumeToFlow"( "EstimateEvaporation"( % "MorrowPoint", $ "MorrowPoint.Storage" [@"t - 1"], "ElevationToStorage"( % "MorrowPoint", $ "BlueMesaData.StorageTargetMorrowPoint" [] ) COMMENTED_BY "CF: MP should reach target by end of timestep. <br>", @"t", @"t" ) + ( "ElevationToStorage"( % "MorrowPoint", $ "BlueMesaData.StorageTargetMorrowPoint" [] ) - $ "MorrowPoint.Storage" [@"t - 1"] ) COMMENTED_BY "CF: Vol to get MP to target. <br>", @"t" ) );
 
     END;
@@ -9733,7 +9733,7 @@ BEGIN
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
     MIN_CONSTRAINT 0.00000000 "acre-ft/month";
-    MAX_CONSTRAINT "Min"( "SolveOutflow"( reservoir, reservoir & "Inflow" [@"t"], $ "UBRuleCurveData.ReservoirData" [STRINGIFY reservoir, "DeadCapacity"], reservoir & "Storage" [@"t - 1"], @"t" ), $ "UBRuleCurveData.ReservoirData" [STRINGIFY reservoir, "maxRelease"] );
+    MAX_CONSTRAINT "Min"( "SolveOutflow"( reservoir, reservoir & "Inflow" [@"t"], 0.00000000 "acre-ft", reservoir & "Storage" [@"t - 1"], @"t" ), $ "UBRuleCurveData.ReservoirData" [STRINGIFY reservoir, "maxRelease"] );
     NOTES          "CF,20190405: Created to apply to Aspinall Rules";
     BEGIN
 
