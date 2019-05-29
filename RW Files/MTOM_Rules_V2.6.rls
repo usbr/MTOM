@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.4.2 Patch
-# Created 10:31 May 29, 2019
+# Created 08:31 May 29, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -3247,7 +3247,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the April-July unregulated inflow volumes for Flaming Gorge for Base Flow and Spring Flow purposes, and the April-July volume for the Yampa at the Deerlodge gage.<br><br>SLOTS SET: KNN_MTOM.AprJulSpringFlow; KNN_MTOM.AprJulVolBaseFlow; FlamingGorgeData.YampaAprJulVol<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
-    NOTES                "CF, 20190529: set of slot FlamingGorgeData.YampaAprJulVol Replace IF @t = startrun, 0 ac-ft with Sum(Yampa,April,July) to help first timestep solve<br><br>AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
     DESCRIPTION          "For spring flow operations we are interested in the april - july volume for the upcoming season beginning in January through April. <br>The May official forecast is used for spring operations through July. <br>This number is needed in march to determine releases to meet the ULDE. ";
@@ -3259,7 +3259,7 @@ BEGIN
     BREAKPOINT AFTER_EXEC FALSE;
       $ "FlamingGorgeData.YampaAprJulVol" [] := IF ( "MonthIs"( { "April" } ) )
  THEN
-  "SumFlowsToVolume"( $ "YampaRiverInflow.Yampa_at_Deerlodge", @"t", @"t + 3" )
+  "SumFlowsToVolume"( $ "YampaRiverInflow.Yampa_at_Deerlodge", @"t" COMMENTED_BY "CF: shouldn't this be April 1 <br>", @"t + 3" )
  ELSE
   IF ( IsNaN $ "FlamingGorgeData.YampaAprJulVol" [@"t - 1"] )
   THEN
@@ -7985,7 +7985,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "CF, 20190529: MakeDailyFlamingGorgeReleaseDateandFlowList_LTSP() changes:<br>- modified FOR APPEND IF (date < startdate) &lcub;to Outflow&lcub;@t-1&rcub; if Daily had not been set in previous month.&rcub; <br>- modified IF (date < FGSpringReleaseStartDate) &lcub;Change from a IF April use Outflow[@March&rcub; Else Outflow[@April] &rcub;  <br>- GetFGBaseFlowMagnitude() was missing from IF after downramp statement. Fixed.  <br>- New fct CheckJensen() replaces Max(FG.BaseFlowMagLimits-Minitem(YampaDepleted)),MinFlow) to improve readability.<br>- New fct FGTargetHWGivenInflowOneMonth() w/ only 1 PE arguement now calls generic TargetHWGivenInflowOneMonth() to improve readability  <br>- Change nested max() statements to MaxItem() to improve readability <br><br>CF 20190125: Updated to use TargetHWGivenInflowOneMonth<br><br>HP, 20170714";
+    NOTES          "CF 20190125: Updated to use TargetHWGivenInflowOneMonth<br><br>HP, 20170714";
     BEGIN
 
       WITH LIST DateList = "GetDates"( @"24:00:00 April 1, Current Year", @"t" COMMENTED_BY "Only calculates daily schedule to the end of the current month for computation efficiency.", "1 days" ) DO
@@ -8095,11 +8095,11 @@ BEGIN
     FUNCTION       "FGTargetHWGivenInflowOneMonth" ( NUMERIC TargetPE )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
-    DESCRIPTION    "ARGUMENTS<br>NUMERIC TargetPE, PE to achieve at TargetEndDate<br><br>DESCRIPTION: This new fct FGTargetHWGivenInflowOneMonth() w/ only 1 PE arguement now calls generic TargetHWGivenInflowOneMonth() to improve readability   <br><br>RETURNS: Monthly outflow rate [L^3/T]<br><br><br>";
+    DESCRIPTION    "ARGUMENTS<br>NUMERIC TargetPE, PE to achieve at TargetEndDate<br><br>DESCRIPTION: This function returns the release for the current month to attain the specified pool elevation value, &quot;TargetPE&quot;. New fct FGTargetHWGivenInflowOneMonth() w/ only 1 PE arguement now calls generic TargetHWGivenInflowOneMonth() to improve readability   <br><br>RETURNS: Monthly outflow rate [L^3/T]<br><br><br>";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "AUTHOR, DATE:  CF, 20190529";
+    NOTES          "CF,20190109: New mass balance function called by GetFGBaseFlowMagnitudeUnconstrained which accounts for evaporation. Replaces old ...forOneMonth() function. This is more generic.<br><br>AUTHOR, DATE:  CF,20190109";
     BEGIN
 
       "TargetHWGivenInflowOneMonth"( % "FlamingGorge", @"t - 1", @"t", TargetPE COMMENTED_BY "CF: Prv fct (TargetHWGivenInflowforOneMonth) just took in Elevation but this matches <br>TargetHW arguements and is more explicit.   <br>", "FlowToVolume"( $ "FlamingGorge.Inflow" COMMENTED_BY "CF: CRSS slot ForecastData.FlamingGorgeInflow <br>" [], @"t" ) COMMENTED_BY "CF: MTOM's unregulated inflow accounts for the evaporation and upstream delta storage <br>therefore it does not need to include EstimateEvaporation like CRSS. <br>", $ "FlamingGorge.Storage" [@"t - 1"] );
@@ -8182,7 +8182,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "AUTHOR, DATE:  CF, 20190529";
+    NOTES          "";
     BEGIN
 
       "Max"( ( $ "FlamingGorgeData.BaseFlowMagnitudeLimits" [$ "KNN_MTOM.BaseFlowHClass" [], 2.00000000] - "MinItem"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"t", @"24:00:00 July 31, Current Year" ) ) ), $ "FlamingGorgeData.MinFlow" [] );
