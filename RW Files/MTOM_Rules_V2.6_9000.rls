@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5
-# Created 15:23 July 8, 2019
+# Created 15:25 July 8, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -859,8 +859,8 @@ BEGIN
     RULE                 "LB_ScheduleReset";
     DESCRIPTION          "9/18/2018, AP: This rule resets lower basin water user diversion when the lower basin condition switches between run cycles 3 and 4 (from either shortage/surplus to normal operating condition). ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] == 0.00000000 AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000;
-    NOTES                "9/18/2018, AP: The rule needs to be cleaned up at a later date when all CU_schedules slots have the same name as the diversion requested slots.";
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000;
+    NOTES                "9/18/2018, AP: The rule needs to be cleaned up at a later date when all CU_schedules slots have the same name as the diversion requested slots.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 1 (allows for no dependence on BHOPS during development testing). ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
