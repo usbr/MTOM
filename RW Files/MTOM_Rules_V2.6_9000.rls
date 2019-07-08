@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5
-# Created 11:24 July 2, 2019
+# Created 15:18 July 8, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4019,8 +4019,8 @@ BEGIN
     RULE                 "Havasu Rule Curve";
     DESCRIPTION          "DESCRIPTION: In any month except the Start Timestep, set the Havasu outflow such that the reservoir pool elevation target is met. For testbed hindcasts, this rule executes in the Start Timestep to solve for outflow which is not input using the slot HavasuOutflow.BHOPSParkerOutflow.<br><br>SLOTS SET: Havasu.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( @"t" >= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] == 1.00000000 ) ) COMMENTED_BY "For testbed hindcasts, this rule solves for Havasu.Outflow in Start Timestep <br>" );
-    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( @"t" >= @"Start Timestep" AND $ "MTOMRunType.RunType" [] != 0.00000000 ) COMMENTED_BY "For testbed hindcasts, this rule solves for Havasu.Outflow in Start Timestep <br>" );
+    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 0 (allows for no dependence on BHOPS during development testing). ";
     BEGIN
 
       $ "Havasu.Outflow" [] := "SolveOutflow"( % "Havasu", $ "Havasu.Inflow" [], "GetTargetStorage"( % "Havasu", @"t" ), $ "Havasu.Storage" [@"t - 1"], @"t" );
@@ -12648,32 +12648,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ca1987f6-3ae3-42e5-8b97-94fedbacd671}";
+    UUID "{374ec572-5c13-439d-b346-88ef0d173278}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8459bc8d-6329-4c7a-9eeb-2ad675cd9c44}";
+    UUID "{de5110bf-8288-46be-925b-9beb3a72187c}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{168c83c2-74b9-4ddd-ba6d-8b97ed263563}";
+    UUID "{b38c5c0a-1878-4c05-a940-7aaed9d91f32}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5bdb8d6c-4363-46f7-8d81-d4a04f8731f5}";
+    UUID "{572e80b3-3ca7-44eb-8078-73731fa68db8}";
 ;
 
   END
-  UUID "{d386c16a-fc23-41b3-a336-01e9b036cc76}";;
+  UUID "{75452792-53a6-4f1c-9cce-7a297a168bd2}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -12684,11 +12684,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{55d1ce06-fdf7-4184-95a9-3f53c648b6a8}";
+    UUID "{bbe12144-78fa-4db3-a9f1-2256228cc6ee}";
 ;
 
   END
-  UUID "{a4bcd32b-ffcf-436a-8983-c66bdaf0975f}";;
+  UUID "{23100499-8ccd-43d3-b5bd-29dc42998aa4}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -12699,11 +12699,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e790e8ae-4f7c-4cd1-b421-1d7a7536a3d0}";
+    UUID "{8e20aaa4-1519-4037-91b6-de629fbc54e0}";
 ;
 
   END
-  UUID "{9391fb36-df2f-4955-90ef-fb8307a25ecc}";;
+  UUID "{f68f44c4-d71d-471e-9c66-94f82563ce74}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -12714,11 +12714,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d0d654d2-6767-4649-bf96-e0d23d79ba6b}";
+    UUID "{e158d6e1-71c1-4649-b4a9-0cb6b11c7720}";
 ;
 
   END
-  UUID "{982d14ea-4b57-40d4-b2af-64f930d4673d}";;
+  UUID "{4606a50c-c32f-464b-9d94-1073ba116301}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
