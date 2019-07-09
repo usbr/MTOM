@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5
-# Created 16:10 July 9, 2019
+# Created 16:50 July 9, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -224,6 +224,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br>MC, 20170920: Changed beginning datetime in FOR loop from @&quot;24:00:00 January 31, Current Year&quot; to @&quot;t&quot; per Sep 19 email from Shana T. and Corinne H.<br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. ";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
             $ "Surplus.Surplus Flag" [date] := 3.00000000;
 
@@ -327,6 +328,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>CH, 4/18/18: Added execution constraint: AND IsNaN FloodControlOutput.Flood Control Flag to so that in the case the Flood Control Flag is set in run cycle 3, it is not reset in run cycle 4. Once a flood control flag is set, it should not be reset (even in run cycle 4).";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
       IF_STATEMENT ($ "Mead.Storage" [] > "ComputeTargetStorage"(  )) THEN
             $ "Mead.Outflow" [] := "Max"( "ComputeOutflowAtGivenStorage"( % "Mead", "ComputeTargetStorage"(  ) ), $ "Mead.Outflow" [] );
 
@@ -352,6 +354,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170518: Rule modified to only use 1 IF statement <br>CH, 4/18/18: Added execution constraint: AND IsNaN FloodControlOutput.Flood Control Flag to so that in the case the Flood Control Flag is set in run cycle 3, it is not reset in run cycle 4. Once a flood control flag is set, it should not be reset (even in run cycle 4).";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
       IF_STATEMENT ($ "Mead.Outflow" [] < $ "FloodControlOutput.FCrelease" []) THEN
             $ "Mead.Outflow" [] := $ "FloodControlOutput.FCrelease" [];
 
@@ -368,10 +371,11 @@ BEGIN
     RULE                 "Mead Exclusive Flood Control Space";
     DESCRIPTION          "DESCRIPTION: This rule ensures that Mead does not violate the 1.5 maf space requirement (on MeadFloodControlData.MinSpace slot) at any time of the year. Although this is the highest priority rule, we don't want it to fire until the other flood control procedures have potentially executed. The rule checks the storage in Mead, and if it does not provide the minimum space, the outflow is recalculated so that the minimum space is achieved. If the outflow is recalculated, the FloodControlOutput.Exclusive Space Flag is set to 1; otherwise it is set to 0.<br><br>SLOTS SET: Mead.Outflow; FloodControlOutput.Exclusive Space Flag<br><br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT IsNaN $ "FloodControlOutput.Flood Control Flag" [] AND NOT IsNaN $ "Mead.Storage" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170518: Modified rule to use only 1 IF statement instead of 2, and only print statement in the case the IF statement is TRUE<br>MC, 20170920: Modified calculation of Mead.Outflow to take the larger of outflow to reach min space requirement or outflow to meet downstream requirement per Sep 19 email from Shana T. and Corinne H. (previously did not consider downstream requirement)";
+    RULE_EXEC_CONSTRAINT $ "FloodControlOutput.Flood Control Flag" [] == 1.00000000 AND NOT IsNaN $ "Mead.Storage" [];
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>SB, 07/09/2019: This rule was being used to set Mead outflow in conditions where Mead was almost empty. Edited execution constraints to look if Flood Control Flag is equal to 1, not NaN.<br>MC, 20170518: Modified rule to use only 1 IF statement instead of 2, and only print statement in the case the IF statement is TRUE<br>MC, 20170920: Modified calculation of Mead.Outflow to take the larger of outflow to reach min space requirement or outflow to meet downstream requirement per Sep 19 email from Shana T. and Corinne H. (previously did not consider downstream requirement)";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "If Mead storage exceeds what provides the minimum space requirement, <br>recalculate outflow so the storage provides the minimum space.";
       IF_STATEMENT ($ "Mead.Storage" [] >= "ComputeMinimumSpace"( % "Mead" ) COMMENTED_BY "Storage with min space requirement" OR $ "Mead.Outflow" [] < "VolumeToFlow"( $ "Lower Basin Output.DownstreamReq" [], @"t" ) COMMENTED_BY "Storage with min space requirement") THEN
             $ "Mead.Outflow" [] := "Max"( "ComputeOutflowAtGivenStorage"( % "Mead", "ComputeMinimumSpace"( % "Mead" ) ), "VolumeToFlow"( $ "Lower Basin Output.DownstreamReq" [], @"t" ) ) COMMENTED_BY "Calculate outflow to reach storage with min space requirement or meet <br>downstream requirement, whichever volume is larger<br>(This will be constrained to MaxSpaceBuildingRelease outflow) <br>";
@@ -4092,6 +4096,7 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknow Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
       $ "Mohave.Outflow" [] := "SolveOutflow"( % "Mohave", $ "Mohave.Inflow" [], "GetTargetStorage"( % "Mohave", @"t" ), $ "Mohave.Storage" [@"t - 1"], @"t" );
 
     END
@@ -4104,6 +4109,7 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>S.Baker 2018/10/17: Replace SumAllDiversionsBelowVolume(Havasu) - SumAllGainsBelowVolume(Havasu) with HavasuOutflow.ParkerRequirement. This change was made because this calculation was already performed in rule &quot;Set Parker Final Requirement&quot;, so it was repetative and problematic to recalculate them. This change is important during hindcast runs when the Gila River has ver high local inflows (Jan-Apr 1993). ";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
       $ "Mead.Outflow" [] := "Min"( IF ( "GetRunCycleIndex"(  ) >= 3.00000000 )
  THEN
   "CheckResPhysicalConstraint"( % "Mead", @"t" )
@@ -12693,32 +12699,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{414807eb-c59d-4ec9-ab47-b85086173cf1}";
+    UUID "{f0ff2b14-6aaf-48bc-8a28-e5513dd19772}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fc445c3c-05d5-48a1-aec8-cb0a3fe3a9ab}";
+    UUID "{ae85e0ae-3d7e-47ad-a150-7daf932411a8}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{26624807-edb3-4749-81ec-c208729e9916}";
+    UUID "{0389191c-f3fc-4e5c-aed3-42695081a79b}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{379d14cf-869c-4d92-af56-dacac49a6afa}";
+    UUID "{00ee91e4-9200-40f5-a616-1090109f6284}";
 ;
 
   END
-  UUID "{a9ed6ecd-4f67-4e77-995a-8ef076d26b70}";;
+  UUID "{3fb1601a-d0c7-45c4-b9a7-e449d37cd8e0}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -12729,11 +12735,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4abf7d65-af6f-4617-9c2e-031de79af703}";
+    UUID "{8cf8578e-9cc1-47d4-8819-10c12cf7d253}";
 ;
 
   END
-  UUID "{38d121e9-4170-43c9-a09c-78bcce5fc1e8}";;
+  UUID "{fb3fca74-d576-4d33-90a4-504153fee02d}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -12744,11 +12750,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e7677bec-86bd-453b-9be6-7cf297acef5e}";
+    UUID "{c8c5629f-ec47-469a-a685-32a796e40d7a}";
 ;
 
   END
-  UUID "{bec69690-3e8b-424e-8de4-eb9a4acf82ab}";;
+  UUID "{9876c2bf-ffd7-4414-bd79-4e00e04b2d81}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -12759,11 +12765,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4ab1d866-c8f7-41c7-970d-1b4ae68d1220}";
+    UUID "{461ba7dc-b3c0-4c7e-9b6f-551090f2c5bc}";
 ;
 
   END
-  UUID "{8a2a165b-09ec-4536-b937-24d48e666d11}";;
+  UUID "{6e43a648-8821-4e87-8293-68b4ccff2097}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
