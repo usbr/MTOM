@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5
-# Created 11:03 July 9, 2019
+# Created 16:10 July 9, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -3869,8 +3869,6 @@ BEGIN
   ENDWITH
  ENDIF;
 
-            PRINT ?;
-
       END_WITH_STATEMENT;
 
     INACTIVE      WITH_STATEMENT (DATETIME EndDate = "DateMin"( "GetWaterYearEndDate"( @"t" ), @"Finish Timestep" )) DO
@@ -3895,18 +3893,17 @@ BEGIN
     END
     UUID "{8add48ac-d036-4418-9bf6-471a36b3ddf3}";;
 
-    RULE                 "Taylor Park Guide Release_lowerVals";
+    RULE                 "Taylor Park Guide Release_new";
     DESCRIPTION          "DESCRIPTION: This rule sets the Taylor Park Reservoir releases for the entire run on the first timestep.  The ability to do this is predicated on the fact that Taylor Park operations only need to know the inflow to the reservoir and nothing else about the state of the system.  If this changes, then it will have be done each timestep<br><br>SLOTS SET: TaylorPark.Outflow<br><br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: SC, 12/31/2010<br><br>SB, 20190709: Taylor Park needed lower release for very dry scenarios. Added an additional IF statement to check if storage would go negative with calculated minimum flow. If storage would be negative, Taylor Park is set to a release equal to the inflow. <br><br>MC, 20170720: Wrote modifed version of reduced MinFlow situation to adaptively reduce MinFlow values so that MinElevation is avoided; not active yet because haven't run it by USBR<br><br>MC, 20170621: (a) Changed reference  in local variable ToSpillway from 9,330 feet to TaylorParkData.SpillwayElevation; (b) Changed reference in first IF statement from TaylorParkData.TaylorPark_LowestFlow to TaylorParkData.MinFlow * TaylorParkData.MinFlowReductionFactor. (b) will allow more flexibility in flow reductions due to low pool elevations than hard-coding new min flow values.<br><br>MC, 20170508: Added conditional logic and LowestFlow slot to address problems Sarah B. was having with her model runs; changes developed by Sarah and confirmed with Erik K.<br><br>MC, 20170124: With midmonth ensembles, situation occurred in which the maximum release constraint in SimulateHeadwaterRes prevented use of spillway and led to storage greater than maximum in storage-volume table and aborted runs. I rewrote the rule so now TP only solves one timestep at a time but utilizes spill possibility. Three possibilities for relative size of outflows calculated:<br>1. ToSpillway < ToTarget < MaximumControlled: release to hit target<br>2. ToSpillway < MaximumControlled < ToTarget: release maximum and end of month elevation will be lower than spillway but higher than target<br>3. MaximumControlled < ToSpillway < ToTarget: release to spillway, which will require spill, but not excessive spill that would be required to reach target<br><br>Need Minimum Flow in case inflow is insufficient to reach Target";
+    NOTES                "AUTHOR, DATE: SC, 12/31/2010<br><br>SB, 20190709: Taylor Park needed lower release for very dry scenarios. Added a max statement to release only the available water in Taylor Park. <br><br>MC, 20170720: Wrote modifed version of reduced MinFlow situation to adaptively reduce MinFlow values so that MinElevation is avoided; not active yet because haven't run it by USBR<br><br>MC, 20170621: (a) Changed reference  in local variable ToSpillway from 9,330 feet to TaylorParkData.SpillwayElevation; (b) Changed reference in first IF statement from TaylorParkData.TaylorPark_LowestFlow to TaylorParkData.MinFlow * TaylorParkData.MinFlowReductionFactor. (b) will allow more flexibility in flow reductions due to low pool elevations than hard-coding new min flow values.<br><br>MC, 20170508: Added conditional logic and LowestFlow slot to address problems Sarah B. was having with her model runs; changes developed by Sarah and confirmed with Erik K.<br><br>MC, 20170124: With midmonth ensembles, situation occurred in which the maximum release constraint in SimulateHeadwaterRes prevented use of spillway and led to storage greater than maximum in storage-volume table and aborted runs. I rewrote the rule so now TP only solves one timestep at a time but utilizes spill possibility. Three possibilities for relative size of outflows calculated:<br>1. ToSpillway < ToTarget < MaximumControlled: release to hit target<br>2. ToSpillway < MaximumControlled < ToTarget: release maximum and end of month elevation will be lower than spillway but higher than target<br>3. MaximumControlled < ToSpillway < ToTarget: release to spillway, which will require spill, but not excessive spill that would be required to reach target<br><br>Need Minimum Flow in case inflow is insufficient to reach Target";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
       WITH_STATEMENT (DATETIME EndDate = "DateMin"( "GetWaterYearEndDate"( @"t" ), @"Finish Timestep" )) DO
-            $ "TaylorPark.Outflow" [@"t"] := IF ( ( $ "TaylorPark.Storage" [@"t - 1"] + "FlowToVolume"( $ "TaylorPark.Inflow" [@"t"], @"t" ) < "FlowToVolume"( $ "TaylorParkData.MinFlow" [@"t"], @"t" ) * $ "TaylorParkData.MinFlowReductionFactor" [] ) COMMENTED_BY "For extremely low TP pool elevations set outflow equal to inflow <br>(if previous storage plus inflow is less than minimum outflow)  <br>" )
+            $ "TaylorPark.Outflow" [@"t"] := IF ( ( $ "TaylorPark.Pool Elevation" [@"t - 1"] < ( $ "TaylorParkData.TaylorParkGuide" [@"t - 1"] - 70.00000000 "ft" ) ) COMMENTED_BY "Previous pool elevation is more than 70ft below guide curve OR (more than 20ft below AND inflows less than lowest outflows)" OR ( $ "TaylorPark.Pool Elevation" [@"t - 1"] < ( $ "TaylorParkData.TaylorParkGuide" [@"t - 1"] - 20.00000000 "ft" ) AND "SumFlowsToVolume"( $ "TaylorPark.Inflow", "GetWaterYearBeginDate"( @"t" ), EndDate ) < "SumFlowsToVolume"( $ "TaylorParkData.MinFlow", "GetWaterYearBeginDate"( @"t" ), EndDate ) * $ "TaylorParkData.MinFlowReductionFactor" [] ) )
  THEN
-  $ "TaylorPark.Inflow" [@"t"]
+  "VolumeToFlow"( "Min"( "FlowToVolume"( $ "TaylorParkData.MinFlow" [@"t"], @"t" ) * $ "TaylorParkData.MinFlowReductionFactor" [], $ "TaylorPark.Storage" [@"t - 1"] + "FlowToVolume"( $ "TaylorPark.Inflow" [@"t"], @"t" ) ), @"t" )
  ELSE
   WITH NUMERIC MaximumControlled = $ "TaylorPark.Maximum Controlled Release" [0.00000000, 0.00000000] DO
    WITH NUMERIC ToTarget = "SolveOutflow"( % "TaylorPark", $ "TaylorPark.Inflow" [@"t"], "ElevationToStorage"( % "TaylorPark", $ "TaylorParkData.TaylorParkGuide" [@"t"] ), $ "TaylorPark.Storage" [@"t - 1"], @"t" ) COMMENTED_BY "Outflow required to reach the pool elevation target" DO
@@ -3915,10 +3912,7 @@ BEGIN
     ENDWITH
    ENDWITH
   ENDWITH
- ENDIF
- ELSEIF_COND ( ( $ "TaylorPark.Pool Elevation" [@"t - 1"] < ( $ "TaylorParkData.TaylorParkGuide" [@"t - 1"] - 70.00000000 "ft" ) ) COMMENTED_BY "Previous pool elevation is more than 70ft below guide curve OR (more than 20ft below AND inflows less than lowest outflows)" OR ( $ "TaylorPark.Pool Elevation" [@"t - 1"] < ( $ "TaylorParkData.TaylorParkGuide" [@"t - 1"] - 20.00000000 "ft" ) AND "SumFlowsToVolume"( $ "TaylorPark.Inflow", "GetWaterYearBeginDate"( @"t" ), EndDate ) < "SumFlowsToVolume"( $ "TaylorParkData.MinFlow", "GetWaterYearBeginDate"( @"t" ), EndDate ) * $ "TaylorParkData.MinFlowReductionFactor" [] ) )
- ELSEIF_CLAUSE ( "VolumeToFlow"( "FlowToVolume"( $ "TaylorParkData.MinFlow" [@"t"], @"t" ) * $ "TaylorParkData.MinFlowReductionFactor" [], @"t" ) )
- END_ELSEIF;
+ ENDIF;
 
       END_WITH_STATEMENT;
 
@@ -3942,7 +3936,7 @@ BEGIN
       END_WITH_STATEMENT;
 
     END
-    UUID "{ead5980e-6a57-4543-9d71-5ee935a090cc}";;
+    UUID "{86f6a5d5-3ec7-4cd4-901c-3041d0db3ee5}";;
 
   END
   UUID "{eefa021d-c2c5-4714-9e1d-babdcd14fcbf}";;
@@ -12699,32 +12693,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{75d8f52e-3d60-474b-ade7-9489994e1651}";
+    UUID "{414807eb-c59d-4ec9-ab47-b85086173cf1}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e153e313-4c06-4eec-ad28-1537e50cca89}";
+    UUID "{fc445c3c-05d5-48a1-aec8-cb0a3fe3a9ab}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{08b6c64a-46ec-44cd-8178-9fcde1341873}";
+    UUID "{26624807-edb3-4749-81ec-c208729e9916}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{15f1c8db-6f52-4706-972e-8ec3ed02eac4}";
+    UUID "{379d14cf-869c-4d92-af56-dacac49a6afa}";
 ;
 
   END
-  UUID "{12599991-ed8d-497a-8638-b18a20f82bf3}";;
+  UUID "{a9ed6ecd-4f67-4e77-995a-8ef076d26b70}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -12735,11 +12729,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e04dded1-a844-4c12-9e8e-5431f9bcd6af}";
+    UUID "{4abf7d65-af6f-4617-9c2e-031de79af703}";
 ;
 
   END
-  UUID "{1f3ca30e-e06e-470b-83e0-761a15266840}";;
+  UUID "{38d121e9-4170-43c9-a09c-78bcce5fc1e8}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -12750,11 +12744,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7a940703-1af9-4283-8fa2-0117118b6e6a}";
+    UUID "{e7677bec-86bd-453b-9be6-7cf297acef5e}";
 ;
 
   END
-  UUID "{d98eb98b-aa36-4af3-a9e3-45eff97d6a7a}";;
+  UUID "{bec69690-3e8b-424e-8de4-eb9a4acf82ab}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -12765,11 +12759,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fb17ba50-b147-4c98-ba2a-ba122d457d1e}";
+    UUID "{4ab1d866-c8f7-41c7-970d-1b4ae68d1220}";
 ;
 
   END
-  UUID "{be9e3214-d5b9-41ba-8fe1-841ee456edea}";;
+  UUID "{8a2a165b-09ec-4536-b937-24d48e666d11}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
