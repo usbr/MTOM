@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5
-# Created 11:43 July 11, 2019
+# Created 12:08 July 11, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -369,8 +369,8 @@ BEGIN
     RULE                 "Mead Exclusive Flood Control Space";
     DESCRIPTION          "DESCRIPTION: This rule ensures that Mead does not violate the 1.5 maf space requirement (on MeadFloodControlData.MinSpace slot) at any time of the year. Although this is the highest priority rule, we don't want it to fire until the other flood control procedures have potentially executed. The rule checks the storage in Mead, and if it does not provide the minimum space, the outflow is recalculated so that the minimum space is achieved. If the outflow is recalculated, the FloodControlOutput.Exclusive Space Flag is set to 1; otherwise it is set to 0.<br><br>SLOTS SET: Mead.Outflow; FloodControlOutput.Exclusive Space Flag<br><br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT IsNaN $ "FloodControlOutput.Flood Control Flag" [] AND NOT IsNaN $ "Mead.Storage" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170518: Modified rule to use only 1 IF statement instead of 2, and only print statement in the case the IF statement is TRUE<br>MC, 20170920: Modified calculation of Mead.Outflow to take the larger of outflow to reach min space requirement or outflow to meet downstream requirement per Sep 19 email from Shana T. and Corinne H. (previously did not consider downstream requirement)";
+    RULE_EXEC_CONSTRAINT $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 AND NOT IsNaN $ "Mead.Storage" [];
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>SB, 20190711: Edited execution constraint to check if FC slot was greater than 0 (not just Not NaN). This rule was setting Mead outflow during very low scenarios in which flood control rules should not be executing. <br>MC, 20170518: Modified rule to use only 1 IF statement instead of 2, and only print statement in the case the IF statement is TRUE<br>MC, 20170920: Modified calculation of Mead.Outflow to take the larger of outflow to reach min space requirement or outflow to meet downstream requirement per Sep 19 email from Shana T. and Corinne H. (previously did not consider downstream requirement)";
     BEGIN
 
     DESCRIPTION          "If Mead storage exceeds what provides the minimum space requirement, <br>recalculate outflow so the storage provides the minimum space.";
@@ -12704,32 +12704,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3ec62be1-eb40-4be3-b311-a63d582e3d0d}";
+    UUID "{d5d3a173-ae35-4c2c-b968-c0c11bd60ede}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c05b2806-bfc6-479a-83d3-9e462831f103}";
+    UUID "{c6372dd3-faff-42fe-8427-209df58580bb}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3bd8c374-e43e-4ee6-94a9-e7a5306dc98f}";
+    UUID "{f67c2584-cb6b-4222-9610-588fa06b4efa}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{50c5c5f3-921b-40c6-b3a7-e08a8dde968e}";
+    UUID "{f4671095-22b9-4b8f-bbec-7a2bd8ee687a}";
 ;
 
   END
-  UUID "{a908e261-e5e6-4663-8495-3fd62021fcbb}";;
+  UUID "{3ed7ec5a-1638-4fa8-9c98-a38bb6ba194e}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -12740,11 +12740,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d68e389b-a6be-47c1-82bd-ad1af6edf147}";
+    UUID "{aadd80e5-30ce-466f-ba3f-e2f135e28426}";
 ;
 
   END
-  UUID "{c92caa23-8dc9-437f-b6c5-500b6ec9dbec}";;
+  UUID "{0cbe7c51-48d4-4840-8430-443c5731f735}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -12755,11 +12755,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c38164da-2416-49af-b4fa-ec2b337e84d8}";
+    UUID "{625c2d3e-8b05-4433-b9d5-6401958905ae}";
 ;
 
   END
-  UUID "{98475b03-516c-4508-b99a-8f710e435761}";;
+  UUID "{82bdfee7-c321-44c6-b62f-c1b480ca2cd7}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -12770,11 +12770,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6d7fab65-d5bf-4fb1-b185-2834bd5f69e6}";
+    UUID "{0d3b35df-8ff5-4c05-bcb8-fc4140ea2016}";
 ;
 
   END
-  UUID "{8d9f3072-10ff-4232-a299-a524eaf43937}";;
+  UUID "{d6a73f0f-04b5-443f-86de-8a8999f51192}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
