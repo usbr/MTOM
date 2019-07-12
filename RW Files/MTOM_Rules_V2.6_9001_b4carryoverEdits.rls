@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5
-# Created 13:57 July 12, 2019
+# Created 16:39 July 11, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2265,7 +2265,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>TP 20171017: Removed Setting the volume for the first water year, only sets outyear volumes now<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "For August timestep with Lower Balancing Release Tier in next outyear";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "Min"( "Max"( "EqualizationReleaseWithCarryover"( "RelativeEOWYDate"( @"t + 2" ) ), $ "PowellData.LowerTierMinAnnualRelease" [] ), $ "PowellData.LowerTierMaxAnnualRelease" [] );
 
@@ -2411,14 +2410,13 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier for out years. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3)<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "AUTHOR, DATE: Unknown<br><br>SB, 20190712: Added NaNToZero to PowelltoMead.Carryover() so rule doesnt fail. <br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>S.Baker, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 20180925: Replaced function 'GetMeadProjectedPoolElevation' with function 'GetProjectedPoolElevation'.";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>S.Baker, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 20180925: Replaced function 'GetMeadProjectedPoolElevation' with function 'GetProjectedPoolElevation'.";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "In August or September start month with UEBT for outyear";
       $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := IF ( "StorageToElevation"( % "Powell", "ElevationToStorage"( % "Powell", $ "Powell.Pool Elevation" ["DateToCheckEOWYElevation"( @"t", FALSE )] ) - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] ) ) > "EqLevel"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) )
  THEN
-  ( GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) ) - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "DateToCheckEOWYElevation"( @"t", FALSE ) )] )
+  ( GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) ) - $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( "DateToCheckEOWYElevation"( @"t", FALSE ) )]
  ELSE
   IF ( "StorageToElevation"( % "Mead", "ElevationToStorage"( % "Mead", "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Current Year" ) ) + NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Current Year"] ) ) >= 1075.00000000 "ft" )
   THEN
@@ -2472,7 +2470,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints and removed from each IF statement in rule.<br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot;. This doesn't cause problems in the normal Powell policy group since the rule &quot;Set Release Tier&quot; doesn't have the EOCY Powell Pool Elevation. Therefore, the rule &quot;Set Release Tier&quot; is skipped until the rule &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot; has executed successfully. The rule priorities were changed to make the ruleset more efficiently. ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "Model needs to set the teir for the following water year if current timestep is August. <br>";
       IF_STATEMENT ("MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) AND @"t + 2" IN "WaterYearDatesByGroup"( 2.00000000 )) THEN
             WITH_STATEMENT (NUMERIC Carryover = NaNToZero ( $ "PowellToMeadData.CarryoverVolume" [@"24:00:00 December 31, Next Year"] )) DO
@@ -2743,7 +2740,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: In most months, interpolate values from the monthly release table using the current value of annual release volume. In August and September the annual release volume has already been set for the subsequent water year, so use the previous water year's annual volume. <br><br>SLOTS SET: Powell.Outflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep";
-    NOTES                "AUTHOR, DATE: Unknown<br><br>SB, 20190712: Edited how carryover is set. Added IF so carryover is only set during EQ or UEBT. This is what is done in CRSS. Carryover was causing this rule to reach max executions when Powell and Mead were at very low pool elevations. ";
+    NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
@@ -2755,17 +2752,13 @@ BEGIN
 
       ENDFOREACH;
 
-          DESCRIPTION          "Track carryover only if Powell is in UEBT or Equalization, not LEBR or MEBR  <br>";
-      IF_STATEMENT ("TierIs"( "Equalization", @"t", TRUE ) OR "TierIs"( "Upper", @"t", TRUE )) THEN
             WITH_STATEMENT (NUMERIC iterMax = ( LENGTH PowellOutflowsAndCarryover ) - 1.00000000) DO
-            WITH_STATEMENT (DATETIME CarryoverYear = "OffsetDate"( "Dec31ofYear"( GET @INDEX 0.00000000 FROM GET @INDEX iterMax FROM PowellOutflowsAndCarryover ), 12.00000000, "1 Months" )) DO
-            $ "PowellToMeadData.CarryoverVolume" [CarryoverYear] := "Max"( "Floor"( GET @INDEX 3.00000000 FROM GET @INDEX iterMax FROM PowellOutflowsAndCarryover, 1.00000000 "acre-feet" ), 0.00000000 "acre-feet" );
+            WITH_STATEMENT (DATETIME CarryoverYear = "OffsetDate"( "Dec31ofYear"( GET @INDEX 0.00000000 FROM GET @INDEX ( LENGTH PowellOutflowsAndCarryover ) - 1.00000000 FROM PowellOutflowsAndCarryover ), 12.00000000, "1 Months" )) DO
+            $ "PowellToMeadData.CarryoverVolume" [CarryoverYear] := "Max"( "Floor"( GET @INDEX 3.00000000 FROM GET @INDEX ( LENGTH PowellOutflowsAndCarryover ) - 1.00000000 FROM PowellOutflowsAndCarryover, 1.00000000 "acre-feet" ), 0.00000000 "acre-feet" );
 
       END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
-
-      END_IF_STATEMENT;
 
       END_WITH_STATEMENT;
 
@@ -2798,15 +2791,12 @@ BEGIN
 
       ENDFOREACH;
 
-          DESCRIPTION          "Track carryover only if Powell is in UEBT or Equalization, not LEBR or MEBR  <br>";
-      IF_STATEMENT ("TierIs"( "Equalization", @"t", FALSE ) OR "TierIs"( "Upper", @"t", FALSE )) THEN
-          DESCRIPTION          "If there is carryover volume in the last element of the PowellOutflowsAndCarryover List, then <br>add that to the next Water Year to be released in the next water year.  <br>";
+            BREAKPOINT BEFORE_EXEC TRUE;
+    DESCRIPTION          "If there is carryover volume in the last element of the PowellOutflowsAndCarryover List, then <br>add that to the next Water Year to be released in the next water year.  <br>";
       WITH_STATEMENT (DATETIME CarryoverYear = "Dec31ofYear"( WaterYear + 1.00000000 "year" )) DO
             $ "PowellToMeadData.CarryoverVolume" [CarryoverYear] := "Max"( "Floor"( GET @INDEX 3.00000000 FROM GET @INDEX ( LENGTH PowellOutflowsAndCarryover ) - 1.00000000 FROM PowellOutflowsAndCarryover, 1.00000000 "acre-feet" ), 0.00000000 "acre-feet" );
 
       END_WITH_STATEMENT;
-
-      END_IF_STATEMENT;
 
       END_WITH_STATEMENT;
 
@@ -4127,7 +4117,6 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>S.Baker 2018/10/17: Replace SumAllDiversionsBelowVolume(Havasu) - SumAllGainsBelowVolume(Havasu) with HavasuOutflow.ParkerRequirement. This change was made because this calculation was already performed in rule &quot;Set Parker Final Requirement&quot;, so it was repetative and problematic to recalculate them. This change is important during hindcast runs when the Gila River has ver high local inflows (Jan-Apr 1993). ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
       $ "Mead.Outflow" [] := "Min"( IF ( "GetRunCycleIndex"(  ) >= 3.00000000 )
  THEN
   "CheckResPhysicalConstraint"( % "Mead", @"t" )
@@ -6530,7 +6519,6 @@ BEGIN
     END
     UUID "{e216fafe-b67f-4ec5-800a-43bc820a374f}";;
 
-      BREAKPOINT BEFORE_EXEC TRUE;
     FUNCTION       "GetPowellMonthlyReleases" ( LIST datesToEOWY )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -12720,32 +12708,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{be204f7a-2a36-4330-8cf4-b30da584cf77}";
+    UUID "{bf715240-b136-4175-b76e-0e83f9063eda}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b36140e9-2c7e-4cdb-a46a-ae9851faf6a2}";
+    UUID "{6175ceda-45c7-47f8-821b-47ef67ea8afc}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3c94d758-f51d-4620-8e5e-4c6d1e858f92}";
+    UUID "{d9a40d8d-c59b-4870-8d84-08f3b3bb3ce6}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3fc80556-391b-4b04-a988-08301821778f}";
+    UUID "{a7a52ce2-2364-4547-8127-8999d2ce0135}";
 ;
 
   END
-  UUID "{72cf7f4b-b208-4c04-9ed2-a012a167bb92}";;
+  UUID "{1128e72e-4d8d-4881-be1e-9acebad0c9ea}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -12756,11 +12744,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{38eff9bc-a113-4784-9588-81a616299267}";
+    UUID "{6ecb8165-4d78-42d2-b098-45789bf5b5fb}";
 ;
 
   END
-  UUID "{845dc713-0c65-4e49-9bc0-a7fbc70ec680}";;
+  UUID "{8454e822-cd50-4aef-b492-519ecdcd70ff}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -12771,11 +12759,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{566cf47e-b7be-408e-bf85-eaa173d4e923}";
+    UUID "{ba376b56-b3f6-45ff-add6-3924cfd513b2}";
 ;
 
   END
-  UUID "{680c0a4b-0307-4f4e-8637-9b0c3886ec5f}";;
+  UUID "{e7cd95cc-5e57-4332-a84f-34681faa7cd6}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -12786,11 +12774,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6f5a43a6-9aa2-4aa2-80ba-09df161692a3}";
+    UUID "{85e9de23-01f3-454a-bc24-2e8867216804}";
 ;
 
   END
-  UUID "{134d9d99-460c-4422-904d-d7dc2497f7d0}";;
+  UUID "{112442e8-36f0-4b24-9f8c-85ecc72d90c4}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
