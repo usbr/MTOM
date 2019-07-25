@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5
-# Created 13:57 July 12, 2019
+# Created 12:01 July 25, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2755,7 +2755,8 @@ BEGIN
 
       ENDFOREACH;
 
-          DESCRIPTION          "Track carryover only if Powell is in UEBT or Equalization, not LEBR or MEBR  <br>";
+            BREAKPOINT BEFORE_EXEC TRUE;
+    DESCRIPTION          "Track carryover only if Powell is in UEBT or Equalization, not LEBR or MEBR  <br>";
       IF_STATEMENT ("TierIs"( "Equalization", @"t", TRUE ) OR "TierIs"( "Upper", @"t", TRUE )) THEN
             WITH_STATEMENT (NUMERIC iterMax = ( LENGTH PowellOutflowsAndCarryover ) - 1.00000000) DO
             WITH_STATEMENT (DATETIME CarryoverYear = "OffsetDate"( "Dec31ofYear"( GET @INDEX 0.00000000 FROM GET @INDEX iterMax FROM PowellOutflowsAndCarryover ), 12.00000000, "1 Months" )) DO
@@ -5763,7 +5764,7 @@ BEGIN
              THEN
               "Min"( PreviousCarryover, GET @INDEX 2.00000000 FROM index ) + GET @INDEX 2.00000000 FROM GET @INDEX ( LENGTH InitialDateRelease ) - 1.00000000 FROM InitialDateRelease
              ELSE
-              PreviousCarryover + "FlowToVolume"( CurrentEstRelease - NextOutflow, CurrentDate )
+              "Min"( PreviousCarryover, GET @INDEX 2.00000000 FROM index ) + "FlowToVolume"( CurrentEstRelease - NextOutflow, CurrentDate )
              ENDIF COMMENTED_BY "Want to use the original InitialDateRelease because the sorted version does not <br>have any carryover that needs to be released next year. <br>" DO
               APPEND { CurrentDate , NextOutflow , NewPE , addCarryoverIfAny * "DebuggerStop"(  ) } ONTO result
              ENDWITH
@@ -12720,32 +12721,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{be204f7a-2a36-4330-8cf4-b30da584cf77}";
+    UUID "{986f95df-4a34-4b6a-9b4b-c13c58e27929}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b36140e9-2c7e-4cdb-a46a-ae9851faf6a2}";
+    UUID "{b6eccbe1-8b2e-44ba-9b2d-cd50809dc07d}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3c94d758-f51d-4620-8e5e-4c6d1e858f92}";
+    UUID "{6c1c18fc-d5f5-41f8-ac59-9e92b7d92434}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3fc80556-391b-4b04-a988-08301821778f}";
+    UUID "{336901e9-ee78-4dcc-96cb-e9e757f17ade}";
 ;
 
   END
-  UUID "{72cf7f4b-b208-4c04-9ed2-a012a167bb92}";;
+  UUID "{a193ecae-1625-431c-a515-cb344cb4071c}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -12756,11 +12757,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{38eff9bc-a113-4784-9588-81a616299267}";
+    UUID "{b8fbd7b2-80a8-442c-b169-050957de9484}";
 ;
 
   END
-  UUID "{845dc713-0c65-4e49-9bc0-a7fbc70ec680}";;
+  UUID "{e710a094-f90d-4b1d-8775-d0f572e6e07c}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -12771,11 +12772,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{566cf47e-b7be-408e-bf85-eaa173d4e923}";
+    UUID "{b3d4a8e7-b5e8-43bf-bc3d-6278556e0502}";
 ;
 
   END
-  UUID "{680c0a4b-0307-4f4e-8637-9b0c3886ec5f}";;
+  UUID "{473407e1-84be-4706-91f1-3b38636e8980}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -12786,11 +12787,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6f5a43a6-9aa2-4aa2-80ba-09df161692a3}";
+    UUID "{980aec97-c856-42ab-8351-50232b5e8de6}";
 ;
 
   END
-  UUID "{134d9d99-460c-4422-904d-d7dc2497f7d0}";;
+  UUID "{faeae2a1-f708-433e-827c-77778d1bdf6e}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
