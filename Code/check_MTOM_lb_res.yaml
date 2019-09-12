@@ -1,0 +1,45 @@
+# check lb res Storage & Outflow >= 0
+
+rules:
+-
+  expr: Mead.Storage >= 0
+  name: Mead.Storage
+  label: Mead Storage
+  description: |
+    Mead Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Mohave.Storage >= 0
+  name: Mohave.Storage
+  label: Mohave Storage
+  description: |
+    Mohave Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Havasu.Storage >= 0
+  name: Havasu.Storage
+  label: Havasu Storage
+  description: |
+    Havasu Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Mead.Outflow >= 0
+  name: Mead.Outflow
+  label: Mead Outflow
+  description: |
+    Mead Outflow should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Mohave.Outflow >= 0
+  name: Mohave.Outflow
+  label: Mohave Outflow
+  description: |
+    Mohave Outflow should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Havasu.Outflow >= 0
+  name: Havasu.Outflow
+  label: Havasu Outflow
+  description: |
+    Havasu Outflow should never be negative.
+  in_file: ReservoirOutput.csv

@@ -1,0 +1,66 @@
+# check ub res Storage >= 0
+
+rules:
+-
+  expr: Fontenelle.Storage >= 0
+  name: Fontenelle.Storage
+  label: Fontenelle Storage
+  description: |
+    Fontenelle Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: FlamingGorge.Storage >= 0
+  name: FlamingGorge.Storage
+  label: FlamingGorge Storage
+  description: |
+    Flaming Gorge Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: BlueMesa.Storage >= 0
+  name: BlueMesa.Storage
+  label: Blue Mesa Storage
+  description: |
+    Blue Mesa Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: TaylorPark.Storage >= 0
+  name: TaylorPark.Storage
+  label: TaylorPark Storage
+  description: |
+    Taylor Park Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: MorrowPoint.Storage >= 0
+  name: MorrowPoint.Storage
+  label: Morrow Point Storage
+  description: |
+    Morrow Point Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Crystal.Storage >= 0
+  name: Crystal.Storage
+  label: Crystal Storage
+  description: |
+    Crystal Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Vallecito.Storage >= 0
+  name: Vallecito.Storage
+  label: Vallecito Storage
+  description: |
+    Vallecito Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Navajo.Storage >= 0
+  name: Navajo.Storage
+  label: Navajo Storage
+  description: |
+    Navajo Storage should never be negative.
+  in_file: ReservoirOutput.csv
+-
+  expr: Powell.Storage >= 0
+  name: Powell.Storage
+  label: Powell Storage
+  description: |
+    Powell Storage should never be negative.
+  in_file: ReservoirOutput.csv
