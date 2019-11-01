@@ -1,7 +1,18 @@
-# Libraries
+# =================================================================== #
+#   Development Testing Tool: Post-processing    
+#      Script used to compare base and development mdl/rules
+#
+#   S. Baker, Nov 2019
+# =================================================================== #
+
+## Libraries
 library(RWDataPlyr)
 library(tidyverse)
 library(lubridate)
+
+## Load graphing functions from script
+setwd(Sys.getenv('MTOM_DIR')) # get base folder location
+source(paste0(getwd(), '/Code/graphFuncs.R'))
 
 # # TEST - function inputs - how to do this with RiverSMART ?
 # scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
@@ -85,7 +96,7 @@ compare_modelDev <- function(scenario_dir,
   
   
   ## === Figures based on slots and slot_period vectors
-  pdf(paste0(output_dir, "\\", out_fl_nm, ".pdf"))
+  pdf(paste0(output_dir, out_fl_nm, ".pdf"))
   
   for (i in 1:length(slots)) {
     
@@ -94,7 +105,7 @@ compare_modelDev <- function(scenario_dir,
                            ObjectSlot == gsub(" ", "", slots[i]))
     y_lab = paste(slots[i], '[', unique(df_i$Unit)) # lab with units
     
-    ## ---- TIME PERIOD ---- ##
+    ## ==== TIME PERIOD ==== ##
     
     # -- EOCY or EOWY 
     if (slot_period[i] == 'EOCY' | slot_period[i] == 'EOWY') {
@@ -104,84 +115,56 @@ compare_modelDev <- function(scenario_dir,
         filter(month == ey_mon) %>%
         mutate(time_per = year)
       
-    # -- monthly values 
+      # -- monthly values 
     } else if (slot_period[i] == 'month') {
       df_i <- df_i %>%
         mutate(time_per = Timestep)
       
-    # -- annual - sum only if full year of data
+      # -- monthly valueson an annual scale
+    } else if (slot_period[i] %in% c('12monthWY','12monthCY')) {
+      if(slot_period[i] =='12monthWY') {
+        mon_order = month.abb[c(10:12, 1:9)] } else {
+          mon_order = month.abb }
+      
+      df_i <- df_i %>%
+        mutate(time_per = factor(month.abb[month], levels = mon_order))
+      
+      # -- annual - sum only if full year of data
     } else if (slot_period[i] %in% c('annualWY', 'annualCY')) {
       yrType = ifelse(slot_period[i] == 'annualWY', 'WY', 'CY')
       df_i <- df_i %>%
         mutate(time_per = YrOfWYCY(Timestep, yrType)) %>%
-        group_by(scenario_i, ScenarioGroup, hydroGroup, time_per, TraceNumber) %>%
+        group_by(scenario_i, ScenarioGroup, hydroGroup, time_per, 
+                 TraceNumber) %>%
         filter(n() == 12) %>%
         summarise(Value = sum(Value))
       y_lab = paste(y_lab, 'per year') # lab with units
-    
+      
     } else {
       stop('check slot_period inputs')
     }
     
-    ## ---- PLOT TYPE ---- ##
+    ## ==== PLOT TYPE ==== ##
     
     # -- Boxplots for Base vs. Dev
     if (plot_type[i] == 'boxplot') {
-      g <- ggplot(df_i, aes(factor(time_per), Value, fill = ScenarioGroup)) +
-        geom_boxplot() +
-        theme_bw() +
-        labs(x = NULL, y = paste(y_lab, ']')) +
-        facet_grid(hydroGroup ~ ., scales = "free_y")
+      g <- compareBoxplot(df_i, paste(y_lab, ']'))
       
-    # -- Exceedance figures for Base vs. Dev
+      # -- Exceedance figures for Base vs. Dev 
     } else if (plot_type[i] %in% c('exceedance0', 'exceedance10')) {
       
-      df_ib <- df_i %>%
-        group_by(ScenarioGroup, hydroGroup, time_per) %>%
-        summarise(
-          q0 = quantile(Value, 0),
-          q10 = quantile(Value, 0.1),
-          q30 = quantile(Value, 0.3),
-          q50 = quantile(Value, 0.5),
-          q70 = quantile(Value, 0.7),
-          q90 = quantile(Value, 0.9),
-          q100 = quantile(Value, 1)
-        )
-      
-      # add 0% & 100% exceedance or not
-      if (plot_type[i] == 'exceedance0') {
-        g <- ggplot(df_ib, aes(time_per, q10, fill = ScenarioGroup)) +
-          geom_ribbon(aes(ymin = q0, ymax = q100, fill = ScenarioGroup), 
-                      alpha = 0.1) +
-          geom_line(aes(time_per, q0, color = ScenarioGroup), 
-                    linetype = 'dotted', size =0.6) +
-          geom_line(aes(time_per, q100, color = ScenarioGroup), 
-                    linetype = 'dotted', size =0.6) 
-        cap = 'Note: Exceedances displayed are 0%, 10%, 30%, 50%, 70%, 90% & 100%.'
+      # priont error if user specified periodic fig
+      if (slot_period[i] %in% c('12monthWY','12monthCY')) {
+        plot.new()
+        txt = 'Exceedance figures do not work with slot_periods
+                                         12monthWY or 12monthCY.'
+        text(.5, .5, txt, font=2, cex=0.75)
+        g <- NULL
+        
+      # -- Exceedance figures for Base vs. Dev 
       } else {
-        g <- ggplot(df_ib, aes(time_per, q10, fill = ScenarioGroup))
-        cap = 'Note: Exceedances displayed are 10%, 30%, 50%, 70% & 90%.'
+        g <- exceedPlot(df_i, paste(y_lab, ']'), plot_type = plot_type[i])
       }
-      
-      g <- g +
-        geom_ribbon(aes(ymin = q10, ymax = q90, fill = ScenarioGroup), 
-                    alpha = 0.2) +
-        geom_ribbon(aes(ymin = q30, ymax = q70, fill = ScenarioGroup),
-                    alpha = 0.2) +
-        geom_line(aes(time_per, q10, color = ScenarioGroup), 
-                  linetype = 'longdash', size =0.6) +
-        geom_line(aes(time_per, q30, color = ScenarioGroup), 
-                  linetype = 'longdash', size =0.6) +
-        geom_line(aes(time_per, q70, color = ScenarioGroup), 
-                  linetype = 'longdash', size =0.6) +
-        geom_line(aes(time_per, q90, color = ScenarioGroup), 
-                  linetype = 'longdash', size =0.6) +
-        geom_line(aes(time_per, q50, color = ScenarioGroup), 
-                  linetype = 'longdash', size =0.6) +
-        theme_bw() +
-        labs(x = NULL, y = paste(y_lab, ']'), caption = cap) +
-        facet_grid(hydroGroup ~ ., scales = "free_y")
-      
       
     } else {
       stop('check plot_type input')
