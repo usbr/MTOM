@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 17:47 October 31, 2019
+# Created 16:17 November 1, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -767,15 +767,15 @@ BEGIN
 
     RULE                 "CA Bank Adjustment";
     DESCRIPTION          "";
-    ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT TRUE;
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
     NOTES                "";
     BEGIN
 
     DESCRIPTION          "Adjust DCP ICS balances to below bank. If there is still excess ICS, SysEff, BiNat and ECICS <br>creation/deliveries need to be adjusted manually.   <br>";
-      IF_STATEMENT ($ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] > $ "ICS Credits.Parameters" ["California", "Max Capacity"]) THEN
-            WITH_STATEMENT (NUMERIC TotalReduction = $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] - $ "ICS Credits.Parameters" ["California", "Max Capacity"]) DO
-            WITH_STATEMENT (LIST ReductionAmount = FOR ( NUMERIC CategoryBalance IN { RPL_DISABLE ( $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December 31, Current Year"] ) , $ "ICS Credits.SimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] , $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] } ) WITH LIST result = {  } DO
+      IF_STATEMENT ($ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] > $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"]) THEN
+            WITH_STATEMENT (NUMERIC TotalReduction = $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] - $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"]) DO
+            WITH_STATEMENT (LIST ReductionAmount = FOR ( NUMERIC CategoryBalance IN { RPL_DISABLE ( ( $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Disabled because Coachella can't technically create DCP ICS. They are just leaving system water <br>for MWD to take. MWD current EC creation not taken into account because creation is already <br>limited to bank psace in previous rule<br>AJP  11/1/19<br>" ) , $ "ICS Credits.SimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] , $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
    TotalReduction
@@ -797,15 +797,10 @@ BEGIN
 
             $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] - "Sum"( ReductionAmount );
 
-            $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] := Bank - "Sum"( ReductionAmount );
+            $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] - "Sum"( ReductionAmount );
 
-            $ "ICS Credits.DCPICS_Coachella" ["Dec31ofYear"( @"t" )] := "Max"( 0.00000000 "acre-ft", ( ( $ "ICS Credits.AnnualDCPContribution_Coachella" ["Dec31ofYear"( @"t" )] ) - "Sum"( ReductionAmount ) ) * "SystemTaxAdjustment_DCP"(  ) );
-
-          INACTIVE      $ "ICS Credits.AnnualSysWaterforDCP_Coachella" [@"24:00:00 December 31, Current Year"] := GET @INDEX 0.00000000 FROM ReductionAmount;
-
-          INACTIVE      $ "ICS Credits.AnnualConversionSchedtoECtoDCP_Coachella" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualConversionSchedtoECtoDCP_Coachella" [@"24:00:00 December 31, Current Year"] - GET @INDEX 0.00000000 FROM ReductionAmount;
-
-          INACTIVE      $ "ICS Credits.AnnualCreationDCP_Coachella" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualCreationDCP_Coachella" [@"24:00:00 December 31, Current Year"] - GET @INDEX 0.00000000 FROM ReductionAmount;
+          DESCRIPTION          "Coachella can't create DCP ICS. this is just to help us keep track of how much is in MWD system <br>for potential troubleshooting AJP 11/1/19<br>";
+      $ "ICS Credits.DCPICS_Coachella" ["Dec31ofYear"( @"t" )] := "Max"( 0.00000000 "acre-ft", ( ( $ "ICS Credits.AnnualDCPContribution_Coachella" ["Dec31ofYear"( @"t" )] ) - "Sum"( ReductionAmount ) ) * "SystemTaxAdjustment_DCP"(  ) );
 
             $ "ICS Credits.AnnualCreationDCP_MWD" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualCreationDCP_MWD" [@"24:00:00 December 31, Current Year"] - "Sum"( ReductionAmount );
 
@@ -813,13 +808,19 @@ BEGIN
 
             $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - GET @INDEX 1.00000000 FROM ReductionAmount;
 
-            $ "ICS Credits.AnnualConversionSchedtoECtoDCP_MWD" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualConversionSchedtoECtoDCP_MWD" [@"24:00:00 December 31, Current Year"] - GET @INDEX 0.00000000 FROM ReductionAmount;
+            $ "ICS Credits.SimultaneousCreationDCPICS_MWD" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.SimultaneousCreationDCPICS_MWD" [@"24:00:00 December 31, Current Year"] - GET @INDEX 0.00000000 FROM ReductionAmount;
 
             $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December 31, Current Year"] := "Sum"( ReductionAmount );
 
+          INACTIVE      $ "ICS Credits.AnnualSysWaterforDCP_Coachella" [@"24:00:00 December 31, Current Year"] := GET @INDEX 0.00000000 FROM ReductionAmount;
+
+          INACTIVE      $ "ICS Credits.AnnualConversionSchedtoECtoDCP_Coachella" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualConversionSchedtoECtoDCP_Coachella" [@"24:00:00 December 31, Current Year"] - GET @INDEX 0.00000000 FROM ReductionAmount;
+
+          INACTIVE      $ "ICS Credits.AnnualCreationDCP_Coachella" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualCreationDCP_Coachella" [@"24:00:00 December 31, Current Year"] - GET @INDEX 0.00000000 FROM ReductionAmount;
+
       END_WITH_STATEMENT;
 
-            IF_STATEMENT (TotalReduction > $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.AnnualConversionSchedtoECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"]) THEN
+            IF_STATEMENT (TotalReduction > $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.SimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"]) THEN
             $ "DCP Flags.CA Accounting Check" [@"24:00:00 December 31, Current Year"] := 1.00000000;
 
       END_IF_STATEMENT;
@@ -827,26 +828,20 @@ BEGIN
       END_WITH_STATEMENT;
 
       ELSE
-            WITH_STATEMENT (NUMERIC CoachellaICSforMWD = "Min"( $ "ICS Credits.Parameters" ["California", "Max Capacity"] - Bank, ( $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December 31, Current Year"] ) * $ "ICS Credits.SystemTaxPercent_DCP" [] )) DO
-            $ "ICS Credits.AnnualCreationDCP_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 15.00000000 FROM caICSvalues;
-
-            $ "ICS Credits.DCPICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 17.00000000 FROM caICSvalues;
-
+            WITH_STATEMENT (NUMERIC CoachellaICSforMWD = "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )], ( $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December 31, Current Year"] ) * $ "ICS Credits.SystemTaxPercent_DCP" [] )) DO
             $ "ICS Credits.DCPICS_Coachella" ["Dec31ofYear"( @"t" )] := CoachellaICSforMWD;
 
-            $ "ICS Credits.DCPICS_CA" ["Dec31ofYear"( @"t" )] := GET @INDEX 19.00000000 FROM caICSvalues;
+            $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 8.00000000 FROM caICSvalues ) + CoachellaICSforMWD;
+            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 10.00000000 FROM caICSvalues ) + CoachellaICSforMWD;
+            $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
 
-            $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 21.00000000 FROM caICSvalues ) + CoachellaICSforMWD;
-
-            $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 22.00000000 FROM caICSvalues ) + CoachellaICSforMWD;
-
-            $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] := Bank;
+            $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
 
             $ "ICS Credits.AnnualCreationDCP_Coachella" ["Dec31ofYear"( @"t" )] := CoachellaICSforMWD;
+
+            $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
 
       END_WITH_STATEMENT;
 
@@ -1497,7 +1492,7 @@ BEGIN
     RULE                 "California Conversion DCP";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
     NOTES                "";
     BEGIN
 
@@ -1656,7 +1651,7 @@ BEGIN
     RULE                 "Determine DCP and BWSCP Contrib";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
     NOTES                "";
     BEGIN
 
@@ -9756,7 +9751,12 @@ BEGIN
    THEN
     0.00000000 "acre-ft"
    ELSE
-    $ "ICSProjectionData.AnnualCreationEC_IID_Default" [@"24:00:00 December 31, Current Year"]
+    IF ( $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-ft" )
+    THEN
+     "Max"( ( $ "ICS Credits.MeadBankParameters" ["IID", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December 31, Previous Year"] * $ "ICS Credits.EvapTaxPercent" [] ) / $ "ICS Credits.SystemTaxPercent" [] - $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December 31, Current Year"], 0.00000000 "acre-ft" )
+    ELSE
+     ( $ "ICS Credits.MeadBankParameters" ["IID", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December 31, Previous Year"] * $ "ICS Credits.EvapTaxPercent" [] ) / $ "ICS Credits.SystemTaxPercent" []
+    ENDIF
    ENDIF DO
     WITH NUMERIC ECICSIID = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
     THEN
@@ -13342,32 +13342,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{71f3b427-5b3e-4ab1-ac99-5ade1ea1a14c}";
+    UUID "{fa7bf4ea-4804-47e9-9044-18d97a832b0b}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{571b3ae2-54bc-42be-9fa9-39d73db83b2f}";
+    UUID "{921d1513-ea26-4dc0-b7ef-c0f3c3705562}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bfe7b5e7-1d3e-4881-ad56-50028ea5e534}";
+    UUID "{dadc75ea-157e-40c4-9cd9-5e311fedd04b}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{57a2ec8f-7b02-4cc6-b6ae-12a7928a4f1a}";
+    UUID "{3ce71e05-f550-4114-9e39-a4959539e57e}";
 ;
 
   END
-  UUID "{59060b6e-7246-4eee-b8e5-e3522c143971}";;
+  UUID "{7caa2667-bcc5-44be-9f8e-e07f24761bbd}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13378,11 +13378,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fcd0f0fa-0cc2-45e4-a767-3beca5654ef8}";
+    UUID "{9ff07d8a-39b1-4255-93bd-1c65ee04787c}";
 ;
 
   END
-  UUID "{6af2c475-4f0e-4d46-afaf-9c6e55e5a4ef}";;
+  UUID "{27e56313-ff79-4610-b080-6a40add6af72}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13393,11 +13393,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4b216966-7a6f-42aa-a488-52ad69a3144f}";
+    UUID "{12568d72-b857-4e24-a595-5f626d4c97aa}";
 ;
 
   END
-  UUID "{190d0c33-1b18-4979-915b-54031e06802c}";;
+  UUID "{11503c42-cfa4-4884-a4cb-1727812a30a4}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13408,11 +13408,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1579cfa4-5313-402a-b3f0-7fcc85b61025}";
+    UUID "{a004eec8-6269-4e0d-8857-40a223a0b6cd}";
 ;
 
   END
-  UUID "{ba98d4e8-5106-4626-bb5f-601bbf248c0e}";;
+  UUID "{1340818d-f8db-487e-b190-1ef0592167a2}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
