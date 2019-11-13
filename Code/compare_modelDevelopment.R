@@ -16,14 +16,6 @@ library(lubridate)
 setwd(Sys.getenv('MTOM_DIR')) # get base folder location
 source(paste0(getwd(), '/Code/graphFuncs.R'))
 
-# # TEST - function inputs - how to do this with RiverSMART ?
-# scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
-# base_scen_nm <- c("ModelBase_RulesBase", "Base") # naming convention of scenarios
-# dev_scen_nm <- c("ModelDev_RulesDev", "Dev")
-# slots <- c("Powell.Outflow", "Powell.Pool Elevation")
-# slot_period <- c("eocy", "eocy")
-# data_files <- "ReservoirOutput.csv"
-
 ## -- Fuction: get WY or CY from a list of dates
 YrOfWYCY <- function(fcst_dates, WYorCY) {
   if (WYorCY == 'CY') { # add year to df
