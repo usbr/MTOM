@@ -37,8 +37,8 @@ YrOfWYCY <- function(fcst_dates, WYorCY) {
 
 compare_modelDev <- function(scenario_dir,
                              output_dir,
-                             base_scen_nm = c("ModelBase_RulesBase", "Base"),
-                             dev_scen_nm = c("ModelDev_RulesDev", "Dev"),
+                             base_scen_nm = c("ModelBase,RulesBase", "Base"),
+                             dev_scen_nm = c("ModelDev,RulesDev", "Dev"),
                              slots = c("Powell.Pool Elevation"),
                              slot_period = c("EOCY"),
                              plot_type = c("exceedance0"),

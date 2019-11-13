@@ -35,7 +35,7 @@ check_slots <- function(scenario_dir,
   }
 
   # loop through scenarios
-  out_summ <- out_summ_i <- NULL
+  out_summ <- out_summ_i <- summ_err <- NULL
   for (scenario_i in scenarios) {
     cat(paste("Scenario -", scenario_i), file = log_fl, sep="\n")
 
@@ -58,6 +58,7 @@ check_slots <- function(scenario_dir,
       spread(ObjectSlot, Value)
 
     # loop through yaml rule files and collect summary output
+    scen_err = NULL # probably a more efficient way of doing this...
     for (yaml_j in yaml_rule_files) {
       yaml_j <- paste0(dirname(scenario_dir), "/Code/", yaml_j)
       rules_j <- validator(.file = yaml_j)
@@ -69,20 +70,38 @@ check_slots <- function(scenario_dir,
       if (length(errors(vv)) > 0) {
         cat(paste('  ... fails in', yaml_rules), file = log_fl, sep="\n")
         cat(errors(vv), file = log_fl, sep="\n")
+        scen_err = c(scen_err, 1)
       } else {
         cat(paste('  ... all passes in', yaml_rules), file = log_fl, sep="\n")
+        scen_err = c(scen_err, 0)
       }
     }
 
     # add scenario column to output
     out_summ = rbind(out_summ,
                      cbind(scenario_i, out_summ_i))
+    
+    # check if scenario produced errors
+    if (scen_err > 0) { summ_err = c(summ_err, 1) } else {
+      summ_err = c(summ_err, 0)
+    }
+    
   }
 
   # write output to text file
   write.table(out_summ, paste0(output_dir, "\\", out_fl_nm, ".txt"),
               sep = "\t", row.names = FALSE)
   close(log_fl)
+  
+  # add summary to beginning of log file
+  nscen = length(summ_err)
+  npass = nscen - sum(summ_err)
+  fl_nm = paste0(output_dir, "\\log_file.txt")
+  fConn <- file(fl_nm,'r+')
+  Lines <- readLines(fl_nm)
+  writeLines(c(paste(npass, "/", nscen,
+                     "scenarios passed all tests\n"), Lines), con = fl_nm)
+  close(fl_nm)
 }
 
 # test
