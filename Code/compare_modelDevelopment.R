@@ -1,16 +1,18 @@
 # =================================================================== #
-#   Development Testing Tool: Post-processing    
-#      Script used to compare base and development mdl/rules
+#   Development Testing Tool Post-processing Script
+#   compare_modelDevelopment.R
+#      - compare base and development mdl/rules
+#      - outputs pdf with plots of desired slots
 #
 #   S. Baker, Nov 2019
 # =================================================================== #
 
-## Libraries
+## -- Libraries
 library(RWDataPlyr)
 library(tidyverse)
 library(lubridate)
 
-## Load graphing functions from script
+## -- Load graphing functions from script
 setwd(Sys.getenv('MTOM_DIR')) # get base folder location
 source(paste0(getwd(), '/Code/graphFuncs.R'))
 
@@ -22,7 +24,7 @@ source(paste0(getwd(), '/Code/graphFuncs.R'))
 # slot_period <- c("eocy", "eocy")
 # data_files <- "ReservoirOutput.csv"
 
-## get WY or CY from a list of dates
+## -- Fuction: get WY or CY from a list of dates
 YrOfWYCY <- function(fcst_dates, WYorCY) {
   if (WYorCY == 'CY') { # add year to df
     # yr_v = as.numeric(strftime(sort(unique(fcst_dates)), "%Y"))
@@ -34,15 +36,16 @@ YrOfWYCY <- function(fcst_dates, WYorCY) {
   return(yr_v)
 }
 
-
+## -- Fuction
 compare_modelDev <- function(scenario_dir,
                              output_dir,
                              base_scen_nm = c("ModelBase,RulesBase", "Base"),
                              dev_scen_nm = c("ModelDev,RulesDev", "Dev"),
-                             slots = c("Powell.Pool Elevation"),
-                             slot_period = c("EOCY"),
-                             plot_type = c("exceedance0"),
-                             data_files = "ReservoirOutput.csv",
+                             # slots = c("Powell.Pool Elevation"),
+                             # slot_period = c("EOCY"),
+                             # plot_type = c("exceedance0"),
+                             slot_period_plot = "Mead.Outflow;EOCY;boxplot",
+                             data_files,
                              out_fl_nm = "model_comparision",
                              hydroGroups = c("Wet", "Avg", "Dry")) {
   
@@ -52,6 +55,17 @@ compare_modelDev <- function(scenario_dir,
   dev_scenarios <- scenarios[grep(dev_scen_nm[1], scenarios)]
   all_scenarios <- c(base_scenarios, dev_scenarios)
   
+  # get inputs from string
+  slot_period_plot = matrix(unlist(strsplit(slot_period_plot, ';')), 
+                            ncol = 3, byrow = T)
+  if (anyNA(slot_period_plot)) { 
+    stop('Check slot_period_plot inputs!') } # stop if input is wrong
+  
+  # set-up inputs for script use
+  slots = slot_period_plot[,1]
+  slot_period = slot_period_plot[,2]
+  plot_type = slot_period_plot[,3]
+  
   ## == Create df of desired slots from input
   # loop through scenarios
   df <- NULL
@@ -59,7 +73,7 @@ compare_modelDev <- function(scenario_dir,
     # read and append all data_files based on file type
     for (data_j in unique(data_files)) {
       fl_type_j <- last(unlist(strsplit(data_j, ".", fixed = TRUE)))
-      fl_nm_j <- paste0(scenario_dir, "\\", scenario_i, "\\", data_j)
+      fl_nm_j <- paste0(scenario_dir,  scenario_i, "/", data_j)
       if (fl_type_j == "rdf") {
         df_j <- rdf_to_rwtbl2(fl_nm_j)
       } else {

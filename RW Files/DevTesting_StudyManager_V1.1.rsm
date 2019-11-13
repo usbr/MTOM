@@ -2,7 +2,7 @@
 <!--
 CADSWES, University of Colorado, http://cadswes.colorado.edu/
 RiverSMART 1.9.1
-Document created on Wed Nov 13 12:01:39 2019
+Document created on Wed Nov 13 13:40:12 2019
 Document created by sabaker
 -->
 <Study uuid="{74facddd-2a44-4dae-b72a-ebed6e5d417e}" mode="fullstudy">
@@ -39,7 +39,7 @@ Document created by sabaker
 <plugin minor="1" patch="0" major="1"><type>Temporal Disagg</type>
 </plugin>
 </pluginList>
-<fileInfo><createdOn>Wed Nov 13 12:01:39 2019</createdOn>
+<fileInfo><createdOn>Wed Nov 13 13:40:12 2019</createdOn>
 <createdBy>sabaker</createdBy>
 </fileInfo>
 <name></name>
@@ -49,7 +49,7 @@ Document created by sabaker
 <scene><fontSize>14</fontSize>
 <fontColor>#808080</fontColor>
 </scene>
-<graph eventCnt="11" textCnt="10" fileCnt="1" numNode="22"><eventNode nodeNum="0" type="RiverWare Policy"><scenePos y="2259" x="2449"></scenePos>
+<graph eventCnt="13" textCnt="10" fileCnt="1" numNode="24"><eventNode nodeNum="0" type="RiverWare Policy"><scenePos y="2259" x="2449"></scenePos>
 <eventConfig><uuid>{2e15b2f1-772d-49c3-a14f-60055bc90565}</uuid>
 <name>RulesBase</name>
 <placeholder>0</placeholder>
@@ -85,35 +85,9 @@ Document created by sabaker
 </config>
 </eventConfig>
 </eventNode>
-<fileNode nodeNum="3" type="CSV"><scenePos y="2458" x="2708"></scenePos>
-<fileConfig><uuid>{fa2e2255-2a8e-4514-babf-35643ba87dec}</uuid>
-<name>ReservoirOutput</name>
-<fileName>ReservoirOutputs.csv</fileName>
-</fileConfig>
-</fileNode>
-<eventNode nodeNum="4" type="RiverWare MRM"><scenePos y="2511" x="2238"></scenePos>
-<eventConfig><uuid>{b7eae1c6-9971-468c-92a9-0d822676ced5}</uuid>
-<name>MRM_Wet</name>
-<placeholder>0</placeholder>
-<scope>event</scope>
-<config><mrmConfigName>DevTesting_Wet</mrmConfigName>
-</config>
-</eventConfig>
-</eventNode>
-<eventNode nodeNum="5" type="RiverWare Policy"><scenePos y="2263.5" x="2671.5"></scenePos>
-<eventConfig><uuid>{429a81bb-8efa-44a9-a0fe-3e0dac7cc338}</uuid>
-<name>RulesDev</name>
-<placeholder>0</placeholder>
-<scope>event</scope>
-<config><ParamDat><RplPolicy><RplSetFile>$MTOM_Dir/RW Files/DevTestingTool_Files/Dev_Rules.rls</RplSetFile>
-</RplPolicy>
-</ParamDat>
-</config>
-</eventConfig>
-</eventNode>
-<eventNode nodeNum="6" type="R Plugin"><scenePos y="2670" x="2668"></scenePos>
-<eventConfig><uuid>{3f294efe-6da7-44b5-848f-be3e3fde0f2d}</uuid>
-<name>compareModels</name>
+<eventNode nodeNum="3" type="R Plugin"><scenePos y="2582.5" x="2660.5"></scenePos>
+<eventConfig><uuid>{ea2b67b1-e24f-478e-a577-1ca646e553d4}</uuid>
+<name>UBres_compare</name>
 <placeholder>0</placeholder>
 <scope>scenarioSet</scope>
 <config><rFile>$MTOM_DIR/Code/compare_modelDevelopment.R</rFile>
@@ -140,7 +114,7 @@ Document created by sabaker
 <predefarg>scenarionames</predefarg>
 <name>base_scen_nm</name>
 <desc>No changes needed unless changing RS event names. Key of Base model scenarios (name of model and rule objects), Name of Base model for plotting (e.g. Base)</desc>
-<value>"ModelBase_RulesBase","Base"</value>
+<value>"ModelBase,RulesBase","Base"</value>
 <logical>false</logical>
 </funcArg>
 <funcArg><kind>userdefined</kind>
@@ -148,36 +122,35 @@ Document created by sabaker
 <predefarg>scenarionames</predefarg>
 <name>dev_scen_nm</name>
 <desc>No changes needed unless changing RS event names. Key of Dev model scenarios (name of model and rule event), Name of Dev model for plotting (e.g. Dev)</desc>
-<value>"ModelDev_RulesDev","Dev"</value>
+<value>"ModelDev,RulesDev","Dev"</value>
 <logical>false</logical>
 </funcArg>
 <funcArg><kind>userdefined</kind>
 <type>character</type>
 <predefarg>scenarionames</predefarg>
-<name>slots</name>
-<desc>slot(s) that will be plotted</desc>
-<value>"Mead.Pool Elevation","Mead.Pool Elevation","Mead.Outflow","Powell.Pool Elevation","Powell.Pool Elevation","Powell.Outflow","Fontenelle.Pool Elevation"</value>
+<name>slot_period_plot</name>
+<desc>Specify plots with string of inputs seperated by semicolons: slot;timePeriod;plotType. Each plot is anew string. OPTIONS: timePeriod-eowy,eocy,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values may be unrealistic for first year of simulation since script is not using obs data.</desc>
+<value>"Fontenelle.Pool Elevation;month;exceedance0", 
+"Fontenelle.Outflow;12monthWY;boxplot",
+"FlamingGorge.Pool Elevation;month;exceedance0", 
+"FlamingGorge.Outflow;12monthWY;boxplot",
+"TaylorPark.Pool Elevation;month;exceedance0", 
+"TaylorPark.Outflow;12monthWY;boxplot",
+"BlueMesa.Pool Elevation;month;exceedance0", 
+"BlueMesa.Outflow;12monthWY;boxplot",
+"Crystal.Pool Elevation;month;exceedance0", 
+"Crystal.Outflow;12monthWY;boxplot",
+"MorrowPoint.Pool Elevation;month;exceedance0", 
+"MorrowPoint.Outflow;12monthWY;boxplot",
+"Vallecito.Pool Elevation;month;exceedance0", 
+"Vallecito.Outflow;12monthWY;boxplot",
+"Navajo.Pool Elevation;month;exceedance0", 
+"Navajo.Outflow;12monthWY;boxplot"</value>
 <logical>false</logical>
 </funcArg>
-<funcArg><kind>userdefined</kind>
+<funcArg><kind>predefined</kind>
 <type>character</type>
-<predefarg>scenarionames</predefarg>
-<name>slot_period</name>
-<desc>Time period to plot corresponding to slots input. Only supported options: "eowy", "eocy", "month", "annualWY", "annualCY","12monthWY","12monthCY". Note annual values may be unrealistic for first year of simulation since script is not using obs data.</desc>
-<value>"EOCY","month","annualWY","EOCY","month","annualWY","12monthWY"</value>
-<logical>false</logical>
-</funcArg>
-<funcArg><kind>userdefined</kind>
-<type>character</type>
-<predefarg>scenarionames</predefarg>
-<name>plot_type</name>
-<desc>Specify plot type corresponding to the slots input: "boxplot", "exceedance0", "exceedance10"</desc>
-<value>"boxplot", "exceedance0","boxplot","boxplot", "exceedance0","boxplot","boxplot"</value>
-<logical>false</logical>
-</funcArg>
-<funcArg><kind>userdefined</kind>
-<type>character</type>
-<predefarg>scenarionames</predefarg>
+<predefarg>inputnames</predefarg>
 <name>data_files</name>
 <desc>Files (rdf or csv) where the desired slots are stored</desc>
 <value>ReservoirOutput.csv</value>
@@ -196,7 +169,180 @@ Document created by sabaker
 </config>
 </eventConfig>
 </eventNode>
-<eventNode nodeNum="7" type="RiverWare Run Range"><scenePos y="2437" x="2093"></scenePos>
+<eventNode nodeNum="4" type="R Plugin"><scenePos y="2674.5" x="2659.5"></scenePos>
+<eventConfig><uuid>{64148302-f1a8-42e2-9e4b-82ca5c12bd58}</uuid>
+<name>LBres_compare</name>
+<placeholder>0</placeholder>
+<scope>scenarioSet</scope>
+<config><rFile>$MTOM_DIR/Code/compare_modelDevelopment.R</rFile>
+<rFunc>compare_modelDev</rFunc>
+<passby>namepass</passby>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputdir</predefarg>
+<name>scenario_dir</name>
+<desc></desc>
+<value></value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>outputdir</predefarg>
+<name>output_dir</name>
+<desc></desc>
+<value></value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>userdefined</kind>
+<type>character</type>
+<predefarg>scenarionames</predefarg>
+<name>base_scen_nm</name>
+<desc>No changes needed unless changing RS event names. Key of Base model scenarios (name of model and rule objects), Name of Base model for plotting (e.g. Base)</desc>
+<value>"ModelBase,RulesBase","Base"</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>userdefined</kind>
+<type>character</type>
+<predefarg>scenarionames</predefarg>
+<name>dev_scen_nm</name>
+<desc>No changes needed unless changing RS event names. Key of Dev model scenarios (name of model and rule event), Name of Dev model for plotting (e.g. Dev)</desc>
+<value>"ModelDev,RulesDev","Dev"</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>userdefined</kind>
+<type>character</type>
+<predefarg>scenarionames</predefarg>
+<name>slot_period_plot</name>
+<desc>Specify plots with string of inputs seperated by semicolons: slot;timePeriod;plotType. Each plot is anew string. OPTIONS: timePeriod-eowy,eocy,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values may be unrealistic for first year of simulation since script is not using obs data.</desc>
+<value>"Mohave.Pool Elevation;month;exceedance0", 
+"Mohave.Outflow;12monthWY;boxplot",
+"Havasu.Pool Elevation;month;exceedance0", 
+"Havasu.Outflow;12monthWY;boxplot"</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputnames</predefarg>
+<name>data_files</name>
+<desc>Files (rdf or csv) where the desired slots are stored</desc>
+<value>ReservoirOutput.csv</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>userdefined</kind>
+<type>character</type>
+<predefarg>scenarionames</predefarg>
+<name>out_fl_nm</name>
+<desc>Name of pdf saved with plots</desc>
+<value>"model_comparision"</value>
+<logical>false</logical>
+</funcArg>
+<scenSetsUsed>true</scenSetsUsed>
+<selSetId>{a0a10981-89d6-45ec-b45f-09cc756f908e}</selSetId>
+</config>
+</eventConfig>
+</eventNode>
+<fileNode nodeNum="5" type="CSV"><scenePos y="2674" x="2458"></scenePos>
+<fileConfig><uuid>{fa2e2255-2a8e-4514-babf-35643ba87dec}</uuid>
+<name>ReservoirOutput</name>
+<fileName>ReservoirOutput.csv</fileName>
+</fileConfig>
+</fileNode>
+<eventNode nodeNum="6" type="RiverWare MRM"><scenePos y="2511" x="2238"></scenePos>
+<eventConfig><uuid>{b7eae1c6-9971-468c-92a9-0d822676ced5}</uuid>
+<name>MRM_Wet</name>
+<placeholder>0</placeholder>
+<scope>event</scope>
+<config><mrmConfigName>DevTesting_Wet</mrmConfigName>
+</config>
+</eventConfig>
+</eventNode>
+<eventNode nodeNum="7" type="RiverWare Policy"><scenePos y="2263.5" x="2671.5"></scenePos>
+<eventConfig><uuid>{429a81bb-8efa-44a9-a0fe-3e0dac7cc338}</uuid>
+<name>RulesDev</name>
+<placeholder>0</placeholder>
+<scope>event</scope>
+<config><ParamDat><RplPolicy><RplSetFile>$MTOM_Dir/RW Files/DevTestingTool_Files/Dev_Rules.rls</RplSetFile>
+</RplPolicy>
+</ParamDat>
+</config>
+</eventConfig>
+</eventNode>
+<eventNode nodeNum="8" type="R Plugin"><scenePos y="2487" x="2661"></scenePos>
+<eventConfig><uuid>{3f294efe-6da7-44b5-848f-be3e3fde0f2d}</uuid>
+<name>PowellMead_compare</name>
+<placeholder>0</placeholder>
+<scope>scenarioSet</scope>
+<config><rFile>$MTOM_DIR/Code/compare_modelDevelopment.R</rFile>
+<rFunc>compare_modelDev</rFunc>
+<passby>namepass</passby>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputdir</predefarg>
+<name>scenario_dir</name>
+<desc></desc>
+<value></value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>outputdir</predefarg>
+<name>output_dir</name>
+<desc></desc>
+<value></value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>userdefined</kind>
+<type>character</type>
+<predefarg>scenarionames</predefarg>
+<name>base_scen_nm</name>
+<desc>No changes needed unless changing RS event names. Key of Base model scenarios (name of model and rule objects), Name of Base model for plotting (e.g. Base)</desc>
+<value>"ModelBase,RulesBase","Base"</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>userdefined</kind>
+<type>character</type>
+<predefarg>scenarionames</predefarg>
+<name>dev_scen_nm</name>
+<desc>No changes needed unless changing RS event names. Key of Dev model scenarios (name of model and rule event), Name of Dev model for plotting (e.g. Dev)</desc>
+<value>"ModelDev,RulesDev","Dev"</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>userdefined</kind>
+<type>character</type>
+<predefarg>scenarionames</predefarg>
+<name>slot_period_plot</name>
+<desc>Specify plots with string of inputs seperated by semicolons: slot;timePeriod;plotType. Each plot is anew string. OPTIONS: timePeriod-eowy,eocy,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values may be unrealistic for first year of simulation since script is not using obs data.</desc>
+<value>"Powell.Pool Elevation;EOCY;boxplot",
+"Powell.Pool Elevation;month;exceedance0", 
+"Powell.Outflow;annualWY;boxplot", 
+"Mead.Pool Elevation;EOCY;boxplot", 
+"Mead.Pool Elevation;month;exceedance0", 
+"Mead.Outflow;annualWY;boxplot"
+</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputnames</predefarg>
+<name>data_files</name>
+<desc>Files (rdf or csv) where the desired slots are stored</desc>
+<value>ReservoirOutput.csv</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>userdefined</kind>
+<type>character</type>
+<predefarg>scenarionames</predefarg>
+<name>out_fl_nm</name>
+<desc>Name of pdf saved with plots</desc>
+<value>"model_comparision"</value>
+<logical>false</logical>
+</funcArg>
+<scenSetsUsed>true</scenSetsUsed>
+<selSetId>{a0a10981-89d6-45ec-b45f-09cc756f908e}</selSetId>
+</config>
+</eventConfig>
+</eventNode>
+<eventNode nodeNum="9" type="RiverWare Run Range"><scenePos y="2437" x="2093"></scenePos>
 <eventConfig><uuid>{c20e7ae8-6c5d-4078-a8d8-ffb6287488e4}</uuid>
 <name>Oct2019_RR</name>
 <placeholder>0</placeholder>
@@ -212,7 +358,7 @@ Document created by sabaker
 </config>
 </eventConfig>
 </eventNode>
-<eventNode nodeNum="8" type="R Plugin"><scenePos y="2667" x="2546"></scenePos>
+<eventNode nodeNum="10" type="R Plugin"><scenePos y="2480" x="2846"></scenePos>
 <eventConfig><uuid>{2f43394d-4100-4428-a747-a5332713519d}</uuid>
 <name>basicChecks</name>
 <placeholder>0</placeholder>
@@ -257,7 +403,7 @@ Document created by sabaker
 </config>
 </eventConfig>
 </eventNode>
-<eventNode nodeNum="9" type="RiverWare Model"><scenePos y="2264.5" x="2585.5"></scenePos>
+<eventNode nodeNum="11" type="RiverWare Model"><scenePos y="2264.5" x="2585.5"></scenePos>
 <eventConfig><uuid>{22853c04-b32a-4dee-b823-cbe5b00f1aad}</uuid>
 <name>ModelDev</name>
 <placeholder>0</placeholder>
@@ -270,7 +416,7 @@ Document created by sabaker
 </config>
 </eventConfig>
 </eventNode>
-<eventNode nodeNum="10" type="RiverWare MRM"><scenePos y="2436" x="2183"></scenePos>
+<eventNode nodeNum="12" type="RiverWare MRM"><scenePos y="2436" x="2183"></scenePos>
 <eventConfig><uuid>{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}</uuid>
 <name>MRM_Dry</name>
 <placeholder>0</placeholder>
@@ -279,7 +425,7 @@ Document created by sabaker
 </config>
 </eventConfig>
 </eventNode>
-<eventNode nodeNum="11" type="RiverWare MRM"><scenePos y="2513" x="2134"></scenePos>
+<eventNode nodeNum="13" type="RiverWare MRM"><scenePos y="2513" x="2134"></scenePos>
 <eventConfig><uuid>{d159de63-8c48-4d65-9b81-5cf2da139a73}</uuid>
 <name>MRM_Avg</name>
 <placeholder>0</placeholder>
@@ -288,52 +434,52 @@ Document created by sabaker
 </config>
 </eventConfig>
 </eventNode>
-<textNode nodeNum="12"><scenePos y="2590" x="2551"></scenePos>
+<textNode nodeNum="14"><scenePos y="2418" x="2650"></scenePos>
 <text>R scripts process desired model output through (1) basic checks 
 of physical constraints and (2) visualizal comparison of specified 
 model slots.</text>
 <fontSize>8</fontSize>
 <fontColor>#808080</fontColor>
 </textNode>
-<textNode nodeNum="13"><scenePos y="2206" x="2391"></scenePos>
+<textNode nodeNum="15"><scenePos y="2206" x="2391"></scenePos>
 <text></text>
 <fontSize>12</fontSize>
 <fontColor>#808080</fontColor>
 </textNode>
-<textNode nodeNum="14"><scenePos y="2151" x="2380"></scenePos>
+<textNode nodeNum="16"><scenePos y="2151" x="2380"></scenePos>
 <text>Models &amp; Rulesets</text>
 <fontSize>14</fontSize>
 <fontColor>#000000</fontColor>
 </textNode>
-<textNode nodeNum="15"><scenePos y="2400" x="2691"></scenePos>
+<textNode nodeNum="17"><scenePos y="2680" x="2242"></scenePos>
 <text>Scenario results are output to csv files. 
 This can be changed to rdfs if desired.</text>
 <fontSize>8</fontSize>
 <fontColor>#808080</fontColor>
 </textNode>
-<textNode nodeNum="16"><scenePos y="2233" x="2432"></scenePos>
+<textNode nodeNum="18"><scenePos y="2233" x="2432"></scenePos>
 <text></text>
 <fontSize>12</fontSize>
 <fontColor>#808080</fontColor>
 </textNode>
-<textNode nodeNum="17"><scenePos y="2182" x="2382"></scenePos>
+<textNode nodeNum="19"><scenePos y="2182" x="2382"></scenePos>
 <text>Development model/rules are compared against a baseline model/rules. 
 Overwrite the model/rule files in these events so you dont have to 
 regenerate/hide scenarios. </text>
 <fontSize>8</fontSize>
 <fontColor>#808080</fontColor>
 </textNode>
-<textNode nodeNum="18"><scenePos y="2299" x="2065"></scenePos>
+<textNode nodeNum="20"><scenePos y="2299" x="2065"></scenePos>
 <text>Scenarios</text>
 <fontSize>14</fontSize>
 <fontColor>#000000</fontColor>
 </textNode>
-<textNode nodeNum="19"><scenePos y="2562" x="2548"></scenePos>
+<textNode nodeNum="21"><scenePos y="2390" x="2647"></scenePos>
 <text>Post-processing R scripts</text>
 <fontSize>14</fontSize>
 <fontColor>#000000</fontColor>
 </textNode>
-<textNode nodeNum="20"><scenePos y="2327" x="2067"></scenePos>
+<textNode nodeNum="22"><scenePos y="2327" x="2067"></scenePos>
 <text>The Run Range event specifies model 
 scenarios starting each month of the 
 2019 water year. Three initial condition 
@@ -342,7 +488,7 @@ test a large range of model operations. </text>
 <fontSize>8</fontSize>
 <fontColor>#808080</fontColor>
 </textNode>
-<textNode nodeNum="21"><scenePos y="2371" x="2689"></scenePos>
+<textNode nodeNum="23"><scenePos y="2651" x="2244"></scenePos>
 <text>Model Output</text>
 <fontSize>14</fontSize>
 <fontColor>#000000</fontColor>
@@ -355,28 +501,31 @@ test a large range of model operations. </text>
 <fileName>_StudyEventOutput_.xml</fileName>
 </file>
 </nodeLink>
-<nodeLink to="3" from="2"></nodeLink>
-<nodeLink to="2" from="4"><file type="RW MRM Configuration"><uuid>{b254b9a9-e4d2-4fb5-82b7-d0dada89d603}</uuid>
+<nodeLink to="5" from="2"></nodeLink>
+<nodeLink to="8" from="5"></nodeLink>
+<nodeLink to="3" from="5"></nodeLink>
+<nodeLink to="4" from="5"></nodeLink>
+<nodeLink to="2" from="6"><file type="RW MRM Configuration"><uuid>{b254b9a9-e4d2-4fb5-82b7-d0dada89d603}</uuid>
 <fileName>_StudyEventOutput_.xml</fileName>
 </file>
 </nodeLink>
-<nodeLink to="2" from="5"><file type="RW Policy Configuration"><uuid>{2b5f7c17-0cb8-4556-9d7d-e2d542684485}</uuid>
+<nodeLink to="2" from="7"><file type="RW Policy Configuration"><uuid>{2b5f7c17-0cb8-4556-9d7d-e2d542684485}</uuid>
 <fileName>_StudyEventOutput_.xml</fileName>
 </file>
 </nodeLink>
-<nodeLink to="2" from="7"><file type="RW Model Configuration"><uuid>{08d44b10-4efd-419c-944a-36dac025ad17}</uuid>
+<nodeLink to="2" from="9"><file type="RW Model Configuration"><uuid>{08d44b10-4efd-419c-944a-36dac025ad17}</uuid>
 <fileName>_StudyEventOutput_.xml</fileName>
 </file>
 </nodeLink>
-<nodeLink to="2" from="9"><file type="RW Model Configuration"><uuid>{448ea257-e4fe-42f0-87c5-5dd5de58208a}</uuid>
+<nodeLink to="2" from="11"><file type="RW Model Configuration"><uuid>{448ea257-e4fe-42f0-87c5-5dd5de58208a}</uuid>
 <fileName>_StudyEventOutput_.xml</fileName>
 </file>
 </nodeLink>
-<nodeLink to="2" from="10"><file type="RW MRM Configuration"><uuid>{730a729a-ac59-47ca-a65c-712d1b86215c}</uuid>
+<nodeLink to="2" from="12"><file type="RW MRM Configuration"><uuid>{730a729a-ac59-47ca-a65c-712d1b86215c}</uuid>
 <fileName>_StudyEventOutput_.xml</fileName>
 </file>
 </nodeLink>
-<nodeLink to="2" from="11"><file type="RW MRM Configuration"><uuid>{46ec81dd-10cb-4976-bf13-bcc0bc1e79d9}</uuid>
+<nodeLink to="2" from="13"><file type="RW MRM Configuration"><uuid>{46ec81dd-10cb-4976-bf13-bcc0bc1e79d9}</uuid>
 <fileName>_StudyEventOutput_.xml</fileName>
 </file>
 </nodeLink>

@@ -1,20 +1,18 @@
-# Libraries
+# =================================================================== #
+#   Development Testing Tool Post-processing Script
+#   check_slots.R  
+#    - check slots for errors based on yaml rules
+#
+#   S. Baker, Nov 2019
+# =================================================================== #
+
+## -- Libraries
 library(RWDataPlyr)
 library(validate)
 library(tidyverse)
-# library(miniCRAN)
-# library(data.table)
 library(yaml)
 
-# # TEST - function inputs - how to do this with RiverSMART ?
-# scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), '\\Scenario')
-# scenarios <- list.files(paste0(study_dir, "\\", "Scenario"))
-# yaml_dir <- "C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dev_Testing_Tool/Dev_Tool_scripts/crmdiag/inst/"
-# yaml_rule_files = paste0(yaml_dir, c("check_MTOM_ub_outflow.yaml", "check_MTOM_ub_storage.yaml"))
-# yaml_rule_files = c("check_MTOM_ub_outflow.yaml", "check_MTOM_ub_storage.yaml")
-
-
-
+## -- Function
 check_slots <- function(scenario_dir,
                         output_dir,
                         scenarios,
@@ -103,27 +101,3 @@ check_slots <- function(scenario_dir,
                      "scenarios passed all tests\n"), Lines), con = fl_nm)
   close(fl_nm)
 }
-
-# test
-# check_slots(study_dir, scenarios, yaml_rule_files)
-
-
-# # read data and remove unit scheme to limit NAs
-# df_i <- fread(paste0(study_dir, '/Scenarios/', scenario_i, '/', data_i)) %>%
-#   select(-Unit) %>%
-#   spread(Object.Slot, `Slot Value`)
-#
-# # Run yaml rules - note NAs in table (not sure if we canre about this...)
-# ub_rules <- validator(.file = paste0(yaml_dir, "check_MTOM_ub_outflow.yaml"))
-# vv <- confront(df_i, ub_rules)
-# summary(vv)
-#
-# summary(vv)
-# aggregate(vv, by = "record")
-# sort(vv)
-# errors(vv)
-#
-# failed <- df_i[!values(vv)[,2], ] %>%
-#   select(Timestep, `Trace Number`, MorrowPoint.Outflow)
-#
-# ## add rules for storage, lb res
