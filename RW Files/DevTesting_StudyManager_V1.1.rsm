@@ -2,7 +2,7 @@
 <!--
 CADSWES, University of Colorado, http://cadswes.colorado.edu/
 RiverSMART 1.9.1
-Document created on Wed Nov 13 13:40:12 2019
+Document created on Wed Nov 13 15:24:17 2019
 Document created by sabaker
 -->
 <Study uuid="{74facddd-2a44-4dae-b72a-ebed6e5d417e}" mode="fullstudy">
@@ -39,7 +39,7 @@ Document created by sabaker
 <plugin minor="1" patch="0" major="1"><type>Temporal Disagg</type>
 </plugin>
 </pluginList>
-<fileInfo><createdOn>Wed Nov 13 13:40:12 2019</createdOn>
+<fileInfo><createdOn>Wed Nov 13 15:24:17 2019</createdOn>
 <createdBy>sabaker</createdBy>
 </fileInfo>
 <name></name>
@@ -93,22 +93,6 @@ Document created by sabaker
 <config><rFile>$MTOM_DIR/Code/compare_modelDevelopment.R</rFile>
 <rFunc>compare_modelDev</rFunc>
 <passby>namepass</passby>
-<funcArg><kind>predefined</kind>
-<type>character</type>
-<predefarg>inputdir</predefarg>
-<name>scenario_dir</name>
-<desc></desc>
-<value></value>
-<logical>false</logical>
-</funcArg>
-<funcArg><kind>predefined</kind>
-<type>character</type>
-<predefarg>outputdir</predefarg>
-<name>output_dir</name>
-<desc></desc>
-<value></value>
-<logical>false</logical>
-</funcArg>
 <funcArg><kind>userdefined</kind>
 <type>character</type>
 <predefarg>scenarionames</predefarg>
@@ -148,14 +132,6 @@ Document created by sabaker
 "Navajo.Outflow;12monthWY;boxplot"</value>
 <logical>false</logical>
 </funcArg>
-<funcArg><kind>predefined</kind>
-<type>character</type>
-<predefarg>inputnames</predefarg>
-<name>data_files</name>
-<desc>Files (rdf or csv) where the desired slots are stored</desc>
-<value>ReservoirOutput.csv</value>
-<logical>false</logical>
-</funcArg>
 <funcArg><kind>userdefined</kind>
 <type>character</type>
 <predefarg>scenarionames</predefarg>
@@ -164,19 +140,6 @@ Document created by sabaker
 <value>"model_comparision"</value>
 <logical>false</logical>
 </funcArg>
-<scenSetsUsed>true</scenSetsUsed>
-<selSetId>{a0a10981-89d6-45ec-b45f-09cc756f908e}</selSetId>
-</config>
-</eventConfig>
-</eventNode>
-<eventNode nodeNum="4" type="R Plugin"><scenePos y="2674.5" x="2659.5"></scenePos>
-<eventConfig><uuid>{64148302-f1a8-42e2-9e4b-82ca5c12bd58}</uuid>
-<name>LBres_compare</name>
-<placeholder>0</placeholder>
-<scope>scenarioSet</scope>
-<config><rFile>$MTOM_DIR/Code/compare_modelDevelopment.R</rFile>
-<rFunc>compare_modelDev</rFunc>
-<passby>namepass</passby>
 <funcArg><kind>predefined</kind>
 <type>character</type>
 <predefarg>inputdir</predefarg>
@@ -193,6 +156,27 @@ Document created by sabaker
 <value></value>
 <logical>false</logical>
 </funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputnames</predefarg>
+<name>data_files</name>
+<desc>Files (rdf or csv) where the desired slots are stored</desc>
+<value>ReservoirOutput.csv</value>
+<logical>false</logical>
+</funcArg>
+<scenSetsUsed>true</scenSetsUsed>
+<selSetId>{a0a10981-89d6-45ec-b45f-09cc756f908e}</selSetId>
+</config>
+</eventConfig>
+</eventNode>
+<eventNode nodeNum="4" type="R Plugin"><scenePos y="2674.5" x="2659.5"></scenePos>
+<eventConfig><uuid>{64148302-f1a8-42e2-9e4b-82ca5c12bd58}</uuid>
+<name>LBres_compare</name>
+<placeholder>0</placeholder>
+<scope>scenarioSet</scope>
+<config><rFile>$MTOM_DIR/Code/compare_modelDevelopment.R</rFile>
+<rFunc>compare_modelDev</rFunc>
+<passby>namepass</passby>
 <funcArg><kind>userdefined</kind>
 <type>character</type>
 <predefarg>scenarionames</predefarg>
@@ -220,20 +204,36 @@ Document created by sabaker
 "Havasu.Outflow;12monthWY;boxplot"</value>
 <logical>false</logical>
 </funcArg>
-<funcArg><kind>predefined</kind>
-<type>character</type>
-<predefarg>inputnames</predefarg>
-<name>data_files</name>
-<desc>Files (rdf or csv) where the desired slots are stored</desc>
-<value>ReservoirOutput.csv</value>
-<logical>false</logical>
-</funcArg>
 <funcArg><kind>userdefined</kind>
 <type>character</type>
 <predefarg>scenarionames</predefarg>
 <name>out_fl_nm</name>
 <desc>Name of pdf saved with plots</desc>
 <value>"model_comparision"</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputdir</predefarg>
+<name>scenario_dir</name>
+<desc></desc>
+<value></value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>outputdir</predefarg>
+<name>output_dir</name>
+<desc></desc>
+<value></value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputnames</predefarg>
+<name>data_files</name>
+<desc>Files (rdf or csv) where the desired slots are stored</desc>
+<value>ReservoirOutput.csv</value>
 <logical>false</logical>
 </funcArg>
 <scenSetsUsed>true</scenSetsUsed>
@@ -275,22 +275,6 @@ Document created by sabaker
 <config><rFile>$MTOM_DIR/Code/compare_modelDevelopment.R</rFile>
 <rFunc>compare_modelDev</rFunc>
 <passby>namepass</passby>
-<funcArg><kind>predefined</kind>
-<type>character</type>
-<predefarg>inputdir</predefarg>
-<name>scenario_dir</name>
-<desc></desc>
-<value></value>
-<logical>false</logical>
-</funcArg>
-<funcArg><kind>predefined</kind>
-<type>character</type>
-<predefarg>outputdir</predefarg>
-<name>output_dir</name>
-<desc></desc>
-<value></value>
-<logical>false</logical>
-</funcArg>
 <funcArg><kind>userdefined</kind>
 <type>character</type>
 <predefarg>scenarionames</predefarg>
@@ -311,7 +295,7 @@ Document created by sabaker
 <type>character</type>
 <predefarg>scenarionames</predefarg>
 <name>slot_period_plot</name>
-<desc>Specify plots with string of inputs seperated by semicolons: slot;timePeriod;plotType. Each plot is anew string. OPTIONS: timePeriod-eowy,eocy,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values may be unrealistic for first year of simulation since script is not using obs data.</desc>
+<desc>Specify plots with string of inputs separated by semicolons: slot;timePeriod;plotType. Each plot is a new string. OPTIONS: timePeriod-eowy,eocy,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values only show the scenarios with 12 months of data.</desc>
 <value>"Powell.Pool Elevation;EOCY;boxplot",
 "Powell.Pool Elevation;month;exceedance0", 
 "Powell.Outflow;annualWY;boxplot", 
@@ -321,20 +305,36 @@ Document created by sabaker
 </value>
 <logical>false</logical>
 </funcArg>
-<funcArg><kind>predefined</kind>
-<type>character</type>
-<predefarg>inputnames</predefarg>
-<name>data_files</name>
-<desc>Files (rdf or csv) where the desired slots are stored</desc>
-<value>ReservoirOutput.csv</value>
-<logical>false</logical>
-</funcArg>
 <funcArg><kind>userdefined</kind>
 <type>character</type>
 <predefarg>scenarionames</predefarg>
 <name>out_fl_nm</name>
 <desc>Name of pdf saved with plots</desc>
 <value>"model_comparision"</value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputdir</predefarg>
+<name>scenario_dir</name>
+<desc></desc>
+<value></value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>outputdir</predefarg>
+<name>output_dir</name>
+<desc></desc>
+<value></value>
+<logical>false</logical>
+</funcArg>
+<funcArg><kind>predefined</kind>
+<type>character</type>
+<predefarg>inputnames</predefarg>
+<name>data_files</name>
+<desc>Files (rdf or csv) where the desired slots are stored</desc>
+<value>ReservoirOutput.csv</value>
 <logical>false</logical>
 </funcArg>
 <scenSetsUsed>true</scenSetsUsed>
@@ -5684,81 +5684,7 @@ test a large range of model operations. </text>
 </scenario>
 </scenarioList>
 </scenarioMgr>
-<scenarioSetMgr><scenarioSet uniqueId="{3f4074ff-29f1-45f6-b608-36194e76b446}" name="DevRunScenarios"><scenId>{032ab927-2713-412f-a58d-dd7a9cd039f4}</scenId>
-<scenId>{3d83094c-c5e0-4173-b043-96fa8874af03}</scenId>
-<scenId>{8564d6da-ea5a-42e0-90e3-3b53787e9269}</scenId>
-<scenId>{e3244255-01d1-4bb8-be0b-9de2c0307290}</scenId>
-<scenId>{9dc850f0-6e2a-4d09-8a59-3e993867f1d2}</scenId>
-<scenId>{53f16cf6-12f1-4d20-9e98-4f3d8e004431}</scenId>
-<scenId>{d495382c-dc22-4357-9d72-7b79cde2235e}</scenId>
-<scenId>{a15244f8-68f1-4b97-b6cb-2cb49190e048}</scenId>
-<scenId>{bd12d1be-eda9-4098-83cf-26ec4084cbee}</scenId>
-<scenId>{77a5e087-9de3-4c47-9d55-2ef0a6e2cd8b}</scenId>
-<scenId>{416707e5-e439-419c-be91-13eafb2edb54}</scenId>
-<scenId>{405d2120-a1d7-4da9-a4cb-89962e111a76}</scenId>
-<scenId>{751945ec-ef7c-4ed2-be27-f8217a95c45a}</scenId>
-<scenId>{a2fe4973-3c57-4fa2-a118-6f847a411dac}</scenId>
-<scenId>{ea459ae1-ccee-4356-8351-11e1dbc235c7}</scenId>
-<scenId>{2741e108-f145-4283-8c59-f94ba7e8d7f1}</scenId>
-<scenId>{716be5f5-4d89-4c34-baf4-609f802e1f0f}</scenId>
-<scenId>{688a1d8c-8b16-445f-8c83-61406099b952}</scenId>
-<scenId>{52f04bca-609e-4eb2-bd43-80f082717121}</scenId>
-<scenId>{6428afc1-2efd-4720-a2c5-b640ca58b6c7}</scenId>
-<scenId>{84b62fee-54a0-4542-8e47-feaec8f5b89c}</scenId>
-<scenId>{4901e8d3-cb52-4c1d-a877-fdbbb62d2ea3}</scenId>
-<scenId>{ab4f4bbb-be85-4a02-8c9f-27e0a0caf131}</scenId>
-<scenId>{f2a00f41-a451-493c-9182-43376d7dd33c}</scenId>
-<scenId>{a024f76b-7c27-499b-b849-74b92dad0799}</scenId>
-<scenId>{86a3914a-a597-43b0-8a3f-fe9e90518cce}</scenId>
-<scenId>{c924bc69-6b29-4f80-82cd-a4d8ff3d00b5}</scenId>
-<scenId>{a792b72e-f59d-431c-b9fa-77c6d744f13e}</scenId>
-<scenId>{5670e1d4-fb91-4c7d-a11a-608054402f07}</scenId>
-<scenId>{72b21fbf-57da-4664-b38c-4145d8fc17ef}</scenId>
-<scenId>{c2ef7187-2821-4044-93ec-41f5f8f67298}</scenId>
-<scenId>{ff7f18c0-ecc3-47d4-8cb5-210f37b441ce}</scenId>
-<scenId>{f94c385f-84c2-4863-b176-9718778c0689}</scenId>
-<scenId>{8ed75152-4aa0-4d3e-8913-b2f3bb5b2375}</scenId>
-<scenId>{f84d376d-0960-45c0-a4a6-c1a14a7893b2}</scenId>
-<scenId>{2d2c4e4f-14c6-4747-a17b-cd059146256e}</scenId>
-</scenarioSet>
-<scenarioSet uniqueId="{567e3846-a778-4b51-9556-6b068146551b}" name="BaseRunScenarios"><scenId>{dc679eac-3f86-4718-af41-f4b4fb592aaf}</scenId>
-<scenId>{5b97002f-acdd-49e2-94ac-cff1fdbf9189}</scenId>
-<scenId>{2d243a00-b007-4118-be7c-8393f31c412c}</scenId>
-<scenId>{8f3e1d94-8a0b-485e-b73d-cd323fa323ba}</scenId>
-<scenId>{a246f1e7-4c6c-474e-a187-c0eef1127345}</scenId>
-<scenId>{ed4a0a78-42cc-44b4-8e9c-960da2a5e434}</scenId>
-<scenId>{f5da1c4e-8e1a-4f69-aec6-66351afd5a0f}</scenId>
-<scenId>{59e98b8d-e3e4-40a3-8e19-e53435cd9e7f}</scenId>
-<scenId>{78bc5aec-35a6-4f49-aefe-fbc46d419991}</scenId>
-<scenId>{7d9884c3-4324-4127-b32b-f2ef0c016ce5}</scenId>
-<scenId>{89fafaed-8e29-4981-9cd2-7d5e3b9291e6}</scenId>
-<scenId>{ca0a115b-f742-4534-b680-b23ea2afa077}</scenId>
-<scenId>{960cca8b-83e0-4895-8724-185667ff1091}</scenId>
-<scenId>{58d20e11-95d4-43b6-836b-fc664aff722b}</scenId>
-<scenId>{cb9cfdf3-bac4-41b5-ad6d-4901931a3065}</scenId>
-<scenId>{253f60e2-6dba-4771-be40-746b0c102364}</scenId>
-<scenId>{e9affcdb-c1a0-443e-970c-a1f164085022}</scenId>
-<scenId>{58476ad2-0535-4ae9-bc1f-ffe6cd0550fb}</scenId>
-<scenId>{8cac98f3-d8b0-45c6-879f-82f327a8e6f5}</scenId>
-<scenId>{e31f89bc-dbef-4967-82c8-479d8ff0434a}</scenId>
-<scenId>{9e087dd8-2c42-4ba6-9051-b4457df701be}</scenId>
-<scenId>{027cf1dd-b4d2-4947-b78c-a312c3a2da8c}</scenId>
-<scenId>{b0e48292-a8f1-482c-8c1d-316e5a380ddc}</scenId>
-<scenId>{9bdf482e-10f5-4dc2-98f5-2ab9d682219f}</scenId>
-<scenId>{385df38f-747b-4415-97eb-70a85db93ec6}</scenId>
-<scenId>{e73f04c1-61a5-4c61-bf24-1f6fda0e925c}</scenId>
-<scenId>{1b04b9a3-5ede-416e-b0cc-e39178a3a566}</scenId>
-<scenId>{794f48a9-8884-4285-ae00-d62ad997f7dc}</scenId>
-<scenId>{9bd9b009-9be1-41da-b89e-06b9bd2589ea}</scenId>
-<scenId>{05637db0-6372-4bb4-9174-dfd3331da4eb}</scenId>
-<scenId>{18567739-21ad-445e-a808-ab030fad9648}</scenId>
-<scenId>{6d98f62d-5d77-4458-916d-b20a31bd71c3}</scenId>
-<scenId>{fb10c6b8-1713-48fb-9e79-a0217a1008bb}</scenId>
-<scenId>{cc1f4df0-3cac-481c-a58a-f524d0f6901e}</scenId>
-<scenId>{9190a375-2e7f-4959-937a-c21f654ffd24}</scenId>
-<scenId>{072e0938-57aa-4627-8d12-d825e26acc49}</scenId>
-</scenarioSet>
-<scenarioSet uniqueId="{a0a10981-89d6-45ec-b45f-09cc756f908e}" name="allScenarios"><scenId>{dc679eac-3f86-4718-af41-f4b4fb592aaf}</scenId>
+<scenarioSetMgr><scenarioSet uniqueId="{a0a10981-89d6-45ec-b45f-09cc756f908e}" name="allScenarios"><scenId>{dc679eac-3f86-4718-af41-f4b4fb592aaf}</scenId>
 <scenId>{5b97002f-acdd-49e2-94ac-cff1fdbf9189}</scenId>
 <scenId>{2d243a00-b007-4118-be7c-8393f31c412c}</scenId>
 <scenId>{8f3e1d94-8a0b-485e-b73d-cd323fa323ba}</scenId>
