@@ -77,8 +77,8 @@ check_slots <- function(scenario_dir,
         n_fail = which(vv_sum$fails > 0)
         n_fail = vv_sum[n_fail,c(1,4)]
         cat(paste('  ... fails in', yaml_rules), file = log_fl, sep="\n")
-        cat(paste('         ', n_fail[1], 'failed in', n_fail[2], 'timesteps'), 
-            file = log_fl, sep="\n")
+        cat(paste('  ***     ', n_fail[1], 'failed in', n_fail[2], 
+                  'timesteps      ***'), file = log_fl, sep="\n")
         scen_err = c(scen_err, 1)
       } else {
         cat(paste('  ... all passes in', yaml_rules), file = log_fl, sep="\n")
@@ -91,7 +91,7 @@ check_slots <- function(scenario_dir,
                      cbind(scenario_i, out_summ_i))
     
     # check if scenario produced errors
-    if (scen_err > 0) { summ_err = c(summ_err, 1) } else {
+    if (sum(scen_err) > 0) { summ_err = c(summ_err, 1) } else {
       summ_err = c(summ_err, 0)
     }
     
