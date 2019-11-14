@@ -61,13 +61,24 @@ check_slots <- function(scenario_dir,
       yaml_j <- paste0(dirname(scenario_dir), "/Code/", yaml_j)
       rules_j <- validator(.file = yaml_j)
       vv <- confront(as.data.frame(df), rules_j)
-      out_summ_i <- rbind(out_summ_i, summary(vv))
       yaml_rules <- last(unlist(strsplit(yaml_j, "/", fixed = TRUE)))
 
-      # print errors or passes
+      # collect summary of rule output
+      vv_sum = summary(vv)
+      out_summ_i <- rbind(out_summ_i, vv_sum)
+
+      # print errors/fails or passes
       if (length(errors(vv)) > 0) {
-        cat(paste('  ... fails in', yaml_rules), file = log_fl, sep="\n")
+        cat(paste('  ... errors in', yaml_rules), file = log_fl, sep="\n")
         cat(errors(vv), file = log_fl, sep="\n")
+        scen_err = c(scen_err, 1)
+      } else if (max(vv_sum$fails) > 0) {
+        # check for fails
+        n_fail = which(vv_sum$fails > 0)
+        n_fail = vv_sum[n_fail,c(1,4)]
+        cat(paste('  ... fails in', yaml_rules), file = log_fl, sep="\n")
+        cat(paste('         ', n_fail[1], 'failed in', n_fail[2], 'timesteps'), 
+            file = log_fl, sep="\n")
         scen_err = c(scen_err, 1)
       } else {
         cat(paste('  ... all passes in', yaml_rules), file = log_fl, sep="\n")
