@@ -60,7 +60,7 @@ check_slots <- function(scenario_dir,
     for (yaml_j in yaml_rule_files) {
       yaml_j <- paste0(dirname(scenario_dir), "/Code/", yaml_j)
       rules_j <- validator(.file = yaml_j)
-      vv <- confront(df, rules_j)
+      vv <- confront(as.data.frame(df), rules_j)
       out_summ_i <- rbind(out_summ_i, summary(vv))
       yaml_rules <- last(unlist(strsplit(yaml_j, "/", fixed = TRUE)))
 
