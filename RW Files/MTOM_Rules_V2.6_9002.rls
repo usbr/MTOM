@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 10:39 November 14, 2019
+# Created 16:10 November 14, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1192,7 +1192,7 @@ BEGIN
             $ "ICS Credits.TotalICS_AZ" [@"24:00:00 December 31, Current Year"] := GET @INDEX 22.00000000 FROM azICSvalues;
 
           DESCRIPTION          "Balance Check<br><br>Since AZ does not create DCP ICS, all ICS creation values are manually entered. If the bank is <br>above the maximum, print an error message to adjust the ICS creation/delivery values for AZ   <br>";
-      IF_STATEMENT (( GET @INDEX 21.00000000 FROM azICSvalues ) > $ "ICS Credits.Parameters" ["Arizona", "Max Capacity"]) THEN
+      IF_STATEMENT (( GET @INDEX 21.00000000 FROM azICSvalues ) > $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"]) THEN
             $ "DCP Flags.AZ Accounting Check" [@"24:00:00 December 31, Current Year"] := 1.00000000;
 
       END_IF_STATEMENT;
@@ -1740,7 +1740,7 @@ BEGIN
   WITH NUMERIC DCPICScreationCAWCD = $ "DCP.ArizonaSched_DCPICS" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
    IF ( $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" )
    THEN
-    { DCPICScreationCAWCD , ( AZdcpContribution - DCPICScreationCAWCD ) / $ "ICS Credits.SystemTaxPercent_DCP" [] }
+    { DCPICScreationCAWCD , AZdcpContribution - DCPICScreationCAWCD * "SystemTaxAdjustment_DCP"(  ) }
    ELSE
     { 0.00000000 "acre-ft" , 0.00000000 "acre-ft" }
    ENDIF
@@ -9664,7 +9664,7 @@ BEGIN
              WITH NUMERIC ECICS_WM = ( $ "ICS Credits.ExtraordinaryConservationICS_WM" [@"24:00:00 December 31, Previous Year"] + "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_WM" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_WM" [@"24:00:00 December 31, Previous Year"], "Arizona" ) - $ "ICS Credits.AnnualDeliveryEC_WM" [@"24:00:00 December 31, Current Year"] ) DO
               WITH NUMERIC BiNat_CAWCD = ( $ "ICS Credits.BiNationalICS_CAWCD" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_CAWCD" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualDeliveryBiNat_CAWCD" [@"24:00:00 December 31, Current Year"] ) DO
                WITH NUMERIC SysEff_CAWCD = ( $ "ICS Credits.SystemEfficiencyICS_CAWCD" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.AnnualCreationSysEff_CAWCD" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualDeliverySysEff_CAWCD" [@"24:00:00 December 31, Current Year"] ) DO
-                WITH NUMERIC DCP_CAWCD = ( $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.AnnualCreationDCP_CAWCD" [@"24:00:00 December 31, Current Year"] * $ "ICS Credits.SystemTaxPercent_DCP" [] - $ "ICS Credits.AnnualDeliveryDCP_CAWCD" [@"24:00:00 December 31, Current Year"] ) DO
+                WITH NUMERIC DCP_CAWCD = ( $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.AnnualCreationDCP_CAWCD" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryDCP_CAWCD" [@"24:00:00 December 31, Current Year"] ) DO
                  WITH NUMERIC TotalCAWCD = ECICS_CAWCD + BiNat_CAWCD + SysEff_CAWCD + DCP_CAWCD DO
                   WITH NUMERIC SysEff_AZ = SysEff_CAWCD DO
                    WITH NUMERIC ECICS_AZ = ECICS_CRIT + ECICS_GRIC + ECICS_CAWCD + ECICS_MVIID + ECICS_WM DO
@@ -13539,32 +13539,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{850ae24d-d1b0-4ac2-bb8d-c216ef93715e}";
+    UUID "{a9cd3e7c-9688-402a-b6a0-017d51b71b7a}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{125a6db5-0c69-42ca-a5df-bd5b236b93f1}";
+    UUID "{667d19c5-eaca-4c05-9ef4-70d5e7d21a4a}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f81c4d79-2d24-4167-be25-c193820d621c}";
+    UUID "{9c62ceff-36f3-4148-aad8-380a64b3880a}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d642240f-0e56-4860-b052-f8a83540586a}";
+    UUID "{aeb13ce5-17e1-41e9-9b05-34a64e9af830}";
 ;
 
   END
-  UUID "{212b2ccb-02ac-4836-bac2-f573c04ba0c2}";;
+  UUID "{e1cb3b7c-b1d0-4245-87c6-ea848d9881ae}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13575,11 +13575,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d1f34925-904e-4cf6-bd6e-6e835003ed39}";
+    UUID "{8fa0a821-68d1-4868-9e62-b9c69cbafdc6}";
 ;
 
   END
-  UUID "{1a247e91-ca74-496a-ab1f-966aeb4e255e}";;
+  UUID "{a42124a7-4ae6-431a-b425-e7dd8b3970f2}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13590,11 +13590,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8aaf4ed6-7dfc-42c0-9b4e-9fe47e85d3f5}";
+    UUID "{8fe1cd18-eb21-4dd1-9e11-605b38e49a81}";
 ;
 
   END
-  UUID "{faa5b310-acbf-499d-abb3-d48af5ddf833}";;
+  UUID "{3775ba3c-86b5-432a-b48d-c88363448f4d}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13605,11 +13605,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{483db49c-317d-49fb-97bb-d2aba3ee6ce8}";
+    UUID "{5bedf286-6baf-4445-becf-0a90695dc825}";
 ;
 
   END
-  UUID "{3ee57edf-af72-4cdb-af46-0a3c9dd4a17d}";;
+  UUID "{31a0fc0a-9f41-49c7-b1b0-e46620d835cf}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
