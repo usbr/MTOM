@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 09:01 November 19, 2019
+# Created 12:53 November 19, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -796,8 +796,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br>CH, 5/10/18: Added assignments for: IID EC ICS balance, IID Binat ICS balance, and total IID ICS (binat + EC) and edited total CA ICS assignment to include total MWD and total IID in order to distinguish MWD ICS creation/delivery/balance from IID ICS creation/delivery/balance ";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
-    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (LIST iidICSValues = "ICSAccountingForIID"(  )) DO
             WITH_STATEMENT (LIST mwdICSValues = "ICSAccountingForMWD"(  )) DO
           DESCRIPTION          "Annual Delivery BiNatational ICS  <br>";
@@ -1144,19 +1142,31 @@ BEGIN
     BEGIN
 
       WITH_STATEMENT (LIST ICSAccounting = "ICSAccountingForNV"(  )) DO
-            $ "DCP Flags.NV Accounting Check" [@"24:00:00 December 31, Current Year"] := 0.00000000;
+          INACTIVE      $ "DCP Flags.NV Accounting Check" [@"24:00:00 December 31, Current Year"] := 0.00000000;
 
             $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 0.00000000 FROM ICSAccounting;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 1.00000000 FROM ICSAccounting;
+            $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 1.00000000 FROM ICSAccounting;
 
-            $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 2.00000000 FROM ICSAccounting;
+            $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 2.00000000 FROM ICSAccounting;
 
-            $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 3.00000000 FROM ICSAccounting;
+            $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 3.00000000 FROM ICSAccounting;
 
-            $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 4.00000000 FROM ICSAccounting;
+            $ "ICS Credits.AnnualConversionCurrentECtoDCP_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 4.00000000 FROM ICSAccounting;
 
-            IF_STATEMENT (( GET @INDEX 6.00000000 FROM ICSAccounting ) COMMENTED_BY "<6> = NV Bank = EC + BiNat + DCP ICS  <br>" > $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"]) THEN
+            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December 31, Current Year"] := ( GET @INDEX 5.00000000 FROM ICSAccounting ) + GET @INDEX 4.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 6.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 7.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 8.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.Bank_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 9.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.TotalICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 10.00000000 FROM ICSAccounting;
+
+          INACTIVE      IF_STATEMENT (( GET @INDEX 6.00000000 FROM ICSAccounting ) COMMENTED_BY "<6> = NV Bank = EC + BiNat + DCP ICS  <br>" > $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"]) THEN
           DESCRIPTION          "If the bank is full, this rule will reduce the DCP ICS created for that year and convert the correct <br>amount to system water. This rule only reduces DCP ICS balance to produce system water since <br>all other ICS creation is manually input. If there is still more ICS in the bank than allowed and <br>error notice will be printed.   <br>";
       WITH_STATEMENT (NUMERIC TotalReduction = ( GET @INDEX 6.00000000 FROM ICSAccounting ) - $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"]) DO
             WITH_STATEMENT (LIST CreationReduction = FOR ( NUMERIC CreationBalance IN { $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] , $ "ICS Credits.AnnualConversionCurrentECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] , "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Previous Year"], "Nevada" ) } ) WITH LIST result = {  } DO
@@ -1218,8 +1228,8 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December 31, Current Year"], "Nevada", "Max Delivery", ( $ "ICS Credits.AnnualConversionECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) )) DO
-            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_NV" [@"24:00:00 December 31, Previous Year"] , "Min"( ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.AnnualConversionECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) + "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Previous Year"], "Nevada" ), $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Delivery"] ) , $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  ) , $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December 31, Previous Year"] , $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Previous Year"] } ) WITH LIST result = {  } DO
+      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December 31, Current Year"], "Nevada", "Max Delivery", ( $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) )) DO
+            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_NV" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "If there is an ICS deivery amount, take out of accounts in the following order.<br><br>DCP ICS (if above recovery elevation)<br>EC ICS<br>Tributary ICS <br>System Efficiency<br>BiNational <br><br>AP 11/19/19 <br>" , ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + "Max"( $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December 31, Previous Year"], 0.00000000 "acre-ft" ) ) COMMENTED_BY "Previous years balance less any conversion for DCP ICS. No need to take current year ICS <br>creation into account because the two are mutually exclusive. Based on SNWP ICS creation and <br>delivery logic, SNWP is either creating OR delivering EC ICS based on the demand vs basic <br>apportionment. Still need to add previous year Trib/Imported ICS creation since it will be <br>converted to EC ICS in the current year but it needs to take into account any silumtaneous <br>creation for DPC ICS<br><br>AP 11/19/19    <br>" , $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  ) , $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December 31, Previous Year"] , $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Previous Year"] } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
    AnnualDelivery
@@ -1956,218 +1966,6 @@ BEGIN
   END
   UUID "{87c5c0a0-f901-479e-a5c8-62bbf53b39f5}";;
 
-  POLICY_GROUP   "DCP and BWSCP";
-  DESCRIPTION    "";
-  ACTIVE         TRUE;
-  NOTES          "";
-  BEGIN
-
-    RULE                 "California Conversion DCP";
-    DESCRIPTION          "";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "";
-    BEGIN
-
-      IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
-          DESCRIPTION          "This assignment calculates whether MWD's DCP contribution will be made as schedule <br>reduction or conversion of EC ICS to DCP ICS. Accounting for this will happen in the ICS <br>Accounting policy group.<br><br>If a schedule reduction to meet the DCP contribution is needed, it assumed that the schedule <br>reduction will be converted to DCP ICS through EC ICS.   <br><br>Check EC ICS balance, check current year EC creation, else reduce schedule to create EC ICS<br>which will then be converted to DCP ICS<br><br><br>AP, 7/11/19<br>";
-      WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
-            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( dcpContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
-            WITH_STATEMENT (NUMERIC CurrentICStoDCP = IF ( dcpContribution == PreviousECtoDCP )
- THEN
-  0.00000000 "acre-ft"
- ELSE
-  "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December 31, Previous Year"], "California" )
- ENDIF
- ELSEIF_COND ( "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December 31, Previous Year"], "California" ) > dcpContribution - PreviousECtoDCP )
- ELSEIF_CLAUSE ( dcpContribution - PreviousECtoDCP )
- END_ELSEIF) DO
-            WITH_STATEMENT (NUMERIC dcpSchedReduc = IF ( dcpContribution > PreviousECtoDCP + CurrentICStoDCP )
- THEN
-  dcpContribution - ( PreviousECtoDCP + CurrentICStoDCP )
- ELSE
-  0.00000000 "acre-ft"
- ENDIF) DO
-          DESCRIPTION          "Coachella can not &quot;officially&quot; create DCP ICS. Instead DCP creation for Coachella will be done <br>&quot;unofficially&quot; and held in MWD account. Coachella will reduce diversion by 7% to help CA meet <br>DCP contribution and will be stored store in MWD's system. MWD to pay tax for now. Logic will be <br>disabled for Coachella besides 7% reduction to diversion to create system water for MWD. It is <br>assumed there will be enough space for MWD to create DCP ICS with coachellas system water + <br>their own. Will be adjusted downward in accounting rule if not enough space. CVWD account in <br>MWD system will not be tracked, all DCP ICS will be assumed to be MWD.<br><br>AP 7/31/19        <br>";
-      $ "ICS Credits.AnnualCreationDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP + CurrentICStoDCP + dcpSchedReduc;
-
-            $ "ICS Credits.AnnualConversionECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP + CurrentICStoDCP;
-
-            $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP;
-
-            $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := CurrentICStoDCP;
-
-            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := dcpSchedReduc;
-
-            $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := "Max"( $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - CurrentICStoDCP, 0.00000000 "acre-ft" );
-
-            $ "ICS Credits.AnnualSysWaterforDCP_Coachella" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"];
-
-          INACTIVE      $ "ICS Credits.AnnualSimultaneousCreationDCPICS_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"];
-
-            $ "ICS Credits.AnnualCreationDCP_Coachella" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"];
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      ELSE
-            $ "ICS Credits.AnnualCreationDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualConversionECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualSysWaterforDCP_Coachella" [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-ft";
-
-          INACTIVE      $ "ICS Credits.AnnualSimultaneousCreationDCPICS_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualCreationDCP_Coachella" [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-ft";
-
-      END_IF_STATEMENT;
-
-    DESCRIPTION          "Initally set to 0. Will get adjusted in CA acounting rule if neccessary<br>";
-      $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-feet";
-
-    END
-    UUID "{c862f2bd-77c9-4b9d-957d-8c1f3f2b3bfe}";;
-
-    RULE                 "Nevada Conversion DCP";
-    DESCRIPTION          "";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "";
-    BEGIN
-
-      IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-feet") THEN
-          DESCRIPTION          "This assignment calculates whether NV's DCP contribution will be made as through a schedule <br>reduction to create EC ICS then DCP ICS or conversion of EC ICS to DCP ICS. Accounting for <br>this will happen in the ICS Accounting policy group.<br><br>If a schedule reduction to meet the DCP contribution is needed, it assumed that the schedule <br>reduction will be converted to DCP ICS through EC ICS.   <br><br>Check EC ICS balance, check current year EC creation, else reduce schedule to create EC ICS <br>which will then be converted to DCP ICS<br><br>AP, 7/11/19<br>";
-      WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
-            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( dcpContribution, $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
-            WITH_STATEMENT (NUMERIC CurrentICStoDCP = IF ( dcpContribution == PreviousECtoDCP )
- THEN
-  0.00000000 "acre-ft"
- ELSE
-  "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Previous Year"], "Nevada" )
- ENDIF
- ELSEIF_COND ( "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Previous Year"], "Nevada" ) > dcpContribution - PreviousECtoDCP )
- ELSEIF_CLAUSE ( dcpContribution - PreviousECtoDCP )
- END_ELSEIF) DO
-            WITH_STATEMENT (NUMERIC dcpSchedReduc = IF ( dcpContribution > PreviousECtoDCP + CurrentICStoDCP )
- THEN
-  dcpContribution - ( PreviousECtoDCP + CurrentICStoDCP )
- ELSE
-  0.00000000 "acre-ft"
- ENDIF) DO
-            $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP + CurrentICStoDCP + dcpSchedReduc;
-
-            $ "ICS Credits.AnnualConversionECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP + CurrentICStoDCP;
-
-            $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP;
-
-            $ "ICS Credits.AnnualConversionCurrentECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := CurrentICStoDCP;
-
-            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := dcpSchedReduc;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      ELSE
-            $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualConversionECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualConversionCurrentECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-feet";
-
-      END_IF_STATEMENT;
-
-    END
-    UUID "{6e31581a-a7c2-4a0d-b9ae-34e4ae15b347}";;
-
-    RULE                 "Arizona DCP";
-    DESCRIPTION          "";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "";
-    BEGIN
-
-      WITH_STATEMENT (LIST AZdcpCreation = WITH NUMERIC AZdcpContribution = $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-  WITH NUMERIC DCPICScreationCAWCD = $ "DCP.ArizonaSched_DCPICS" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-   IF ( $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" )
-   THEN
-    { DCPICScreationCAWCD , AZdcpContribution - DCPICScreationCAWCD * "SystemTaxAdjustment_DCP"(  ) }
-   ELSE
-    { 0.00000000 "acre-ft" , 0.00000000 "acre-ft" }
-   ENDIF
-  ENDWITH
- ENDWITH) DO
-            $ "ICS Credits.AnnualCreationDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 0.00000000 FROM AZdcpCreation;
-
-            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 0.00000000 FROM AZdcpCreation;
-
-            $ "ICS Credits.AnnualCreationDCP_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 0.00000000 FROM AZdcpCreation;
-
-            $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 1.00000000 FROM AZdcpCreation;
-
-            $ "ICS Credits.AnnualSysWaterforDCP_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 1.00000000 FROM AZdcpCreation;
-
-      END_WITH_STATEMENT;
-
-    END
-    UUID "{0ae60bc0-928a-4151-b115-4a58787c56dd}";;
-
-    RULE                 "Determine DCP and BWSCP Contrib";
-    DESCRIPTION          "";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "";
-    BEGIN
-
-      WITH_STATEMENT (NUMERIC MeadPoolElevation = "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" )) DO
-            FOREACH (STRING user IN "DCP Users"(  )) DO
-            IF_STATEMENT (user == "MX") THEN
-            $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), MeadPoolElevation, @"t", FALSE );
-
-      ELSE
-            % "ICS Credits" & "AnnualDCPContribution_" CONCAT user [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), MeadPoolElevation, @"t", FALSE );
-
-      END_IF_STATEMENT;
-
-      ENDFOREACH;
-
-            $ "DCP Flags.LB DCP" [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, MeadPoolElevation, @"t", FALSE );
-
-            IF_STATEMENT ("GetRunCycleIndex"(  ) == 3.00000000) THEN
-            $ "DCP Flags.LB DCP Check" [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, MeadPoolElevation, @"t", FALSE );
-
-      END_IF_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-    END
-    UUID "{938b73ef-6bd0-48ac-9cf9-a371f9ad9e95}";;
-
-  END
-  UUID "{9e01eacb-5079-4b62-90bd-edea3c9a6313}";;
-
   POLICY_GROUP   "Lower Basin Demand Variability/ICS Creation and Delivery";
   DESCRIPTION    "";
   ACTIVE         TRUE;
@@ -2181,6 +1979,7 @@ BEGIN
     NOTES                "";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "This rule determines Nevada ICS creation or delivery based on the annual apportionment <br>";
       WITH_STATEMENT (NUMERIC ICS = $ "AnnualWaterUse.NV_BasicApportionment" [] - IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
  THEN
@@ -2190,7 +1989,7 @@ BEGIN
  ENDIF - "FlowToVolume"( "SumSlot"( $ "PumpingFromLakeMead:SNWP.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ), @"t" )) DO
             $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := "Min"( "Abs"( "Min"( ICS, 0.00000000 "acre-ft" ) ), $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Delivery"] );
 
-            $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := "MinItem"( { "Max"( ICS, 0.00000000 "acre-ft" ) , $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Creation"] , "Max"( ( ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], 0.00000000 "acre-ft" ) COMMENTED_BY "??????????????????<br> <br>" } );
+            $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := "MinItem"( { "Max"( ICS, 0.00000000 "acre-ft" ) , $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Creation"] , "Max"( ( ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) + $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], 0.00000000 "acre-ft" ) COMMENTED_BY "??????????????????<br><br>Max EC ICS creation based on bank availability. ICS is not taxed if it is paid back from the <br>previous year's delivery. Max bank capacity less any delivery from previous year,  minus the <br>bank + any trib/imported ICS being converted to EC ICS + annual creation biNat (input slot) = <br>the available ICS creation that can be taxed. EC delivery amount added back in post tax <br>adjustment since any volume equal to the delivery wont be taxed.<br>" } );
 
       END_WITH_STATEMENT;
 
@@ -2401,6 +2200,205 @@ BEGIN
 
   END
   UUID "{7d23b72b-fd8b-40be-8e47-056a0c6b9de8}";;
+
+  POLICY_GROUP   "DCP and BWSCP";
+  DESCRIPTION    "";
+  ACTIVE         TRUE;
+  NOTES          "";
+  BEGIN
+
+    RULE                 "California Conversion DCP";
+    DESCRIPTION          "";
+    ACTIVE               FALSE;
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    NOTES                "";
+    BEGIN
+
+      IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
+          DESCRIPTION          "This assignment calculates whether MWD's DCP contribution will be made as schedule <br>reduction or conversion of EC ICS to DCP ICS. Accounting for this will happen in the ICS <br>Accounting policy group.<br><br>If a schedule reduction to meet the DCP contribution is needed, it assumed that the schedule <br>reduction will be converted to DCP ICS through EC ICS.   <br><br>Check EC ICS balance, check current year EC creation, else reduce schedule to create EC ICS<br>which will then be converted to DCP ICS<br><br><br>AP, 7/11/19<br>";
+      WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( dcpContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
+            WITH_STATEMENT (NUMERIC CurrentICStoDCP = IF ( dcpContribution == PreviousECtoDCP )
+ THEN
+  0.00000000 "acre-ft"
+ ELSE
+  "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December 31, Previous Year"], "California" )
+ ENDIF
+ ELSEIF_COND ( "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December 31, Current Year"] + $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December 31, Previous Year"], "California" ) > dcpContribution - PreviousECtoDCP )
+ ELSEIF_CLAUSE ( dcpContribution - PreviousECtoDCP )
+ END_ELSEIF) DO
+            WITH_STATEMENT (NUMERIC dcpSchedReduc = IF ( dcpContribution > PreviousECtoDCP + CurrentICStoDCP )
+ THEN
+  dcpContribution - ( PreviousECtoDCP + CurrentICStoDCP )
+ ELSE
+  0.00000000 "acre-ft"
+ ENDIF) DO
+          DESCRIPTION          "Coachella can not &quot;officially&quot; create DCP ICS. Instead DCP creation for Coachella will be done <br>&quot;unofficially&quot; and held in MWD account. Coachella will reduce diversion by 7% to help CA meet <br>DCP contribution and will be stored store in MWD's system. MWD to pay tax for now. Logic will be <br>disabled for Coachella besides 7% reduction to diversion to create system water for MWD. It is <br>assumed there will be enough space for MWD to create DCP ICS with coachellas system water + <br>their own. Will be adjusted downward in accounting rule if not enough space. CVWD account in <br>MWD system will not be tracked, all DCP ICS will be assumed to be MWD.<br><br>AP 7/31/19        <br>";
+      $ "ICS Credits.AnnualCreationDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP + CurrentICStoDCP + dcpSchedReduc;
+
+            $ "ICS Credits.AnnualConversionECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP + CurrentICStoDCP;
+
+            $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP;
+
+            $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := CurrentICStoDCP;
+
+            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := dcpSchedReduc;
+
+            $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := "Max"( $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - CurrentICStoDCP, 0.00000000 "acre-ft" );
+
+            $ "ICS Credits.AnnualSysWaterforDCP_Coachella" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"];
+
+          INACTIVE      $ "ICS Credits.AnnualSimultaneousCreationDCPICS_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"];
+
+            $ "ICS Credits.AnnualCreationDCP_Coachella" [@"24:00:00 December 31, Current Year"] := $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"];
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      ELSE
+            $ "ICS Credits.AnnualCreationDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualConversionECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualConversionCurrentECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualSysWaterforDCP_Coachella" [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-ft";
+
+          INACTIVE      $ "ICS Credits.AnnualSimultaneousCreationDCPICS_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualCreationDCP_Coachella" [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-ft";
+
+      END_IF_STATEMENT;
+
+    DESCRIPTION          "Initally set to 0. Will get adjusted in CA acounting rule if neccessary<br>";
+      $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-feet";
+
+    END
+    UUID "{c862f2bd-77c9-4b9d-957d-8c1f3f2b3bfe}";;
+
+    RULE                 "Nevada DCP";
+    DESCRIPTION          "";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    NOTES                "";
+    BEGIN
+
+      IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-feet") THEN
+          DESCRIPTION          "This assignment calculates whether NV's DCP contribution will be made as through a schedule <br>reduction to create EC ICS then DCP ICS or conversion of EC ICS to DCP ICS. Accounting for <br>this will happen in the ICS Accounting policy group.<br><br>If a schedule reduction to meet the DCP contribution is needed, it assumed that the schedule <br>reduction will be converted to DCP ICS through EC ICS.   <br><br>Check EC ICS balance, check current year EC creation, else reduce schedule to create EC ICS <br>which will then be converted to DCP ICS<br><br>AP, 7/11/19<br>";
+      WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( dcpContribution, $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
+            WITH_STATEMENT (NUMERIC RemainingContribution = IF ( dcpContribution == PreviousECtoDCP )
+ THEN
+  0.00000000 "acre-ft"
+ ELSE
+  dcpContribution - PreviousECtoDCP
+ ENDIF) DO
+          INACTIVE      $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP + SimultaneousCreation;
+
+            $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP;
+
+            $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := RemainingContribution;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      ELSE
+          INACTIVE      $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+          INACTIVE      $ "ICS Credits.AnnualConversionECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+          INACTIVE      $ "ICS Credits.AnnualConversionCurrentECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-feet";
+
+      END_IF_STATEMENT;
+
+    END
+    UUID "{6e31581a-a7c2-4a0d-b9ae-34e4ae15b347}";;
+
+    RULE                 "Arizona DCP";
+    DESCRIPTION          "";
+    ACTIVE               FALSE;
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    NOTES                "";
+    BEGIN
+
+      WITH_STATEMENT (LIST AZdcpCreation = WITH NUMERIC AZdcpContribution = $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
+  WITH NUMERIC DCPICScreationCAWCD = $ "DCP.ArizonaSched_DCPICS" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
+   IF ( $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" )
+   THEN
+    { DCPICScreationCAWCD , AZdcpContribution - DCPICScreationCAWCD * "SystemTaxAdjustment_DCP"(  ) }
+   ELSE
+    { 0.00000000 "acre-ft" , 0.00000000 "acre-ft" }
+   ENDIF
+  ENDWITH
+ ENDWITH) DO
+            $ "ICS Credits.AnnualCreationDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 0.00000000 FROM AZdcpCreation;
+
+            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 0.00000000 FROM AZdcpCreation;
+
+            $ "ICS Credits.AnnualCreationDCP_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 0.00000000 FROM AZdcpCreation;
+
+            $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 1.00000000 FROM AZdcpCreation;
+
+            $ "ICS Credits.AnnualSysWaterforDCP_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 1.00000000 FROM AZdcpCreation;
+
+      END_WITH_STATEMENT;
+
+    END
+    UUID "{0ae60bc0-928a-4151-b115-4a58787c56dd}";;
+
+    RULE                 "Determine DCP and BWSCP Contrib";
+    DESCRIPTION          "";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    NOTES                "";
+    BEGIN
+
+      WITH_STATEMENT (NUMERIC MeadPoolElevation = "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" )) DO
+            FOREACH (STRING user IN "DCP Users"(  )) DO
+            IF_STATEMENT (user == "MX") THEN
+            $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), MeadPoolElevation, @"t", FALSE );
+
+      ELSE
+            % "ICS Credits" & "AnnualDCPContribution_" CONCAT user [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), MeadPoolElevation, @"t", FALSE );
+
+      END_IF_STATEMENT;
+
+      ENDFOREACH;
+
+            $ "DCP Flags.LB DCP" [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, MeadPoolElevation, @"t", FALSE );
+
+            IF_STATEMENT ("GetRunCycleIndex"(  ) == 3.00000000) THEN
+            $ "DCP Flags.LB DCP Check" [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, MeadPoolElevation, @"t", FALSE );
+
+      END_IF_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+    END
+    UUID "{938b73ef-6bd0-48ac-9cf9-a371f9ad9e95}";;
+
+  END
+  UUID "{9e01eacb-5079-4b62-90bd-edea3c9a6313}";;
 
   POLICY_GROUP   "Mead and Lower Basin Condition Determination";
   DESCRIPTION    "";
@@ -10005,6 +10003,8 @@ BEGIN
     END
     UUID "{fb667623-0553-452e-af24-8afa189a5714}";;
 
+      BREAKPOINT BEFORE_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "ICSAccountingForNV" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -10016,22 +10016,45 @@ BEGIN
     BEGIN
 
       WITH NUMERIC SysEff = $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.AnnualCreationSysEff_NV" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualDeliverySysEff_NV" [@"24:00:00 December 31, Current Year"] DO
-  WITH NUMERIC EC = $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December 31, Previous Year"] + "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Previous Year"], "Nevada" ) - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Current Year"] - NaNToZero ( $ "ICS Credits.AnnualConversionECtoDCP_NV" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Don't need to charge system tax because this slot is the sum of the conversion to DCP ICS from <br>previous year and the amount of current year ICS with the system tax already assessed      <br>" DO
-   WITH NUMERIC BiNat = $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualDeliveryBiNat_NV" [@"24:00:00 December 31, Current Year"] DO
-    WITH NUMERIC Imported = $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryImp_NV" [@"24:00:00 December 31, Current Year"] DO
-     WITH NUMERIC Tributary = $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryTrib_NV" [@"24:00:00 December 31, Current Year"] DO
-      WITH NUMERIC DCP = $ "ICS Credits.DCPICS_NV" [@"24:00:00 December 31, Previous Year"] + NaNToZero ( $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December 31, Current Year"] ) - $ "ICS Credits.AnnualDeliveryDCP_NV" [@"24:00:00 December 31, Current Year"] DO
-       WITH NUMERIC MeadBank = EC + BiNat + DCP DO
-        WITH NUMERIC TotalICS = MeadBank + ( SysEff + Imported + Tributary ) DO
-         { SysEff , EC , BiNat , Imported , Tributary , DCP , MeadBank , TotalICS }
-        ENDWITH
-       ENDWITH
-      ENDWITH COMMENTED_BY "DCP ICS Calculation <br>"
-     ENDWITH COMMENTED_BY "Tributary ICS Calculation <br>"
-    ENDWITH COMMENTED_BY "Imported and Tributary ICS is not carried over from the previous year so the equation format is <br>just: [EOY ICS] =  [ICS created this year] - [ICS delivered this year]<br><br>EOY ICS becomes ECICS the following year.  <br><br><br>Imported ICS Balance Calculation  <br>"
-   ENDWITH COMMENTED_BY "BiNational ICS Calculation <br>"
-  ENDWITH COMMENTED_BY "EC ICS Calculation <br>"
- ENDWITH;
+  WITH NUMERIC BiNat = $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualDeliveryBiNat_NV" [@"24:00:00 December 31, Current Year"] DO
+   WITH NUMERIC Imported = $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryImp_NV" [@"24:00:00 December 31, Current Year"] DO
+    WITH NUMERIC Tributary = $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryTrib_NV" [@"24:00:00 December 31, Current Year"] DO
+     WITH NUMERIC currentECICStoDCPconversion = "Min"( $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"], "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Previous Year"], "Nevada" ) ) DO
+      WITH NUMERIC schedReductionDCPcontribution = $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - currentECICStoDCPconversion DO
+       WITH NUMERIC ECpreliminary = $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December 31, Previous Year"] + "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Previous Year"], "Nevada" ) - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December 31, Current Year"] - currentECICStoDCPconversion DO
+        WITH NUMERIC DCPpreliminary = $ "ICS Credits.DCPICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliveryDCP_NV" [@"24:00:00 December 31, Current Year"] + currentECICStoDCPconversion DO
+         WITH NUMERIC MeadBankPreliminary = BiNat + ECpreliminary + DCPpreliminary DO
+          WITH NUMERIC RemainingBankSpace = $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - MeadBankPreliminary DO
+           WITH NUMERIC additionalDCPICScreation = "Max"( "Min"( schedReductionDCPcontribution, RemainingBankSpace ), 0.00000000 "acre-ft" ) DO
+            WITH NUMERIC syswaterDCPcontribution = schedReductionDCPcontribution - additionalDCPICScreation DO
+             WITH NUMERIC ECbankReduction = IF ( RemainingBankSpace < 0.00000000 "acre-ft" )
+             THEN
+              RemainingBankSpace
+             ELSE
+              0.00000000 "acre-ft"
+             ENDIF DO
+              WITH NUMERIC ECfinal = ECpreliminary + ECbankReduction DO
+               WITH NUMERIC DCPfinal = DCPpreliminary + additionalDCPICScreation DO
+                WITH NUMERIC MeadBankFinal = MeadBankPreliminary + additionalDCPICScreation + ECbankReduction DO
+                 WITH NUMERIC TotalICS = MeadBankFinal + ( SysEff + Imported + Tributary ) DO
+                  { SysEff , BiNat , Imported , Tributary , currentECICStoDCPconversion , additionalDCPICScreation , syswaterDCPcontribution , ECfinal , DCPfinal , MeadBankFinal , TotalICS }
+                 ENDWITH
+                ENDWITH
+               ENDWITH
+              ENDWITH
+             ENDWITH
+            ENDWITH
+           ENDWITH
+          ENDWITH
+         ENDWITH
+        ENDWITH COMMENTED_BY "BiNational ICS Calculation <br>"
+       ENDWITH COMMENTED_BY "EC ICS Calculations<br>"
+      ENDWITH COMMENTED_BY "Calculates remaining DCP contribution needed if it is not covered through conversion of previous <br>balance of from any ICS created during the current year. Depending on bank space, this <br>contribution amount will either be made through system water or additional simultaneous DCP ICS <br>creation <br>"
+     ENDWITH COMMENTED_BY "Information for DCP and EC ICS calculations <br><br>Calculates how much of the current year's EC ICS creation will be used to create DCP ICS <br>"
+    ENDWITH
+   ENDWITH COMMENTED_BY "Imported and Tributary ICS is not carried over from the previous year so the equation format is <br>just: [EOY ICS] =  [ICS created this year] - [ICS delivered this year]<br><br>EOY ICS becomes ECICS the following year.  <br><br><br>Imported and Tributary ICS Balance Calculation  <br>"
+  ENDWITH COMMENTED_BY "BiNat ICS Calculation <br>"
+ ENDWITH COMMENTED_BY "System Eff Calculation <br>";
 
     END
     UUID "{76f7c0fe-0981-49aa-8181-fe2aa2636d54}";;
