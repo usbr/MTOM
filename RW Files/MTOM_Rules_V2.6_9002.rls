@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 18:43 November 18, 2019
+# Created 19:15 November 18, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -796,6 +796,8 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br>CH, 5/10/18: Added assignments for: IID EC ICS balance, IID Binat ICS balance, and total IID ICS (binat + EC) and edited total CA ICS assignment to include total MWD and total IID in order to distinguish MWD ICS creation/delivery/balance from IID ICS creation/delivery/balance ";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (LIST iidICSValues = "ICSAccountingForIID"(  )) DO
             WITH_STATEMENT (LIST mwdICSValues = "ICSAccountingForMWD"(  )) DO
           DESCRIPTION          "Annual Delivery BiNatational ICS  <br>";
@@ -920,20 +922,20 @@ BEGIN
       END_WITH_STATEMENT;
 
       ELSE
-            WITH_STATEMENT (NUMERIC CoachellaICSforMWD = "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )], ( $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December 31, Current Year"] ) * $ "ICS Credits.SystemTaxPercent_DCP" [] )) DO
+            WITH_STATEMENT (NUMERIC CoachellaICSforMWD = "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - Bank, ( $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December 31, Current Year"] ) * "SystemTaxAdjustment_DCP"(  ) )) DO
             $ "ICS Credits.DCPICS_Coachella" ["Dec31ofYear"( @"t" )] := CoachellaICSforMWD;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
+            $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 0.00000000 FROM mwdICSValues ) + CoachellaICSforMWD;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
+            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := ( ( GET @INDEX 0.00000000 FROM mwdICSValues ) + GET @INDEX 3.00000000 FROM iidICSValues ) + CoachellaICSforMWD;
 
-            $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
+            $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 4.00000000 FROM mwdICSValues ) + CoachellaICSforMWD;
 
-            $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
+            $ "ICS Credits.TotalICS_CA" ["Dec31ofYear"( @"t" )] := ( ( GET @INDEX 4.00000000 FROM mwdICSValues ) + GET @INDEX 5.00000000 FROM iidICSValues ) + CoachellaICSforMWD;
 
-            $ "ICS Credits.AnnualCreationDCP_Coachella" ["Dec31ofYear"( @"t" )] := CoachellaICSforMWD;
+          INACTIVE      $ "ICS Credits.AnnualCreationDCP_Coachella" ["Dec31ofYear"( @"t" )] := CoachellaICSforMWD;
 
-            $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] + CoachellaICSforMWD;
+            $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] := Bank + CoachellaICSforMWD;
 
       END_WITH_STATEMENT;
 
@@ -1141,8 +1143,6 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
-    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (LIST ICSAccounting = "ICSAccountingForNV"(  )) DO
             $ "DCP Flags.NV Accounting Check" [@"24:00:00 December 31, Current Year"] := 0.00000000;
 
@@ -2181,8 +2181,6 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
-    BREAKPOINT AFTER_EXEC TRUE;
     DESCRIPTION          "This rule determines Nevada ICS creation or delivery based on the annual apportionment <br>";
       WITH_STATEMENT (NUMERIC ICS = $ "AnnualWaterUse.NV_BasicApportionment" [] - IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
  THEN
@@ -13710,32 +13708,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8564025b-39c0-4193-ad05-f3e51da10988}";
+    UUID "{14c3d37f-b721-4492-a9aa-ad34eb2b99f3}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{80e95c2a-065d-4aeb-9659-3c5c23351e54}";
+    UUID "{97b8fbe6-59da-4eb7-9b5c-39f393fb1f33}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fa9515dc-2f51-400b-8608-553e6c91b79b}";
+    UUID "{cd387883-6d60-4784-b1ca-d396967f978b}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bff7678b-446d-45e0-b92e-a744d476c379}";
+    UUID "{225f7883-145d-475b-a46c-adb20c09e1b3}";
 ;
 
   END
-  UUID "{9a7a5428-030a-41af-8f8b-c83a09d04970}";;
+  UUID "{3db489f8-b4fd-4875-a123-4532e91c9415}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13746,11 +13744,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5b8562cd-9266-4e14-8d53-84750ee37d63}";
+    UUID "{ce98d4b4-d383-41b6-b02c-f785a7a04c72}";
 ;
 
   END
-  UUID "{b7b42c05-cc0a-418a-a721-9ab3c79baad9}";;
+  UUID "{8af781c5-544d-44a4-8bb9-f07213032b48}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13761,11 +13759,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{61ee44c2-7016-4cd4-88ed-9dc7f03ae7d6}";
+    UUID "{3056cca3-8cae-411d-b152-3bb2b0d24488}";
 ;
 
   END
-  UUID "{84bbfdf3-c3fe-4c0b-8ad0-9bfa8140f54e}";;
+  UUID "{e96f8ccb-ea4c-40a8-ae49-825237ceb084}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13776,11 +13774,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{59b0ab13-6f5b-4647-a747-dbbc563ea458}";
+    UUID "{010b85b7-4d09-4e3e-98bc-d7b36bbdb298}";
 ;
 
   END
-  UUID "{95384ced-ad33-41ae-9246-44285ca79898}";;
+  UUID "{ae0b07e6-53ea-47a1-8231-7461202c7ce0}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
