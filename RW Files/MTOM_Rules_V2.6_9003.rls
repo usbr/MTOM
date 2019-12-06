@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 13:33 November 22, 2019
+# Created 16:52 December 5, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -368,7 +368,7 @@ BEGIN
     RULE                 "Mead Exclusive Flood Control Space";
     DESCRIPTION          "DESCRIPTION: This rule ensures that Mead does not violate the 1.5 maf space requirement (on MeadFloodControlData.MinSpace slot) at any time of the year. Although this is the highest priority rule, we don't want it to fire until the other flood control procedures have potentially executed. The rule checks the storage in Mead, and if it does not provide the minimum space, the outflow is recalculated so that the minimum space is achieved. If the outflow is recalculated, the FloodControlOutput.Exclusive Space Flag is set to 1; otherwise it is set to 0.<br><br>SLOTS SET: Mead.Outflow; FloodControlOutput.Exclusive Space Flag<br><br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 AND NOT IsNaN $ "Mead.Storage" [];
+    RULE_EXEC_CONSTRAINT NOT IsNaN $ "FloodControlOutput.Flood Control Flag" [] AND NOT IsNaN $ "Mead.Storage" [];
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>SB, 201907011: Edited execution constraint to check if FC slot was greater than 0 (not just Not NaN). This rule was setting Mead outflow during very low scenarios in which flood control rules should not be executing.<br>MC, 20170518: Modified rule to use only 1 IF statement instead of 2, and only print statement in the case the IF statement is TRUE<br>MC, 20170920: Modified calculation of Mead.Outflow to take the larger of outflow to reach min space requirement or outflow to meet downstream requirement per Sep 19 email from Shana T. and Corinne H. (previously did not consider downstream requirement)";
     BEGIN
 
@@ -607,7 +607,7 @@ BEGIN
     RULE                 "MX Diversion Reduction";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT TRUE;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
     NOTES                "";
     BEGIN
 
@@ -671,7 +671,7 @@ BEGIN
     RULE                 "CA Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" < @"24:00:00 April 30, Start Year" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "IsMRM"(  ) AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] ) ) );
+    RULE_EXEC_CONSTRAINT ( @"t" < @"24:00:00 April 30, Start Year" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "IsMRM"(  ) AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] ) ) );
     NOTES                "";
     BEGIN
 
@@ -873,7 +873,7 @@ BEGIN
     RULE                 "NV Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
     NOTES                "";
     BEGIN
 
@@ -905,8 +905,6 @@ BEGIN
     BEGIN
 
       WITH_STATEMENT (LIST ICSAccounting = "ICSAccountingForNV"(  )) DO
-          INACTIVE      $ "DCP Flags.NV Accounting Check" [@"24:00:00 December 31, Current Year"] := 0.00000000;
-
             $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 0.00000000 FROM ICSAccounting;
 
             $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 1.00000000 FROM ICSAccounting;
@@ -924,6 +922,8 @@ BEGIN
             $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 7.00000000 FROM ICSAccounting;
 
             $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 8.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + ( ( GET @INDEX 5.00000000 FROM ICSAccounting ) + GET @INDEX 4.00000000 FROM ICSAccounting );
 
             $ "ICS Credits.Bank_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 9.00000000 FROM ICSAccounting;
 
@@ -984,7 +984,7 @@ BEGIN
     RULE                 "AZ Delivery Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
     NOTES                "";
     BEGIN
 
@@ -1011,7 +1011,7 @@ BEGIN
     RULE                 "AZ Accounting";
     DESCRIPTION          "DESCRIPTION: This Rule assigns the values for the Arizona ICS.  The function &quot;ICSAccountingForAZ&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for Arizona ICS. The rule only sets informative values to data object slots and not any simulation object slots, the Lower Basin Demand Variability, Surplus and Shortage Logic will reference this data in later rules.  The rule only fires in January or the Start timestep. TP 9/10/2014<br><br>SLOTS SET: ICS Credits.AnnualDeliveryEC_AZ; ICS Credits.AnnualDeliverySysEff_AZ; ICS Credits.AnnualDeliveryBiNat_AZ; ICS Credits.ExtraordinaryConservationICS_AZ; ICS Credits.SystemEfficiencyICS_AZ; ICS Credits.BiNationalICS_AZ; ICS Credits.TotalICS_AZ<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) ) COMMENTED_BY "Rule executes in Run Cycle 3 at the Start Timestep or January, if the rule has not already <br>executed successfully or in run cycle 4 in the LB System condition switched from run cycle 3<br>";
+    RULE_EXEC_CONSTRAINT ( ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] AND $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] ) ) ) COMMENTED_BY "Rule executes in Run Cycle 3 at the Start Timestep or January, if the rule has not already <br>executed successfully or in run cycle 4 in the LB System condition switched from run cycle 3<br>";
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4";
     BEGIN
 
@@ -1084,7 +1084,7 @@ BEGIN
     RULE                 "AZ ICS Delivery";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] AND $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] ) );
     NOTES                "";
     BEGIN
 
@@ -1746,10 +1746,10 @@ BEGIN
     END
     UUID "{c16ff88f-1baa-46a3-9410-6ba82373f4a6}";;
 
-    RULE                 "CAP ICS Delivery";
+    RULE                 "CAP Annual ICS Delivery";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] ) );
     NOTES                "";
     BEGIN
 
@@ -1779,7 +1779,7 @@ BEGIN
     RULE                 "Reset Monthly Forecast CAP LC Demand Variability";
     DESCRIPTION          "DESCRIPTION: This rule resets the CAP Diversion request based on a demand variability factor.  The Function CAPDemandVariabilityFactor will return a scale value that will either decrease the CAP Diversion Request in Non Shortage or Surplus years to 90% of the original diversion schedule if local inflows to the system below Parker Dam are greater than the 90% exceedence of historic local inflows.  If the local inflows are below the 10% exceedence of the historic local inflows, then the diversion requested can be increased in an amount equal to the difference in the State Apportionment for the year and the volume of Senior Prority user diversion requests.  This value is added to any ICS delivery if Lake Mead is above 1,100 Ft.  The sum of the remaining state apportionment and the ICS Delivery is what CAP is allowed to divert.  TP 7/27/2015<br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000 AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] ) ) AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000 AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 7/27/2015<br><br>S.Baker 06/20/2018: Added execution constraint to simulate only in operational MTOM runs. <br>AP, 9/18/2018: Added  run constraint to refire rule of the schedule check value set in run cycle 3 does not equal the LB condition in RC 4. Adjusted constraint logic to fire when LB condition is normal instead of condition not equaling surplus, shortage, etc. Cleaned up rule logic, added to note in rule<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>SB 07/08/2019: Updated constraints to have Run Type not equal to 1 (allows for no dependence on BHOPS during development testing). ";
     BEGIN
 
@@ -1894,7 +1894,7 @@ BEGIN
     RULE                 "California DCP";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] );
     NOTES                "";
     BEGIN
 
@@ -1962,7 +1962,7 @@ BEGIN
     RULE                 "Nevada DCP";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] );
     NOTES                "";
     BEGIN
 
@@ -1976,8 +1976,6 @@ BEGIN
  ELSE
   dcpContribution - PreviousECtoDCP
  ENDIF) DO
-          INACTIVE      $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP + RemainingContribution;
-
             $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP;
 
             $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := RemainingContribution;
@@ -1989,19 +1987,9 @@ BEGIN
       END_WITH_STATEMENT;
 
       ELSE
-          INACTIVE      $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-          INACTIVE      $ "ICS Credits.AnnualConversionECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
             $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
 
-            $ "ICS Credits.AnnualConversionCurrentECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
             $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
-
-            $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-feet";
 
       END_IF_STATEMENT;
 
@@ -2011,32 +1999,9 @@ BEGIN
     RULE                 "Arizona DCP";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] ) );
     NOTES                "";
     BEGIN
-
-      BREAKPOINT BEFORE_EXEC TRUE;
-    INACTIVE      WITH_STATEMENT (LIST AZdcpCreation = WITH NUMERIC AZdcpContribution = $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-  WITH NUMERIC DCPICScreationCAWCD = $ "DCP.ArizonaSched_DCPICS" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-   IF ( $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" )
-   THEN
-    { DCPICScreationCAWCD , AZdcpContribution - DCPICScreationCAWCD * "SystemTaxAdjustment_DCP"(  ) }
-   ELSE
-    { 0.00000000 "acre-ft" , 0.00000000 "acre-ft" }
-   ENDIF
-  ENDWITH
- ENDWITH) DO
-            $ "ICS Credits.AnnualCreationDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := ( GET @INDEX 0.00000000 FROM AZdcpCreation ) * "SystemTaxAdjustment_DCP"(  );
-
-            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := ( GET @INDEX 0.00000000 FROM AZdcpCreation ) * "SystemTaxAdjustment_DCP"(  );
-
-            $ "ICS Credits.AnnualCreationDCP_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] := ( GET @INDEX 0.00000000 FROM AZdcpCreation ) * "SystemTaxAdjustment_DCP"(  );
-
-            $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 1.00000000 FROM AZdcpCreation;
-
-            $ "ICS Credits.AnnualSysWaterforDCP_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 1.00000000 FROM AZdcpCreation;
-
-      END_WITH_STATEMENT;
 
     BREAKPOINT AFTER_EXEC TRUE;
       IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
@@ -2053,7 +2018,7 @@ BEGIN
     RULE                 "Determine DCP and BWSCP Contrib";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP Flags.LB DCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) >= 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) );
     NOTES                "";
     BEGIN
 
@@ -2069,10 +2034,10 @@ BEGIN
 
       ENDFOREACH;
 
-            $ "DCP Flags.LB DCP" [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, MeadPoolElevation, @"t", FALSE );
+            $ "DCP Flags.LB DCP Tier" [@"24:00:00 December 31, Current Year"] := "GetRowIndex"( $ "DCP.Contributions", STRINGIFY "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, MeadPoolElevation, @"t", FALSE ) );
 
             IF_STATEMENT ("GetRunCycleIndex"(  ) == 3.00000000) THEN
-            $ "DCP Flags.LB DCP Check" [@"24:00:00 December 31, Current Year"] := "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, MeadPoolElevation, @"t", FALSE );
+            $ "DCP Flags.LB DCP Tier Check" [@"24:00:00 December 31, Current Year"] := "GetRowIndex"( $ "DCP.Contributions", STRINGIFY "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, MeadPoolElevation, @"t", FALSE ) );
 
       END_IF_STATEMENT;
 
@@ -5464,7 +5429,7 @@ BEGIN
  THEN
   "VolumeToFlow"( $ "Mexico_CU_Actual.MexicoSched" [date] - $ "Mexico_CU_Actual.MexicoTJ" [date], date )
  ELSE
-  "VolumeToFlow"( $ "AnnualWaterUse.Mexico_OutyearVolume" ["Dec31ofYear"( date )] * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Mexico"], date )
+  "VolumeToFlow"( $ "AnnualWaterUse.Mexico_OutyearVolume" ["Dec31ofYear"( date )] * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Mexico"] + $ "Mexico Shortage and Surplus.AnnualCreationMexicoWaterReserve" ["Dec31ofYear"( date )] - $ "Mexico Shortage and Surplus.AnnualDeliveryMexicoWaterReserve" ["Dec31ofYear"( date )], date )
  ENDIF
  ELSEIF_COND ( "GetYear"( date ) == "GetYear"( @"Start Timestep" ) )
  ELSEIF_CLAUSE ( "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date], date ) )
@@ -10281,17 +10246,22 @@ BEGIN
 
       IF ( "IsMRM"(  ) AND NOT "IsSurplusOrShortage"(  ) )
  THEN
-  IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover90"] ) COMMENTED_BY "For high inflow year, pumping reduced" )
+  IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "DCP.DCP_StartElevation" [] )
   THEN
-   0.95000000
+   1.00000000
   ELSE
-   IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] < $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover10"] ) COMMENTED_BY "For low inflow year, pumping increased" )
+   IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover90"] ) COMMENTED_BY "For high inflow year, pumping reduced" )
    THEN
-    1.05000000
+    0.95000000
    ELSE
-    1.00000000
+    IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] < $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover10"] ) COMMENTED_BY "For low inflow year, pumping increased" )
+    THEN
+     1.05000000
+    ELSE
+     1.00000000
+    ENDIF
    ENDIF
-  ENDIF
+  ENDIF COMMENTED_BY "If DCP contributions needs to be made, no NV demand variability AP 12/5/19  <br>"
  ELSE
   1.00000000
  ENDIF;
@@ -13467,32 +13437,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8851be50-bf01-477a-8b3b-b332b1de186b}";
+    UUID "{83510a60-fcb2-405a-9f7a-15c33ea11ff3}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{43403fe4-4b9b-48e7-b0a8-8776d12e1b3d}";
+    UUID "{02145320-7cc7-4acc-afab-7d53ec4a8126}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{80bf73c8-7ed5-493c-84b9-580a1aa1e3f3}";
+    UUID "{badccfa5-12f8-44a6-b0ac-f008074ae820}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{273d646d-766c-45e2-b564-9954b460e5fa}";
+    UUID "{7169df1f-9c98-4a50-9dd9-dcba3d9522b9}";
 ;
 
   END
-  UUID "{a052060e-d4cd-42a4-8799-a2b3e7aa5de4}";;
+  UUID "{c5577ea9-a302-4a00-853f-2b83c060763b}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13503,11 +13473,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{75842d01-f634-49d3-b106-5b0d82a4b97b}";
+    UUID "{ccb4e742-caf6-42b2-8afd-f76e2033cfb2}";
 ;
 
   END
-  UUID "{b50f61a6-6ca0-43dd-bf05-9a9c6e58d767}";;
+  UUID "{d46e15e9-8e1e-4968-ab77-f52f80b64a13}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13518,11 +13488,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2d1837ff-1f20-40fe-aa49-077898018acb}";
+    UUID "{b127b690-9c89-4f89-8efd-1abef674f223}";
 ;
 
   END
-  UUID "{efa26858-6f33-4b00-85df-9b925444e80d}";;
+  UUID "{f655cc92-4c10-4973-a37e-bb8812f6c8e6}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13533,11 +13503,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c50fe220-e575-48d8-a523-6bcaaf867648}";
+    UUID "{b60a3276-dfb5-4442-bad7-386072c0f44a}";
 ;
 
   END
-  UUID "{a84b3cb3-16b7-4d9d-a3b0-5c0023f23ed2}";;
+  UUID "{d112e766-e1b1-49cf-aa14-40782247a309}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
