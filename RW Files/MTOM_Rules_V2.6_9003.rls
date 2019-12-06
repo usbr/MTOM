@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 16:52 December 5, 2019
+# Created 13:06 December 6, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -835,7 +835,7 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "California", "Max Delivery", "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.Bank_CA" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDCPContribution_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.AnnualDCPContribution_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) )) DO
+      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "California", "Max Delivery", "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.Bank_CA" [@"24:00:00 December Max DayOfMonth, Previous Year"], $ "ICS Credits.AnnualDCPContribution_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) )) DO
             WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "If there is an ICS deivery amount, take out of accounts in the following order.<br><br>DCP ICS (if above recovery elevation)<br>EC ICS<br>System Efficiency<br>BiNational <br><br>AP 11/19/19  <br>" , "Min"( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.MeadBankParameters" ["California", "Max Delivery"] ) COMMENTED_BY "Previous years balance less any conversion for DCP ICS. No need to take current year ICS <br>creation into account because the two are mutually exclusive. Based on MWD ICS creation and <br>delivery logic, MWD is either creating OR delivering EC ICS based SAC WY Index.<br><br>AP 11/19/19     <br>" , $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
@@ -941,7 +941,7 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Nevada", "Max Delivery", "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.Bank_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) )) DO
+      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Nevada", "Max Delivery", "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.Bank_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) )) DO
             WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "If there is an ICS deivery amount, take out of accounts in the following order.<br><br>DCP ICS (if above recovery elevation)<br>EC ICS<br>Tributary ICS <br>System Efficiency<br>BiNational <br><br>AP 11/19/19  <br>" , ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + "Max"( $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], 0.00000000 "acre-ft" ) ) COMMENTED_BY "Previous years balance less any conversion for DCP ICS. No need to take current year ICS <br>creation into account because the two are mutually exclusive. Based on SNWP ICS creation and <br>delivery logic, SNWP is either creating OR delivering EC ICS based on the demand vs basic <br>apportionment. Still need to add previous year Trib/Imported ICS creation since it will be <br>converted to EC ICS in the current year but it needs to take into account any silumtaneous <br>creation for DPC ICS<br><br>AP 11/19/19     <br>" , $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) , $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
@@ -1088,7 +1088,7 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Arizona", "Max Delivery", "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.Bank_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualRemainingDCPContribution_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.AnnualRemainingDCPContribution_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) )) DO
+      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Arizona", "Max Delivery", "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"] - $ "ICS Credits.Bank_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"], $ "ICS Credits.AnnualRemainingDCPContribution_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) )) DO
             WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , ( $ "ICS Credits.ExtraordinaryConservationICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + "Current Year EC ICS Creation"( $ "ICS Credits.AnnualCreationEC_CAWCD" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_CAWCD" [@"24:00:00 December 31, Previous Year"], "Arizona" ) ) , $ "ICS Credits.BiNationalICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.SystemEfficiencyICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
@@ -13437,32 +13437,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{83510a60-fcb2-405a-9f7a-15c33ea11ff3}";
+    UUID "{4f62e776-5d5a-4620-a50b-6a7fbdd4c8fd}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{02145320-7cc7-4acc-afab-7d53ec4a8126}";
+    UUID "{dc5fe80c-9198-4d61-9b2a-57de10ebec57}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{badccfa5-12f8-44a6-b0ac-f008074ae820}";
+    UUID "{d4fbf34d-abf7-4bb4-ade8-8ff2fa87cc10}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7169df1f-9c98-4a50-9dd9-dcba3d9522b9}";
+    UUID "{4605ca9c-c8a0-48c7-8fd2-8bf124f6baf8}";
 ;
 
   END
-  UUID "{c5577ea9-a302-4a00-853f-2b83c060763b}";;
+  UUID "{085f31d4-bb2b-4c98-bbf4-2bb97f5de2b1}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13473,11 +13473,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ccb4e742-caf6-42b2-8afd-f76e2033cfb2}";
+    UUID "{5b9e1397-01f2-4346-b43d-40434fe5abc0}";
 ;
 
   END
-  UUID "{d46e15e9-8e1e-4968-ab77-f52f80b64a13}";;
+  UUID "{9c6607b4-b951-4790-b308-05206d5df327}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13488,11 +13488,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b127b690-9c89-4f89-8efd-1abef674f223}";
+    UUID "{7d0a90ec-fff1-4b61-a98e-426cc71dfe4e}";
 ;
 
   END
-  UUID "{f655cc92-4c10-4973-a37e-bb8812f6c8e6}";;
+  UUID "{4358472b-97b1-4030-871a-3ecd2779c757}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13503,11 +13503,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b60a3276-dfb5-4442-bad7-386072c0f44a}";
+    UUID "{e80645b9-1055-4784-8d15-04da86d44b19}";
 ;
 
   END
-  UUID "{d112e766-e1b1-49cf-aa14-40782247a309}";;
+  UUID "{3329448d-3c8e-4310-a8f3-26773c84f5e5}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
