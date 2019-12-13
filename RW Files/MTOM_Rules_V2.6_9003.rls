@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 16:05 December 12, 2019
+# Created 18:14 December 12, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -603,6 +603,7 @@ BEGIN
 
       END_WITH_STATEMENT;
 
+    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (NUMERIC IIDadjustment = $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualCreationEC_IID_Default" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] + $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] )) DO
             WITH_STATEMENT (NUMERIC totalDeliveryMWDICS = IF ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  ) )
  THEN
@@ -1756,7 +1757,6 @@ BEGIN
 
       END_IF_STATEMENT;
 
-    BREAKPOINT AFTER_EXEC TRUE;
       IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.MWD FC" [@"24:00:00 December 31, Current Year"]) THEN
             $ "Surplus Volume Entitlements.MWD FC" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumAnnualMWDDivRequest"(  );
 
@@ -4897,7 +4897,7 @@ BEGIN
     RULE                 "Reset MWD Annual Forecast Use - Force to CA Apportionment";
     DESCRIPTION          "DESCRIPTION: Set the MWD Forecast annual diversion to the state apportionment (in the deterministic run or in the first year of the run, use the input state apportionment, in an outyear use the adjusted state apportionment), less any senior users to MWD diversion requested. <br><br>SLOTS SET: ForecastUse.MWDResetAnnualFC";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetRunCycleIndex"(  ) == 1.00000000 OR ( "GetRunCycleIndex"(  ) == 3.00000000 AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 );
+    RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetRunCycleIndex"(  ) == 1.00000000 OR ( "GetRunCycleIndex"(  ) == 3.00000000 AND ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND NOT "HasRuleFiredSuccessfully"( "True" ) AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 );
     NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed because creation of EC ICS (an Input value) is not allowed in that case.";
     BEGIN
 
@@ -9739,31 +9739,25 @@ BEGIN
     WITH NUMERIC MWDsyswaterDCPcontribution = "Max"( 0.00000000 "acre-ft", ( $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - MWDcurrentECICStoDCPconversion ) ) COMMENTED_BY "This is the state of CA system water requirement. MWD meets CA DCP requirement <br>" DO
      WITH NUMERIC CVWDDCPContribution = $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
       WITH NUMERIC MWDannualECICScreation = "Max"( 0.00000000 "acre-ft", $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] - MWDcurrentECICStoDCPconversion / "SystemTaxAdjustment_DCP"(  ) ) DO
-       WITH NUMERIC MWD_ECICS_preliminary = $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + "Current Year EC ICS Creation"( MWDannualECICScreation, $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"], "California" ) - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
+       WITH NUMERIC MWD_ECICS = $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + "Current Year EC ICS Creation"( MWDannualECICScreation, $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"], "California" ) - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
         WITH NUMERIC MWD_DCPICS = $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + MWDcurrentECICStoDCPconversion ) - $ "ICS Credits.AnnualDeliveryDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-         WITH NUMERIC MWD_ICSBank_Preliminary = MWD_ECICS_preliminary + MWD_DCPICS + MWD_BiNatICS DO
-          WITH NUMERIC RemainingBankSpace = $ "ICS Credits.MeadBankParameters" ["MWD", "Max Capacity"] - MWD_ICSBank_Preliminary DO
-           WITH NUMERIC CVWDDCPICS_creation = "Max"( "Min"( CVWDDCPContribution * "SystemTaxAdjustment_DCP"(  ), RemainingBankSpace ), 0.00000000 "acre-ft" ) DO
-            WITH NUMERIC CVWDsyswaterDCPcontribution = CVWDDCPContribution - CVWDDCPICS_creation / "SystemTaxAdjustment_DCP"(  ) DO
-             WITH NUMERIC MWD_ECICS = MWD_ECICS_preliminary + CVWDDCPICS_creation DO
-              WITH NUMERIC MWD_TotalICS = MWD_ECICS + MWD_SysEffICS + MWD_BiNatICS + MWD_DCPICS DO
-               WITH NUMERIC MWD_ICSBank = MWD_ECICS + MWD_BiNatICS + MWD_DCPICS DO
-                { MWD_SysEffICS , MWD_BiNatICS , MWDcurrentECICStoDCPconversion , MWDannualECICScreation , MWD_DCPICS , MWDsyswaterDCPcontribution , CVWDDCPICS_creation , CVWDsyswaterDCPcontribution , MWD_ECICS , MWD_TotalICS , MWD_ICSBank }
-               ENDWITH
-              ENDWITH
-             ENDWITH
-            ENDWITH COMMENTED_BY "CVWD System water is a subset of MWD <br>"
+         WITH NUMERIC CVWDDCPICS_creation = "Max"( 0.00000000 "acre-ft", ( $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + MWDcurrentECICStoDCPconversion ) - $ "ICS Credits.AnnualDCPContribution_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) DO
+          WITH NUMERIC CVWDsyswaterDCPcontribution = CVWDDCPContribution - CVWDDCPICS_creation DO
+           WITH NUMERIC MWD_TotalICS = MWD_ECICS + MWD_SysEffICS + MWD_BiNatICS + MWD_DCPICS DO
+            WITH NUMERIC MWD_ICSBank = MWD_ECICS + MWD_BiNatICS + MWD_DCPICS DO
+             { MWD_SysEffICS , MWD_BiNatICS , MWDcurrentECICStoDCPconversion , MWDannualECICScreation , MWD_DCPICS , MWDsyswaterDCPcontribution , CVWDDCPICS_creation , CVWDsyswaterDCPcontribution , MWD_ECICS , MWD_TotalICS , MWD_ICSBank }
+            ENDWITH
            ENDWITH
           ENDWITH
-         ENDWITH
+         ENDWITH COMMENTED_BY "CVWD is a sub account of the MWD DCP contribution since MWD covers the state of CA. <br>MWD DCP conversion from previous ICS and simultaneous creation has already been checked <br>against the bank space. This way, per discussion, MWD covers any tax needed to meet the <br>CA DCP contribution. MWD creates DCP ICS then CVWD can create if there is bank space. <br>MWD can create EC ICS after CVWD creates DCP ICS. <br><br>MWD covers as much as they can using conversion from previous DCP ICS and simultaneous <br>creation. If the sum of the DCP ICS creation is more than MWD's 93% contribution, the <br>remaining DCP ICS goes to CVWD. If system water is used to meet <7% of the state DCP <br>cntribution then it will get charged to CVWD. If there is system water >7%, all of CVWD's <br>DCP contribution will be system water. <br>"
         ENDWITH
        ENDWITH
-      ENDWITH
+      ENDWITH COMMENTED_BY "If there is any ICS left over after meeting the DCP requirement it can be created my MWD.  <br>"
      ENDWITH
     ENDWITH
-   ENDWITH COMMENTED_BY "Since MWD's DCP contribution is meeting the state of CA full amount, this covers MWD and <br>CVWD's DCP contribution. CVWD's 7% will be converted to MWD ECICS if there is bank space <br>available in CA.  <br>"
+   ENDWITH COMMENTED_BY "Since MWD's DCP contribution is meeting the state of CA full amount, this covers MWD and <br>CVWD's DCP contribution.<br><br>DCP Contributions will be made by converting EC ICS, then simultaneous creation, then system <br>water  <br>"
   ENDWITH COMMENTED_BY "BiNat Calculation <br>"
- ENDWITH COMMENTED_BY "CVWD DCP ICS accounting takes place under ICS Accounting for MWD. This is because CVWD is <br>storing there ICS under MWD's account. Even though there are CVWD slots, all water will be <br>taken off through MWD as if it is stored there.<br><br>AP 11/19/19<br><br>Sys Eff Calculation  <br>";
+ ENDWITH COMMENTED_BY "CVWD DCP ICS accounting takes place under ICS Accounting for MWD. This is because CVWD is <br>storing their ICS under MWD's account. MWD meets the state of CA contribution<br><br>AP 11/19/19<br><br>Sys Eff Calculation   <br>";
 
     END
     UUID "{fb667623-0553-452e-af24-8afa189a5714}";;
@@ -13501,32 +13495,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7ecfd7e1-b4bd-4d37-bf4c-158f1d02e381}";
+    UUID "{7218f516-2dc3-47ef-a06b-724866620d96}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6fa1f7eb-4a62-4286-9eb2-5395dc8afff5}";
+    UUID "{42daed7f-3dc9-4b66-98be-42bd2727303f}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{83ade204-290f-4f41-b4d5-d8abfb2d3b38}";
+    UUID "{8db6f479-77d5-48b8-ad7b-19a72f9f09b1}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9e4a8b1a-07c9-4892-8369-2a40ccfabd5a}";
+    UUID "{149b37a9-4069-423c-9b0a-fc6f26bd2214}";
 ;
 
   END
-  UUID "{cf8be78a-7e9f-48e8-b977-05c545393f80}";;
+  UUID "{4dae4d3e-d781-4661-8da5-6eb8a1ea5f75}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13537,11 +13531,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0e1f96ff-80fb-4a8f-959e-f0114b0e1a88}";
+    UUID "{70669dba-69ee-4483-bf20-8c9bf32682e4}";
 ;
 
   END
-  UUID "{81450785-0487-4fac-a4ed-62f0910950d5}";;
+  UUID "{507561fa-8815-46f0-9c56-077951c4ef92}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13552,11 +13546,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6d336758-33a9-41ed-90b8-4ce15ff90367}";
+    UUID "{07a4f092-39b2-4cb1-a8ee-7825028f2f0f}";
 ;
 
   END
-  UUID "{ea17e4fa-81bd-4db9-bafa-ef10dc31a2e0}";;
+  UUID "{679abd7c-6a32-4d0e-8f28-bc2573a2aaeb}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13567,11 +13561,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a1d05489-6ddc-4136-9d68-17f8515bb5e8}";
+    UUID "{3f52800a-53d8-4a14-82c7-7f9c10ca79c6}";
 ;
 
   END
-  UUID "{c8ba17d8-4f2a-4de1-95a4-21e1dc7c9125}";;
+  UUID "{4bd18aaf-f23b-4fa5-9227-0b5d3d42e29f}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
