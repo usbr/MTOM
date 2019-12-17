@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:52 December 16, 2019
+# Created 17:41 December 16, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -564,7 +564,7 @@ BEGIN
     RULE                 "NV Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 );
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
     NOTES                "";
     BEGIN
 
@@ -1007,27 +1007,34 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Nevada", "Max Delivery", "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.Bank_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ), $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "The amount of EC ICS converted to DCP ICS during the current year  <br>" )) DO
-            WITH_STATEMENT (NUMERIC TribSurplusDeliv = IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 )
+      WITH_STATEMENT (NUMERIC ECICStoDCP = "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.Bank_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ), $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "The amount of EC ICS converted to DCP ICS during the current year   <br>") DO
+            WITH_STATEMENT (NUMERIC SurplusICSDelivery = IF ( "IsQuantifiedOrFloodControl"(  ) )
+ THEN
+  ( $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) * "SystemTaxAdjustment_DCP"(  )
+ ELSE
+  0.00000000 "acre-ft"
+ ENDIF COMMENTED_BY "If in quantified surplus or flood control, take delivery of any tributary or imprted ICS creation <br>made during the current year  <br>") DO
+            WITH_STATEMENT (NUMERIC AnnualDelivery = "Max"( "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Nevada", "Max Delivery", ECICStoDCP ) - SurplusICSDelivery, 0.00000000 "acre-ft" )) DO
+            WITH_STATEMENT (NUMERIC TribSurplusDeliv = IF ( "IsQuantifiedOrFloodControl"(  ) )
  THEN
   $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  )
  ELSE
   0.00000000 "acre-ft"
  ENDIF) DO
-            WITH_STATEMENT (NUMERIC ImpSurplusDeliv = IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 )
+            WITH_STATEMENT (NUMERIC ImpSurplusDeliv = IF ( "IsQuantifiedOrFloodControl"(  ) )
  THEN
   $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  )
  ELSE
   0.00000000 "acre-ft"
  ENDIF) DO
-            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "If there is an ICS deivery amount, take out of accounts in the following order.<br><br>DCP ICS (if above recovery elevation)<br>EC ICS<br>Tributary ICS <br>System Efficiency<br>BiNational <br><br>AP 11/19/19  <br>" , ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + "Max"( $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], 0.00000000 "acre-ft" ) ) COMMENTED_BY "Previous years balance less any conversion for DCP ICS. No need to take current year ICS <br>creation into account because the two are mutually exclusive. Based on SNWP ICS creation and <br>delivery logic, SNWP is either creating OR delivering EC ICS based on the demand vs basic <br>apportionment. Still need to add previous year Trib/Imported ICS creation since it will be <br>converted to EC ICS in the current year but it needs to take into account any silumtaneous <br>creation for DPC ICS<br><br>AP 11/19/19     <br>" , $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) , $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) } ) WITH LIST result = {  } DO
+            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "If there is an ICS deivery amount, take out of accounts in the following order.<br><br>DCP ICS (if above recovery elevation) [0]<br>EC ICS [1]<br>Tributary ICS[2]<br>System Efficiency[3]<br>BiNational[4]<br>Imported[5]<br><br>AP 11/19/19   <br>" , ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) COMMENTED_BY "ECICS balance <br>" , ( $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Current Year trib <br>" , $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "SysEff <br>" , $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "BiNat <br>" , ( $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Imported <br>" } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
    AnnualDelivery
   ELSE
    AnnualDelivery - "Sum"( result )
   ENDIF DO
-   WITH NUMERIC DeliveryAmount = IF ( ( ( ( LENGTH result ) == 0.00000000 AND $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"] < $ "DCP.RecoveryElevation" [] ) OR ( ( LENGTH result ) == 2.00000000 OR ( LENGTH result ) == 5.00000000 AND ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 ) ) COMMENTED_BY "If surplus, do not take any ICS out of Tributary or Imported ICS accounts because they were <br>already cleared in the logic above. <br>" ) COMMENTED_BY "Don't take DCP ICS if the Mead elevation is below the recovery elevation of 1110 <br>" )
+   WITH NUMERIC DeliveryAmount = IF ( ( ( ( LENGTH result ) == 0.00000000 AND $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"] < $ "DCP.RecoveryElevation" [] ) OR ( ( LENGTH result ) == 2.00000000 OR ( LENGTH result ) == 5.00000000 AND NOT "IsQuantifiedOrFloodControl"(  ) ) COMMENTED_BY "If surplus, do not take any ICS out of Tributary or Imported ICS accounts because they were <br>already cleared in the logic above. <br>" ) COMMENTED_BY "Don't take DCP ICS if the Mead elevation is below the recovery elevation of 1110 <br>" )
    THEN
     0.00000000 "acre-ft"
    ELSE
@@ -1050,6 +1057,10 @@ BEGIN
             $ "ICS Credits.AnnualDeliveryImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := ( GET @INDEX 5.00000000 FROM DeliveryChargedList ) + ImpSurplusDeliv;
 
             $ "ICS Credits.AnnualICSDelivery_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := "Sum"( DeliveryChargedList ) + TribSurplusDeliv + ImpSurplusDeliv;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
 
@@ -1259,7 +1270,7 @@ BEGIN
   $ "ICS Credits.TotalICS_NV" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.DCPICS_NV" [@"24:00:00 December 31, Previous Year"]
  ENDIF COMMENTED_BY "Total available ICS to take in delivery scenario <br>" } );
 
-            $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := IF ( ( NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 )
+            $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := IF ( "IsQuantifiedOrFloodControl"(  ) == TRUE )
  THEN
   0.00000000 "acre-ft"
  ELSE
@@ -10286,24 +10297,19 @@ BEGIN
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/2013";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrShortage"(  ) )
+      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) )
  THEN
-  IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "DCP.DCP_StartElevation" [] )
+  IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover90"] ) COMMENTED_BY "For high inflow year, pumping reduced" )
   THEN
-   1.00000000
+   0.95000000
   ELSE
-   IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover90"] ) COMMENTED_BY "For high inflow year, pumping reduced" )
+   IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] < $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover10"] ) COMMENTED_BY "For low inflow year, pumping increased" )
    THEN
-    0.95000000
+    1.05000000
    ELSE
-    IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] < $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover10"] ) COMMENTED_BY "For low inflow year, pumping increased" )
-    THEN
-     1.05000000
-    ELSE
-     1.00000000
-    ENDIF
+    1.00000000
    ENDIF
-  ENDIF COMMENTED_BY "If DCP contributions needs to be made, no NV demand variability AP 12/5/19  <br>"
+  ENDIF
  ELSE
   1.00000000
  ENDIF;
@@ -10356,7 +10362,7 @@ BEGIN
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 3/12/2013";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrShortage"(  ) )
+      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) )
  THEN
   IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "DCP.DCP_StartElevation" [] )
   THEN
@@ -10413,7 +10419,7 @@ BEGIN
     END
     UUID "{77c6cb47-3924-443d-80b2-7e8f9c14ffcc}";;
 
-    FUNCTION       "IsSurplusOrShortage" (  )
+    FUNCTION       "IsSurplusOrDCP" (  )
     RETURN_TYPE    BOOLEAN;
     SCALE_UNITS    "";
     DESCRIPTION    "DESCRIPTION: This Function checks the two limits of Shortage or Surplus and returns a boolean statement saying if the water year is in surplus or shortage. This is being used in the LC Demand Variability Logic. TP 4/18/2013<br><br>RETURNS: TRUE if Mead is in Shortage or Surplus; FALSE otherwise [BOOLEAN]<br><br>ARGUMENTS: <NONE><br><br>CONSTRAINTS:<br><br><br>";
@@ -10423,7 +10429,7 @@ BEGIN
     NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 4/18/2013<br><br>S.Baker, 20180925: Changed IF statements to use function 'GetProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
     BEGIN
 
-      IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+      IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "DCP.DCP_StartElevation" [] )
  THEN
   TRUE
  ELSE
@@ -10437,6 +10443,26 @@ BEGIN
 
     END
     UUID "{43700a2b-b93e-4abd-93d1-439824e212a9}";;
+
+    FUNCTION       "IsQuantifiedOrFloodControl" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "";
+    BEGIN
+
+      IF ( ( NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{7f9481d7-b0d6-470c-a603-007f3f0e56c5}";;
 
     FUNCTION       "MonthIs" ( LIST months )
     RETURN_TYPE    BOOLEAN;
@@ -13479,32 +13505,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{dfcdb146-2187-4b82-afb0-7fd59aec1779}";
+    UUID "{1d02b05e-35b7-4af0-a03b-4f27344f5db1}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{49e0af9b-a965-4cae-8766-fafe88de959e}";
+    UUID "{4a0ed9d9-3d24-4f9d-8291-d08ad3b14e3b}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fbd6ca30-05d0-4a33-818d-d5708a023c13}";
+    UUID "{2ddca3b9-73f2-4c6d-8ae0-ad322db16bc9}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e1254556-32d3-43ed-827a-2468a9b8f21a}";
+    UUID "{33645735-ca94-4be3-843f-164aaf71d813}";
 ;
 
   END
-  UUID "{157ba53b-66b7-49f5-ac58-0e9624236ed2}";;
+  UUID "{656874a8-282f-43b9-8f4b-7950c444b790}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13515,11 +13541,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e476a470-8cfc-4058-87ce-7463f662a424}";
+    UUID "{c2de1c98-bebe-4cee-9987-76752813e958}";
 ;
 
   END
-  UUID "{2d0a351b-cdb0-44c7-9d62-e324c1adabd2}";;
+  UUID "{3f7312b2-f2e6-43cd-bcac-23cba52afe0a}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13530,11 +13556,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d93d097c-d434-4164-a672-07a5bc475d41}";
+    UUID "{0528b396-91c9-45a5-b553-320c8ec2c3b1}";
 ;
 
   END
-  UUID "{24957427-ed68-4df4-b37e-98bb656205f7}";;
+  UUID "{c199029c-a33a-4998-ac7f-dcb5cd9f0ac3}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13545,11 +13571,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c3db0036-9088-4e18-8396-9e360112e63b}";
+    UUID "{5b34d3c5-164d-461c-9c6d-3964fa2d5412}";
 ;
 
   END
-  UUID "{cf05fd88-bce0-43d3-b171-a1bc4d118797}";;
+  UUID "{e12c111c-b234-4d05-8867-9d7c186464aa}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
