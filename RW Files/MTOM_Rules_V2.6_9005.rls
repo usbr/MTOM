@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 18:05 December 17, 2019
+# Created 15:39 December 18, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -546,7 +546,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "MX Diversion Reduction";
+    RULE                 "MX Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP Flags.LB DCP Tier" ["Dec31ofYear"( @"t" )] != $ "DCP Flags.LB DCP Tier Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
@@ -672,7 +672,7 @@ BEGIN
             WITH_STATEMENT (NUMERIC CAPDivRequested = "SumFlowsToVolume"( $ "CAPDiversion.Total Diversion Requested", @"t", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             WITH_STATEMENT (NUMERIC MonthPercent = 1.00000000 / "GetDaysLeftInYear"(  ) * "GetDaysInMonth"( date )) DO
-            $ "CAPDiversion.Total Diversion Requested" [date] := "VolumeToFlow"( ( ( CAPDivRequested + GET @INDEX 0.00000000 FROM AZFirming ) - DCPreductionCAWCD - CAWCDICSdiversionAdjustment ) * MonthPercent, date );
+            $ "CAPDiversion.Total Diversion Requested" [date] := "VolumeToFlow"( ( ( CAPDivRequested + GET @INDEX 0.00000000 FROM AZFirming ) - DCPreductionCAWCD + CAWCDICSdiversionAdjustment ) * MonthPercent, date );
 
       END_WITH_STATEMENT;
 
@@ -692,7 +692,7 @@ BEGIN
     RULE                 "Flood Control ICS Reduction";
     DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re calculates and assignes the Total ICS Volumes for each state. TP 11/4/2014<br><br>SLOTS SET: ICS Credits.ExtraordinaryConservationICS_CA; ICS Credits.ExtraordinaryConservationICS_NV; ICS Credits.ExtraordinaryConservationICS_AZ; ICS Credits.TotalICS_CA; ICS Credits.TotalICS_NV; ICS Credits.TotalICS_AZ; ICS Credits.AnnualDeliveryEC_CA; ICS Credits.AnnualDeliveryEC_NV; ICS Credits.AnnualDeliveryEC_AZ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 ) AND ( @"t" == @"24:00:00 December Max DayOfMonth, Current Year" OR @"t" == @"Finish Timestep" ) AND NOT "HasRuleFiredSuccessfully"( "True" );
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND "IsQuantifiedOrFloodControl"(  ) AND ( @"t" == @"24:00:00 December Max DayOfMonth, Current Year" OR @"t" == @"Finish Timestep" ) AND NOT "HasRuleFiredSuccessfully"( "True" );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split";
     BEGIN
 
@@ -1133,7 +1133,7 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC ECICStoDCP = "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"] - $ "ICS Credits.Bank_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"], $ "ICS Credits.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "The amount of EC ICS converted to DCP ICS during the current year <br>") DO
+      WITH_STATEMENT (NUMERIC ECICStoDCP = "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"] - $ "ICS Credits.Bank_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"], $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "The amount of EC ICS converted to DCP ICS during the current year <br>") DO
             WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Arizona", "Max Delivery", ECICStoDCP )) DO
             WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.ExtraordinaryConservationICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.BiNationalICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.SystemEfficiencyICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
@@ -1992,10 +1992,10 @@ BEGIN
 
     DESCRIPTION          "Rule sets AZ DCP contribution. AZSched_DCPICS is an input from the 24MS (desired DCP ICS <br>creation). The desired DCP ICS creation is set here and will be adjusted down in the AZ <br>accounting rule based on bank space. AZ system water for DCP contribution is also calculated in <br>the AZ accounting rule. <br>";
       IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
-            $ "ICS Credits.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICSProjectionData.AnnualCreationDCPICS_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  );
+            $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICSProjectionData.AnnualCreationDCPICS_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  );
 
       ELSE
-            $ "ICS Credits.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
+            $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
 
       END_IF_STATEMENT;
 
@@ -9539,8 +9539,8 @@ BEGIN
               IF ( fcvolume < totalECICS )
               THEN
                WITH LIST stateECBalLista = { mwdECICS - ( mwdECICS / totalECICS ) * fcvolume , iidECICS - ( iidECICS / totalECICS ) * fcvolume , nvECICS - ( nvECICS / totalECICS ) * fcvolume , cawcdECICS - ( cawcdECICS / totalECICS ) * fcvolume , critECICS - ( critECICS / totalECICS ) * fcvolume , gricECICS - ( gricECICS / totalECICS ) * fcvolume , mviddECICS - ( mviddECICS / totalECICS ) * fcvolume , wmECICS - ( wmECICS / totalECICS ) * fcvolume } DO
-                WITH LIST totalECBalList = { mwdOtherICS + GET @INDEX 0.00000000 FROM stateECBalLista , iidOtherICS + GET @INDEX 1.00000000 FROM stateECBalLista , nvOtherICS + GET @INDEX 2.00000000 FROM stateECBalLista , cawcdECICS + GET @INDEX 3.00000000 FROM stateECBalLista } DO
-                 { 0.00000000 "acre-ft" , GET @INDEX 0.00000000 FROM stateECBalLista , GET @INDEX 1.00000000 FROM stateECBalLista , GET @INDEX 2.00000000 FROM stateECBalLista , GET @INDEX 3.00000000 FROM stateECBalLista , GET @INDEX 4.00000000 FROM stateECBalLista , GET @INDEX 5.00000000 FROM stateECBalLista , GET @INDEX 6.00000000 FROM stateECBalLista , GET @INDEX 7.00000000 FROM stateECBalLista , GET @INDEX 0.00000000 FROM totalECBalList , GET @INDEX 1.00000000 FROM totalECBalList , GET @INDEX 2.00000000 FROM totalECBalList , GET @INDEX 3.00000000 FROM totalECBalList }
+                WITH LIST totalICSBalList = { mwdOtherICS + GET @INDEX 0.00000000 FROM stateECBalLista , iidOtherICS + GET @INDEX 1.00000000 FROM stateECBalLista , nvOtherICS + GET @INDEX 2.00000000 FROM stateECBalLista , cawcdOtherICS + GET @INDEX 3.00000000 FROM stateECBalLista } DO
+                 { 0.00000000 "acre-ft" , GET @INDEX 0.00000000 FROM stateECBalLista , GET @INDEX 1.00000000 FROM stateECBalLista , GET @INDEX 2.00000000 FROM stateECBalLista , GET @INDEX 3.00000000 FROM stateECBalLista , GET @INDEX 4.00000000 FROM stateECBalLista , GET @INDEX 5.00000000 FROM stateECBalLista , GET @INDEX 6.00000000 FROM stateECBalLista , GET @INDEX 7.00000000 FROM stateECBalLista , GET @INDEX 0.00000000 FROM totalICSBalList , GET @INDEX 1.00000000 FROM totalICSBalList , GET @INDEX 2.00000000 FROM totalICSBalList , GET @INDEX 3.00000000 FROM totalICSBalList }
                 ENDWITH
                ENDWITH
               ELSE
@@ -9625,7 +9625,7 @@ BEGIN
                        WITH NUMERIC BiNat_AZ = BiNat_CAWCD DO
                         WITH NUMERIC SysEff_CAWCD = ( $ "ICS Credits.SystemEfficiencyICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationSysEff_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliverySysEff_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) DO
                          WITH NUMERIC SysEff_AZ = SysEff_CAWCD DO
-                          WITH NUMERIC CAWCDremainingDCPcontribution = $ "ICS Credits.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
+                          WITH NUMERIC CAWCDremainingDCPcontribution = $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
                            WITH NUMERIC DCP_CAWCD_preliminary = $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
                             WITH NUMERIC MeadBankPrelminary = DCP_CAWCD_preliminary + ECICS_AZ + BiNat_AZ DO
                              WITH NUMERIC RemainingBankSpace = $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"] - MeadBankPrelminary DO
@@ -9634,11 +9634,11 @@ BEGIN
                                 WITH NUMERIC AnnualCreationDCP_CAWCD = AnnualSimultaneousCreationDCP_CAWCD DO
                                  WITH NUMERIC AnnualCreationDCP_AZ = AnnualSimultaneousCreationDCP_CAWCD DO
                                   WITH NUMERIC AnnualCreationSysWater_AZ = AnnualSysWaterDCPcontribution_CAWCD DO
-                                   WITH NUMERIC DCP_CAWCD = ( $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + AnnualSimultaneousCreationDCP_CAWCD - $ "ICS Credits.AnnualDeliveryDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) DO
+                                   WITH NUMERIC DCP_CAWCD = DCP_CAWCD_preliminary + AnnualSimultaneousCreationDCP_CAWCD DO
                                     WITH NUMERIC TotalCAWCD = ECICS_CAWCD + BiNat_CAWCD + SysEff_CAWCD + DCP_CAWCD DO
                                      WITH NUMERIC CAWCDBank = ECICS_CAWCD + BiNat_CAWCD + DCP_CAWCD DO
                                       WITH NUMERIC DCP_AZ = DCP_CAWCD DO
-                                       WITH NUMERIC AZBank = ECICS_AZ + BiNat_AZ + DCP_CAWCD DO
+                                       WITH NUMERIC AZBank = ECICS_AZ + BiNat_AZ + DCP_AZ DO
                                         WITH NUMERIC TotalICS = SysEff_AZ + ECICS_AZ + BiNat_AZ + DCP_AZ DO
                                          { AnnualCreationSysEff_AZ , AnnualCreationEC_AZ , AnnualCreationBiNat_AZ , AnnualDeliverySysEff_AZ , AnnualDeliveryEC_AZ , AnnualDeliveryBiNat_AZ , AnnualDeliveryDCP_AZ , ECICS_CRIT , ECICS_GRIC , ECICS_CAWCD , ECICS_MVIID , ECICS_WM , ECICS_AZ , BiNat_CAWCD , BiNat_AZ , SysEff_CAWCD , SysEff_AZ , AnnualSimultaneousCreationDCP_CAWCD , AnnualSysWaterDCPcontribution_CAWCD , AnnualCreationDCP_CAWCD , AnnualCreationDCP_AZ , AnnualCreationSysWater_AZ , DCP_CAWCD , TotalCAWCD , DCP_AZ , AZBank , TotalICS , FirmingBalanceAZ , FirmingBalanceUS , AnnualCreationEC_CRIT , AnnualCreationEC_GRIC , AnnualCreationEC_CAWCD , AnnualCreationEC_MVIDD , AnnualCreationEC_WM , CAWCDBank }
                                         ENDWITH
@@ -13481,32 +13481,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0400a425-5274-4731-b2e7-e22aa283cef0}";
+    UUID "{2df6c3f8-e779-4e43-85aa-faef06b66edc}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0865fef6-afba-4898-bb28-ff19f7ab0626}";
+    UUID "{5a102529-b7fe-4303-891d-b1296a3b2954}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{78b38238-1e81-4818-b287-b301207e728f}";
+    UUID "{8450cbe9-405c-45e4-92fa-05b851c110d0}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0d52c466-75e2-4265-b8f1-e62ce2ec1a71}";
+    UUID "{b32ee134-928c-4838-ac43-34dd00ed1b6b}";
 ;
 
   END
-  UUID "{8867f832-5bba-4b81-9a20-8311c2e5281a}";;
+  UUID "{f45c2c53-2089-436a-bf88-1a5db1d2a634}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13517,11 +13517,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{774037c3-9552-4462-9583-9f8b5641ccf7}";
+    UUID "{da94cb73-d29f-4264-8451-c09d2c7c3355}";
 ;
 
   END
-  UUID "{91d8acc5-b739-4d12-b0c3-c20636fd7672}";;
+  UUID "{022df9ab-4ec8-4e93-8599-0f5f3bbea165}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13532,11 +13532,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c573a0a4-1aee-4c5c-bd59-40c07ca81b53}";
+    UUID "{5bc1c59e-af86-4861-9211-67af28982d37}";
 ;
 
   END
-  UUID "{2f28f3a8-1c75-4d79-9888-558654053812}";;
+  UUID "{18ccfc69-a6bb-4f52-bb57-71d551c011f1}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13547,11 +13547,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0d51695e-b8d2-4ac0-ac7d-3cb917493cbb}";
+    UUID "{5e7299ec-ee69-4351-963a-4c0f528abe98}";
 ;
 
   END
-  UUID "{928fd1c4-01e2-41c2-8aec-6fd721d82cb5}";;
+  UUID "{b4c33651-d7f7-4a86-8fab-22eace7822c2}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
