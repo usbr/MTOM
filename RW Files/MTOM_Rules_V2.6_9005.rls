@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:39 December 18, 2019
+# Created 15:01 December 19, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -553,10 +553,19 @@ BEGIN
     NOTES                "";
     BEGIN
 
-      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
-            $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( "FlowToVolume"( $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date], date ) - $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December Max DayOfMonth, Current Year"] * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Mexico"], date );
+      WITH_STATEMENT (NUMERIC BNWSCPreduction = $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC MXdivRequested = "SumFlowsToVolume"( $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested", @"t", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
+            FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
+            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date], date ) / MXdivRequested) DO
+            $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( ( MXdivRequested - BNWSCPreduction ) * MonthPercent, date );
+
+      END_WITH_STATEMENT;
 
       ENDFOREACH;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
 
     END
     UUID "{c0ad0cb4-4363-4f0d-9b4a-f149af07515a}";;
@@ -571,9 +580,9 @@ BEGIN
       WITH_STATEMENT (NUMERIC AdditionalDCPReductionNV = ( $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] )) DO
             WITH_STATEMENT (NUMERIC SNWPdivRequested = "SumFlowsToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested", @"t", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC monthPercent = 1.00000000 / "GetDaysLeftInYear"(  ) * "GetDaysInMonth"( date )) DO
+            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) / SNWPdivRequested) DO
             FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" }) DO
-            slot [date] := "VolumeToFlow"( ( SNWPdivRequested - AdditionalDCPReductionNV ) * monthPercent, date );
+            slot [date] := "VolumeToFlow"( ( SNWPdivRequested - AdditionalDCPReductionNV ) * MonthPercent, date );
 
       ENDFOREACH;
 
@@ -671,7 +680,7 @@ BEGIN
             WITH_STATEMENT (NUMERIC DCPreductionCAWCD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC CAPDivRequested = "SumFlowsToVolume"( $ "CAPDiversion.Total Diversion Requested", @"t", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC MonthPercent = 1.00000000 / "GetDaysLeftInYear"(  ) * "GetDaysInMonth"( date )) DO
+            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "CAPDiversion.Total Diversion Requested" [date], date ) / CAPDivRequested) DO
             $ "CAPDiversion.Total Diversion Requested" [date] := "VolumeToFlow"( ( ( CAPDivRequested + GET @INDEX 0.00000000 FROM AZFirming ) - DCPreductionCAWCD + CAWCDICSdiversionAdjustment ) * MonthPercent, date );
 
       END_WITH_STATEMENT;
@@ -5420,11 +5429,8 @@ BEGIN
  THEN
   "VolumeToFlow"( $ "Mexico_CU_Actual.MexicoSched" [date] - $ "Mexico_CU_Actual.MexicoTJ" [date], date )
  ELSE
-  "VolumeToFlow"( ( $ "AnnualWaterUse.Mexico_OutyearVolume" ["Dec31ofYear"( date )] - $ "Mexico Shortage and Surplus.AnnualCreationMexicoWaterReserve" ["Dec31ofYear"( date )] + $ "Mexico Shortage and Surplus.AnnualDeliveryMexicoWaterReserve" ["Dec31ofYear"( date )] ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Mexico"], date )
- ENDIF
- ELSEIF_COND ( "GetYear"( date ) == "GetYear"( @"Start Timestep" ) )
- ELSEIF_CLAUSE ( "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date], date ) )
- END_ELSEIF;
+  "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date], date )
+ ENDIF;
 
             $ "MexicanTreatyDelivery:MexicoBypass.Diversion Requested" [date] := IF ( date < @"Start Timestep" )
  THEN
@@ -9563,8 +9569,6 @@ BEGIN
     END
     UUID "{7232ee59-42ea-44fa-804c-baab7f95b193}";;
 
-      BREAKPOINT BEFORE_EXEC TRUE;
-    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "ICSAccountingForAZ" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -13481,32 +13485,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2df6c3f8-e779-4e43-85aa-faef06b66edc}";
+    UUID "{9b39f437-a553-4677-8a03-0a835e8cfc89}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5a102529-b7fe-4303-891d-b1296a3b2954}";
+    UUID "{b6cc016c-5294-4c80-982f-a23fa93ee1dd}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8450cbe9-405c-45e4-92fa-05b851c110d0}";
+    UUID "{a196964b-4c53-4271-8f3a-470c422519cc}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b32ee134-928c-4838-ac43-34dd00ed1b6b}";
+    UUID "{5d123804-72bc-4bf8-a3f3-c669e9fcf871}";
 ;
 
   END
-  UUID "{f45c2c53-2089-436a-bf88-1a5db1d2a634}";;
+  UUID "{71197fef-1ed8-422c-b37c-b9f53496cec7}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13517,11 +13521,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{da94cb73-d29f-4264-8451-c09d2c7c3355}";
+    UUID "{8db35388-e6ea-408c-81f6-d110f603cf28}";
 ;
 
   END
-  UUID "{022df9ab-4ec8-4e93-8599-0f5f3bbea165}";;
+  UUID "{c2610586-5bff-4c1b-b500-8378371a7b9e}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13532,11 +13536,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5bc1c59e-af86-4861-9211-67af28982d37}";
+    UUID "{35957cfa-c3b4-46e0-b5b7-df2b875cec4e}";
 ;
 
   END
-  UUID "{18ccfc69-a6bb-4f52-bb57-71d551c011f1}";;
+  UUID "{c72749fd-bf8c-41ed-9a41-6d7b8fc18795}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13547,11 +13551,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5e7299ec-ee69-4351-963a-4c0f528abe98}";
+    UUID "{44742d6e-631a-4c3d-aa12-0feb18ae6387}";
 ;
 
   END
-  UUID "{b4c33651-d7f7-4a86-8fab-22eace7822c2}";;
+  UUID "{c19abb1a-1286-4786-b8ba-439bebe4cb99}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
