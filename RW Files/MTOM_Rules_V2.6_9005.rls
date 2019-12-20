@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:01 December 19, 2019
+# Created 13:09 December 20, 2019
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1348,12 +1348,13 @@ BEGIN
             $ "ICSProjectionData.AnnualICSDelivery_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := $ "ICSProjectionData.AnnualDeliveryBiNat_MWD_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualDeliverySysEff_MWD_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualDeliveryEC_MWD_Default" ["Dec31ofYear"( @"t" )];
 
       ELSE
+            WITH_STATEMENT (LIST IIDAccounting = "ICSAccountingForIID"(  )) DO
             $ "ICSProjectionData.AnnualICSDelivery_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := "MinItem"( { IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
  THEN
   "Max"( ( $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - 1.00000000, "Take Step 1"] - $ "Surplus Volume Entitlements.MWD Domestic" ["Dec31ofYear"( @"t" )] ), 0.00000000 "acre-ft" )
  ELSE
   $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - 1.00000000, "Take Step 1"] COMMENTED_BY "Not Surplus or Shortage <br>"
- ENDIF , ( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Delivery"] - ( $ "ICSProjectionData.AnnualDeliveryBiNat_IID_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] ), IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December Max DayOfMonth, Previous Year" ) > $ "DCP.RecoveryElevation" [] )
+ ENDIF , ( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Delivery"] - ( ( GET @INDEX 0.00000000 FROM IIDAccounting ) + GET @INDEX 1.00000000 FROM IIDAccounting ), IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December Max DayOfMonth, Previous Year" ) > $ "DCP.RecoveryElevation" [] )
  THEN
   $ "ICS Credits.TotalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"]
  ELSE
@@ -1364,8 +1365,10 @@ BEGIN
  THEN
   0.00000000 "acre-ft"
  ELSE
-  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( ( ( ( $ "ICS Credits.MeadBankParameters" ["MWD", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.Bank_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Taxable ICS creation space <br>" + $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "Non Taxable ICS creation space. If EC delivery is paid back the following year, creation amount <br>equal to said delivery is not taxed   <br>" ), 0.00000000 "acre-ft" ) COMMENTED_BY "Bank space <br>" , ( $ "ICS Credits.MeadBankParameters" ["California", "Max Creation"] - $ "ICSProjectionData.AnnualCreationEC_IID_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] ) COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" ) - $ "AnnualWaterUse.MWDMinimumAnnualDelivery" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
+  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( ( ( ( $ "ICS Credits.MeadBankParameters" ["MWD", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.Bank_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Taxable ICS creation space <br>" + $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "Non Taxable ICS creation space. If EC delivery is paid back the following year, creation amount <br>equal to said delivery is not taxed   <br>" ), 0.00000000 "acre-ft" ) COMMENTED_BY "Bank space <br>" , ( $ "ICS Credits.MeadBankParameters" ["California", "Max Creation"] - GET @INDEX 2.00000000 FROM IIDAccounting ) COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" ) - $ "AnnualWaterUse.MWDMinimumAnnualDelivery" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
  ENDIF;
+
+      END_WITH_STATEMENT;
 
       END_IF_STATEMENT;
 
@@ -9794,16 +9797,11 @@ BEGIN
   ELSE
    $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December 31, Current Year"]
   ENDIF DO
-   WITH NUMERIC AnnualCreationEC = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR NaNToZero ( $ "FloodControlOutput.Flood Control Flag" [] ) > 0.00000000 OR NaNToZero ( $ "FloodControlOutput.Exclusive Space Flag" [] ) > 0.00000000 ) )
+   WITH NUMERIC AnnualCreationEC = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR "IsQuantifiedOrFloodControl"(  ) OR AnnualDeliveryEC > 0.00000000 "acre-ft" )
    THEN
     0.00000000 "acre-ft"
    ELSE
-    IF ( $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-ft" )
-    THEN
-     "Max"( ( $ "ICS Credits.MeadBankParameters" ["IID", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December 31, Previous Year"] * "EvapTaxAdjustment"(  ) ) / "SystemTaxAdjustment"(  ) - $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December 31, Current Year"], 0.00000000 "acre-ft" )
-    ELSE
-     ( $ "ICS Credits.MeadBankParameters" ["IID", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December 31, Previous Year"] * "EvapTaxAdjustment"(  ) ) / "SystemTaxAdjustment"(  )
-    ENDIF
+    ( $ "ICS Credits.MeadBankParameters" ["IID", "Max Capacity"] - $ "ICS Credits.ExtraordinaryConservationICS_IID" [@"24:00:00 December 31, Previous Year"] * "EvapTaxAdjustment"(  ) ) / "SystemTaxAdjustment"(  )
    ENDIF DO
     WITH NUMERIC ECICSIID = IF ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 )
     THEN
@@ -10434,7 +10432,7 @@ BEGIN
     NOTES          "";
     BEGIN
 
-      IF ( ( NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 )
+      IF ( ( NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 OR ( NaNToZero ( $ "Surplus.Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 1.00000000 ) )
  THEN
   TRUE
  ELSE
@@ -13485,32 +13483,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9b39f437-a553-4677-8a03-0a835e8cfc89}";
+    UUID "{70d099c6-3543-47fa-aa88-31a694af1c5c}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b6cc016c-5294-4c80-982f-a23fa93ee1dd}";
+    UUID "{97d0f348-8f70-4735-ad09-6302c1abb00f}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a196964b-4c53-4271-8f3a-470c422519cc}";
+    UUID "{bdb6335d-77ab-409b-a629-7ed9e8117959}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5d123804-72bc-4bf8-a3f3-c669e9fcf871}";
+    UUID "{96babf9e-bd39-4313-94c8-829cb2134b60}";
 ;
 
   END
-  UUID "{71197fef-1ed8-422c-b37c-b9f53496cec7}";;
+  UUID "{29536c3f-aaa8-4e6a-a0ca-4e20ba62b6a9}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13521,11 +13519,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8db35388-e6ea-408c-81f6-d110f603cf28}";
+    UUID "{db646cc1-e84c-4ab0-9ae1-942971672b1c}";
 ;
 
   END
-  UUID "{c2610586-5bff-4c1b-b500-8378371a7b9e}";;
+  UUID "{f58c1934-418e-42c5-beaf-f4624c526aa3}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13536,11 +13534,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{35957cfa-c3b4-46e0-b5b7-df2b875cec4e}";
+    UUID "{4a121cc5-b999-4eaf-aa95-313a65ccbef0}";
 ;
 
   END
-  UUID "{c72749fd-bf8c-41ed-9a41-6d7b8fc18795}";;
+  UUID "{5a20f829-1a8e-49a4-98dc-e62f6b55f25e}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13551,11 +13549,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{44742d6e-631a-4c3d-aa12-0feb18ae6387}";
+    UUID "{ffc2dbf0-9cb7-43b0-95b7-0e88ba07c3ec}";
 ;
 
   END
-  UUID "{c19abb1a-1286-4786-b8ba-439bebe4cb99}";;
+  UUID "{f7171022-da96-43e0-b2d1-e9c03639c77c}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
