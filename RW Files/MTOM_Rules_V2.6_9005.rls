@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 13:09 December 20, 2019
+# Created 16:03 January 2, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -612,6 +612,7 @@ BEGIN
 
       END_WITH_STATEMENT;
 
+    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (NUMERIC IIDadjustment = $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualCreationEC_IID_Default" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] + $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] )) DO
             WITH_STATEMENT (NUMERIC totalDeliveryMWDICS = IF ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  ) )
  THEN
@@ -626,25 +627,68 @@ BEGIN
   $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ENDIF) DO
             WITH_STATEMENT (NUMERIC DCPreductionMWD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC MWDDivRequested = "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"t", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
             WITH_STATEMENT (LIST newMWDDivDepList = FOR ( DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year" ) WITH LIST result = {  } DO
-  WITH NUMERIC newMWDDivAmount = WITH NUMERIC DeliveryToDate = "GetDiversionToDate"( $ "California_CU_Actual.MWD" ) DO
-   WITH NUMERIC monthPercent = 1.00000000 / "GetDaysLeftInYear"(  ) * "GetDaysInMonth"( date ) DO
-    "VolumeToFlow"( "Min"( $ "MWDDiversionData.MWDCanal_DailyCapacity" [] * "GetDaysInMonth"( date ), ( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) + ( totalDeliveryMWDICS - totalCreationECICS - DCPreductionMWD - DeliveryToDate - IIDadjustment ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery that might be <br>occuring in a given scenario, or decrease the delivery if any creation of water for a given <br>scenario. TP 12/22/2017  <br>" ) * monthPercent ), date )
-   ENDWITH
-  ENDWITH DO
-   WITH NUMERIC newDivReq = newMWDDivAmount - $ "MWDDiversion:Tijuana.Diversion Requested" [date] DO
-    WITH NUMERIC newDepReq = newMWDDivAmount - ( "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date ) + $ "MWDDiversion:Tijuana.Diversion Requested" [date] ) DO
-     APPEND { date , newDivReq , newDepReq } ONTO result
+  WITH NUMERIC MaximumMonthlyDiv = $ "MWDDiversionData.MWDCanal_DailyCapacity" [] * "GetDaysInMonth"( date ) DO
+   WITH NUMERIC newMWDDivAmount = WITH NUMERIC DeliveryToDate = "GetDiversionToDate"( $ "California_CU_Actual.MWD" ) DO
+    WITH NUMERIC monthPercent = "FlowToVolume"( $ "MWDDiversion:MWD.Diversion Requested" [date], date ) / MWDDivRequested DO
+     WITH NUMERIC MWDAdjustedDiv = ( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) + ( totalDeliveryMWDICS - totalCreationECICS - DCPreductionMWD - DeliveryToDate - IIDadjustment ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery that might be <br>occuring in a given scenario, or decrease the delivery if any creation of water for a given <br>scenario. TP 12/22/2017  <br>" ) * monthPercent DO
+      "VolumeToFlow"( "Min"( MaximumMonthlyDiv, MWDAdjustedDiv ), date )
+     ENDWITH
+    ENDWITH
+   ENDWITH DO
+    WITH NUMERIC newDivReq = newMWDDivAmount - $ "MWDDiversion:Tijuana.Diversion Requested" [date] DO
+     WITH NUMERIC newDepReq = newDivReq - "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date ) DO
+      WITH NUMERIC RemainingCanalSpace = "VolumeToFlow"( MaximumMonthlyDiv, date ) - newDivReq DO
+       APPEND { date , newDivReq , newDepReq , RemainingCanalSpace } ONTO result
+      ENDWITH
+     ENDWITH
     ENDWITH
    ENDWITH
   ENDWITH
  ENDFOR COMMENTED_BY "Adjust the MWD Diversion Request to reduce the request if there is not enough total ICS in the <br>system for the total delivery to California.  The reduction will be the difference between the <br>determined delivery to california above the state apportionment minus the availalbe ICS volume.  <br>MWD takes the reduction.   <br>") DO
-            FOREACH (LIST subList IN newMWDDivDepList) DO
-            $ "MWDDiversion:MWD.Diversion Requested" [GET @INDEX 0.00000000 FROM subList] := GET @INDEX 1.00000000 FROM subList;
+            WITH_STATEMENT (NUMERIC RemainingDelivery = "Max"( MWDDivRequested - "FlowToVolume"( "SumByIndex"( newMWDDivDepList, 1.00000000 ), @"t" ), 0.00000000 "acre-ft" )) DO
+            BREAKPOINT BEFORE_EXEC TRUE;
+      WITH_STATEMENT (LIST MonthlyAdjustment = FOR ( DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year" ) WITH LIST result = {  } DO
+  WITH LIST CurrentMonthlySublist = GET @INDEX "GetMonth"( date ) - 1.00000000 FROM newMWDDivDepList DO
+   WITH LIST PreviousMonthlySublistforAdditionalWaterDelivered = IF ( "GetMonth"( date ) == 1.00000000 )
+   THEN
+    { 0.00000000 }
+   ELSE
+    GET @INDEX "GetMonth"( date ) - 2.00000000 FROM result
+   ENDIF DO
+    WITH NUMERIC RemainingDeliveryBalance = IF ( ( LENGTH result ) == 0.00000000 )
+    THEN
+     RemainingDelivery
+    ELSE
+     RemainingDelivery - GET @INDEX 3.00000000 FROM PreviousMonthlySublistforAdditionalWaterDelivered
+    ENDIF DO
+     WITH NUMERIC RemainingCanalSpace = "FlowToVolume"( GET @INDEX 3.00000000 FROM CurrentMonthlySublist, @"t" ) DO
+      WITH NUMERIC AdditionalDeliveryAmount = "Min"( RemainingCanalSpace, RemainingDeliveryBalance ) DO
+       WITH NUMERIC AdditionalWaterDelivered = IF ( ( LENGTH result ) == 0.00000000 )
+       THEN
+        AdditionalDeliveryAmount
+       ELSE
+        ( GET @INDEX 3.00000000 FROM PreviousMonthlySublistforAdditionalWaterDelivered ) + AdditionalDeliveryAmount
+       ENDIF DO
+        APPEND { date , ( GET @INDEX 1.00000000 FROM CurrentMonthlySublist ) + "VolumeToFlow"( AdditionalDeliveryAmount, date ) , ( GET @INDEX 2.00000000 FROM CurrentMonthlySublist ) + "VolumeToFlow"( AdditionalDeliveryAmount, date ) , AdditionalWaterDelivered } ONTO result
+       ENDWITH
+      ENDWITH
+     ENDWITH
+    ENDWITH
+   ENDWITH
+  ENDWITH
+ ENDFOR) DO
+            FOREACH (LIST subListMonthlyAdjustment IN MonthlyAdjustment) DO
+            $ "MWDDiversion:MWD.Diversion Requested" [GET @INDEX 0.00000000 FROM subListMonthlyAdjustment] := GET @INDEX 1.00000000 FROM subListMonthlyAdjustment;
 
-            $ "MWDDiversion:MWD.Depletion Requested" [GET @INDEX 0.00000000 FROM subList] := GET @INDEX 2.00000000 FROM subList;
+            $ "MWDDiversion:MWD.Depletion Requested" [GET @INDEX 0.00000000 FROM subListMonthlyAdjustment] := GET @INDEX 2.00000000 FROM subListMonthlyAdjustment;
 
       ENDFOREACH;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
 
           DESCRIPTION          "Adjust IID Diversion Requested <br>";
       IF_STATEMENT (IIDadjustment != 0.00000000 "acre-ft") THEN
@@ -654,6 +698,8 @@ BEGIN
       ENDFOREACH;
 
       END_IF_STATEMENT;
+
+      END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
 
@@ -13483,32 +13529,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{70d099c6-3543-47fa-aa88-31a694af1c5c}";
+    UUID "{cdf012e9-ae74-4438-8858-17de99a809f3}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{97d0f348-8f70-4735-ad09-6302c1abb00f}";
+    UUID "{f2764bcf-6ab1-4fb9-b93a-a8b9773f37bd}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bdb6335d-77ab-409b-a629-7ed9e8117959}";
+    UUID "{7d96deff-d03d-4012-8e05-bc535b303c56}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{96babf9e-bd39-4313-94c8-829cb2134b60}";
+    UUID "{8f0a9ab9-6ccc-4db4-9043-b02585eb4970}";
 ;
 
   END
-  UUID "{29536c3f-aaa8-4e6a-a0ca-4e20ba62b6a9}";;
+  UUID "{201de7c5-638c-4ef3-8651-dc9764f0c95c}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13519,11 +13565,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{db646cc1-e84c-4ab0-9ae1-942971672b1c}";
+    UUID "{62c00278-9185-4bae-aba6-046acc81f60d}";
 ;
 
   END
-  UUID "{f58c1934-418e-42c5-beaf-f4624c526aa3}";;
+  UUID "{ce26dcc1-ffc3-4551-868e-b6c7ff03020f}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13534,11 +13580,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4a121cc5-b999-4eaf-aa95-313a65ccbef0}";
+    UUID "{c92ae1e3-a80b-40c5-8df6-404bdd5812e1}";
 ;
 
   END
-  UUID "{5a20f829-1a8e-49a4-98dc-e62f6b55f25e}";;
+  UUID "{3c9b5a83-d7db-495f-8771-cc10a6ea3f57}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13549,11 +13595,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ffc2dbf0-9cb7-43b0-95b7-0e88ba07c3ec}";
+    UUID "{a22d2999-e104-4077-b590-05839ac7f5f6}";
 ;
 
   END
-  UUID "{f7171022-da96-43e0-b2d1-e9c03639c77c}";;
+  UUID "{96c0d831-09d5-400c-a20c-f9ba822b1acf}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
