@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 18:07 January 13, 2020
+# Created 11:05 January 14, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -550,7 +550,7 @@ BEGIN
     RULE                 "MX Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
     NOTES                "";
     BEGIN
 
@@ -615,7 +615,7 @@ BEGIN
     RULE                 "AZ Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT "IsQuantifiedOrFloodControl"(  );
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
     NOTES                "";
     BEGIN
 
@@ -13532,32 +13532,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c30f581b-6459-434d-b962-b93d45e65e80}";
+    UUID "{42ffcbdb-7f5c-46aa-8d46-1863187342f7}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{afebd22d-d9c0-4081-88e8-82a98a776fca}";
+    UUID "{e242feaf-3d17-4cb6-9878-2c632926e5ec}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ea048b7d-e08a-4cf0-bcc5-a13d69e641e0}";
+    UUID "{82972289-14b1-49c2-9f37-98541a3c234a}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{436ceda6-a040-41c5-baab-0edf598fa79f}";
+    UUID "{c0433ab6-db12-4c82-8dc1-080f17e70866}";
 ;
 
   END
-  UUID "{a60f3efe-21f0-4a63-a159-87efa1043014}";;
+  UUID "{4e641469-84dd-4e40-94ac-176259a1bf69}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13568,11 +13568,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{463c0049-4230-483e-b7be-c1948637e56f}";
+    UUID "{016471b8-6b09-4e4d-a746-5871ecbf1565}";
 ;
 
   END
-  UUID "{6a11cb13-8f51-4cf6-a91c-521416fe0229}";;
+  UUID "{d87a0961-35e3-408c-8dbf-5b0c6caf6c93}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13583,11 +13583,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fcca2ebb-22ff-4be4-a242-6573f8761418}";
+    UUID "{b3952127-b973-47f7-926b-f0b5b882ec2a}";
 ;
 
   END
-  UUID "{84f6f290-cf2c-433a-9349-efc22f84f509}";;
+  UUID "{c65fe9ef-5fec-4919-88bd-3d25f68e9afe}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13598,11 +13598,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{943145f4-140a-44c7-8d18-6956ada3ce55}";
+    UUID "{104e1cf8-1ce0-40b4-a255-36cb6019504e}";
 ;
 
   END
-  UUID "{e6471a67-d8e8-457c-a1e0-b52b071d6cca}";;
+  UUID "{5a663be5-cf49-444f-b557-382302fef90f}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
