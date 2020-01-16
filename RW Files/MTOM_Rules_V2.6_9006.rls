@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 11:05 January 14, 2020
+# Created 13:15 January 16, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -571,7 +571,7 @@ BEGIN
     END
     UUID "{c0ad0cb4-4363-4f0d-9b4a-f149af07515a}";;
 
-    RULE                 "NV Diversion Adjustment";
+    RULE                 "NV Shortage and Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
@@ -612,7 +612,7 @@ BEGIN
     END
     UUID "{bde8a45f-6afe-4ca8-bb72-e79b4a6c743a}";;
 
-    RULE                 "AZ Diversion Adjustment";
+    RULE                 "AZ Shortage and Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
@@ -1257,84 +1257,6 @@ BEGIN
     END
     UUID "{ccb68901-761d-4298-aba0-749bec3b23f9}";;
 
-    RULE                 "Nevada Banking";
-    DESCRIPTION          "DESCRIPTION: This rule assigns the Banked Storage from NV in CA and AZ for each year.  As of implementation Unbanked water from CA and AZ is 0 af and will continue to be for the foreseable future.  The values of 0 acre-feet are input on those slots.  If logic is used to solve for those, then logic will have to go into this rule where appropriate. This rule only sets data objects and that data is used in subsequent rules in the Shortage, Surplus and LBDV logic. TP 7.28.2015<br><br>SLOTS SET: ICS Credits.AnnualNevadaUnused, ICS Credits.CumulativeNVBankedinCA, ICS Credits.CumulativeNVBankedinAZ, ICS Credits.AnnualNVBankedinCA, ICS Credits.AnnualNVBankedinAZ, ICS Credits.AnnualNVRecoverableCA, ICS Credits.AnnualNVRecoverableAZ, ICS Credits.AnnualNVUnBankedFromCA, ICS Credits.AnnualNVUnbankedFromAZ<br><br><br><br>";
-    ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4";
-    BEGIN
-
-      WITH_STATEMENT (NUMERIC unusedNV = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
- THEN
-  0.00000000 "acre-ft"
- ELSE
-  ( 300000.00000000 "acre-ft" - $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] + IF ( "MeadPumpingDemandVariabilityFactor"( @"t" ) == 0.95000000 )
-  THEN
-   ( "SumAnnualSNWADivRequest"(  ) * 0.05000000 ) COMMENTED_BY "Side inflows are high"
-  ELSE
-   IF ( "MeadPumpingDemandVariabilityFactor"( @"t" ) == 1.05000000 )
-   THEN
-    ( "SumAnnualSNWADivRequest"(  ) * - 0.05000000 ) COMMENTED_BY "Side Inflows are low"
-   ELSE
-    0.00000000 "acre-ft" COMMENTED_BY "Normal Side inflows above Hoover"
-   ENDIF
-  ENDIF COMMENTED_BY "With Regard to Lower Basin Demand Variability, if the side inflows above Hoover are high, <br>then the SNWA diversion is reduced and the available unused Nevada water is increased <br>by 5% of the SNWA diversion. If the side inflows are low, then the SNWA diversion is <br>increased by 5% and the amount of unused Nevada water is decreased by that amount. <br>In a normal year, do not apply any change. TP 7/30/2015" ) COMMENTED_BY "MC, 20170512: Add in a Max&lcub; ..., 0 acre-ft&rcub; here to ensure unused never negative?"
- ENDIF) DO
-          DESCRIPTION          "Right now, all unused NV water is going to CA Banking, more logic will  have to go in the following With statements <br>to get that figured out. ";
-      WITH_STATEMENT (NUMERIC nvBankedCA = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
- THEN
-  0.00000000 "acre-ft"
- ELSE
-  unusedNV - $ "ICSProjectionData.NV_LeftinMead" ["Dec31ofYear"( @"t" )]
- ENDIF) DO
-            WITH_STATEMENT (NUMERIC nvBankedAZ = IF ( NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) == 1.00000000 )
- THEN
-  0.00000000 "acre-ft"
- ELSE
-  0.00000000 "acre-ft"
- ENDIF) DO
-          DESCRIPTION          "Nevada is permitted to recover up to 40,000 AF from AZ and 30,000 AF from CA annually, added based on <br>an email, April 27, 2015 subject &quot;Re: MTOM Action Items&quot; from Shana Tighi to Tony Powell";
-      WITH_STATEMENT (NUMERIC annNVRecoverableAZ = "Min"( 40000.00000000 "acre-ft", $ "ICS Credits.CumulativeNVBankedinAZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
-            WITH_STATEMENT (NUMERIC annNVRecoverableCA = "Min"( 30000.00000000 "acre-ft", $ "ICS Credits.CumulativeNVBankedinCA" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
-          DESCRIPTION          "When the NV unbanked to CA logic needs to be improved, the next two With statements is <br>where that should happen. Currently, the values for unbanked to CA and AZ will be 0 acre-feet.  <br>When logic is generated it needs to be limited to the Recoverable water available to NV. ";
-      WITH_STATEMENT (NUMERIC nvUnbankedCA = "Min"( 0.00000000 "acre-ft", annNVRecoverableCA )) DO
-            WITH_STATEMENT (NUMERIC nvUnbankedAZ = "Min"( 0.00000000 "acre-ft", annNVRecoverableAZ )) DO
-          DESCRIPTION          "Annual Nevada Water not Used";
-      $ "ICS Credits.AnnualNevadaUnused" ["Dec31ofYear"( @"t" )] := unusedNV;
-
-            $ "ICS Credits.CumulativeNVBankedinCA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.CumulativeNVBankedinCA" [@"24:00:00 December Max DayOfMonth, Previous Year"] + nvBankedCA * 0.66666600 - nvUnbankedCA;
-
-            $ "ICS Credits.CumulativeNVBankedinAZ" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.CumulativeNVBankedinAZ" [@"24:00:00 December Max DayOfMonth, Previous Year"] + nvBankedAZ - nvUnbankedAZ;
-
-            $ "ICS Credits.AnnualNVBankedinCA" ["Dec31ofYear"( @"t" )] := nvBankedCA;
-
-            $ "ICS Credits.AnnualNVBankedinAZ" ["Dec31ofYear"( @"t" )] := nvBankedAZ;
-
-            $ "ICS Credits.AnnualNVRecoverableCA" ["Dec31ofYear"( @"t" )] := annNVRecoverableCA;
-
-            $ "ICS Credits.AnnualNVRecoverableAZ" ["Dec31ofYear"( @"t" )] := annNVRecoverableAZ;
-
-            $ "ICS Credits.AnnualNVUnBankedFromCA" ["Dec31ofYear"( @"t" )] := nvUnbankedCA;
-
-            $ "ICS Credits.AnnualNVUnbankedFromAZ" ["Dec31ofYear"( @"t" )] := nvUnbankedAZ;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-    END
-    UUID "{3caeca45-d10b-4123-98f1-f4aff264ea4b}";;
-
   END
   UUID "{3f523123-2536-4487-a732-9f06f03e16f6}";;
 
@@ -1909,52 +1831,6 @@ BEGIN
 
     END
     UUID "{f13c7a8a-558d-4eb4-bf43-63f15c6c5e25}";;
-
-    RULE                 "Set Outyear Shortage Schedules";
-    DESCRIPTION          "DESCRIPTION: This rule sets the shortage schedules located in data objects or calculated to the diversion requested slots of the appropriate U.S. water use simulation objects.<br><br>SLOTS SET: PumpingFromLakeMead:SNWP.Diversion Requested, PumpingFromLakeMead:SNWP.Depletion Requested, AzDvsToPkr:LakeHavasuCity.Diversion Requested, AzDvsToPkr:MohaveValleyIID.Diversion Requested, AzDvsToPkr:BullheadCity.Diversion Requested, AzDvsToPkr:CibolaValleyIID.Diversion Requested, AzDvsToPkr:Parker.Diversion Requested, AzDvsToPkr:Ehrenberg.Diversion Requested, GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested, GilaAndYumaUsers:CocopahIndRes.Diversion Requested, AzPkrToImp:AzPumpersAbvImp.Diversion Requested, OthersBlwImp:AzPumpersBlwImp.Diversion Requested, AzDvsToPkr:AzPumpersDvsToPkr.Diversion Requested, CAPDiversion.Total Diversion Requested<br><br>";
-    ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170306: Calculation of snwpDivVol modified by Sarah B. to correct an error";
-    BEGIN
-
-      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
-          DESCRIPTION          "snwpDivVol modified by Sarah B. 20170306 to correct error";
-      WITH_STATEMENT (NUMERIC snwpDivVol = "VolumeToFlow"( WITH NUMERIC dssDeliveries = NaNToZero ( $ "ICS Credits.AnnualDeliveryTribDSS_NV" ["Dec31ofYear"( @"t" )] ) + NaNToZero ( $ "ICS Credits.AnnualDeliveryImpDSS_NV" ["Dec31ofYear"( @"t" )] ) DO
-  WITH NUMERIC shortageVolume = $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) - 1.00000000, "Nevada"] DO
-   WITH NUMERIC NonSNWANevadaDivReqs = FOR ( DATETIME date2 IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
-    "FlowToVolume"( $ "FtMohaveIndRes:NV.Diversion Requested" [date2], date ) + "FlowToVolume"( $ "NvDvsToPkr:BigBend.Diversion Requested" [date2], date ) + "FlowToVolume"( $ "NvDvsToPkr:SCE.Diversion Requested" [date2], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Nv Mohave.Diversion Requested" [date2], date )
-   ENDFOR DO
-    ( ( "Min"( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume, $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] ) - NonSNWANevadaDivReqs ) + dssDeliveries ) COMMENTED_BY "Annual SNWP volume = (NV annual allotment - Priority users diversions + Developed Shortage <br>Supplies - Shortage volume) <br>"
-   ENDWITH
-  ENDWITH
- ENDWITH * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Average"] COMMENTED_BY "Multiply by monthly percentage to get monthly volume", date ) COMMENTED_BY "Calculate the monthly SNWP diversion request under Shortage as a flow rate") DO
-            $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] := snwpDivVol;
-
-            $ "PumpingFromLakeMead:SNWP.Depletion Requested" [date] := snwpDivVol;
-
-      END_WITH_STATEMENT;
-
-      ENDFOREACH;
-
-    END
-    UUID "{3e5be3a1-a8df-42f7-8506-128654735141}";;
-
-    RULE                 "Set CAP Annual Shortage Volume";
-    DESCRIPTION          "DESCRIPTION: This rule sets the annual shortage volume for CAP in Arizona. The CAP shortage volume is based on the Arizona Shortage Sharing Agreement. It is calculated as the total Arizona shortage volume (based on Lake Mead trigger elevation) minus the sum of the shortage volumes of the other Arizona water users.<br><br>SLOTS SET: Shortage.CAP Annual Shortage Volume<br><br>";
-    ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
-    BEGIN
-
-      $ "Shortage.CAP Annual Shortage Volume" [@"24:00:00 December 31, Current Year"] := IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
- THEN
-  "GetAnnualCAPShortage"( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000 )
- ELSE
-  0.00000000 "acre-feet"
- ENDIF;
-
-    END
-    UUID "{dfb9c5fe-a754-4910-a3ca-e4c806e39af8}";;
 
   END
   UUID "{87c5c0a0-f901-479e-a5c8-62bbf53b39f5}";;
@@ -9531,45 +9407,6 @@ BEGIN
     END
     UUID "{7478f1a7-9e89-4d19-8daa-6825b3214a40}";;
 
-    FUNCTION       "DeliveryAndCreationMWDICS" (  )
-    RETURN_TYPE    LIST;
-    SCALE_UNITS    "";
-    DESCRIPTION    "DESCRIPTION: This function calculates the volumes of ICS delivered and EC ICS created for California, taking into account Lower Basin Demand Variability <br><br>RETURNS: List of lists of the form &lcub;&lcub;ICS delivered, EC ICS created&rcub;&rcub;<br><br>ARGUMENTS: <NONE><br><br>CONSTRAINTS: <NONE><br><br>";
-    ACTIVE         FALSE;
-    PRE_EXEC_DIAG  TRUE;
-    POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>CH, 5/8/18: In MWD EC ICS creation assignment, maximum creation of MWD EC ICS edited to be CA max put - IID EC creation; in MWD ICS delivery assignment, available ICS water edited to be min of (MWD max take - IID total ICS) and (total MWD ICS + creation EC ICS*system tax) in order to separate MWD ICS creation and delivery from IID ICS creation and delivery <br>CH, 5/10/18: renamed function and internal variables to refer to MWD ICS instead of CA ICS to avoid confusion<br>AP, 4/11/19: Added constraint to make sure the deterministic run uses the default 24 MS inputs";
-    BEGIN
-
-      IF ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  ) )
- THEN
-  { $ "ICSProjectionData.AnnualDeliveryBiNat_MWD_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualDeliverySysEff_MWD_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualDeliveryEC_MWD_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualDeliveryDCPICS_MWD_Default" ["Dec31ofYear"( @"t" )] , $ "ICSProjectionData.AnnualCreationEC_MWD_Default" ["Dec31ofYear"( @"t" )] }
- ELSE
-  WITH NUMERIC creationOfMWDECICS = IF ( ( NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NOT "IsMRM"(  ) ) COMMENTED_BY "If a Quantified Surplus Year, a Flood Control Year, or if the run is a deterministic Min, Max or <br>Most run, do not Create any ICS TP 12/18/2017, updated for DCP AP 10/21/19<br>" )
-  THEN
-   0.00000000 "acre-ft"
-  ELSE
-   "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "Max"( ( $ "ICS Credits.MeadBankParameters" ["MWD", "Max Capacity"] - ( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December 31, Previous Year"] ) ), 0.00000000 "acre-ft" ) COMMENTED_BY "Account Space <br>" , ( $ "ICS Credits.MeadBankParameters" ["California", "Max Creation"] - $ "ICSProjectionData.AnnualCreationEC_IID_Default" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "Max"( "SumFlowsToVolume"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) - $ "AnnualWaterUse.MWDMinimumAnnualDelivery" [], 0.00000000 "acre-ft" ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
-  ENDIF DO
-   WITH NUMERIC totalDeliveryOfMWDICS = "ICSDeliveryReduction_DCP"( "MinItem"( { IF ( NOT "IsMRM"(  ) )
-   THEN
-    0.00000000 "acre-ft"
-   ELSE
-    IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
-    THEN
-     "Max"( ( $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Take Step 1"] - $ "Surplus Volume Entitlements.MWD Domestic" ["Dec31ofYear"( @"t" )] ), 0.00000000 "acre-ft" )
-    ELSE
-     $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Take Step 1"] COMMENTED_BY "Not Surplus or Shortage <br>"
-    ENDIF COMMENTED_BY "flood control <br>"
-   ENDIF , ( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumFlowsToVolume"( $ "MWDDiversion:MWD.Depletion Requested", @"24:00:00 January 31, Current Year", @"24:00:00 December 31, Current Year" ) ) COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( $ "ICS Credits.MeadBankParameters" ["California", "Max Take"] - ( $ "ICSProjectionData.AnnualDeliveryBiNat_IID_Default" [@"24:00:00 December 31, Current Year"] + $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" [@"24:00:00 December 31, Current Year"] ), $ "ICS Credits.TotalICS_MWD" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Make sure the amount of Delivery taken is within the MWD ICS bank or below <br>the Maximum Take that MWD can have. TP 12/18/2017  <br>" + creationOfMWDECICS * "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Available ICS Water <br>" } ), "California", "Max Delivery", $ "ICS Credits.AnnualConversionECtoDCP_MWD" [@"24:00:00 December 31, Current Year"] ) DO
-    { totalDeliveryOfMWDICS , creationOfMWDECICS }
-   ENDWITH
-  ENDWITH
- ENDIF;
-
-    END
-    UUID "{7041b37d-1172-484e-aec6-cf16887c9756}";;
-
     FUNCTION       "FloodControlECICSBalance" ( NUMERIC fcvolume )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -9992,66 +9829,6 @@ BEGIN
 
     END
     UUID "{e8ee2616-dae9-48dd-bb6d-11a94fb7a144}";;
-
-    FUNCTION       "MWD_ICSDeliveryCharged" ( NUMERIC totalDeliveryOfMWDICS, NUMERIC creationOfMWDECICS )
-    RETURN_TYPE    LIST;
-    SCALE_UNITS    "";
-    DESCRIPTION    "";
-    ACTIVE         FALSE;
-    PRE_EXEC_DIAG  FALSE;
-    POST_EXEC_DIAG FALSE;
-    NOTES          "";
-    BEGIN
-
-      WITH NUMERIC AnnualDelivery = totalDeliveryOfMWDICS DO
-  WITH LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December 31, Previous Year"] , "Min"( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December 31, Previous Year"] - NaNToZero ( $ "ICS Credits.AnnualConversionECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) + "Current Year ECICS into Bank"( creationOfMWDECICS + $ "ICS Credits.AnnualSysWaterforDCP_Coachella" [@"24:00:00 December 31, Current Year"], $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December 31, Previous Year"], "California" ), $ "ICS Credits.MeadBankParameters" ["California", "Max Delivery"] ) , $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December 31, Previous Year"] , $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December 31, Previous Year"] } ) WITH LIST result = {  } DO
-   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
-   THEN
-    AnnualDelivery
-   ELSE
-    AnnualDelivery - "Sum"( result )
-   ENDIF DO
-    WITH NUMERIC DeliveryAmount = IF ( ( LENGTH result ) == 0.00000000 AND $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"] < $ "DCP.RecoveryElevation" [] )
-    THEN
-     0.00000000 "acre-ft"
-    ELSE
-     "Min"( RemainingBalance, CategoryBalance )
-    ENDIF DO
-     APPEND DeliveryAmount ONTO result
-    ENDWITH
-   ENDWITH
-  ENDFOR DO
-   { GET @INDEX 0.00000000 FROM DeliveryChargedList , GET @INDEX 1.00000000 FROM DeliveryChargedList , GET @INDEX 2.00000000 FROM DeliveryChargedList , GET @INDEX 3.00000000 FROM DeliveryChargedList } COMMENTED_BY "0 = DCP, 1 = EC, 2 = SysEff, 3 = BiNat<br>"
-  ENDWITH
- ENDWITH;
-
-    END
-    UUID "{3755aaf4-0c63-41bf-8b7a-1ada5368c65b}";;
-
-    FUNCTION       "MWD_ICS_Balances" ( NUMERIC creationOfMWDECICS, NUMERIC deliveryChargedToEC, NUMERIC creationMWDSE, NUMERIC deliveryChargedToSE, NUMERIC creationMWDBiNat, NUMERIC deliveryChargedToBiNat, NUMERIC creationMWDDCPICS, NUMERIC deliveryChargedToDCPICS )
-    RETURN_TYPE    LIST;
-    SCALE_UNITS    "";
-    DESCRIPTION    "";
-    ACTIVE         FALSE;
-    PRE_EXEC_DIAG  FALSE;
-    POST_EXEC_DIAG FALSE;
-    NOTES          "";
-    BEGIN
-
-      WITH NUMERIC DCPICSMWD = $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationMWDDCPICS - deliveryChargedToDCPICS DO
-  WITH NUMERIC ECICSMWD = ( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + "Current Year ECICS into Bank"( creationOfMWDECICS, $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"], "California" ) - deliveryChargedToEC ) COMMENTED_BY "Resulting ExtraOrdinaryConservation ICS " DO
-   WITH NUMERIC SEICSMWD = ( $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationMWDSE - deliveryChargedToSE ) COMMENTED_BY "Resulting System Efficiency ICS " DO
-    WITH NUMERIC BiNatICSMWD = ( $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + creationMWDBiNat - deliveryChargedToBiNat ) COMMENTED_BY "Resulting Bi National ICS " DO
-     WITH NUMERIC totalICSMWD = ( DCPICSMWD + ECICSMWD + SEICSMWD + BiNatICSMWD ) COMMENTED_BY "Total ICS" DO
-      { ECICSMWD , SEICSMWD , BiNatICSMWD , totalICSMWD , DCPICSMWD }
-     ENDWITH
-    ENDWITH
-   ENDWITH
-  ENDWITH
- ENDWITH;
-
-    END
-    UUID "{7c3ee56a-3c8c-43d2-8f3f-01a1e85f16ab}";;
 
     FUNCTION       "AZ Firming Agreement" (  )
     RETURN_TYPE    LIST;
@@ -13532,32 +13309,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{42ffcbdb-7f5c-46aa-8d46-1863187342f7}";
+    UUID "{73c9db77-7f52-494a-9dc2-f945a023c1a7}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e242feaf-3d17-4cb6-9878-2c632926e5ec}";
+    UUID "{47e108df-d19c-4b37-bbb9-31aa4c919df9}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{82972289-14b1-49c2-9f37-98541a3c234a}";
+    UUID "{f7abf3fe-9491-4f72-9097-80b5c6463e57}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c0433ab6-db12-4c82-8dc1-080f17e70866}";
+    UUID "{62969570-5a9f-4c7f-86a0-05590863d08d}";
 ;
 
   END
-  UUID "{4e641469-84dd-4e40-94ac-176259a1bf69}";;
+  UUID "{97550a61-dd63-440c-9584-41a0cf9f97be}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13568,11 +13345,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{016471b8-6b09-4e4d-a746-5871ecbf1565}";
+    UUID "{c0f2e410-d820-4412-ad9d-3c509d4e0713}";
 ;
 
   END
-  UUID "{d87a0961-35e3-408c-8dbf-5b0c6caf6c93}";;
+  UUID "{46fc1076-31f0-4ea3-876a-19b42538ebb6}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13583,11 +13360,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b3952127-b973-47f7-926b-f0b5b882ec2a}";
+    UUID "{00e34f7b-9253-418a-a317-901e5d48e245}";
 ;
 
   END
-  UUID "{c65fe9ef-5fec-4919-88bd-3d25f68e9afe}";;
+  UUID "{d176eb8a-7b66-4e71-8071-0775194a4d1b}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13598,11 +13375,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{104e1cf8-1ce0-40b4-a255-36cb6019504e}";
+    UUID "{ba4f21d7-2106-4ba8-be42-4147f43e6e7b}";
 ;
 
   END
-  UUID "{5a663be5-cf49-444f-b557-382302fef90f}";;
+  UUID "{2ac38310-16ba-4004-8e45-6d33970c0cf8}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
