@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 17:18 January 28, 2020
+# Created 11:29 January 31, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -8340,36 +8340,6 @@ BEGIN
     END
     UUID "{11035a5f-eb7f-4499-af91-01c67167adcc}";;
 
-    FUNCTION       "GetDaysAtBypass_old" ( NUMERIC HClass )
-    RETURN_TYPE    NUMERIC;
-    SCALE_UNITS    "";
-    DESCRIPTION    "DESCRIPTION: Determines the number of days at bypass capacity. For mod dry, average and mod wet years, if the number of days that the Yampa is greater than 14000 cfs is greater than the threshold then the standard days at bypass capacity are used. If the days greater than 14000 cfs is less than the threshold then the days at bypass is zero.  For dry years the days at bypass is always zero and for wet years always bypass. -CE 6/12/13<br><br>RETURNS: Number of days [NONE]<br><br>ARGUMENTS:<br>1. NUMERIC HClass - hydrologic class indicator<br><br>CONSTRAINTS:<br><br><br>";
-    ACTIVE         TRUE;
-    PRE_EXEC_DIAG  FALSE;
-    POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
-    BEGIN
-
-      IF ( HClass < 4.00000000 AND HClass > 0.00000000 )
- THEN
-  IF ( "YampaDaysAbove14000"(  ) > $ "FlamingGorgeData.YampaDaysAbove14000ForBypass" [HClass, 0.00000000] )
-  THEN
-   $ "FlamingGorgeData.DaysAtBypassCapacity" [HClass, 0.00000000]
-  ELSE
-   0.00000000 "day"
-  ENDIF COMMENTED_BY "If the Yampa is very wet then bypass to meet peaks otherwise no bypass"
- ELSE
-  IF ( HClass == 0.00000000 )
-  THEN
-   0.00000000 "day" COMMENTED_BY "In Dry years never bypass"
-  ELSE
-   $ "FlamingGorgeData.DaysAtBypassCapacity" [HClass, 0.00000000] COMMENTED_BY "In wet years always bypass"
-  ENDIF
- ENDIF COMMENTED_BY "Are we in Mod Dry, Ave, or Mod Wet?";
-
-    END
-    UUID "{c7342ffe-dd00-4869-8e24-992825e302ab}";;
-
     FUNCTION       "GetFGBaseFlowMagnitude" (  )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "acre-ft/month";
@@ -9039,10 +9009,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "CF,20190204: Imported from CRSS. <br>";
+    NOTES          "CF,20200124: GetDaysAtBypass() calculated MaxBypassDays using PredictedFGInflow(@t, @&quot;24:00:00 August Max DayOfMonth, Next Year&quot;). This was incorrect and should be @....Current Year&quot;. The issue caused FG to not calculate a Spring Release in the last year of the run (since no value for FlamingGorgeData.ProjectedInflow[@....Next Year&quot;]. Instead FG only releases baseflow. This does not effect calculations in earlier years. This is not an issue in CRSS. MTOM_Rules_V3.0.9000.rls fix this issue.<br><br><br>CF,20190204: Imported from CRSS. <br>";
     BEGIN
 
-      WITH NUMERIC MaxBypassDays = "Max"( "RoundToNearestDay"( ( $ "FlamingGorge.Storage" [@"t - 1"] - "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.MaxPE" [] ) + "PredictedFGInflow"( @"t", @"24:00:00 August Max DayOfMonth, Next Year" ) ) / "GetMaxOutflowGivenHW"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [], @"t" ) ), 0.00000000 "day" ) DO
+      WITH NUMERIC MaxBypassDays = "Max"( "RoundToNearestDay"( ( $ "FlamingGorge.Storage" [@"t - 1"] - "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.MaxPE" [] ) + "PredictedFGInflow"( @"t", @"24:00:00 August Max DayOfMonth, Current Year" ) ) / "GetMaxOutflowGivenHW"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [], @"t" ) ), 0.00000000 "day" ) DO
   IF ( $ "KNN_MTOM.SpringHClass" [] < 4.00000000 AND $ "KNN_MTOM.SpringHClass" [] > 0.00000000 )
   THEN
    IF ( "DaysAboveThreshold"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"24:00:00 April 1, Current Year", @"24:00:00 July 31, Current Year" ), 10000.00000000 "cfs" ) >= $ "FlamingGorgeData.YampaDaysAbove10000ForBypass" [$ "KNN_MTOM.SpringHClass" [], 0.00000000] )
@@ -13557,32 +13527,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{dfbf00e2-1b24-47d5-ab1b-596670085e5f}";
+    UUID "{e6d674f2-5fb4-4349-ac42-2c0a0a5f5e6c}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{27ca25d0-441a-4efc-813b-63d9ae040d8b}";
+    UUID "{48f8ee9c-1617-4e33-b54a-47fedcf790e3}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{cb238d46-e56c-493d-94a8-529487e9b6cf}";
+    UUID "{81902fc9-f354-41c8-85d3-e79a793f8a65}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1dce4301-3de7-4ac7-a8bc-66bb50103bd2}";
+    UUID "{2bec1d6b-7b0c-4e32-a639-a1c7333c2bbc}";
 ;
 
   END
-  UUID "{81aa4692-5b4f-4d8f-b928-570631383459}";;
+  UUID "{2bdb4465-414b-4d1b-814c-1437ea4d4ae9}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13593,11 +13563,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1dcf29f5-a05a-44ef-8d77-aac9a7d763c1}";
+    UUID "{54a0bf9b-3753-42dd-900e-11623033ea32}";
 ;
 
   END
-  UUID "{04b177c6-872d-4bfb-86a4-4a1ce80666ae}";;
+  UUID "{5db1a5ab-01a9-4794-9c79-e9eaa4093141}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13608,11 +13578,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e5325a9a-9fe6-4f36-a6a3-188e0e20337c}";
+    UUID "{7f306346-9729-4768-b281-87a8d1d8420e}";
 ;
 
   END
-  UUID "{5c4f8428-8fa7-4532-9fd9-6a167bfec9a0}";;
+  UUID "{59431d36-7e27-4de4-98f8-624e3a9218fc}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13623,11 +13593,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{72429cf5-2c13-44cb-be5a-b4f8c1d0b428}";
+    UUID "{5d7e28f9-439f-496d-9e3b-60f716a84408}";
 ;
 
   END
-  UUID "{224ca426-b705-47cd-be79-a6125b976413}";;
+  UUID "{72fc9d01-494e-4da0-97d3-dcd642f81ec3}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
