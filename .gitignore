@@ -63,3 +63,6 @@ Input Data/Observed_for_MTOM_IC.xlsx
 /Scenario
 /ScenarioSet
 /Working
+
+#ignore csv output file
+MTOMcsvOutput.csv
