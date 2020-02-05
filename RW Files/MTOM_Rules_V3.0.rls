@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 11:29 January 31, 2020
+# Created 07:25 February 5, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -541,7 +541,7 @@ BEGIN
   END
   UUID "{9605f34a-8ce0-4545-8453-6df3df83363a}";;
 
-  POLICY_GROUP   "ICS Accounting and Releases";
+  POLICY_GROUP   "Lower Basin Shortage ICS Adjustements";
   DESCRIPTION    "";
   ACTIVE         TRUE;
   NOTES          "";
@@ -778,6 +778,15 @@ BEGIN
 
     END
     UUID "{6a54fd44-a0fc-456b-bdff-5faea9c4fc1e}";;
+
+  END
+  UUID "{24189569-a0a6-4af8-b323-138623fbd54e}";;
+
+  POLICY_GROUP   "ICS Accounting";
+  DESCRIPTION    "";
+  ACTIVE         TRUE;
+  NOTES          "";
+  BEGIN
 
     RULE                 "Flood Control ICS Reduction";
     DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re calculates and assignes the Total ICS Volumes for each state. TP 11/4/2014<br><br>SLOTS SET: ICS Credits.ExtraordinaryConservationICS_CA; ICS Credits.ExtraordinaryConservationICS_NV; ICS Credits.ExtraordinaryConservationICS_AZ; ICS Credits.TotalICS_CA; ICS Credits.TotalICS_NV; ICS Credits.TotalICS_AZ; ICS Credits.AnnualDeliveryEC_CA; ICS Credits.AnnualDeliveryEC_NV; ICS Credits.AnnualDeliveryEC_AZ";
@@ -13527,32 +13536,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e6d674f2-5fb4-4349-ac42-2c0a0a5f5e6c}";
+    UUID "{bb6fe260-2529-40a5-b331-a563edff03b0}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{48f8ee9c-1617-4e33-b54a-47fedcf790e3}";
+    UUID "{af36b16d-97cb-4f38-8ad5-5336180014ff}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{81902fc9-f354-41c8-85d3-e79a793f8a65}";
+    UUID "{d4cb2c7b-b9bc-450c-9b2d-f5b4b810ee82}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2bec1d6b-7b0c-4e32-a639-a1c7333c2bbc}";
+    UUID "{64438577-86e6-4997-9ff6-c2d4bde9946a}";
 ;
 
   END
-  UUID "{2bdb4465-414b-4d1b-814c-1437ea4d4ae9}";;
+  UUID "{901b3b10-f57f-4a1a-9186-a062aa59611c}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13563,11 +13572,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{54a0bf9b-3753-42dd-900e-11623033ea32}";
+    UUID "{5e210844-8a9a-4932-8376-779a5a127349}";
 ;
 
   END
-  UUID "{5db1a5ab-01a9-4794-9c79-e9eaa4093141}";;
+  UUID "{6c8de131-26ca-4aef-9fa9-495a8c92f89b}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13578,11 +13587,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7f306346-9729-4768-b281-87a8d1d8420e}";
+    UUID "{41b21625-9de2-444a-8109-f8d0a70056f9}";
 ;
 
   END
-  UUID "{59431d36-7e27-4de4-98f8-624e3a9218fc}";;
+  UUID "{0195c6fe-98f0-428c-b3c1-467b6a0b3b2c}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13593,11 +13602,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5d7e28f9-439f-496d-9e3b-60f716a84408}";
+    UUID "{1d6cc16d-67aa-4fa9-a30b-cd645a4b6840}";
 ;
 
   END
-  UUID "{72fc9d01-494e-4da0-97d3-dcd642f81ec3}";;
+  UUID "{c18cdc78-909d-43b0-928a-b25eea846c97}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
