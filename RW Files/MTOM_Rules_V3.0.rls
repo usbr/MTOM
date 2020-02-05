@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 07:25 February 5, 2020
+# Created 07:31 February 5, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -10367,7 +10367,12 @@ BEGIN
  THEN
   IF ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] )
   THEN
-   0.90000000
+   IF ( AgUser == "IID" OR AgUser == "CVWD" )
+   THEN
+    0.95000000
+   ELSE
+    0.90000000
+   ENDIF
   ELSE
    IF ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] < $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker10"] )
    THEN
