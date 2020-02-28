@@ -1,5 +1,5 @@
-MTOM Model Run Date: Jan-19-2018
-MTOM Distribution Date: Feb-2018
+MTOM Model Run Date: Feb-2020
+MTOM Distribution Date: Feb-2020
 
 ------------------------Disclaimer-------------------------------------------------------
 The Bureau of Reclamation (Reclamation) provides the contents of this model package as 
@@ -23,24 +23,34 @@ whatsoever to any individual or group entity by reason of any use made thereof.
 	MTOM_DIR Environment Variable on your local machine. The Environment Variable is 
 	referenced within the model to find the required input and output files and 
 	directories.
-- You can run the model via the "2.RunMtom.bat" program included in this package. The 
-	program prompts you for several inputs based on whether you want to run the model
-	in MRM or Single-Trace mode. The prompts are self explanatory and will guide you
-	through the model run process.
+- Open the MTOM RiverWare model located in the "RW Files" directory. In RiverWare, navigate 
+	to 
+Multiple Run Management and choose the "Run_CBRFC_Ensemble_Fcst_RFC" Multiple Run 
+
+	Configuration. Click "Start" after first making sure the Excel workbooks with 
+
+	ensemble forecasts and outputs are closed. This will run the Most Probable and ESP 
+
+	forecasts. 
 - Model outputs are automatically placed by the model in the "Output Data" directory
-	and runs initiated from the RiverWare interface will append results to the existing
-	files. Running the model with the Batch program will delete previous results that
-	are not moved to another directory.
+
+	and runs initiated from the RiverWare interface will output results to the existing
+
+	files. Open the Excel workbook "MTOM_EnsembleOutput.xlsm", navigate to the "Comparison"
+	tab, and check that the Start Timestep is correct. Then click the "Load All Data" button 
+	to load new output traces to the workbook. 
+
 - Model inputs are queried by the model from the "Inflow Forecasts" and "Input Data"
+
 	directories. The model relies on specific naming conventions so please do not rename 
+
 	files in these directories.
 	
 ------------------------Package Contents-------------------------------------------------
-MMMYY (Month and Year of MTOM Model Run)
+MTOM_DIR
 	|
 	|- Read Me text file
 	|- Program to set the MTOM_DIR Environment Variable
-	|- Program to run MTOM in RiverWare Batch Mode
 	|
 	|- Inflow Forecasts
 	|		|- Ensemble Forecast input analysis spreadsheet
@@ -50,7 +60,7 @@ MMMYY (Month and Year of MTOM Model Run)
 	|				|- 17 ESP Trace files
 	|
 	|- Input Data
-	|		|- RiverWare RDF output dummy control file
+	|		|- RiverWare output dummy control files
 	|
 	|- Output Data
 	|		|- MTOM Output Analysis Spreadsheet
