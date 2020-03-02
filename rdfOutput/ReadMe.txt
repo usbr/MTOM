@@ -1,1 +1,1 @@
-This folder contains rdf files created by the MRM run.
+This folder is intentionally left empty. If MTOM is run with "dummy.controlfile.txt" or "output.control" control files, RDFs will be saved here. 
