@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 11:41 February 18, 2020
+# Created 09:24 March 2, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -6006,7 +6006,7 @@ BEGIN
     UUID "{7755fda4-4ed6-406a-84f3-eaefeea61c6c}";;
 
     RULE                 "Set LB Demand Variability Triggers Below Parker";
-    DESCRIPTION          "DESCRIPTION: This rule fires in the beginning timestep but sets the trigger values for the whole run. Lower Basin Demand Variability determines if users in the Lower Basin can increase or decrease their diversion request based on side inflow hydrology between certain locations.  The below Parker variability takes into considerations the side inflows below Parker Dam and sets a slot value (trigger) that will be used when compared to a historic statistically derived volume to determine the variability thresholds. This rule only sets the volumes and those will be used in subsequent rules when compared to historic threshold inflow values. <br><br>SLOTS SET: LowerBasinDemandVariability.LocalInflowBelowParkerTrigger<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule fires on the start timestep and sets the trigger values for the whole run. Lower Basin Demand Variability determines if users in the Lower Basin can increase or decrease their diversion request based on side inflow hydrology between certain locations.  The below Parker variability takes into considerations the side inflows below Parker Dam and sets a slot value (trigger) that will be used when compared to a historic statistically derived volume to determine the variability thresholds. This rule only sets the volumes and those will be used in subsequent rules when compared to historic threshold inflow values. <br><br>SLOTS SET: LowerBasinDemandVariability.LocalInflowBelowParkerTrigger<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "ThisRule" );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -6051,7 +6051,7 @@ BEGIN
     UUID "{87d31299-5bb7-4e8c-8067-4285400d2ee4}";;
 
     RULE                 "Set LB Demand Variability Triggers Above Hoover";
-    DESCRIPTION          "DESCRIPTION: This rule fires in the beginning timestep but sets the trigger values for the whole run.  Lower Basin Demand Variability determines if users in the Lower Basin can increase or decrease their diversion request based on side inflow hydrology between certain locations.  <br>The above Mead variability takes into considerations the side inflows below Glen Canyon Dam and above Hoover Dam and sets a slot value (trigger) that will be used when compared to a historic statistically-derived volume to determine the variability thresholds. <br>This rule only determines the side inflow volume that will be used later for the comparison.<br><br>SLOTS SET: LowerBasinDemandVariability.LocalInflowAboveHooverTrigger; LowerBasinDemandVariability.PowellUnregulatedInflowTrigger<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule fires on the start timestep and sets the trigger values for the whole run.  Lower Basin Demand Variability determines if users in the Lower Basin can increase or decrease their diversion request based on side inflow hydrology between certain locations.  <br>The above Mead variability takes into considerations the side inflows below Glen Canyon Dam and above Hoover Dam and sets a slot value (trigger) that will be used when compared to a historic statistically-derived volume to determine the variability thresholds. <br>This rule only determines the side inflow volume that will be used later for the comparison.<br><br>SLOTS SET: LowerBasinDemandVariability.LocalInflowAboveHooverTrigger; LowerBasinDemandVariability.PowellUnregulatedInflowTrigger<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "ThisRule" );
     NOTES                "DEVELOPMENT NOTES:<br>AUTHOR, DATE: Unknown";
@@ -13543,32 +13543,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7ce84e60-59c0-49d5-9fc1-db26ea63b928}";
+    UUID "{b5326d85-f0f6-43c6-81af-aff0f764ee63}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{23d2113d-77cb-4480-9292-b2333073fd5c}";
+    UUID "{073ffa15-6487-4aa0-84fe-93c9137d6a04}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f6e855df-45ab-45a4-82a6-1abbcbf9390b}";
+    UUID "{acbfa741-4ebb-4599-a61b-3d795d63d328}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ef635787-9090-491f-9cfe-421f4df2c5a2}";
+    UUID "{849342ea-91e9-4f3b-a016-a56b322da79e}";
 ;
 
   END
-  UUID "{fec44769-786b-4973-86b6-be4021584f18}";;
+  UUID "{fa9349a3-b656-4e48-a0aa-a77e4c3c5cd3}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13579,11 +13579,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{442efc26-eccc-4b11-b89f-c39e95522afc}";
+    UUID "{d7285869-7d37-4223-855b-8163d29a322f}";
 ;
 
   END
-  UUID "{a6835f9e-bb4e-4385-b571-35e5c7fe6f25}";;
+  UUID "{df3ae728-bf7c-4570-8ef3-273d04791a18}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13594,11 +13594,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{de4779ef-99d6-437e-8906-20303c2b2b3d}";
+    UUID "{9c864bfd-31fa-468d-b240-05e2843e534b}";
 ;
 
   END
-  UUID "{b2ec0d63-b9e9-4ac4-8f0e-ba2761f1e746}";;
+  UUID "{8e286005-3016-4408-ad7c-b14e879cc75f}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13609,11 +13609,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{848cd87f-4cb9-4b3a-a479-b627d2d9e8cc}";
+    UUID "{8493ab4b-ba13-4a00-8553-a6c768097ebc}";
 ;
 
   END
-  UUID "{0cccdc11-3ac3-44ff-8d93-e4f2f6821538}";;
+  UUID "{c93dc893-b079-4d92-ae9b-c31934350490}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";

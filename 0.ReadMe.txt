@@ -23,27 +23,18 @@ whatsoever to any individual or group entity by reason of any use made thereof.
 	MTOM_DIR Environment Variable on your local machine. The Environment Variable is 
 	referenced within the model to find the required input and output files and 
 	directories.
-- Open the MTOM RiverWare model located in the "RW Files" directory. In RiverWare, navigate 
-	to 
-Multiple Run Management and choose the "Run_CBRFC_Ensemble_Fcst_RFC" Multiple Run 
-
+- Open the MTOM RiverWare model located in the "RW Files" directory. In RiverWare, navigate
+	to Multiple Run Management and choose the "Run_CBRFC_Ensemble_Fcst_RFC" Multiple Run 
 	Configuration. Click "Start" after first making sure the Excel workbooks with 
-
 	ensemble forecasts and outputs are closed. This will run the Most Probable and ESP 
-
 	forecasts. 
 - Model outputs are automatically placed by the model in the "Output Data" directory
-
 	and runs initiated from the RiverWare interface will output results to the existing
-
 	files. Open the Excel workbook "MTOM_EnsembleOutput.xlsm", navigate to the "Comparison"
 	tab, and check that the Start Timestep is correct. Then click the "Load All Data" button 
 	to load new output traces to the workbook. 
-
 - Model inputs are queried by the model from the "Inflow Forecasts" and "Input Data"
-
 	directories. The model relies on specific naming conventions so please do not rename 
-
 	files in these directories.
 	
 ------------------------Package Contents-------------------------------------------------
@@ -60,11 +51,12 @@ MTOM_DIR
 	|				|- 17 ESP Trace files
 	|
 	|- Input Data
-	|		|- RiverWare output dummy control files
+	|		|- Empty output control files
+	|		|- Control files for outputting to RDF
 	|
 	|- Output Data
 	|		|- MTOM Output Analysis Spreadsheet
-        |               |- MTOM outputs spreadsheet for input into Analysis App 
+	|               |- MTOM outputs spreadsheet for input into Analysis App 
 	|		|- MTOM outputs spreadsheet for Monthly CRSS inputs
 	|		|- MTOM outputs spreadsheet for Yearly CRSS inputs
 	|	
