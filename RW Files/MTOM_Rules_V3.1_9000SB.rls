@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:55 March 5, 2020
+# Created 16:21 March 5, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2086,13 +2086,13 @@ BEGIN
     UUID "{6e31581a-a7c2-4a0d-b9ae-34e4ae15b347}";;
 
     RULE                 "Arizona DCP";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION:  This rule sets Arizona DCP contribution if a DCP contribution is needed (solved for in previous rule). The DCP contribution is made by converting any EC ICS water created for the current year to DCP ICS by imposing a tax on the water. The annual creation of DCP ICS is input from the 24MS and is the desired DCP ICS creation [unsure how this is set for 24MS?]. The Arizona DCP ICS creation and DCP contribute is set here, but can be refined in the Arizona accounting rule based on bank space. <br><br>CONSTRAINTS: The rule fires in January or the start timestep. It fires in run cycle 3 if the rule has not fired successfully and run cycle 4 if the DCP BWSCP flag has changed from run cycle 3. <br><br>SLOTS SET: <br>ICSProjectedData.AnnualCreationECtoDCPICS_CAWCD_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description.";
     BEGIN
 
-    DESCRIPTION          "Rule sets AZ DCP contribution. AnnualCreationDCPICS_CAWCD_Default is an input from the <br>24MS (desired DCP ICS creation). The desired DCP ICS creation is set here and will be adjusted <br>down in the AZ accounting rule based on bank space. AZ system water for DCP contribution is <br>also calculated in the AZ accounting rule.  <br>";
+    DESCRIPTION          "Set Arizona DCP contribution based off the desired DCP ICS creation input from the 24MS <br>";
       IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
             $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICSProjectionData.AnnualCreationDCPICS_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  );
 
@@ -2359,7 +2359,7 @@ BEGIN
   UUID "{8b1f28ea-1166-42a1-b266-40f95b9da449}";;
 
   POLICY_GROUP   "PowellAfterLBDV";
-  DESCRIPTION    "";
+  DESCRIPTION    "This policy group re-executes Powell operations in run cycle 4 after Lower Basin Demand Variability. A different policy group is needed due the way Powell solves (e.g. solving with 8.23 maf release and using the resulting elevation to determine tiering).";
   ACTIVE         TRUE;
   NOTES          "";
   BEGIN
