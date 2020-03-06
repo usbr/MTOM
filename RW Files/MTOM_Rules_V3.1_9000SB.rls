@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 17:49 March 5, 2020
+# Created 11:56 March 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1746,7 +1746,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: If there is a positive Quantified Surplus Volume this rule will fire and set the Total Annual Schedules for all water Users Impacted by Quantified Surplus. The Total Annual Schedules include both the Normal and Surplus Schedules. Rule fires only once per year during January. Quantified Surplus is higher in priority than Domestic Surplus, but lower in priority than Flood Control Surplus. Therefore, this rule will override any Domestic Surplus Schedules, but may then be overriden by Flood Control Surplus Schedules if a Flood Control Surplus exists. -HMG 8/2/11<br><br>SLOTS SET: Surplus Total Annual Schedules.MWD; Surplus Total Annual Schedules.Coachella; Surplus Total Annual Schedules.IID; Surplus Total Annual Schedules.AzPumpersBlwImp; Surplus Total Annual Schedules.Gila Monster Farms; Surplus Total Annual Schedules.City of Parker; Surplus Total Annual Schedules.CibolaValleyIID; Surplus Total Annual Schedules.CAP; Surplus Total Annual Schedules.SNWA<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br><br>GCAA, 20181030: Corrected reference to the Forecast1 SNWP slot to the SNWPResetAnnualFC slot.  Removed &quot;- Minute 323&quot; from rule name.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br><br>GCAA, 20181030: Corrected reference to the Forecast1 SNWP slot to the SNWPResetAnnualFC slot.  Removed &quot;- Minute 323&quot; from rule name.<br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
 
       $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"];
@@ -1803,10 +1803,10 @@ BEGIN
     UUID "{9621c0f9-717b-412a-93e9-d568c632783b}";;
 
     RULE                 "Set Quantified Surplus Entitlement Vols CAP and MWD";
-    DESCRIPTION          "DESCRIPTION: This rule distributes the volume of quantified surplus available between MWD and CAP<br><br>SLOTS SET: Surplus Volume Entitlements.MWD Quantified; Surplus Volume Entitlements.CAP Quantified<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule distributes the volume of Quantified Surplus available between MWD and CAP. If California's Quantified Surplus volume is greater than the MWD's Domestic Surplus volume, the MWD Quantified Surplus volume is equal to the canal capacity minus the current water diversion requested, allowing MWD to take full canal capacity, otherwise MWD receives only the water entitled from the Domestic Surplus. The Quantified Surplus volume for CAP after 1992 (canal finished) is set based on the remaining Quantified Surplus volume available. If there is any remaining Quantified Surplus volume after the Gila Monster Farmers, the Arizona pumpers below Imperial, and the CAP Domestic Surplus take thier entitlement, CAP receives the remaining volume up to thier canal capacity.  Otherwise, they receive their Domestic Surplus volume.<br><br>EXECUTION CONSTRAINTS: This rule fires if the rule has not fired successfully in run cycle 3 and 4 and if the Quantified Surplus Volume greater than zero.<br><br>SLOTS SET: <br>Surplus Volume Entitlements.MWD Quantified<br>Surplus Volume Entitlements.CAP Quantified<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name. Replaced hardcoded MWD surplus entitlement values with reference to DefaultSurplusEntitlement slot";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 20180620: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name. Replaced hardcoded MWD surplus entitlement values with reference to DefaultSurplusEntitlement slot<br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
 
       $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"] := IF ( $ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] )
@@ -1838,10 +1838,10 @@ BEGIN
     UUID "{662dfa55-5c5c-49c7-9015-5ad6055fd735}";;
 
     RULE                 "Set Domestic and FC Surplus Entitlement Vols for MWD";
-    DESCRIPTION          "DESCRIPTION: In Domestic Surplus then MWD gets 1,250 KAF less the MWD Diversion to date, less 1/3 the Mexico Shortage and surplus volume if the year is prior to 2017, after 2017 then the calculation is 250 KAF less 1/3 the Mexico annual surplus value. In a flood control year MWD is entitled to a Full Canal so their entitlement is the current diversion plus what it takes to fill the canal. TP 7/28/2015<br><br>SLOTS SET: Surplus Volume Entitlements.MWD Domestic; Surplus Volume Entitlements.MWD FC<br><br>";
+    DESCRIPTION          "DESCRIPTION: For Domestic Surplus prior to 2017, MWD gets 1,250 KAF (canal capacity), minus the MWD Diversion to date and 1/3 of the Mexico annual surplus volume. For Domestic Surplus after 2017, if CAP and SNWA are taking domestic surplus, MWD gets 250 KAF less 1/3 the Mexico annual surplus value, otherwise NWD gets 250 kaf.  In a flood control year MWD is entitled to a full canal so their entitlement is the current diversion plus what it takes to fill the canal. <br><br>SLOTS SET:<br>Surplus Volume Entitlements.MWD Domestic<br>Surplus Volume Entitlements.MWD FC<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from name, replaced hardcoded CAP surplus entitlement value with reference to Surplus Volume Entitlements.CAP Domestic slot, replaced hardcoded share of surplus by state value with ShareofMexicoSurplusbyState() function, and replaced CAP surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from name, replaced hardcoded CAP surplus entitlement value with reference to Surplus Volume Entitlements.CAP Domestic slot, replaced hardcoded share of surplus by state value with ShareofMexicoSurplusbyState() function, and replaced CAP surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot.<br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
 
       IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"]) THEN
@@ -1870,10 +1870,10 @@ BEGIN
     UUID "{aff04063-da50-435d-872e-1a22a0d7fad4}";;
 
     RULE                 "Set Domestic and FC Surplus Entitlement Vols for CAP";
-    DESCRIPTION          "DESCRIPTION: If the year is greater than 2017, then determine the Domestic Surplus entitlement for CAP which is calculated as 100 KAF - 1/3*Mexico Annual Surplus - (Surplus entitlements for Gila Monster Farms + AZ pumpers blw Imp).  If the system is in Flood Control, the CAP FC volume is set to 1,835 KAF less the current CAP Diversion Request so that they are entitled to a full canal volume of 1,835 KAF in a year of Flood Control. TP 7/28/2015<br><br>SLOTS SET: Surplus Volume Entitlements.CAP Domestic, Surplus Volume Entitlements.CAP FC<br><br>";
+    DESCRIPTION          "DESCRIPTION: For Domestic Surplus after 2017, CAP receives 100 KAF, minus a 1/3 of the Mexico Annual Surplus, the Surplus entitlements for Gila Monster Farms, and AZ pumpers below Imperial.  If the system is in Flood Control, the CAP FC surplus volume is set to 1,835 KAF less the current CAP Diversion Request so that they are entitled to a full canal volume of 1,835 KAF in a year of Flood Control. <br><br>SLOTS SET: <br>Surplus Volume Entitlements.CAP Domestic<br>Surplus Volume Entitlements.CAP FC<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Replaced hardcoded CAP default surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot, replaced share of Mexico surplus by state value with ShareofMexicoSurplusbyState() function, and removed &quot;-Minute 323&quot; from rule name.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 20150728<br><br>GCAA, 20181030: Replaced hardcoded CAP default surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot, replaced share of Mexico surplus by state value with ShareofMexicoSurplusbyState() function, and removed &quot;-Minute 323&quot; from rule name.<br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
 
       IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"]) THEN
@@ -1895,10 +1895,10 @@ BEGIN
     UUID "{cb1d29bd-a1c6-4f53-9311-a9939da062ea}";;
 
     RULE                 "Set Quantified Volumes by State";
-    DESCRIPTION          "DESCRIPTION: If there is a positive Quantified Surplus volume, this rule will distribute it among the lower basin states of AZ, CA, and NV. The distribution amounts (shares) are stored in a slot on the Surplus object. If there is not a positive Quantified Surplus, the execution contraints will prevent this rule from firing. -HMG 8/2/11<br><br>SLOTS SET: Surplus.<state> Quantified Surplus Volume<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule will distribute the total LB Quantified Surplus Volume among the Lower Basin states of AZ, CA, and NV. The distribution amounts (shares) are stored in a slot on the Surplus object.<br><br>EXECUTION CONSTRAINTS: This rule fires if there is a positive Quantified Surplus volume and if the run cycle is 3 or 4. <br><br>SLOTS SET: <br>Surplus.California Quantified Surplus Volume<br>Surplus.Arizona Quantified Surplus Volume<br>Surplus.Nevada Quantified Surplus Volume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/2011";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/2011<br><br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
 
       FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" }) DO
@@ -1910,10 +1910,10 @@ BEGIN
     UUID "{5b328700-3564-4714-b5ad-22cdf863945f}";;
 
     RULE                 "Set Outyear Surplus Schedules for Mexico";
-    DESCRIPTION          "DESCRIPTION: This rule uses the volume associated with the Mexico Surplus Flag to set the Mexico diversion request for surplus according to the Mexico Surplus Table TP 7/28/2015<br><br>SLOTS SET: MexicanTreatyDelivery:MexicoSched.Diversion Requested, Mexico Shortage and Surplus.Mexico Annual Surplus<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule uses the volume associated with the Mexico Surplus Flag to set the Mexico diversion request for surplus according to the Mexico Surplus Table. The shortage monthly percent is used to apply the surplus over the year. Also, set the annual surplus volume based on the surplus flag. <br><br>EXECUTION CONSTRAINTS: This rule fires in January as long as it is not the start timestep, and if the Mexico surplus flag for the current year is greater than zero. <br><br>SLOTS SET:<br>MexicanTreatyDelivery:MexicoSched.Diversion Requested<br>Mexico Shortage and Surplus.Mexico Annual Surplus<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 20150728<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -1936,10 +1936,10 @@ BEGIN
   BEGIN
 
     RULE                 "Set Mexico Outyear Shortage Schedules";
-    DESCRIPTION          "DESCRIPTION: This rule sets a shortage diversion amount to the water use object MexicanTreatyDelivery:MexicoSched. The Mexico schedule is reduced by the shortage volume. The Mexico shortage volume is specified in IBWC Minute 323.<br><br>SLOTS SET: MexicanTreatyDelivery:MexicoSched.Diversion Requested, Mexico Shortage and Surplus.Mexico Annual Shortage<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule sets a diversion to Mexico based on the water use object MexicanTreatyDelivery:MexicoSched and the shortage volume. The Mexico shortage volume is specified in IBWC Minute 323.<br><br>EXECUTION CONSTRAINTS: This rule fires in January as long as it is not the start timestep, and if the shortage flag for the current year is greater than zero. <br><br>SLOTS SET: <br>MexicanTreatyDelivery:MexicoSched.Diversion Requested<br>Mexico Shortage and Surplus.Mexico Annual Shortage<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -2002,21 +2002,21 @@ BEGIN
   UUID "{87c5c0a0-f901-479e-a5c8-62bbf53b39f5}";;
 
   POLICY_GROUP   "DCP and BWSCP";
-  DESCRIPTION    "";
+  DESCRIPTION    "This policy group is used to preliminarily set the contributions for California, Nevada, Arizona, and Mexico set by the U.S. Lower Basin Drought Contingency Plan (DCP) and Mexico Binational Water Scarcity Contingency Plan Savings (BWSCP; Minute 323). The contributions are based off the projected Mead pool elevation.";
   ACTIVE         TRUE;
   NOTES          "";
   BEGIN
 
     RULE                 "California DCP";
-    DESCRIPTION          "DESCRIPTION:  This rule sets California's DCP contribution and determines whether the contribution can be made with existing EC ICS. The rule sets the amount of converted EC ICS to DCP ICS based on the total DCP contribution required and determines if there are remaining DCP contribution after all previous year's ICS has been converted. These values will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>NOTE: Coachella can not &quot;officially&quot; create DCP ICS. Instead DCP creation for Coachella will be done &quot;unofficially&quot; and held in MWD account. Coachella will reduce diversion by 7% to help CA meet DCP contribution and will be stored store in MWD's system. MWD to pay tax for now. No logic for Coachella besides 7% reduction to diversion to create water for MWD. CVWD account in MWD system will not be tracked, all DCP ICS will be assumed to be MWD. -AP 7/31/19     <br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICS Credits.AnnualRemainingDCPContributions_MWD<br>ICS Credits.AnnualConversionPreviousECtoDCP_MWD<br>ICS Credits.AnnualSimultaneousCreationDCPICS_MWD<br>ICS Credits.AnnualSysWaterforDCP_MWD";
+    DESCRIPTION          "DESCRIPTION:  This rule sets California's DCP contribution and determines whether the contribution can be made with existing EC ICS. The rule sets the amount of converted EC ICS to DCP ICS based on the total DCP contribution required and determines if there are remaining DCP contribution after all previous year's ICS has been converted. These values will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>NOTE: Coachella can not &quot;officially&quot; create DCP ICS. Instead DCP creation for Coachella will be done &quot;unofficially&quot; and held in MWD account. Coachella will reduce diversion by 7% to help CA meet DCP contribution and will be stored store in MWD's system. MWD to pay tax for now. No logic for Coachella besides 7% reduction to diversion to create water for MWD. CVWD account in MWD system will not be tracked, all DCP ICS will be assumed to be MWD. -AP 7/31/19     <br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICS Credits.AnnualRemainingDCPContributions_MWD<br>ICS Credits.AnnualConversionPreviousECtoDCP_MWD<br>ICS Credits.AnnualSimultaneousCreationDCPICS_MWD [only if DCP contributions > 0]<br>ICS Credits.AnnualSysWaterforDCP_MWD [only if DCP contributions > 0]";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description.";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.";
     BEGIN
 
+    DESCRIPTION          "If DCP contribution are needed for the year, preliminarily set MWD's DCP contribution based on existing EC ICS <br>";
       IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
-          DESCRIPTION          "Preliminarily sets MWD's DCP contribution based on existing EC ICS to DCP ICS <br>";
-      WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( dcpContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
             WITH_STATEMENT (NUMERIC RemainingContribution = IF ( dcpContribution == PreviousECtoDCP )
  THEN
@@ -2052,7 +2052,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION:  This rule sets Nevada's DCP contribution and determines whether the contribution will be made as conversion of existing EC ICS (including previous year Imported or Tributary ICS creation) to DCP ICS or as scheduled reductions (simultaneous conversion or system water). The rule sets the amount of converted EC+Trib+Imported ICS to DCP ICS based on the total DCP contribution required and determines if there are remaining DCP contribution after all previous year's ICS has been converted. These values will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICS Credits.AnnualRemainingDCPContributions_NV<br>ICS Credits.AnnualConversionPreviousECtoDCP_NV";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description.";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.";
     BEGIN
 
     DESCRIPTION          "This rule calculates whether NV's DCP contribution will be made as conversion of existing EC ICS <br>(including previous year Imported and Tributary ICS creation) to DCP or as a schedule reduction <br>(simultaneuos conversion vs system water). Determination if a schedule reduction will count as <br>system water or simultaneous conversion occurs in the NV accounting rule.     <br>";
@@ -2089,7 +2089,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION:  This rule sets Arizona's DCP contribution if a DCP contribution is needed (solved for in previous rule). The DCP contribution is made by converting any EC ICS water created for the current year to DCP ICS by imposing a tax on the water. The annual creation of DCP ICS is input from the 24MS and is the desired DCP ICS creation [unsure how this is set for 24MS?]. The Arizona DCP ICS creation and DCP contribute is set here, but will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICSProjectedData.AnnualCreationECtoDCPICS_CAWCD_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. ";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. ";
     BEGIN
 
     DESCRIPTION          "Set Arizona DCP contribution based off the desired DCP ICS creation input from the 24MS <br>";
@@ -2105,10 +2105,10 @@ BEGIN
     UUID "{0ae60bc0-928a-4151-b115-4a58787c56dd}";;
 
     RULE                 "Determine DCP and BWSCP Contrib";
-    DESCRIPTION          "DESCRIPTION: This rule determines DCP contributions and sets DCP flags in the out-year. For the first year, these slots should be input through a DMI from the 24MS. The DCP users set include MX, AZ, CA, NV, MWD, and Coachella. The rule uses the projected Mead pool elevation from the 24MS if available (in start months of August - December). The DCP flags set which the elevation level for DCP contributions. A check flag is used to see if the DCP contribution level changes between run cycle 3 and 4. <br><br>CONSTRAINTS: The rule fires in run cycles 3 and 4 in January, as long as it is not the start timestep, and only if the rule has not fired successfully. <br><br>SLOTS SET: <br>Mexico Shortabe and Surplus.Mexico Recoverable Water Savings_AnnualContributions<br>ICS Credits.AnnualDCPContribution_AZ<br>ICS Credits.AnnualDCPContribution_CA<br>ICS Credits.AnnualDCPContribution_NV<br>ICS Credits.AnnualDCPContribution_MWD<br>ICS Credits.AnnualDCPContribution_Coachella<br>DCP BWSCP Flags.LB DCP BWSP<br>DCP BWSCP Flags.LB DCP BWSP Check<br><br>NOTE: If the slots are input, the rule fails to execute. This is the desired execution for the hindcast runs in the testbed. ";
+    DESCRIPTION          "DESCRIPTION: This rule determines DCP contributions and sets DCP flags in the out-year. For the first year, these slots should be input through a DMI from the 24MS. The DCP users set include MX, AZ, CA, NV, MWD, and Coachella. The rule uses the projected Mead pool elevation from the 24MS if available (in start months of August - December). The DCP flags set which the elevation level for DCP contributions. A check flag is used to see if the DCP contribution level changes between run cycle 3 and 4. <br><br>CONSTRAINTS: The rule fires in run cycles 3 and 4 in January, as long as it is not the start timestep, and only if the rule has not fired successfully. <br><br>SLOTS SET: <br>Mexico Shortabe and Surplus.Mexico Recoverable Water Savings_AnnualContributions<br>ICS Credits.AnnualDCPContribution_AZ<br>ICS Credits.AnnualDCPContribution_CA<br>ICS Credits.cAnnualDCPContribution_NV<br>ICS Credits.AnnualDCPContribution_MWD<br>ICS Credits.AnnualDCPContribution_Coachella<br>DCP BWSCP Flags.LB DCP BWSP<br>DCP BWSCP Flags.LB DCP BWSP Check<br><br>NOTE: If the slots are input, the rule fails to execute. This is the desired execution for the hindcast runs in the testbed. ";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) >= 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description.";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.";
     BEGIN
 
     DESCRIPTION          "Set DCP contributions in out-years and set DCP flag <br>";
