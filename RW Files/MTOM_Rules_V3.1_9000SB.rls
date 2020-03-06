@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 16:21 March 5, 2020
+# Created 17:49 March 5, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2008,14 +2008,14 @@ BEGIN
   BEGIN
 
     RULE                 "California DCP";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION:  This rule sets California's DCP contribution and determines whether the contribution can be made with existing EC ICS. The rule sets the amount of converted EC ICS to DCP ICS based on the total DCP contribution required and determines if there are remaining DCP contribution after all previous year's ICS has been converted. These values will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>NOTE: Coachella can not &quot;officially&quot; create DCP ICS. Instead DCP creation for Coachella will be done &quot;unofficially&quot; and held in MWD account. Coachella will reduce diversion by 7% to help CA meet DCP contribution and will be stored store in MWD's system. MWD to pay tax for now. No logic for Coachella besides 7% reduction to diversion to create water for MWD. CVWD account in MWD system will not be tracked, all DCP ICS will be assumed to be MWD. -AP 7/31/19     <br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICS Credits.AnnualRemainingDCPContributions_MWD<br>ICS Credits.AnnualConversionPreviousECtoDCP_MWD<br>ICS Credits.AnnualSimultaneousCreationDCPICS_MWD<br>ICS Credits.AnnualSysWaterforDCP_MWD";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description.";
     BEGIN
 
       IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
-          DESCRIPTION          "This assignment calculates whether MWD's DCP contribution will be made as schedule <br>reduction or conversion of existing EC ICS to DCP ICS. Determination of system water or <br>simultaneous conversion occurs in the accounting rule for this will happen in the ICS <br>Accounting policy group.<br><br>Check EC ICS balance, check current year EC creation, else reduce schedule to create EC ICS<br>which will then be converted to DCP ICS<br><br>AP, 7/11/19<br><br>Coachella can not &quot;officially&quot; create DCP ICS. Instead DCP creation for Coachella will be done <br>&quot;unofficially&quot; and held in MWD account. Coachella will reduce diversion by 7% to help CA meet <br>DCP contribution and will be stored store in MWD's system. MWD to pay tax for now. No logic <br>for Coachella besides 7% reduction to diversion to create water for MWD. CVWD account in <br>MWD system will not be tracked, all DCP ICS will be assumed to be MWD.<br><br>AP 7/31/19          <br>";
+          DESCRIPTION          "Preliminarily sets MWD's DCP contribution based on existing EC ICS to DCP ICS <br>";
       WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( dcpContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
             WITH_STATEMENT (NUMERIC RemainingContribution = IF ( dcpContribution == PreviousECtoDCP )
@@ -2049,10 +2049,10 @@ BEGIN
     UUID "{c862f2bd-77c9-4b9d-957d-8c1f3f2b3bfe}";;
 
     RULE                 "Nevada DCP";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION:  This rule sets Nevada's DCP contribution and determines whether the contribution will be made as conversion of existing EC ICS (including previous year Imported or Tributary ICS creation) to DCP ICS or as scheduled reductions (simultaneous conversion or system water). The rule sets the amount of converted EC+Trib+Imported ICS to DCP ICS based on the total DCP contribution required and determines if there are remaining DCP contribution after all previous year's ICS has been converted. These values will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICS Credits.AnnualRemainingDCPContributions_NV<br>ICS Credits.AnnualConversionPreviousECtoDCP_NV";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description.";
     BEGIN
 
     DESCRIPTION          "This rule calculates whether NV's DCP contribution will be made as conversion of existing EC ICS <br>(including previous year Imported and Tributary ICS creation) to DCP or as a schedule reduction <br>(simultaneuos conversion vs system water). Determination if a schedule reduction will count as <br>system water or simultaneous conversion occurs in the NV accounting rule.     <br>";
@@ -2086,10 +2086,10 @@ BEGIN
     UUID "{6e31581a-a7c2-4a0d-b9ae-34e4ae15b347}";;
 
     RULE                 "Arizona DCP";
-    DESCRIPTION          "DESCRIPTION:  This rule sets Arizona DCP contribution if a DCP contribution is needed (solved for in previous rule). The DCP contribution is made by converting any EC ICS water created for the current year to DCP ICS by imposing a tax on the water. The annual creation of DCP ICS is input from the 24MS and is the desired DCP ICS creation [unsure how this is set for 24MS?]. The Arizona DCP ICS creation and DCP contribute is set here, but can be refined in the Arizona accounting rule based on bank space. <br><br>CONSTRAINTS: The rule fires in January or the start timestep. It fires in run cycle 3 if the rule has not fired successfully and run cycle 4 if the DCP BWSCP flag has changed from run cycle 3. <br><br>SLOTS SET: <br>ICSProjectedData.AnnualCreationECtoDCPICS_CAWCD_Preliminary";
+    DESCRIPTION          "DESCRIPTION:  This rule sets Arizona's DCP contribution if a DCP contribution is needed (solved for in previous rule). The DCP contribution is made by converting any EC ICS water created for the current year to DCP ICS by imposing a tax on the water. The annual creation of DCP ICS is input from the 24MS and is the desired DCP ICS creation [unsure how this is set for 24MS?]. The Arizona DCP ICS creation and DCP contribute is set here, but will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICSProjectedData.AnnualCreationECtoDCPICS_CAWCD_Preliminary";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description.";
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] );
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: SB, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. ";
     BEGIN
 
     DESCRIPTION          "Set Arizona DCP contribution based off the desired DCP ICS creation input from the 24MS <br>";
