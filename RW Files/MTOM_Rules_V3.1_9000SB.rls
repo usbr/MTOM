@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:34 March 6, 2020
+# Created 09:15 March 9, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1495,7 +1495,7 @@ BEGIN
     UUID "{c16ff88f-1baa-46a3-9410-6ba82373f4a6}";;
 
     RULE                 "AZ Annual ICS Delivery";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION: <br><br>EXECUTION CONSTRAINTS: <br><br>SLOTS SET: ";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
     NOTES                "";
@@ -1525,16 +1525,16 @@ BEGIN
     UUID "{ff4606ef-0ef2-43e0-bcdf-caaa1f19fbc4}";;
 
     RULE                 "LB_ScheduleReset";
-    DESCRIPTION          "9/18/2018, AP: This rule resets lower basin water user diversion when the lower basin condition switches between run cycles 3 and 4 (from either shortage/surplus to normal operating condition). ";
+    DESCRIPTION          "DESCRIPTION: This rule resets Lower Basin water user diversion when the Lower Basin condition switches between run cycles 3 and 4 (from either shortage/surplus to normal operating condition). The rule resests junior priority users and Mexico. <br><br>EXECUTION CONSTRAINTS: This rule fires in January during run cycle 4 if the Lower Basin Demand Variability has changed (schedule check vs. Lower Basin condition) and only if the Lower Basin condition is 0 (normal conditions). This rule also has the constraint that it will execute only in MRM and if the run type is not equal to 1 (development testing tool). <br><br>SLOTS SET: <br>GilaAndYumaUsers:GilaMonsterFarmers, CocopahIndRes [Diversion Requested]<br>AzDvsToPkr: BullheadCity, LakeHavasuCity, MohaveValleyIID, AzPumpersDvsToPkr [Diversion Requested]<br>AzPkrToImp: Parker, CibolaValleyIID, Ehrenberg, AzPumpersAbvImp [Diversion Requested]<br>OtherBlwImp:AzPumpersBlwImp [Diversion Requested]<br>MWDDiversion:MWD.Diversion Requested & .Depletion Requested<br>PumpingFromLakeMead:SNWP.Diversion Requested & .Depletion Requested<br>CAPDiversion.Total Diversion Requested<br>MexicoTreatyDelivery:MexicoSched.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000;
-    NOTES                "9/18/2018, AP: The rule needs to be cleaned up at a later date when all CU_schedules slots have the same name as the diversion requested slots.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 1 (allows for no dependence on BHOPS during development testing). ";
+    NOTES                "AUTHOR, Unknown<br><br>AP, 20180918: The rule needs to be cleaned up at a later date when all CU_schedules slots have the same name as the diversion requested slots.<br>S.Baker, 20190708: Updated constraints to have Run Type not equal to 1 (allows for no dependence on BHOPS during development testing). <br>S.Baker, 20200309: Updated and edited description.";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-          DESCRIPTION          "For statement resets LB_SchedCheck (non JP user and mexico) subbasin when LB condition <br>switches between run cycles   <br>";
+          DESCRIPTION          "Resets LB_SchedCheck (JP user and mexico) subbasin  <br>";
       FOREACH (OBJECT user IN "ListSubbasin"( "LB_SchedCheck" )) DO
-          DESCRIPTION          "Resets LB_SchedCheck subbasin members when LB condition switches from shortage(1) to normal <br>(0) condtions between RC3 and RC4    <br>";
+          DESCRIPTION          "Resets users when LB condition switches from shortage to normal condtions between RC3 and RC4       <br>";
       IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 1.00000000) THEN
             IF_STATEMENT (user == % "GilaAndYumaUsers:GilaMonsterFarms") THEN
             $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.Gila Monster Farms" [date], date );
@@ -1554,7 +1554,7 @@ BEGIN
 
       END_IF_STATEMENT;
 
-          DESCRIPTION          "Resets Users in LB_SchedCheck subbasin with surplus entitlement if there is a switch between <br>RC3 and RC4<br>";
+          DESCRIPTION          "Resets users with surplus entitlement when LB condition switches from surplus to normal between RC3 and RC4<br>";
       IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 2.00000000) THEN
             IF_STATEMENT (user == % "GilaAndYumaUsers:GilaMonsterFarms") THEN
             $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.Gila Monster Farms" [date], date );
@@ -1570,7 +1570,7 @@ BEGIN
 
       ENDFOREACH;
 
-          DESCRIPTION          "Resets MWD diversion and depletion in model when switching from suplus to normal condition<br>";
+          DESCRIPTION          "Resets MWD diversion and depletion when LB condition switching from suplus to normal condition<br>";
       IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 2.00000000) THEN
             WITH_STATEMENT (NUMERIC mwdDepletionAmount = "MWD_Outyear_Schedules"( date )) DO
             $ "MWDDiversion:MWD.Depletion Requested" [date] := mwdDepletionAmount;
@@ -1581,7 +1581,7 @@ BEGIN
 
       END_IF_STATEMENT;
 
-          DESCRIPTION          "This resets SNWP, CAP, and Mexico if the lower basin operating condition switches for shortage <br>or surplus to normal operating cindtions between run cycles    <br>";
+          DESCRIPTION          "Resets SNWP, CAP, and Mexico if LB condition switches for shortage or surplus to normal conditions <br>";
       FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" , $ "CAPDiversion.Total Diversion Requested" , $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" }) DO
             slot [date] := IF ( slot == $ "CAPDiversion.Total Diversion Requested" )
  THEN
