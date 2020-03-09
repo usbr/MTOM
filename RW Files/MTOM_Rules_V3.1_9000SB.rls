@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 12:33 March 9, 2020
+# Created 16:41 March 9, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1385,22 +1385,21 @@ BEGIN
   BEGIN
 
     RULE                 "SNWP ICS Creation and Delivery";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION: This rule determines the Nevada ICS creation and delivery. The ICS delivery is the minimum of the Nevada's maximum annual delivery, the water remaining in its apportionment after deliveries based on the LB operating condition, and Nevada's total ICS and DCP ICS credits with the constraint on DCP recovery elevation. The EC ICS creation is minimum of the ICS available based on apportionment and delivery constraints, Nevada's maximum annual creation, Lower Basin operating condition, and bank availability. The bank availability calculates volumes that can be taxed and not taxed since ICS is not taxed if it is paying back the previous year's delivery. The bank availability that can be taxed is calculated by the bank capacity minus any deliveries from the previous year, the bank and any tributary/imported ICS being converted to EC ICS, and annual creation of bi-national ICS (input slot). The EC ICS delivery from the previous year is then added back after the tax adjustment to calculate the bank availability.<br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, or it is quantified surplus or flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICSProjectionData.AnnualICSDelivery_NV_Preliminary<br>ICSProjectionData.AnnualCreationEC_SNWP_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>S.Baker, 20200309: Add description.";
     BEGIN
 
-    DESCRIPTION          "This rule determines Nevada ICS creation or delivery based on the annual apportionment <br>";
       WITH_STATEMENT (NUMERIC ICS = ( $ "AnnualWaterUse.NV_BasicApportionment" [] - ( $ "AnnualWaterUse.Nevada_Forecast1" [@"24:00:00 December 31, Current Year"] - $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Non SNWA Water Use <br>" - IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
  THEN
   $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) - 1.00000000, "Nevada"]
  ELSE
   0.00000000 "acre-ft"
- ENDIF - $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] * "MeadPumpingDemandVariabilityFactor"( @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "Have to build diversion instead of using annual water use because SNWA can be affected by <br>demand variability <br>") DO
+ ENDIF - $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] * "MeadPumpingDemandVariabilityFactor"( @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "ICS calculation based on annual apportionment and diversion calculation affected by demand variability   <br>") DO
             $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := "MinItem"( { IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) )
  THEN
-  "Max"( "Abs"( "Min"( ICS, 0.00000000 "acre-ft" ) ) - $ "Surplus Volume Entitlements.SNWA Domestic" ["Dec31ofYear"( @"t" )], 0.00000000 "acre-ft" ) COMMENTED_BY "If the year has domestic surplus, reduce ICS delivery by the amount of surplus entitlement for <br>SNWP<br>"
+  "Max"( "Abs"( "Min"( ICS, 0.00000000 "acre-ft" ) ) - $ "Surplus Volume Entitlements.SNWA Domestic" ["Dec31ofYear"( @"t" )], 0.00000000 "acre-ft" ) COMMENTED_BY "For domestic surplus, reduce ICS delivery by the amount of surplus entitlement for SNWP<br>"
  ELSE
   "Abs"( "Min"( ICS, 0.00000000 "acre-ft" ) ) COMMENTED_BY "No surplus <br>"
  ENDIF , $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Delivery"] COMMENTED_BY "Max possible delivery <br>" , IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) > $ "DCP.RecoveryElevation" [] )
@@ -1414,7 +1413,7 @@ BEGIN
  THEN
   0.00000000 "acre-ft"
  ELSE
-  "MinItem"( { "Max"( ICS, 0.00000000 "acre-ft" ) , $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Creation"] , "Max"( ( ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.Bank_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], 0.00000000 "acre-ft" ) COMMENTED_BY "Max EC ICS creation based on bank availability. ICS is not taxed if it is paid back from the <br>previous year's delivery. Max bank capacity less any delivery from previous year,  minus the <br>bank + any trib/imported ICS being converted to EC ICS + annual creation biNat (input slot) = <br>the available ICS creation that can be taxed. EC delivery amount added back in post tax <br>adjustment since any volume equal to the delivery wont be taxed.<br>" } )
+  "MinItem"( { "Max"( ICS, 0.00000000 "acre-ft" ) , $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Creation"] , "Max"( ( ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.Bank_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], 0.00000000 "acre-ft" ) COMMENTED_BY "Max EC ICS creation based on bank availability<br>" } )
  ENDIF;
 
       END_WITH_STATEMENT;
