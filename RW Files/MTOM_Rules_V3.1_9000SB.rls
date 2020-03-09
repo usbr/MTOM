@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 09:15 March 9, 2020
+# Created 09:40 March 9, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1495,25 +1495,25 @@ BEGIN
     UUID "{c16ff88f-1baa-46a3-9410-6ba82373f4a6}";;
 
     RULE                 "AZ Annual ICS Delivery";
-    DESCRIPTION          "DESCRIPTION: <br><br>EXECUTION CONSTRAINTS: <br><br>SLOTS SET: ";
+    DESCRIPTION          "DESCRIPTION: This rule sets ICS deliveries for CAWCD. If it is the start year and April-December, the ICS wil be set to the default value from the 24MS. Otherwise, determine the ICS delivery desired for CAWCD, and restrict delivery to not take more water than is banked in Mead (minus non-CAWCD ICS) based on pool elevation and capping the delivery at canal capacity. <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, or it is quantified surplus or flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20200309: Updated and edited description.";
     BEGIN
 
       IF_STATEMENT (@"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  )) THEN
-          DESCRIPTION          "If after April but before December in start year or not a MRM run, use the default value passed <br>from the 24 MS, else do logic below  <br>";
+          DESCRIPTION          "If April-December in start year or not a MRM run, use the default value passed from the 24 MS <br>";
       $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"];
 
       ELSE
-            WITH_STATEMENT (NUMERIC AnnualICSDelivery = ( $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] + "CAWCD Mitigation Water"(  ) + "CAWCD DCP ICS Delivery"(  ) + "CAWCD Post 2026 ICS Delivery"(  ) ) COMMENTED_BY "Determine Annual ICS delivery volume using default value from 24 MS  and functions for any <br>extra needed based on logic <br>") DO
+            WITH_STATEMENT (NUMERIC AnnualICSDelivery = ( $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] + "CAWCD Mitigation Water"(  ) + "CAWCD DCP ICS Delivery"(  ) + "CAWCD Post 2026 ICS Delivery"(  ) ) COMMENTED_BY "Determine Annual ICS delivery volume using default value from 24 MS and functions for any extra needed <br>") DO
             WITH_STATEMENT (NUMERIC NonCAPICSDelivery = ( $ "ICS Credits.AnnualDeliveryEC_CRIT" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.AnnualDeliveryEC_GRIC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.AnnualDeliveryEC_MVIDD" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.AnnualDeliveryEC_WM" [@"24:00:00 December Max DayOfMonth, Current Year"] ) COMMENTED_BY "Sum of non CAP ICS delivery for AZ. All inputs from 24MS, no delivery logic for other entities as <br>of 1/28/20 <br>") DO
             $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := "MinItem"( { AnnualICSDelivery COMMENTED_BY "Annual ICS delivery calculated based on functions + value passed from 24MS <br>" , "CAWCD Available Canal Space"(  ) COMMENTED_BY "CAP at full ditch (Conveyance Capacity)<br>" , "Min"( ( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Delivery"] - NonCAPICSDelivery ) COMMENTED_BY "Available ICS delivery volume in AZ left for CAWCD based on state volume less other users <br>", IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) > $ "DCP.RecoveryElevation" [] )
  THEN
   $ "ICS Credits.TotalICS_CAWCD" [@"24:00:00 December 31, Previous Year"]
  ELSE
   $ "ICS Credits.TotalICS_CAWCD" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December 31, Previous Year"]
- ENDIF COMMENTED_BY "Available ICS for delivery. EC ICS creation and delivery are mutually exclusive (either create or <br>deliver, not both). Max available ICS now limited based on recovery elevation for DCP AP <br>11/19/19     <br>" ) } );
+ ENDIF COMMENTED_BY "Available ICS for delivery. EC ICS creation and delivery are mutually exclusive (either create or deliver, not <br>both). Max available ICS now limited based on recovery elevation for DCP. -AP 11/19/19       <br>" ) } );
 
       END_WITH_STATEMENT;
 
@@ -1528,7 +1528,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule resets Lower Basin water user diversion when the Lower Basin condition switches between run cycles 3 and 4 (from either shortage/surplus to normal operating condition). The rule resests junior priority users and Mexico. <br><br>EXECUTION CONSTRAINTS: This rule fires in January during run cycle 4 if the Lower Basin Demand Variability has changed (schedule check vs. Lower Basin condition) and only if the Lower Basin condition is 0 (normal conditions). This rule also has the constraint that it will execute only in MRM and if the run type is not equal to 1 (development testing tool). <br><br>SLOTS SET: <br>GilaAndYumaUsers:GilaMonsterFarmers, CocopahIndRes [Diversion Requested]<br>AzDvsToPkr: BullheadCity, LakeHavasuCity, MohaveValleyIID, AzPumpersDvsToPkr [Diversion Requested]<br>AzPkrToImp: Parker, CibolaValleyIID, Ehrenberg, AzPumpersAbvImp [Diversion Requested]<br>OtherBlwImp:AzPumpersBlwImp [Diversion Requested]<br>MWDDiversion:MWD.Diversion Requested & .Depletion Requested<br>PumpingFromLakeMead:SNWP.Diversion Requested & .Depletion Requested<br>CAPDiversion.Total Diversion Requested<br>MexicoTreatyDelivery:MexicoSched.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) AND "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] == 0.00000000;
-    NOTES                "AUTHOR, Unknown<br><br>AP, 20180918: The rule needs to be cleaned up at a later date when all CU_schedules slots have the same name as the diversion requested slots.<br>S.Baker, 20190708: Updated constraints to have Run Type not equal to 1 (allows for no dependence on BHOPS during development testing). <br>S.Baker, 20200309: Updated and edited description.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>AP, 20180918: The rule needs to be cleaned up at a later date when all CU_schedules slots have the same name as the diversion requested slots.<br>S.Baker, 20190708: Updated constraints to have Run Type not equal to 1 (allows for no dependence on BHOPS during development testing). <br>S.Baker, 20200309: Updated and edited description.";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
