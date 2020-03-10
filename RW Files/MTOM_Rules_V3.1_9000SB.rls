@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 16:41 March 9, 2020
+# Created 10:19 March 10, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1252,13 +1252,13 @@ BEGIN
     UUID "{eae562f8-31fd-4638-9ba6-2f6cd97320b2}";;
 
     RULE                 "AZ ICS Delivery";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION: This rule sets the annual delivery for each Arizona ICS account. The annual delivery is constrained by the bank capacity, Mead's pool elevation, and the delivery limit. The rule determines which ICS account type the annual ICS delivery comes from using a list. The order in which the ICS deliveries are made is: DCP (constrained by Mead recovery elevation), EC, BiNational, and SysEff. <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, and it is quantified surplus, flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICS Credits.AnnualDeliveryDCP_CAWCD<br>ICS Credits.AnnualDeliveryEC_CAWCD<br>ICS Credits.AnnualDeliveryBiNat_CAWCD<br>ICS Credits.AnnualDeliverySysEff_CAWCD<br>ICS Credits.AnnualICSDelivery_CAWCD";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>S.Baker, 20200309: Add description.";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC ECICStoDCP = "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"] - $ "ICS Credits.Bank_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"], $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "The amount of EC ICS converted to DCP ICS during the current year <br>") DO
+      WITH_STATEMENT (NUMERIC ECICStoDCP = "Max"( 0.00000000 "acre-ft", "Min"( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"] - $ "ICS Credits.Bank_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"], $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "EC ICS converted to DCP ICS during the current year, constrained by bank capacity <br>") DO
             WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Arizona", "Max Delivery", ECICStoDCP ) COMMENTED_BY "Checks desired ICS delivery amount against DCP policy restrictions   <br>") DO
             WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.ExtraordinaryConservationICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.BiNationalICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.SystemEfficiencyICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] } COMMENTED_BY "Accounts for ICS delivery (in order) <br>" ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
@@ -1267,7 +1267,7 @@ BEGIN
   ELSE
    AnnualDelivery - "Sum"( result )
   ENDIF COMMENTED_BY "Remaining ICS delivery balance   <br>" DO
-   WITH NUMERIC DeliveryAmount = IF ( ( ( LENGTH result ) == 0.00000000 AND "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "DCP.RecoveryElevation" [] ) COMMENTED_BY "Don't take DCP ICS if the Mead elevation is below the recovery elevation of 1110  <br>" )
+   WITH NUMERIC DeliveryAmount = IF ( ( ( LENGTH result ) == 0.00000000 AND "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "DCP.RecoveryElevation" [] ) COMMENTED_BY "Don't take DCP ICS if the Mead elevation is below the recovery elevation of 1,110 ft <br>" )
    THEN
     0.00000000 "acre-ft"
    ELSE
@@ -1379,7 +1379,7 @@ BEGIN
   UUID "{3f523123-2536-4487-a732-9f06f03e16f6}";;
 
   POLICY_GROUP   "Lower Basin Demand Variability/ICS Creation and Delivery";
-  DESCRIPTION    "";
+  DESCRIPTION    "This policy group handles Lower Basn deliveries and ICS based on changes in operating conditions due to Lower Basin Demand Variability. The rules reset the Lower Basin water user diversions if necessary. Rules also set preliminary volumes of ICS creation and delivieries for CAWCD, MWD, and SNWP. ";
   ACTIVE         TRUE;
   NOTES          "";
   BEGIN
@@ -9902,7 +9902,7 @@ BEGIN
  END_ELSEIF
  ELSEIF_COND ( $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"] < $ "DCP.MinTakeElevation" [] )
  ELSEIF_CLAUSE ( 0.00000000 "acre-ft" )
- END_ELSEIF COMMENTED_BY "Section IV.D.1-3 of the LB OPs section of the DCP limits the amount of ICS that can be delivered <br>to each state based on meads elevation and the max annual delivery allowed for each state.<br>";
+ END_ELSEIF COMMENTED_BY "Section IV.D.1-3 of the LB OPs section of the DCP limits the amount of ICS that can be delivered to each state <br>based on Mead's elevation and the max annual delivery allowed for each state.<br>";
 
     END
     UUID "{10b946b7-c450-49b2-a03b-8c9e1969ab58}";;
