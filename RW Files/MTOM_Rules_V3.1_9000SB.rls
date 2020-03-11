@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:12 March 10, 2020
+# Created 09:27 March 11, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -800,20 +800,21 @@ BEGIN
     UUID "{6a54fd44-a0fc-456b-bdff-5faea9c4fc1e}";;
 
     RULE                 "Flood Control ICS Reduction";
-    DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re calculates and assignes the Total ICS Volumes for each state. TP 11/4/2014<br><br>SLOTS SET: ICS Credits.ExtraordinaryConservationICS_CA; ICS Credits.ExtraordinaryConservationICS_NV; ICS Credits.ExtraordinaryConservationICS_AZ; ICS Credits.TotalICS_CA; ICS Credits.TotalICS_NV; ICS Credits.TotalICS_AZ; ICS Credits.AnnualDeliveryEC_CA; ICS Credits.AnnualDeliveryEC_NV; ICS Credits.AnnualDeliveryEC_AZ";
+    DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re-calculates and assignes the Total ICS Volumes for each state. <br><br>EXECUTION CONSTRAINTS: This rule fires in December or the end date of the run in run cycle 4 if it is Flood Control or Quantified Surplus and this rule has not fired sucessfully yet. <br><br>SLOTS SET: <br>ICS Credits.ExtraordinaryConservationICS_[ MWD, IID, CA, NV, CAWCD, CRIT, GRIC, MVIDD, MW, AZ ]<br>ICS Credits.TotalICS_[ MWD, IID, CA,  NV, CAWCD, AZ ]<br>ICS Creitds.Bank_[ MWD, CA, NV, CAWCD, AZ ]";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND "IsQuantifiedOrFloodControl"(  ) AND ( @"t" == @"24:00:00 December Max DayOfMonth, Current Year" OR @"t" == @"Finish Timestep" ) AND NOT "HasRuleFiredSuccessfully"( "True" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>AP, 20181211:: edited to include MWD / IID ICS CA split<br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description. ";
     BEGIN
 
     DESCRIPTION          "Recalulates ICS balances when in FC <br>";
       WITH_STATEMENT (NUMERIC floodControlVol = "SumFlowsToVolume"( $ "Lower Basin Output.MexicoExcessFlow", @"24:00:00 January Max DayOfMonth, Current Year", "DateMin"( @"24:00:00 December Max DayOfMonth, Current Year", @"Finish Timestep" ) )) DO
             WITH_STATEMENT (LIST stateECBalances = "FloodControlECICSBalance"( floodControlVol )) DO
-            $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM stateECBalances;
+            $ "ICS Credits.ExtraordinaryConservationICS_MWD" COMMENTED_BY " ------  Set all accounts EC ICS with Flood Control Volume ------  #  <br>" ["Dec31ofYear"( @"t" )] := GET @INDEX 1.00000000 FROM stateECBalances;
 
             $ "ICS Credits.ExtraordinaryConservationICS_IID" ["Dec31ofYear"( @"t" )] := GET @INDEX 2.00000000 FROM stateECBalances;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 1.00000000 FROM stateECBalances ) + GET @INDEX 2.00000000 FROM stateECBalances;
+          DESCRIPTION          "CA ICS is MWD + IID <br>";
+      $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 1.00000000 FROM stateECBalances ) + GET @INDEX 2.00000000 FROM stateECBalances;
 
             $ "ICS Credits.ExtraordinaryConservationICS_NV" ["Dec31ofYear"( @"t" )] := GET @INDEX 3.00000000 FROM stateECBalances;
 
@@ -827,9 +828,10 @@ BEGIN
 
             $ "ICS Credits.ExtraordinaryConservationICS_WM" ["Dec31ofYear"( @"t" )] := GET @INDEX 8.00000000 FROM stateECBalances;
 
-            $ "ICS Credits.ExtraordinaryConservationICS_AZ" ["Dec31ofYear"( @"t" )] := ( ( ( ( GET @INDEX 4.00000000 FROM stateECBalances ) + GET @INDEX 5.00000000 FROM stateECBalances ) + GET @INDEX 6.00000000 FROM stateECBalances ) + GET @INDEX 7.00000000 FROM stateECBalances ) + GET @INDEX 8.00000000 FROM stateECBalances;
+          DESCRIPTION          "AZ ICS is CAWCD + CRIT + GRIC + MVIDD + MW <br>";
+      $ "ICS Credits.ExtraordinaryConservationICS_AZ" ["Dec31ofYear"( @"t" )] := ( ( ( ( GET @INDEX 4.00000000 FROM stateECBalances ) + GET @INDEX 5.00000000 FROM stateECBalances ) + GET @INDEX 6.00000000 FROM stateECBalances ) + GET @INDEX 7.00000000 FROM stateECBalances ) + GET @INDEX 8.00000000 FROM stateECBalances;
 
-            $ "ICS Credits.TotalICS_MWD" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 9.00000000 FROM stateECBalances );
+            $ "ICS Credits.TotalICS_MWD" COMMENTED_BY " ------  California Accounting ------  #  <br>" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 9.00000000 FROM stateECBalances );
 
             $ "ICS Credits.TotalICS_IID" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 10.00000000 FROM stateECBalances );
 
@@ -839,11 +841,12 @@ BEGIN
 
             $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.Bank_CA" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.ExtraordinaryConservationICS_CA" ["Dec31ofYear"( @"t" )] - ( ( GET @INDEX 1.00000000 FROM stateECBalances ) + GET @INDEX 2.00000000 FROM stateECBalances ) );
 
-            $ "ICS Credits.TotalICS_NV" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 11.00000000 FROM stateECBalances );
+          DESCRIPTION          " ------  Nevada Accounting ------  #  <br>";
+      $ "ICS Credits.TotalICS_NV" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 11.00000000 FROM stateECBalances );
 
             $ "ICS Credits.Bank_NV" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.Bank_NV" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.ExtraordinaryConservationICS_NV" ["Dec31ofYear"( @"t" )] - GET @INDEX 3.00000000 FROM stateECBalances );
 
-            $ "ICS Credits.TotalICS_CAWCD" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 12.00000000 FROM stateECBalances );
+            $ "ICS Credits.TotalICS_CAWCD" COMMENTED_BY " ------  Arizona Accounting ------  # <br>" ["Dec31ofYear"( @"t" )] := ( GET @INDEX 12.00000000 FROM stateECBalances );
 
             $ "ICS Credits.TotalICS_AZ" ["Dec31ofYear"( @"t" )] := $ "ICS Credits.TotalICS_AZ" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.ExtraordinaryConservationICS_AZ" ["Dec31ofYear"( @"t" )] - ( ( ( ( ( GET @INDEX 4.00000000 FROM stateECBalances ) + GET @INDEX 5.00000000 FROM stateECBalances ) + GET @INDEX 6.00000000 FROM stateECBalances ) + GET @INDEX 7.00000000 FROM stateECBalances ) + GET @INDEX 8.00000000 FROM stateECBalances ) );
 
@@ -859,21 +862,19 @@ BEGIN
     UUID "{1d4c55e4-42ce-4d4d-a961-8d71f2ad62f0}";;
 
     RULE                 "MX Accounting";
-    DESCRIPTION          "DESCRIPTION: This rule calculates the value of the ICMA balance for Mexico<br><br>SLOTS SET: Mexico Shortage and Surplus.ICMA Balance";
+    DESCRIPTION          "DESCRIPTION: This rule calculates the value for Mexico's Bination Water Scarcity Contingency Plan. <br><br>EXECUTION CONSTRAINTS: This rule fires during run cycle 3 if it is December or the end date of the run.<br><br>SLOTS SET: <br>Mexico Shortage and Surplus.Mexico Water Reserve Balance<br>Mexico Shortage and Surplus.AnnualBWSCP_SysWater<br>Mexico Shortage and Surplus.AnnualCreationMXRecoverableWaterSavings<br>Mexico Shortage and Surplus.Mexico Recoverable Water Savings Balance<br>Mexico Shortage and Surplus.Total Combined MX Savings and Reserve";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 December 31, Current Year" OR @"t" == "RunEndDate"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE;<br>MC, 20160908: Moved slot Mexico Shortage and Surplus.AnnualCreationICMA inside parentheses so it is subject to 0.97 factor per Shana T. email on 20160831<br><br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots";
+    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 December 31, Current Year" OR @"t" == "RunEndDate"(  ) ) AND "GetRunCycleIndex"(  ) == 3.00000000;
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE; unknown<br><br>MC, 20160908: Moved slot Mexico Shortage and Surplus.AnnualCreationICMA inside parentheses so it is subject to 0.97 factor per Shana T. email on 20160831<br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots.<br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description. Removed duplicated setting of slot Mexico Shortage and Surplus.Mexico Water Reserve Balance. Added function SetNegativeToZero() which can replace all Max(0 &quot;acre-ft&quot;, xxx).";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC WaterReserveBal = $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Calculate MX water reserve balance <br>" - $ "Mexico Shortage and Surplus.AnnualDeliveryMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_AZ" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_CA" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] + $ "Mexico Shortage and Surplus.AnnualCreationMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  )) DO
-            $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Current Year"] := WaterReserveBal;
-
+      WITH_STATEMENT (NUMERIC WaterReserveBal = $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "MX water reserve balance is previous year's balance plus creation, minus deliveries and any Binational ICS creation  <br>" - $ "Mexico Shortage and Surplus.AnnualDeliveryMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_AZ" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_CA" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] + $ "Mexico Shortage and Surplus.AnnualCreationMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  )) DO
             WITH_STATEMENT (NUMERIC RecoverableWater_prelim = ( $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings Balance" [@"24:00:00 December 31, Previous Year"] - $ "Mexico Shortage and Surplus.AnnualDeliveryMXRecoverableWaterSavings" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Amount of RecovWaterSavings less delivery <br>") DO
-            WITH_STATEMENT (NUMERIC MXBank_prelim = ( RecoverableWater_prelim + WaterReserveBal ) COMMENTED_BY "Calculate prelim bank space <br>") DO
+            WITH_STATEMENT (NUMERIC MXBank_prelim = ( RecoverableWater_prelim + WaterReserveBal ) COMMENTED_BY "Calculate prelim bank space used <br>") DO
             WITH_STATEMENT (NUMERIC MXRemainingBankSpace = $ "ICS Credits.MeadBankParameters" ["Mexico", "Max Capacity"] - MXBank_prelim) DO
             WITH_STATEMENT (NUMERIC MXRemainingBankSpace_PreTax = MXRemainingBankSpace / "SystemTaxAdjustment_DCP"(  )) DO
             WITH_STATEMENT (NUMERIC annualBWSPcontribution = $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December 31, Current Year"]) DO
-            WITH_STATEMENT (NUMERIC recoverablewaterBWSCPcontribution = "Max"( "Min"( MXRemainingBankSpace_PreTax, annualBWSPcontribution ), 0.00000000 "acre-ft" ) COMMENTED_BY "Recoverable water savings contribution up to allowable bank space.Rest will be system water <br>") DO
+            WITH_STATEMENT (NUMERIC recoverablewaterBWSCPcontribution = "SetNegativeToZero"( "Min"( MXRemainingBankSpace_PreTax, annualBWSPcontribution ) ) COMMENTED_BY "Recoverable water savings contribution up to allowable bank space.Rest will be system water <br>") DO
             WITH_STATEMENT (NUMERIC syswaterBWSCPcontribution = ( annualBWSPcontribution - recoverablewaterBWSCPcontribution ) COMMENTED_BY "Sys Water Calculation <br>") DO
             WITH_STATEMENT (NUMERIC RecoverableWaterSavingsBalance = RecoverableWater_prelim + recoverablewaterBWSCPcontribution * "SystemTaxAdjustment_DCP"(  )) DO
           DESCRIPTION          "Set slots <br>";
