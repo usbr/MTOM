@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 09:27 March 11, 2020
+# Created 10:01 March 11, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -549,8 +549,8 @@ BEGIN
     RULE                 "MX Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
-    NOTES                "";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
+    NOTES                "S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
     DESCRIPTION          "Adjust mexico by BNWSCP contribution <br>";
@@ -574,8 +574,8 @@ BEGIN
     RULE                 "NV Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
-    NOTES                "";
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
+    NOTES                "S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (NUMERIC SNWADivVol = WITH NUMERIC shortageVolume = IF ( ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
@@ -618,8 +618,8 @@ BEGIN
     RULE                 "AZ Diversion Adjustment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
-    NOTES                "";
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
+    NOTES                "S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
@@ -656,10 +656,10 @@ BEGIN
     UUID "{1574216e-dc24-4ea2-9307-60c03d96cdbb}";;
 
     RULE                 "CA Diversion Adjustment";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re-calculates and assignes the Total ICS Volumes for each state. <br><br>EXECUTION CONSTRAINTS: This rule fires at the start timestep if before April in MRM or in January. in December or the end date of the run in run cycle 4 if it is Flood Control or Quantified Surplus and this rule has not fired sucessfully yet. <br><br>SLOTS SET: ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND @"t" < @"24:00:00 April 30, Start Year" ) AND "IsMRM"(  ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) OR ( ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) );
-    NOTES                "";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND @"t" < @"24:00:00 April 30, Start Year" ) AND "IsMRM"(  ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) OR ( ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: Updated description. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (NUMERIC dcpContributionCVWD = $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
@@ -692,7 +692,7 @@ BEGIN
             WITH_STATEMENT (NUMERIC DCPreductionMWD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC MWDDivRequested = $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC DeliveryToDate = "GetDiversionToDate"( $ "California_CU_Actual.MWDDiversion" )) DO
-            WITH_STATEMENT (NUMERIC AnnualAdjustedDivRequested = ( MWDDivRequested + ( totalDeliveryMWDICS - totalCreationECICS - DCPreductionMWD - DeliveryToDate ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery that might be <br>occuring in a given scenario, or decrease the delivery if any creation of water for a given <br>scenario. TP 12/22/2017  <br>" )) DO
+            WITH_STATEMENT (NUMERIC AnnualAdjustedDivRequested = ( MWDDivRequested + ( totalDeliveryMWDICS - totalCreationECICS - DCPreductionMWD - DeliveryToDate ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given <br>scenario, or decrease the delivery if any creation of water for a given scenario. TP 12/22/2017   <br>" )) DO
             WITH_STATEMENT (LIST newMWDDivDepList = FOR ( DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year" ) WITH LIST result = {  } DO
   WITH NUMERIC MaximumMonthlyDiv = $ "MWDDiversionData.MWDCanal_DailyCapacity" [] * "GetDaysInMonth"( date ) DO
    WITH NUMERIC newMWDDivAmount = WITH NUMERIC monthPercent = $ "MWDDiversion:MWD.Diversion Requested" [date] / "SumSlot"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" ) DO
@@ -912,8 +912,8 @@ BEGIN
     RULE                 "NV Accounting";
     DESCRIPTION          "DESCRIPTION: This rule assigns the values for the Nevada ICS.  The function &quot;ICSAccountingForNV&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for Nevada ICS.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.[ BiNational, SystemEfficiency, Imported, Tributary, ExtraordinaryConservation, DCP  ]ICS_NV <br>ICS Credits.AnnualCreationEC_NV ;  ICS Credits.AnnualCreationDCP_NV<br>ICS Credits.AnnualSimultaneousCreationDCPICS_NV ;  ICS Credits.AnnualSysWaterforDCP_NV<br>ICS Credits.Bank_NV ;  ICS Credits.TotalICS_NV";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (LIST ICSAccounting = "ICSAccountingForNV"(  )) DO
@@ -949,8 +949,8 @@ BEGIN
     RULE                 "CA Accounting";
     DESCRIPTION          "DESCRIPTION: This rule assigns the values for the California ICS.  The function &quot;ICSAccountingForCA&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for California ICS.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.AnnualDeliveryBiNat_[IID, CA] ;  ICS Credits.AnnualDeliveryEC_[IID, CA] ;  ICS Credits.AnnualDeliverySysEff_CA ; ICS Credits.AnnualDeliveryDCP_CA<br>ICS Credits.AnnualCreationBiNat_CA ;  ICS Credits.AnnualCreationEC_[IID, MWD, CA] ;  ICS Credits.AnnualCreationSysEff_CA ;  ICS Credits.AnnualCreationDCP_[MWD, CA]<br>ICS Credits.BiNationalICS_[MWD, IID, CA] ;  ICS Credits.ExtraordinaryConservationICS_[MWD, IID, CA] ;  ICS Credits.SystemEfficiencyICS_[MWD, CA]<br>ICS Credits.AnnualSimultaneousCreationDCPICS_MWD ;  ICS Credits.DCPICS_[MWD, CA]; ICS Credits.AnnualSysWaterforDCP_[MWD, CA]<br>ICS Credits.TotalICS_[MWD, IID, CA] ; ICS Credits.Bank_[MWD, CA]";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br>CH, 5/10/18: Added assignments for: IID EC ICS balance, IID Binat ICS balance, and total IID ICS (binat + EC) and edited total CA ICS assignment to include total MWD and total IID in order to distinguish MWD ICS creation/delivery/balance from IID ICS creation/delivery/balance <br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br>CH, 5/10/18: Added assignments for: IID EC ICS balance, IID Binat ICS balance, and total IID ICS (binat + EC) and edited total CA ICS assignment to include total MWD and total IID in order to distinguish MWD ICS creation/delivery/balance from IID ICS creation/delivery/balance <br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (LIST iidICSValues = "ICSAccountingForIID"(  )) DO
@@ -1041,8 +1041,8 @@ BEGIN
     RULE                 "AZ Accounting";
     DESCRIPTION          "DESCRIPTION: This rule assigns the values for the Arizona ICS.  The function &quot;ICSAccountingForAZ&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for Arizona ICS. The rule only sets informative values to data object slots and not any simulation object slots, the Lower Basin Demand Variability, Surplus and Shortage Logic will reference this data in later rules.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.AnnualCreation[SysEff_AZ, BiNat_AZ, DCP_CAWCD, DCP_AZ]<br>ICS Credits.AnnualCreationEC_[CRIT, GRIC, CAWCD, MVIDD, MW, AZ]<br>ICS Credits.AnnualDelivery[SysEff_AZ, EC_AZ, BiNat_AZ, DCP_AZ]<br>ICS Credits.ExtraordinaryConservationICS_[CRIT, GRIC, CAWCD, MVIDD, MW, AZ]<br>ICS Credits.BiNationalICS_[CAWCD, AZ]<br>ICS Credits.SystemEfficiencyICS_[CAWCD, AZ]<br>ICS Credits.AnnualSimultaneousCreatoinDCPICS_CAWCD<br>ICS Credits.AnnualSysWaterforDCP_[CAWCD, AZ]<br>ICS Credits.DCPICS_[CAWCD, AZ]<br>ICS Credits.Bank_[CAWCD, AZ]<br>ICS Credits.TotalICS_[CAWCD, AZ]<br>ICS Credits.FirmingAgreementBalance_[AZ, US]";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) ) ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4.<br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.";
+    RULE_EXEC_CONSTRAINT ( ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4.<br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (LIST azICSvalues = "ICSAccountingForAZ"(  )) DO
@@ -1247,8 +1247,8 @@ BEGIN
     RULE                 "AZ ICS Delivery";
     DESCRIPTION          "DESCRIPTION: This rule sets the annual delivery for each Arizona ICS account. The annual delivery is constrained by the bank capacity, Mead's pool elevation, and the delivery limit. The rule determines which ICS account type the annual ICS delivery comes from using a list. The order in which the ICS deliveries are made is: DCP (constrained by Mead recovery elevation), Extraordinary Conservation, Binational, and System Efficiency. <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.AnnualDeliveryDCP_CAWCD<br>ICS Credits.AnnualDeliveryEC_CAWCD<br>ICS Credits.AnnualDeliveryBiNat_CAWCD<br>ICS Credits.AnnualDeliverySysEff_CAWCD<br>ICS Credits.AnnualICSDelivery_CAWCD";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: AP, 20200101<br><br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadBelowDCPRecoveryElevation() to replace frequently used boolean. ";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR "IsDomesticOrQuantifiedOrFloodControl"(  ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: AP, 20200101<br><br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadBelowDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (NUMERIC ECICStoDCP = "SetNegativeToZero"( "Min"( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"] - $ "ICS Credits.Bank_AZ" [@"24:00:00 December Max DayOfMonth, Previous Year"], $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "EC ICS converted to DCP ICS during the current year, constrained by bank capacity <br>") DO
@@ -1380,8 +1380,8 @@ BEGIN
     RULE                 "SNWP ICS Creation and Delivery";
     DESCRIPTION          "DESCRIPTION: This rule determines the Nevada ICS creation and delivery. The ICS delivery is the minimum of the Nevada's maximum annual delivery, the water remaining in its apportionment after deliveries based on the LB operating condition, and Nevada's total ICS and DCP ICS credits with the constraint on DCP recovery elevation. The EC ICS creation is minimum of the ICS available based on apportionment and delivery constraints, Nevada's maximum annual creation, Lower Basin operating condition, and bank availability. The bank availability calculates volumes that can be taxed and not taxed since ICS is not taxed if it is paying back the previous year's delivery. The bank availability that can be taxed is calculated by the bank capacity minus any deliveries from the previous year, the bank and any tributary/imported ICS being converted to EC ICS, and annual creation of bi-national ICS (input slot). The EC ICS delivery from the previous year is then added back after the tax adjustment to calculate the bank availability.<br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICSProjectionData.AnnualICSDelivery_NV_Preliminary<br>ICSProjectionData.AnnualCreationEC_SNWP_Preliminary";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. ";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR "IsDomesticOrQuantifiedOrFloodControl"(  ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (NUMERIC ICS = ( $ "AnnualWaterUse.NV_BasicApportionment" [] - ( $ "AnnualWaterUse.Nevada_Forecast1" [@"24:00:00 December 31, Current Year"] - $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Non SNWA Water Use <br>" - IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
@@ -1390,7 +1390,7 @@ BEGIN
  ELSE
   0.00000000 "acre-ft"
  ENDIF - $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] * "MeadPumpingDemandVariabilityFactor"( @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "ICS calculation based on annual apportionment and diversion calculation affected by demand variability   <br>") DO
-            $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := "MinItem"( { IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) )
+            $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := "MinItem"( { IF ( "IsDomesticSurplus"(  ) )
  THEN
   "SetNegativeToZero"( "Abs"( "Min"( ICS, 0.00000000 "acre-ft" ) ) - $ "Surplus Volume Entitlements.SNWA Domestic" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "For domestic surplus, reduce ICS delivery by the amount of surplus entitlement for SNWP<br>"
  ELSE
@@ -1448,8 +1448,8 @@ BEGIN
     RULE                 "MWD ICS Creation and Delivery";
     DESCRIPTION          "DESCRIPTION: This rule sets ICS deliveries and creation for MWD. If it is the start year and April-December, the ICS creation and delivery (bi-national, system efficiency, extraordinary conservation) will be set to the default value passed from the 24MS. Otherwise, ICS delivery will be the minimum of the default based on the Sac WY type and LB conditions, the maximum ICS take based on Mead pool elevation, and capped at canal capacity. ICS creation is minimum constrained by the Sac WY type and LB conditions, the remaining space to bank ICS in Mead by MWD, the maximum annual creation by MWD, and the diversion requested that is above their annual delivery.<br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, or it is quantified surplus or flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICSProjectionData.AnnualCreationEC_MWD_Preliminary<br>ICSProjectionData.AnnualICSDelivery_MWD_Preliminary";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>TP, 20171218: In domestic surplus, reduce the ICS Delivery by the amount of Domestic surplus entitlement for MWD. Make sure the amount of Delivery taken is within the MWD ICS bank or below the Maximum Take that MWD can have.<br>AP, 20191921: Updated for DCP. Added constraint for max available ICS limited based on recovery elevation for DCP.<br>S.Baker, 20200309: Updated and edited description. Added WITH statement for SacWY_Take. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. ";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR "IsDomesticOrQuantifiedOrFloodControl"(  ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>TP, 20171218: In domestic surplus, reduce the ICS Delivery by the amount of Domestic surplus entitlement for MWD. Make sure the amount of Delivery taken is within the MWD ICS bank or below the Maximum Take that MWD can have.<br>AP, 20191921: Updated for DCP. Added constraint for max available ICS limited based on recovery elevation for DCP.<br>S.Baker, 20200309: Updated and edited description. Added WITH statement for SacWY_Take. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. ";
     BEGIN
 
       IF_STATEMENT (@"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  )) THEN
@@ -1461,7 +1461,7 @@ BEGIN
       ELSE
             WITH_STATEMENT (LIST IIDAccounting = "ICSAccountingForIID"(  )) DO
             $ "ICSProjectionData.AnnualICSDelivery_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := "MinItem"( { WITH NUMERIC SacWY_Take = $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - 1.00000000, "Take Step 1"] DO
-  IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) COMMENTED_BY "In domestic surplus, reduce the ICS Delivery by the amount of domestic surplus entitlement for MWD.  <br>" )
+  IF ( "IsDomesticSurplus"(  ) COMMENTED_BY "In domestic surplus, reduce the ICS Delivery by the amount of domestic surplus entitlement for MWD.  <br>" )
   THEN
    "SetNegativeToZero"( SacWY_Take - $ "Surplus Volume Entitlements.MWD Domestic" ["Dec31ofYear"( @"t" )] )
   ELSE
@@ -1474,7 +1474,7 @@ BEGIN
   $ "ICS Credits.TotalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"]
  ENDIF COMMENTED_BY "Total available ICS for delivery limited by DCP recovery elevation. EC ICS creation and delivery are mutually <br>exclusive (either create or deliver, not both). <br>" ) COMMENTED_BY "Available ICS Water <br>" } );
 
-            $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := IF ( ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) COMMENTED_BY "No ICS creation if a Quantified Surplus, Flood Control, or DCP<br>" )
+            $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := IF ( "IsDomesticOrQuantifiedOrFloodControl"(  ) COMMENTED_BY "No ICS creation if a Quantified Surplus, Flood Control, or DCP<br>" )
  THEN
   0.00000000 "acre-ft"
  ELSE
@@ -1491,8 +1491,8 @@ BEGIN
     RULE                 "AZ Annual ICS Delivery";
     DESCRIPTION          "DESCRIPTION: This rule sets ICS deliveries for CAWCD. If it is the start year and April-December, the ICS delivery will be set to the default value from the 24MS. Otherwise, determine the ICS delivery desired for CAWCD, and restrict delivery to not take more water than is banked in Mead (minus non-CAWCD ICS) based on pool elevation and capping the delivery at canal capacity. <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, or it is quantified surplus or flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR "IsQuantifiedOrFloodControl"(  ) ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20200309: Updated and edited description.<br>S.Baker, 20200310: Removed Min() inside MinItem() to reduce redundancy. Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. ";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR "IsDomesticOrQuantifiedOrFloodControl"(  ) OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20200309: Updated and edited description.<br>S.Baker, 20200310: Removed Min() inside MinItem() to reduce redundancy. Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
       IF_STATEMENT (@"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  )) THEN
@@ -9572,7 +9572,7 @@ BEGIN
     ACTIVE         FALSE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>CH, 5/8/18: In MWD EC ICS creation assignment, maximum creation of MWD EC ICS edited to be CA max put - IID EC creation; in MWD ICS delivery assignment, available ICS water edited to be min of (MWD max take - IID total ICS) and (total MWD ICS + creation EC ICS*system tax) in order to separate MWD ICS creation and delivery from IID ICS creation and delivery <br>CH, 5/10/18: renamed function and internal variables to refer to MWD ICS instead of CA ICS to avoid confusion<br>AP, 4/11/19: Added constraint to make sure the deterministic run uses the default 24 MS inputs";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>CH, 5/8/18: In MWD EC ICS creation assignment, maximum creation of MWD EC ICS edited to be CA max put - IID EC creation; in MWD ICS delivery assignment, available ICS water edited to be min of (MWD max take - IID total ICS) and (total MWD ICS + creation EC ICS*system tax) in order to separate MWD ICS creation and delivery from IID ICS creation and delivery <br>CH, 5/10/18: renamed function and internal variables to refer to MWD ICS instead of CA ICS to avoid confusion<br>AP, 4/11/19: Added constraint to make sure the deterministic run uses the default 24 MS inputs<br>S. Baker, 20200311: Add function IsDomesticSurplus() to replace Or statement to improve readability. ";
     BEGIN
 
       IF ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  ) )
@@ -9589,7 +9589,7 @@ BEGIN
    THEN
     0.00000000 "acre-ft"
    ELSE
-    IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
+    IF ( "IsDomesticSurplus"(  ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
     THEN
      "Max"( ( $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Take Step 1"] - $ "Surplus Volume Entitlements.MWD Domestic" ["Dec31ofYear"( @"t" )] ), 0.00000000 "acre-ft" )
     ELSE
@@ -10523,6 +10523,46 @@ BEGIN
 
     END
     UUID "{7f9481d7-b0d6-470c-a603-007f3f0e56c5}";;
+
+    FUNCTION       "IsDomesticOrQuantifiedOrFloodControl" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Check if Domestic or Quantified Surplus or Flood Control for current year.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, S.Baker 20200311";
+    BEGIN
+
+      IF ( "IsQuantifiedOrFloodControl"(  ) OR "IsDomesticSurplus"(  ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{7700a1ff-b606-40b3-8fde-a392e351d642}";;
+
+    FUNCTION       "IsDomesticSurplus" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Check if Domestic Surplus for current year.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, S.Baker 20200311";
+    BEGIN
+
+      IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{d0e4e26d-3fb3-4db5-9fd5-33e891c533df}";;
 
     FUNCTION       "MonthIs" ( LIST months )
     RETURN_TYPE    BOOLEAN;
@@ -13452,7 +13492,7 @@ BEGIN
     ACTIVE         FALSE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>GCAA, 20181030: Changed reference from MWDDiversionData.MWDMaximumAnnualDelivery to AnnualWaterUse.MWDCanal_AnnualCapacity slot";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>GCAA, 20181030: Changed reference from MWDDiversionData.MWDMaximumAnnualDelivery to AnnualWaterUse.MWDCanal_AnnualCapacity slot<br>S. Baker, 20200311: Add function IsDomesticSurplus() to replace Or statement to improve readability. <br>";
     BEGIN
 
       WITH NUMERIC creationOfCACEICS = IF ( ( ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR NOT "IsMRM"(  ) ) COMMENTED_BY "If the year is a Shortage Year, a Quantified Surplus Year, a Flood Control Year, <br>or if the run is a deterministic Min, Max or Most run, do not Create any ICS TP <br>12/18/2017 <br>" )
@@ -13465,7 +13505,7 @@ BEGIN
   THEN
    0.00000000 "acre-ft" COMMENTED_BY "Shortage Years <br>"
   ELSE
-   IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
+   IF ( "IsDomesticSurplus"(  ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
    THEN
     "Max"( ( $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Take Step 1"] - $ "Surplus Volume Entitlements.MWD Domestic" ["Dec31ofYear"( @"t" )] ), 0.00000000 "acre-ft" )
    ELSE
