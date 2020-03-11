@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:46 March 11, 2020
+# Created 15:59 March 11, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -19,7 +19,7 @@ BEGIN
   BEGIN
 
     RULE                 "Final SNWP Diversion";
-    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for SNWA after all schedule adjustments. Adjustments may be made to get Nevada to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>SLOTS SET: ForecastUse.SNWPAnnualFC";
+    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for SNWA after all schedule adjustments. Adjustments may be made to get Nevada to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: ForecastUse.SNWPAnnualFC";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -31,7 +31,7 @@ BEGIN
     UUID "{0bfe40d2-1379-42c8-a6d3-db88d4d2719e}";;
 
     RULE                 "Final CAP Diversion";
-    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for CAP after all schedule adjustments. Adjustments may be made to get Arizona to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>SLOTS SET: Forecast.CAPAnnualFC<br><br>";
+    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for CAP after all schedule adjustments. Adjustments may be made to get Arizona to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: Forecast.CAPAnnualFC<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -43,7 +43,7 @@ BEGIN
     UUID "{260969b9-b5a6-4017-8c83-cf6454da6fbe}";;
 
     RULE                 "Final MWD Diversion";
-    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for MWD after all schedule adjustments. Adjustments may be made to get California to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>SLOTS SET: ForecastUse.MWDDiversionAnnualFC; ForecastUse.MWDAnnualFC";
+    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for MWD after all schedule adjustments. Adjustments may be made to get California to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: ForecastUse.MWDDiversionAnnualFC; ForecastUse.MWDAnnualFC";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -64,7 +64,7 @@ BEGIN
     UUID "{0feb2abf-ab3a-4ef2-9441-a6c6975c1a78}";;
 
     RULE                 "Final CA Overrun - Div Req";
-    DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for California after all schedule adjustments by calculating the difference between the total annual diversion request and the annual apportionment for the current calendar year.<br><br>SLOTS SET: AnnualWaterUse.CaOverrun";
+    DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for California after all schedule adjustments by calculating the difference between the total annual diversion request and the annual apportionment for the current calendar year.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.CaOverrun";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -81,7 +81,7 @@ BEGIN
     UUID "{59a6b371-5c3d-4bda-a304-c88c26e0273c}";;
 
     RULE                 "Final CA Annual Use - Div Req";
-    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for California after all schedule adjustments by summing the non-MWD diversion requests and the MWD depletion request for the current calendar year.  This rule also calculates the value of the California Final Adjusted Apportionment.<br><br>SLOTS SET: AnnualWaterUse.CaTotalAnnual; AnnualWaterUse.California_FinalAdjustedApportionment";
+    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for California after all schedule adjustments by summing the non-MWD diversion requests and the MWD depletion request for the current calendar year.  This rule also calculates the value of the California Final Adjusted Apportionment.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4 and if the timestep is December or the finish timestep.<br><br>SLOTS SET: AnnualWaterUse.CaTotalAnnual; AnnualWaterUse.California_FinalAdjustedApportionment";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND ( @"t" == @"24:00:00 December 31, Current Year" OR @"t" == @"Finish Timestep" );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -114,7 +114,7 @@ BEGIN
     UUID "{cb5bece1-347d-415f-b3ce-25fedd882e47}";;
 
     RULE                 "Final AZ Overrun - Div Req";
-    DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for Arizona after all schedule adjustments by calculating the difference between the total diversion request and the annual apportionment for the current calendar year. <br><br>SLOTS SET: AnnualWaterUse.AzOverrun<br><br>";
+    DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for Arizona after all schedule adjustments by calculating the difference between the total diversion request and the annual apportionment for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.AzOverrun<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -126,7 +126,7 @@ BEGIN
     UUID "{51c1f814-afca-4ce1-ae9a-42e6c1a8a216}";;
 
     RULE                 "Final AZ Annual Use - Div Req";
-    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for Arizona after all schedule adjustments by summing the CAP and non-CAP annual diversion requests for the current calendar year. <br><br>SLOTS SET: AnnualWaterUse.AzTotalAnnual<br><br>";
+    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for Arizona after all schedule adjustments by summing the CAP and non-CAP annual diversion requests for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.AzTotalAnnual<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -138,7 +138,7 @@ BEGIN
     UUID "{3181491d-33cb-496a-8c83-de6f7c0e3c69}";;
 
     RULE                 "Final NV Overrun - Div Req";
-    DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for Nevada after all schedule adjustments by calculating the difference between the total diversion requests and the annual apportionment for the current calendar year. <br><br>SLOTS SET: AnnualWaterUse.NVOverrun<br><br>";
+    DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for Nevada after all schedule adjustments by calculating the difference between the total diversion requests and the annual apportionment for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.NVOverrun<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -150,7 +150,7 @@ BEGIN
     UUID "{572e18ce-04c0-4998-86a9-dc6292768c02}";;
 
     RULE                 "Final NV Annual Use - Div Req";
-    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for Nevada after all schedule adjustments by summing the diversion requests of Nevada water users for the current calendar year. <br><br>SLOTS SET: AnnualWaterUse.NvTotalAnnual<br><br>";
+    DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for Nevada after all schedule adjustments by summing the diversion requests of Nevada water users for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.NvTotalAnnual<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -171,7 +171,7 @@ BEGIN
     UUID "{3ce4aca2-e79b-4b7a-b7e7-7d0031d658f2}";;
 
     RULE                 "Compute Lower Basin Energy";
-    DESCRIPTION          "DESCRIPTION: This rule must fire after all schedule adjustments have been made, which is why it is in the highest priority polict group.<br><br>SLOTS SET: Lower Basin Energy.Computed Davis Energy Using Input Eff; Lower Basin Energy.Computed Davis Head using Turbine Release; Lower Basin Energy.Davis KWH per AF; Lower Basin Energy.Computed Parker Energy Using Input Eff; Lower Basin Energy.Computed PD Project Energy Using Peak Base Power Calc; Lower Basin Energy.Computed PD Project Energy Using Input Eff<br><br>";
+    DESCRIPTION          "DESCRIPTION: The rule calculates Lower Basin energy. This rule must fire after all schedule adjustments have been made, which is why it is in the highest priority policy group. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: Lower Basin Energy.Computed Davis Energy Using Input Eff; Lower Basin Energy.Computed Davis Head using Turbine Release; Lower Basin Energy.Davis KWH per AF; Lower Basin Energy.Computed Parker Energy Using Input Eff; Lower Basin Energy.Computed PD Project Energy Using Peak Base Power Calc; Lower Basin Energy.Computed PD Project Energy Using Input Eff<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
