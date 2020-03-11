@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 10:49 March 11, 2020
+# Created 13:27 March 11, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -616,10 +616,10 @@ BEGIN
     UUID "{bde8a45f-6afe-4ca8-bb72-e79b4a6c743a}";;
 
     RULE                 "AZ Diversion Adjustment";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION: This rule adjusted Arizona's diversion for CAP. THe diversion requested is calculated as an annual value  based on the diversion request, firming obligation, shortage volume, DCP volume reduction, and ICS delivery. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
-    NOTES                "S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. ";
+    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. ";
     BEGIN
 
       WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
@@ -629,7 +629,7 @@ BEGIN
  ELSE
   0.00000000 "acre-ft"
  ENDIF COMMENTED_BY "Adjust CAP for shortage <br>") DO
-          DESCRIPTION          "Adjust diversion by difference of ICS delivery calculated by MTOM vs the value passed from the <br>24 MS. <br>";
+          DESCRIPTION          "Adjust diversion by difference of ICS delivery calculated by MTOM vs the value passed from the 24 MS.  <br>";
       WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.AnnualICSDelivery_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
           DESCRIPTION          "DCP reduction volume <br>";
       WITH_STATEMENT (NUMERIC DCPreductionCAWCD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
@@ -656,12 +656,13 @@ BEGIN
     UUID "{1574216e-dc24-4ea2-9307-60c03d96cdbb}";;
 
     RULE                 "CA Diversion Adjustment";
-    DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re-calculates and assignes the Total ICS Volumes for each state. <br><br>EXECUTION CONSTRAINTS: This rule fires at the start timestep if before April in MRM or in January. in December or the end date of the run in run cycle 4 if it is Flood Control or Quantified Surplus and this rule has not fired sucessfully yet. <br><br>SLOTS SET: ";
+    DESCRIPTION          "DESCRIPTION: This rule adjusted California's diversion for MWD, Coachella, and IID. For Coachella and IID, the diversion requested is reduced by the DCP contribution and by a LBDV factor if it is January (allow LBDV in Jan of start year if side inflows below Parker are above 90%). The MWD adjusted diversion requested is based on the deliveries and creation of ICS and is constrained by the states apportionment. The adjusted annual diversion is spread to monthly values based on the current proportion diversion each month.<br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes at the start timestep if before April in MRM or in January and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3 and the rule has not yet fired successfully. <br><br>SLOTS SET: <br>AAC:Coachella.Diversion Requested<br>AAC:IID.Diversion Requested<br>MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND @"t" < @"24:00:00 April 30, Start Year" ) AND "IsMRM"(  ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) OR ( ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: Updated description. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>AP, 20191130: Updated for DCP.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. ";
     BEGIN
 
+    DESCRIPTION          " ---------------  Coachella Diversion Adjustment  --------------- # <br>";
       WITH_STATEMENT (NUMERIC dcpContributionCVWD = $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AAC:Coachella.Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.Coachella" [date] * IF ( "GetMonth"( @"t" ) == 1.00000000 )
@@ -669,14 +670,14 @@ BEGIN
   "AgUsersBelowParkerDemandVariabilityFactor"( date, "CVWD" )
  ELSE
   1.00000000
- ENDIF - dcpContributionCVWD * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"], date );
+ ENDIF - ( dcpContributionCVWD * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"] ) COMMENTED_BY "QUESTION: how does this add up to 100% if not January (eg. Feb-March start year); shouldnt this match IID?   <br>", date ) COMMENTED_BY "Reduce diversion request by DCP contribution; if January, add LBDV factor <br>";
 
       ENDFOREACH;
 
       END_WITH_STATEMENT;
 
-    BREAKPOINT AFTER_EXEC TRUE;
-      WITH_STATEMENT (NUMERIC IIDadjustment = $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualCreationEC_IID_Default" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] + $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] )) DO
+    DESCRIPTION          " ---------------  IID and MWD Diversion Adjustment  --------------- #  <br>";
+      WITH_STATEMENT (NUMERIC IIDadjustment = ( $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualCreationEC_IID_Default" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] + $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] ) ) COMMENTED_BY "Projections input from 24MS and already accounted for in other rules (?) <br>") DO
             WITH_STATEMENT (NUMERIC totalDeliveryMWDICS = IF ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  ) )
  THEN
   0.00000000 "acre-ft"
@@ -768,7 +769,8 @@ BEGIN
 
           DESCRIPTION          "Adjust IID Diversion Requested <br>";
       IF_STATEMENT ("RoundToFactor"( IIDadjustment, 1.00000000 "acre-ft" ) != 0.00000000 "acre-ft") THEN
-            FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+          DESCRIPTION          "QUESTION: Should this match the coachella calc at the top? the date Jan-Dec wouldnt make sense for startmonths <br>other than Jan? <br>";
+      FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AAC:IID.Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.IID" [date] * IF ( "GetMonth"( @"t" ) == 1.00000000 )
  THEN
   "AgUsersBelowParkerDemandVariabilityFactor"( date, "IID" )
@@ -1492,7 +1494,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets ICS deliveries for CAWCD. If it is the start year and April-December, the ICS delivery will be set to the default value from the 24MS. Otherwise, determine the ICS delivery desired for CAWCD, and restrict delivery to not take more water than is banked in Mead (minus non-CAWCD ICS) based on pool elevation and capping the delivery at canal capacity. <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, or it is quantified surplus or flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20200309: Updated and edited description.<br>S.Baker, 20200310: Removed Min() inside MinItem() to reduce redundancy. Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged() .";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20200309: Updated and edited description.<br>S.Baker, 20200310: Removed Min() inside MinItem() to reduce redundancy. Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S.Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged() .";
     BEGIN
 
       IF_STATEMENT (@"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  )) THEN
