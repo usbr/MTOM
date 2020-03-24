@@ -53,9 +53,13 @@ Icon
 /Output Data/EnsembleOutput.xlsx
 
 # Testbed Forecasts and IC data
-Inflow Forecasts/Testbed_Historical_Forecasts
-Input Data/Historical_Diversions.xlsx
-Input Data/Observed_for_MTOM_IC.xlsx
+/Inflow Forecasts/Testbed_Historical_Forecasts
+/Input Data/Historical_Diversions.xlsx
+/Input Data/Observed_for_MTOM_IC.xlsx
+/Input Data/TestbedData
+
+# SCT folder
+/RW Files/SCTs
 
 # RiverSMART folders and files
 /Hydrology
