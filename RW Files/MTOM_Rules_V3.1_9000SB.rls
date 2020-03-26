@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:59 March 11, 2020
+# Created 10:51 March 26, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4702,7 +4702,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the Lake Mead outflow to the smaller of the sum of the lower basin demands OR the water available in Mead (if Run Cycle >=3; otherwise use 9,999,999 acre-ft/month). This rule can execute as many times as necessary to set releases to meet demands. <br><br>SLOTS SET: Mead.Outflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>S.Baker 2018/10/17: Replace SumAllDiversionsBelowVolume(Havasu) - SumAllGainsBelowVolume(Havasu) with HavasuOutflow.ParkerRequirement. This change was made because this calculation was already performed in rule &quot;Set Parker Final Requirement&quot;, so it was repetative and problematic to recalculate them. This change is important during hindcast runs when the Gila River has ver high local inflows (Jan-Apr 1993). ";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker, 20200326: Edited IF ELSE statement to reduce redundancy. <br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>S.Baker 2018/10/17: Replace SumAllDiversionsBelowVolume(Havasu) - SumAllGainsBelowVolume(Havasu) with HavasuOutflow.ParkerRequirement. This change was made because this calculation was already performed in rule &quot;Set Parker Final Requirement&quot;, so it was repetative and problematic to recalculate them. This change is important during hindcast runs when the Gila River has very high local inflows (Jan-Apr 1993). <br>";
     BEGIN
 
       $ "Mead.Outflow" [] := "Min"( IF ( "GetRunCycleIndex"(  ) >= 3.00000000 )
@@ -4710,12 +4710,12 @@ BEGIN
   "CheckResPhysicalConstraint"( % "Mead", @"t" )
  ELSE
   9999999.00000000 "acre-ft/month"
- ENDIF, IF ( @"t" <= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM only <br>" )
+ ENDIF, "VolumeToFlow"( IF ( @"t" <= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM only <br>" )
  THEN
-  "VolumeToFlow"( "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" ) + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", $ "Mohave.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", $ "Havasu.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month", @"t" )
+  "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" )
  ELSE
-  "VolumeToFlow"( $ "HavasuOutflow.ParkerRequirement" [@"t"] + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t - 1" ) ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t - 1" ) ) ) / 2.00000000 ) * 1.00000000 "month", @"t" )
- ENDIF );
+  $ "HavasuOutflow.ParkerRequirement" [@"t"]
+ ENDIF + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", $ "Mohave.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", $ "Havasu.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month", @"t" ) );
 
     END
     UUID "{5a2f1e38-f3a3-4800-9a33-a26b907141e7}";;
@@ -13642,32 +13642,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b5326d85-f0f6-43c6-81af-aff0f764ee63}";
+    UUID "{2de72010-a5a6-4ae8-94eb-d923cdadc11d}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{073ffa15-6487-4aa0-84fe-93c9137d6a04}";
+    UUID "{74dbf136-7450-4350-a543-eb5e1ffaa107}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{acbfa741-4ebb-4599-a61b-3d795d63d328}";
+    UUID "{ba73cac7-3700-4865-9608-b5e75a3d1e59}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{849342ea-91e9-4f3b-a016-a56b322da79e}";
+    UUID "{6843a75a-9a59-44ba-8b55-7216f8a86f50}";
 ;
 
   END
-  UUID "{fa9349a3-b656-4e48-a0aa-a77e4c3c5cd3}";;
+  UUID "{2f8e918e-9f77-4858-b174-6832a4d2c288}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13678,11 +13678,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d7285869-7d37-4223-855b-8163d29a322f}";
+    UUID "{79482375-b18d-43f5-8499-e274059daa90}";
 ;
 
   END
-  UUID "{df3ae728-bf7c-4570-8ef3-273d04791a18}";;
+  UUID "{09e49eeb-f1af-4609-8e0e-e0cf4c44beeb}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13693,11 +13693,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9c864bfd-31fa-468d-b240-05e2843e534b}";
+    UUID "{1408b174-b654-4dad-ab1e-7f0cf6d110cd}";
 ;
 
   END
-  UUID "{8e286005-3016-4408-ad7c-b14e879cc75f}";;
+  UUID "{211cbc25-2cda-410f-a9e2-efc975f203c5}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13708,11 +13708,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8493ab4b-ba13-4a00-8553-a6c768097ebc}";
+    UUID "{5f82fddd-8f67-41e8-a178-04f5b1a875af}";
 ;
 
   END
-  UUID "{c93dc893-b079-4d92-ae9b-c31934350490}";;
+  UUID "{0f4bd49f-8e59-4b6d-94f0-782c181b4e7a}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
