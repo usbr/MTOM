@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 08:57 March 31, 2020
+# Created 11:21 March 31, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -10361,10 +10361,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/2013";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/2013<br><br>S.Baker 20200331: Added MTOM run type to if statement.";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) )
+      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
  THEN
   IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover90"] ) COMMENTED_BY "For high inflow year, pumping reduced" )
   THEN
@@ -10391,10 +10391,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/13";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/13<br><br>S.Baker 20200331: Added MTOM run type to if statement.";
     BEGIN
 
-      IF ( "IsMRM"(  ) )
+      IF ( "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
  THEN
   IF ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] )
   THEN
@@ -10426,10 +10426,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 3/12/2013";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 3/12/2013<br><br>S.Baker 20200331: Added MTOM run type to if statement.";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) )
+      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
  THEN
   IF ( ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] ) COMMENTED_BY "High local inflows" )
   THEN
@@ -13642,32 +13642,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{cf40993d-8937-4eec-b544-34b0842b0152}";
+    UUID "{a62b5a04-6e38-4318-85e4-1ae61014aa6a}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8dbf412e-ec3e-4c8c-a632-b5edf90b7ff2}";
+    UUID "{4d74c51e-eb1e-4f02-b08c-5aeb60c9731c}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5dc37d38-4503-49f4-bcc0-b5f5e7c99056}";
+    UUID "{957b82a2-235f-408b-9a2f-24c2708f06b5}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fdff8b84-98ac-4e98-b163-44512e644af3}";
+    UUID "{f8b1561f-1fe6-4d2f-94d7-951fac88d72a}";
 ;
 
   END
-  UUID "{d7fb645c-c7a6-4e78-b692-60e631d34161}";;
+  UUID "{b2987ad3-6017-44bd-9d66-f32bc12758cd}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13678,11 +13678,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a21100ec-5f4c-42dc-a2ab-7fbf8328adb7}";
+    UUID "{b1e6b1a2-288d-4987-ab2e-699a846c4511}";
 ;
 
   END
-  UUID "{0fd8b149-688e-4669-b0c4-6ca117973ef4}";;
+  UUID "{1f59883f-c19e-402b-8c3b-083473c6bf8b}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13693,11 +13693,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c19f47bf-67ae-408f-be5b-524b8cce3941}";
+    UUID "{1023823f-7f4f-4ed5-af55-d984dcdd6c3e}";
 ;
 
   END
-  UUID "{e9debf5c-921f-4571-815c-38747025ea65}";;
+  UUID "{5c51f5e7-cee0-4c1b-bfb8-1ff859f8e50a}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13708,11 +13708,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{393de4d1-f174-46e8-82b4-d9b63bfe3a46}";
+    UUID "{934fdf8f-82dd-406b-a751-b0d419562297}";
 ;
 
   END
-  UUID "{2cee2c6f-1ced-436b-bed0-9fbf0f3a5d1c}";;
+  UUID "{7582e6f7-bdd8-4de9-a277-48a90608e242}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
