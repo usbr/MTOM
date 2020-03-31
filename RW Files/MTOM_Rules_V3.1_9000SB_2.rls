@@ -1,5 +1,5 @@
-# RiverWare_Ruleset 8.0.3
-# Created 15:12 March 31, 2020
+# RiverWare_Ruleset 7.5.3 Patch
+# Created 15:25 March 31, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1257,7 +1257,7 @@ BEGIN
 
     RULE                 "AZ ICS Delivery";
     DESCRIPTION          "DESCRIPTION: This rule sets the annual delivery for each Arizona ICS account. The annual delivery is constrained by the bank capacity, Mead's pool elevation, and the delivery limit. The rule determines which ICS account type the annual ICS delivery comes from using a list. The order in which the ICS deliveries are made is: DCP (constrained by Mead recovery elevation), Extraordinary Conservation, Binational, and System Efficiency. <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.AnnualDeliveryDCP_CAWCD<br>ICS Credits.AnnualDeliveryEC_CAWCD<br>ICS Credits.AnnualDeliveryBiNat_CAWCD<br>ICS Credits.AnnualDeliverySysEff_CAWCD<br>ICS Credits.AnnualICSDelivery_CAWCD";
-    ACTIVE               FALSE;
+    ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: AP, 20200101<br><br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadBelowDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged() .";
     BEGIN
@@ -1380,7 +1380,7 @@ BEGIN
     UUID "{3caeca45-d10b-4123-98f1-f4aff264ea4b}";;
 
   END
-  UUID "{496b8a83-2e41-45ec-b31b-1853a9624a2e}";;
+  UUID "{2f27e9f0-ed56-456c-b062-79cabf2362f9}";;
 
   POLICY_GROUP   "Lower Basin Demand Variability/ICS Creation and Delivery";
   DESCRIPTION    "This policy group handles Lower Basn deliveries and ICS based on changes in operating conditions due to Lower Basin Demand Variability. The rules reset the Lower Basin water user diversions if necessary. Rules also set preliminary volumes of ICS creation and delivieries for CAWCD, MWD, and SNWP. ";
@@ -13651,32 +13651,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3b865c07-fcfa-4abd-afda-7bdbb82cb4dd}";
+    UUID "{3f2567b5-b175-4ff5-ab9f-72eff744e3a6}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{35021120-1563-4173-b910-1d1af346bfb8}";
+    UUID "{d54b4e0b-162a-426c-a0a1-8efbe7a138e7}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9d397923-6ea0-486f-ab4d-89de856bcd30}";
+    UUID "{5fe26bf0-3dfa-41ef-b0a0-26eaf49c08f2}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{059ad887-4296-4b94-86fa-0f29716ca56c}";
+    UUID "{39f93597-c90a-4af3-bed3-a3c952c9ffc5}";
 ;
 
   END
-  UUID "{13af0f46-be82-4c31-9b7d-06f5463ed6af}";;
+  UUID "{473e9a75-f0a7-41fb-bc6e-d9b4ac03fdfe}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13687,11 +13687,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{56bcbe36-ca04-47a7-9433-c722a5834585}";
+    UUID "{92372de1-9cad-42d6-aca3-1ca58d8b648f}";
 ;
 
   END
-  UUID "{19ae8181-5a27-4834-bebb-6227d8d2990b}";;
+  UUID "{83ae1c3d-d968-45e3-baff-00be7d629166}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13702,11 +13702,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ddbcb747-57dc-4ea2-9101-d20cd7e6537f}";
+    UUID "{f293dc58-f387-43c9-853b-bad55f025c3a}";
 ;
 
   END
-  UUID "{0b5c06e0-53e5-4d73-95f9-360946d82c42}";;
+  UUID "{eccd3972-e868-4dc3-8d53-f5086dcc0df1}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13717,11 +13717,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9132078f-f791-41dd-aa4e-095434f1c522}";
+    UUID "{5f842b5a-bae4-4dfd-83fb-1a25b2f4136a}";
 ;
 
   END
-  UUID "{300429a0-c8c2-4f82-bcf7-14d90acf901f}";;
+  UUID "{085146df-160c-4912-8cee-38acc6175b67}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
