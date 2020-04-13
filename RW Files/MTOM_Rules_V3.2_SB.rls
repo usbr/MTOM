@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 11:49 April 13, 2020
+# Created 11:56 April 13, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -548,10 +548,10 @@ BEGIN
   BEGIN
 
     RULE                 "MX Diversion Adjustment";
-    DESCRIPTION          "";
+    DESCRIPTION          "DESCRIPTION: This rule adjusts Mexico's diversion. The diversion requested is calculated as an annual value based on the diversion requested and Mexico Recoverable Water Savings contribution. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January or the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>MexicoTreatyDelivery:MexicoSched.Diversion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] ) ) AND $ "MTOMRunType.RunType" [] != 1.00000000 AND NOT ( "IsQuantifiedOrFloodControl"(  ) OR ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) );
-    NOTES                "GCAA, 20200330: Updated rule to include SetOutYearSchedules logic and to only fire in outyears.";
+    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
+    NOTES                "GCAA, 20200330: Updated rule to include SetOutYearSchedules logic and to only fire in outyears.<br>S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. ";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC FALSE;
