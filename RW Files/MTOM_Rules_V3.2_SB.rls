@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 10:30 April 13, 2020
+# Created 10:45 April 13, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -10338,10 +10338,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/2013";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/2013<br><br>S.Baker 20200331: Added MTOM run type to if statement.";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) )
+      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
  THEN
   IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover90"] ) COMMENTED_BY "For high inflow year, pumping reduced" )
   THEN
@@ -10368,10 +10368,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/13<br><br>GCAA, 20200330: Added a separate coefficient for IID and CVWD.";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/13<br><br>GCAA, 20200330: Added a separate coefficient for IID and CVWD.<br>S.Baker 20200331: Added MTOM run type to if statement.";
     BEGIN
 
-      IF ( "IsMRM"(  ) )
+      IF ( "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
  THEN
   IF ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] )
   THEN
@@ -10408,10 +10408,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 3/12/2013";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 3/12/2013<br><br>S.Baker 20200331: Added MTOM run type to if statement.";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) )
+      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
  THEN
   IF ( ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] ) COMMENTED_BY "High local inflows" )
   THEN
@@ -10507,6 +10507,66 @@ BEGIN
 
     END
     UUID "{7f9481d7-b0d6-470c-a603-007f3f0e56c5}";;
+
+    FUNCTION       "IsLBorDCPconditionChanged" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Check if the Lower Basin condition or DCP BWSCP condition has changed between run cycles 3 and 4.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, S.Baker 20200311";
+    BEGIN
+
+      IF ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSP" ["Dec31ofYear"( @"t" )] )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{92349f2c-df3a-4918-ab7f-7afdefb584a8}";;
+
+    FUNCTION       "IsDomesticOrQuantifiedOrFloodControl" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Check if Domestic or Quantified Surplus or Flood Control for current year.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, S.Baker 20200311";
+    BEGIN
+
+      IF ( "IsQuantifiedOrFloodControl"(  ) OR "IsDomesticSurplus"(  ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{2c04ee45-8310-4567-9a7f-56fd04962ab7}";;
+
+    FUNCTION       "IsDomesticSurplus" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Check if Domestic Surplus for current year.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, S.Baker 20200311";
+    BEGIN
+
+      IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{556c0a86-e519-4a67-af64-ea8cacfbef0b}";;
 
     FUNCTION       "MonthIs" ( LIST months )
     RETURN_TYPE    BOOLEAN;
@@ -10680,6 +10740,21 @@ BEGIN
 
     END
     UUID "{9931bbae-5872-4b0d-8b90-9a893d240eb8}";;
+
+    FUNCTION       "SetNegativeToZero" ( NUMERIC in_val )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "DESCRIPTION: This function takes a value and if it is negative, returns zero.<br><br>RETURNS: non-negative value<br><br>ARGUMENTS:<br>1. NUMERIC in_val - numeric value";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author: S.Baker, 20200310";
+    BEGIN
+
+      "Max"( in_val, in_val * 0.00000000 );
+
+    END
+    UUID "{c5f217f0-f879-43bc-b280-af69804a5f72}";;
 
   END
   UUID "{164b480b-be20-42c2-ae67-52b9db261109}";;
