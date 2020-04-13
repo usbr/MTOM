@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 15:25 March 31, 2020
+# Created 17:44 April 13, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -9622,7 +9622,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split, edited to more accurately reflect ICS  flood control in interim guidlines (% ICS change)";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split, edited to more accurately reflect ICS  flood control in interim guidlines (% ICS change)<br>SB 20200413: Add constraint to check that the total EC ICS volume is greater than 0 acre-ft when reducing the Total ICS Volume for each state. This caused errors when the totalECICS value is 0 acre-ft, which happens during hindcast runs. ";
     BEGIN
 
       WITH NUMERIC mwdECICS = $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] DO
@@ -9638,7 +9638,7 @@ BEGIN
            WITH NUMERIC iidOtherICS = $ "ICS Credits.TotalICS_IID" ["Dec31ofYear"( @"t" )] - iidECICS DO
             WITH NUMERIC nvOtherICS = $ "ICS Credits.TotalICS_NV" ["Dec31ofYear"( @"t" )] - nvECICS DO
              WITH NUMERIC cawcdOtherICS = $ "ICS Credits.TotalICS_CAWCD" ["Dec31ofYear"( @"t" )] - cawcdECICS DO
-              IF ( fcvolume < totalECICS )
+              IF ( fcvolume < totalECICS AND totalECICS > 0.00000000 "acre-ft" )
               THEN
                WITH LIST stateECBalLista = { mwdECICS - ( mwdECICS / totalECICS ) * fcvolume , iidECICS - ( iidECICS / totalECICS ) * fcvolume , nvECICS - ( nvECICS / totalECICS ) * fcvolume , cawcdECICS - ( cawcdECICS / totalECICS ) * fcvolume , critECICS - ( critECICS / totalECICS ) * fcvolume , gricECICS - ( gricECICS / totalECICS ) * fcvolume , mviddECICS - ( mviddECICS / totalECICS ) * fcvolume , wmECICS - ( wmECICS / totalECICS ) * fcvolume } DO
                 WITH LIST totalICSBalList = { mwdOtherICS + GET @INDEX 0.00000000 FROM stateECBalLista , iidOtherICS + GET @INDEX 1.00000000 FROM stateECBalLista , nvOtherICS + GET @INDEX 2.00000000 FROM stateECBalLista , cawcdOtherICS + GET @INDEX 3.00000000 FROM stateECBalLista } DO
@@ -13651,32 +13651,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3f2567b5-b175-4ff5-ab9f-72eff744e3a6}";
+    UUID "{bda34ebe-c7fb-4667-b96a-9bfe1bc65b7c}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d54b4e0b-162a-426c-a0a1-8efbe7a138e7}";
+    UUID "{05f68551-2366-423e-a5c1-d7d6eafad1eb}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5fe26bf0-3dfa-41ef-b0a0-26eaf49c08f2}";
+    UUID "{6db1435f-3d2c-49a1-a369-3dcdcd85cdc2}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{39f93597-c90a-4af3-bed3-a3c952c9ffc5}";
+    UUID "{5c2443cb-ee91-45bd-8782-4abbf692fb3d}";
 ;
 
   END
-  UUID "{473e9a75-f0a7-41fb-bc6e-d9b4ac03fdfe}";;
+  UUID "{e413a605-2e02-457c-b8fb-31dab4d70264}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13687,11 +13687,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{92372de1-9cad-42d6-aca3-1ca58d8b648f}";
+    UUID "{02ce639c-c7a0-4317-9bb1-46abef7aa53f}";
 ;
 
   END
-  UUID "{83ae1c3d-d968-45e3-baff-00be7d629166}";;
+  UUID "{729c515b-b78e-4a8d-b34a-ba70c98295dd}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13702,11 +13702,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f293dc58-f387-43c9-853b-bad55f025c3a}";
+    UUID "{8cfb70fb-fc6e-4fad-8541-c23a1b9e97e7}";
 ;
 
   END
-  UUID "{eccd3972-e868-4dc3-8d53-f5086dcc0df1}";;
+  UUID "{5e40749f-3365-4635-a2fd-e6b986bc574a}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13717,11 +13717,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5f842b5a-bae4-4dfd-83fb-1a25b2f4136a}";
+    UUID "{7c87efe1-11b2-4875-8316-f3042f0d54ba}";
 ;
 
   END
-  UUID "{085146df-160c-4912-8cee-38acc6175b67}";;
+  UUID "{403fc981-b8fd-4fcf-a949-51a8c122b5f2}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
