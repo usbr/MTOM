@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 15:45 April 14, 2020
+# Created 15:51 April 14, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -885,9 +885,9 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE;<br>MC, 20160908: Moved slot Mexico Shortage and Surplus.AnnualCreationICMA inside parentheses so it is subject to 0.97 factor per Shana T. email on 20160831<br><br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated execution constraint to be consistent with other ICS Accounting rules<br>S.Baker, 20200310: updated description. Removed duplicated setting of slot Mexico Shortage and Surplus.Mexico Water Reserve Balance. Added function SetNegativeToZero() which can replace all Max(0 &quot;acre-ft&quot;, xxx).";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC WaterReserveBal = $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "Calculate MX water reserve balance <br>" - $ "Mexico Shortage and Surplus.AnnualDeliveryMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_AZ" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_CA" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] + $ "Mexico Shortage and Surplus.AnnualCreationMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  )) DO
+      WITH_STATEMENT (NUMERIC WaterReserveBal = $ "Mexico Shortage and Surplus.Mexico Water Reserve Balance" [@"24:00:00 December 31, Previous Year"] COMMENTED_BY "MX water reserve balance is previous year's balance plus creation, minus deliveries and any Binational ICS creation  <br>" - $ "Mexico Shortage and Surplus.AnnualDeliveryMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_AZ" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_CA" [@"24:00:00 December 31, Current Year"] - $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December 31, Current Year"] + $ "Mexico Shortage and Surplus.AnnualCreationMexicoWaterReserve" [@"24:00:00 December 31, Current Year"] * "SystemTaxAdjustment_DCP"(  )) DO
             WITH_STATEMENT (NUMERIC RecoverableWater_prelim = ( $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings Balance" [@"24:00:00 December 31, Previous Year"] - $ "Mexico Shortage and Surplus.AnnualDeliveryMXRecoverableWaterSavings" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Amount of RecovWaterSavings less delivery <br>") DO
-            WITH_STATEMENT (NUMERIC MXBank_prelim = ( RecoverableWater_prelim + WaterReserveBal ) COMMENTED_BY "Calculate prelim bank space <br>") DO
+            WITH_STATEMENT (NUMERIC MXBank_prelim = ( RecoverableWater_prelim + WaterReserveBal ) COMMENTED_BY "Calculate prelim bank space used <br>") DO
             WITH_STATEMENT (NUMERIC MXRemainingBankSpace = $ "ICS Credits.MeadBankParameters" ["Mexico", "Max Capacity"] - MXBank_prelim) DO
             WITH_STATEMENT (NUMERIC MXRemainingBankSpace_PreTax = MXRemainingBankSpace / "SystemTaxAdjustment_DCP"(  )) DO
             WITH_STATEMENT (NUMERIC annualBWSPcontribution = $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December 31, Current Year"]) DO
@@ -1407,11 +1407,9 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule determines the preliminary Nevada ICS creation and delivery volumes based on Nevada's demand and basic apporitionment during non-flood control conditions. The ICS delivery is the minimum of the Nevada's maximum annual delivery, the water remaining in its apportionment after deliveries based on the LB operating condition, and Nevada's total ICS and DCP ICS credits with the constraint on DCP recovery elevation. The EC ICS creation is minimum of the ICS available based on apportionment and delivery constraints, Nevada's maximum annual creation, Lower Basin operating condition, and bank availability. The bank availability calculates volumes that can be taxed and not taxed since ICS is not taxed if it is paying back the previous year's delivery. The bank availability that can be taxed is calculated by the bank capacity minus any deliveries from the previous year, the bank and any tributary/imported ICS being converted to EC ICS, and annual creation of bi-national ICS (input slot). The EC ICS delivery from the previous year is then added back after the tax adjustment to calculate the bank availability.<br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICSProjectionData.AnnualICSDelivery_NV_Preliminary<br>ICSProjectionData.AnnualCreationEC_SNWP_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
-    NOTES                "Sets the prliminary ICS creation and delivery volumes based on Nevada's demand and basic apporitionment during non-flood control conditions.<br>DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged().";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged().";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC FALSE;
-    DESCRIPTION          "This rule determines Nevada ICS creation or delivery based on the annual apportionment <br>";
       WITH_STATEMENT (NUMERIC ICS = ( $ "AnnualWaterUse.NV_BasicApportionment" [] - ( $ "AnnualWaterUse.Nevada_Forecast1" [@"24:00:00 December 31, Current Year"] - $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Non SNWA Water Use <br>" - IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
  THEN
   $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) - 1.00000000, "Nevada"]
@@ -1597,7 +1595,7 @@ BEGIN
 
       ENDFOREACH;
 
-          DESCRIPTION          "Resets MWD diversion and depletion in model when switching from suplus to normal condition<br>";
+          DESCRIPTION          "Resets MWD diversion and depletion when switching from surplus to normal conditions<br>";
       IF_STATEMENT ($ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] == 2.00000000) THEN
             WITH_STATEMENT (NUMERIC mwdDepletionAmount = "MWD_Outyear_Schedules"( date )) DO
             $ "MWDDiversion:MWD.Depletion Requested" [date] := mwdDepletionAmount;
