@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 13:02 April 15, 2020
+# Created 14:41 April 15, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2351,7 +2351,7 @@ BEGIN
   UUID "{8b1f28ea-1166-42a1-b266-40f95b9da449}";;
 
   POLICY_GROUP   "PowellAfterLBDV";
-  DESCRIPTION    "";
+  DESCRIPTION    "This policy group re-executes Powell operations in run cycle 4 after Lower Basin Demand Variability. A different policy group is needed due the way Powell solves (e.g. solving with 8.23 maf release and using the resulting elevation to determine tiering).";
   ACTIVE         TRUE;
   NOTES          "";
   BEGIN
@@ -4700,7 +4700,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the Lake Mead outflow to the smaller of the sum of the lower basin demands OR the water available in Mead (if Run Cycle >=3; otherwise use 9,999,999 acre-ft/month). This rule can execute as many times as necessary to set releases to meet demands. <br><br>SLOTS SET: Mead.Outflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>S.Baker 2018/10/17: Replace SumAllDiversionsBelowVolume(Havasu) - SumAllGainsBelowVolume(Havasu) with HavasuOutflow.ParkerRequirement. This change was made because this calculation was already performed in rule &quot;Set Parker Final Requirement&quot;, so it was repetative and problematic to recalculate them. This change is important during hindcast runs when the Gila River has ver high local inflows (Jan-Apr 1993). ";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker, 20200326: Edited IF ELSE statement to reduce redundancy. <br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>S.Baker 2018/10/17: Replace SumAllDiversionsBelowVolume(Havasu) - SumAllGainsBelowVolume(Havasu) with HavasuOutflow.ParkerRequirement. This change was made because this calculation was already performed in rule &quot;Set Parker Final Requirement&quot;, so it was repetative and problematic to recalculate them. This change is important during hindcast runs when the Gila River has ver high local inflows (Jan-Apr 1993). ";
     BEGIN
 
       $ "Mead.Outflow" [] := "Min"( IF ( "GetRunCycleIndex"(  ) >= 3.00000000 )
@@ -4708,12 +4708,12 @@ BEGIN
   "CheckResPhysicalConstraint"( % "Mead", @"t" )
  ELSE
   9999999.00000000 "acre-ft/month"
- ENDIF, IF ( @"t" <= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM only <br>" )
+ ENDIF, "VolumeToFlow"( IF ( @"t" <= @"Start Timestep" AND $ "MTOMRunType.RunType" [] == 0.00000000 )
  THEN
-  "VolumeToFlow"( "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" ) + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", $ "Mohave.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", $ "Havasu.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month", @"t" )
+  "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" ) COMMENTED_BY "Operational MTOM runs only  <br>"
  ELSE
-  "VolumeToFlow"( $ "HavasuOutflow.ParkerRequirement" [@"t"] + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t - 1" ) ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t - 1" ) ) ) / 2.00000000 ) * 1.00000000 "month", @"t" )
- ENDIF );
+  $ "HavasuOutflow.ParkerRequirement" [@"t"] COMMENTED_BY "Hindcast MTOM runs <br>"
+ ENDIF + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", $ "Mohave.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", $ "Havasu.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month", @"t" ) );
 
     END
     UUID "{5a2f1e38-f3a3-4800-9a33-a26b907141e7}";;
@@ -5998,7 +5998,7 @@ BEGIN
     UUID "{7755fda4-4ed6-406a-84f3-eaefeea61c6c}";;
 
     RULE                 "Set LB Demand Variability Triggers Below Parker";
-    DESCRIPTION          "DESCRIPTION: This rule fires in the beginning timestep but sets the trigger values for the whole run. Lower Basin Demand Variability determines if users in the Lower Basin can increase or decrease their diversion request based on side inflow hydrology between certain locations.  The below Parker variability takes into considerations the side inflows below Parker Dam and sets a slot value (trigger) that will be used when compared to a historic statistically derived volume to determine the variability thresholds. This rule only sets the volumes and those will be used in subsequent rules when compared to historic threshold inflow values. <br><br>SLOTS SET: LowerBasinDemandVariability.LocalInflowBelowParkerTrigger<br><br>";
+    DESCRIPTION          "DESCRIPTION:  This rule fires on the start timestep and sets the trigger values for each timestep of the entire run.  Lower Basin Demand Variability determines if users in the Lower Basin can increase or decrease their diversion request based on side inflow hydrology between certain locations.  The below Parker variability takes into considerations the side inflows below Parker Dam and sets a slot value (trigger) that will be used when compared to a historic statistically derived volume to determine the variability thresholds. This rule only sets the volumes and those will be used in subsequent rules when compared to historic threshold inflow values. <br><br>SLOTS SET: LowerBasinDemandVariability.LocalInflowBelowParkerTrigger";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "ThisRule" );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -6043,7 +6043,7 @@ BEGIN
     UUID "{87d31299-5bb7-4e8c-8067-4285400d2ee4}";;
 
     RULE                 "Set LB Demand Variability Triggers Above Hoover";
-    DESCRIPTION          "DESCRIPTION: This rule fires in the beginning timestep but sets the trigger values for the whole run.  Lower Basin Demand Variability determines if users in the Lower Basin can increase or decrease their diversion request based on side inflow hydrology between certain locations.  <br>The above Mead variability takes into considerations the side inflows below Glen Canyon Dam and above Hoover Dam and sets a slot value (trigger) that will be used when compared to a historic statistically-derived volume to determine the variability thresholds. <br>This rule only determines the side inflow volume that will be used later for the comparison.<br><br>SLOTS SET: LowerBasinDemandVariability.LocalInflowAboveHooverTrigger; LowerBasinDemandVariability.PowellUnregulatedInflowTrigger<br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule fires on the start timestep and sets the trigger values for each timestep of the entire run.  Lower Basin Demand Variability determines if users in the Lower Basin can increase or decrease their diversion request based on side inflow hydrology between certain locations.  <br>The above Mead variability takes into considerations the side inflows below Glen Canyon Dam and above Hoover Dam and sets a slot value (trigger) that will be used when compared to a historic statistically-derived volume to determine the variability thresholds. <br>This rule only determines the side inflow volume that will be used later for the comparison.<br><br>SLOTS SET: LowerBasinDemandVariability.LocalInflowAboveHooverTrigger; LowerBasinDemandVariability.PowellUnregulatedInflowTrigger";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "ThisRule" );
     NOTES                "DEVELOPMENT NOTES:<br>AUTHOR, DATE: Unknown";
@@ -9586,7 +9586,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split, edited to more accurately reflect ICS  flood control in interim guidlines (% ICS change)";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split, edited to more accurately reflect ICS  flood control in interim guidlines (% ICS change)<br>SB 20200413: Add constraint to check that the total EC ICS volume is greater than 0 acre-ft when reducing the Total ICS Volume for each state. This caused errors when the totalECICS value is 0 acre-ft, which happens during hindcast runs. ";
     BEGIN
 
       WITH NUMERIC mwdECICS = $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] DO
@@ -9602,7 +9602,7 @@ BEGIN
            WITH NUMERIC iidOtherICS = $ "ICS Credits.TotalICS_IID" ["Dec31ofYear"( @"t" )] - iidECICS DO
             WITH NUMERIC nvOtherICS = $ "ICS Credits.TotalICS_NV" ["Dec31ofYear"( @"t" )] - nvECICS DO
              WITH NUMERIC cawcdOtherICS = $ "ICS Credits.TotalICS_CAWCD" ["Dec31ofYear"( @"t" )] - cawcdECICS DO
-              IF ( fcvolume < totalECICS )
+              IF ( fcvolume < totalECICS AND totalECICS > 0.00000000 "acre-ft" )
               THEN
                WITH LIST stateECBalLista = { mwdECICS - ( mwdECICS / totalECICS ) * fcvolume , iidECICS - ( iidECICS / totalECICS ) * fcvolume , nvECICS - ( nvECICS / totalECICS ) * fcvolume , cawcdECICS - ( cawcdECICS / totalECICS ) * fcvolume , critECICS - ( critECICS / totalECICS ) * fcvolume , gricECICS - ( gricECICS / totalECICS ) * fcvolume , mviddECICS - ( mviddECICS / totalECICS ) * fcvolume , wmECICS - ( wmECICS / totalECICS ) * fcvolume } DO
                 WITH LIST totalICSBalList = { mwdOtherICS + GET @INDEX 0.00000000 FROM stateECBalLista , iidOtherICS + GET @INDEX 1.00000000 FROM stateECBalLista , nvOtherICS + GET @INDEX 2.00000000 FROM stateECBalLista , cawcdOtherICS + GET @INDEX 3.00000000 FROM stateECBalLista } DO
@@ -13524,7 +13524,7 @@ BEGIN
     ACTIVE         FALSE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>GCAA, 20181030: Changed reference from MWDDiversionData.MWDMaximumAnnualDelivery to AnnualWaterUse.MWDCanal_AnnualCapacity slot";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20180125: Removed SystemTaxAdjustment from Annual Max in MinItem for creationOfCACEICS local variable based on USBR changes to ruleset<br>CH, 4/27/18: Changed totaldeliveryofCAICS assignment so that the available ICS water was was referencing total CA ICS, not just CA EC ICS<br>GCAA, 20181030: Changed reference from MWDDiversionData.MWDMaximumAnnualDelivery to AnnualWaterUse.MWDCanal_AnnualCapacity slot<br>S. Baker, 20200311: Add function IsDomesticSurplus() to replace boolean statement to improve readability. ";
     BEGIN
 
       WITH NUMERIC creationOfCACEICS = IF ( ( ( NaNToZero ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 OR NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) OR NOT "IsMRM"(  ) ) COMMENTED_BY "If the year is a Shortage Year, a Quantified Surplus Year, a Flood Control Year, <br>or if the run is a deterministic Min, Max or Most run, do not Create any ICS TP <br>12/18/2017 <br>" )
@@ -13537,7 +13537,7 @@ BEGIN
   THEN
    0.00000000 "acre-ft" COMMENTED_BY "Shortage Years <br>"
   ELSE
-   IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
+   IF ( "IsDomesticSurplus"(  ) COMMENTED_BY "If the year has domestic surplus, reduce the ICS Delivery by the amount of <br>Domestic surplus entitlement for MWD. TP 12/18/2017 <br>" )
    THEN
     "Max"( ( $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December 31, Current Year"] ) - 1.00000000, "Take Step 1"] - $ "Surplus Volume Entitlements.MWD Domestic" ["Dec31ofYear"( @"t" )] ), 0.00000000 "acre-ft" )
    ELSE
