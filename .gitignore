@@ -50,7 +50,7 @@ Icon
 !RW Files*
 
 #pass through sheets 
-
+/Output Data/EnsembleOutput.xlsx
 
 # Testbed Forecasts and IC data
 Inflow Forecasts/Testbed_Historical_Forecasts
@@ -63,6 +63,3 @@ Input Data/Observed_for_MTOM_IC.xlsx
 /Scenario
 /ScenarioSet
 /Working
-
-#ignore csv output file
-MTOMcsvOutput.csv
