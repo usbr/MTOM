@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 7.5.3 Patch
-# Created 13:10 April 17, 2020
+# Created 13:36 April 17, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -6242,8 +6242,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    MIN_CONSTRAINT $ "PowellData.EqualizationMinAnnualRelease" [];
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 2018/10/17: Equalization needs to know about carryover volume from the previous year in this function in order to calculate the correct TARV, specifically when in equalization with a release of 8.23 MAF. This occurs in multiple places in the ?EqualizationTierCalculationForRelease? function. <br>S.Baker, 20200417: Added 'post-execution checks' minimum constraint for a minimum annual release of 8.23 maf.";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 2018/10/17: Equalization needs to know about carryover volume from the previous year in this function in order to calculate the correct TARV, specifically when in equalization with a release of 8.23 MAF. This occurs in multiple places in the ?EqualizationTierCalculationForRelease? function. <br>S.Baker, 20200417: Added WITH statement at end of function to constrain the 'PreliminaryReleaseVolume' to be greater than or equal to a minimum annual release of 8.23 maf.";
     BEGIN
 
       WITH NUMERIC PowellVolumeOverEqLevel = "Max"( ( $ "Powell.Storage" [EOWYDate] - NaNToZero ( $ "PowellToMeadData.CarryoverVolume" ["Dec31ofYear"( EOWYDate )] ) ) - "ElevationToStorage"( % "Powell", "EqLevel"( EOWYDate ) ), 0.00000000 "acre-ft" ) DO
@@ -6273,12 +6272,14 @@ BEGIN
        ENDWITH COMMENTED_BY "Volume of Powell storage above the equalization level minus 20 feet"
       ENDWITH COMMENTED_BY "Volume needed to release from Powell to raise Mead elevation to 1105'"
      ELSE
-      IF ( PreliminaryReleaseVolume == PowellVolumeOverEqLevel / ( 1.00000000 - $ "Powell.Bank Storage Coefficient" [0.00000000, 1.00000000] ) + $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( EOWYDate )] )
-      THEN
-       { PreliminaryReleaseVolume , 0.10000000 }
-      ELSE
-       { PreliminaryReleaseVolume , 0.20000000 }
-      ENDIF
+      WITH NUMERIC PreliminaryReleaseVolume_constrained = "Max"( PreliminaryReleaseVolume, $ "PowellData.EqualizationMinAnnualRelease" [] ) DO
+       IF ( PreliminaryReleaseVolume_constrained == PowellVolumeOverEqLevel / ( 1.00000000 - $ "Powell.Bank Storage Coefficient" [0.00000000, 1.00000000] ) + $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( EOWYDate )] )
+       THEN
+        { PreliminaryReleaseVolume_constrained , 0.10000000 }
+       ELSE
+        { PreliminaryReleaseVolume_constrained , 0.20000000 }
+       ENDIF
+      ENDWITH
      ENDIF COMMENTED_BY "Check if the preliminary release volume takes Mead above 1105'.  If so the preliminary volume is chosen, if not continue."
     ENDWITH COMMENTED_BY "EOWY Elevation of Mead with the preliminaryReleaseVolume release from Powell"
    ENDWITH COMMENTED_BY "Preliminary annual volume release before the Mead elevation check."
@@ -13652,32 +13653,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9e89e290-13e7-4abb-9a70-86aa5faf81c8}";
+    UUID "{60de97b6-cb89-4e4d-87c9-a5c9cf5efeaf}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{94005fed-f9e5-4609-95d0-1d4b3c5f35b6}";
+    UUID "{b1ee8526-e3db-474a-b2e5-be988dd7a8ee}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{97f0064d-d76d-4a08-8bfc-ac41469821de}";
+    UUID "{139de5b7-a24c-49ee-86a7-94965d8abb19}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{92084854-a574-4553-92f5-364c2c2b5f45}";
+    UUID "{d9e206bc-42fc-4b1d-a4a8-131a4cdfebce}";
 ;
 
   END
-  UUID "{7bc800e7-1b27-437d-b164-ba444e13ff90}";;
+  UUID "{9fd04a83-8c2e-4977-b846-d855ccce3249}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13688,11 +13689,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ed753da8-8d12-4a0d-a73e-59ff75591a17}";
+    UUID "{724dec02-d102-4ab5-a421-56d74eabae54}";
 ;
 
   END
-  UUID "{3b1846b0-ee51-403a-9716-dd728bce29f5}";;
+  UUID "{af3b310f-082d-42de-9c19-e2f72b8da631}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13703,11 +13704,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{af7b9039-958e-400f-972f-34b0a22f1c73}";
+    UUID "{4c8618e8-66f8-430e-b490-f2c6636082dd}";
 ;
 
   END
-  UUID "{036de11e-90c8-4c5f-a592-75d04e555e14}";;
+  UUID "{4002aac1-7d3d-4110-b2dc-f459bd3fc057}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13718,11 +13719,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{73adf09f-9086-460c-9278-361c0b9cff98}";
+    UUID "{ff7ef16b-ae0c-49cd-bde2-8774a3a20999}";
 ;
 
   END
-  UUID "{71c29867-20ca-46cf-91c6-47d7a5260e17}";;
+  UUID "{3e958408-2051-47b9-b8e7-681b96a4e9c9}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
