@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 14:41 April 15, 2020
+# Created 16:47 April 17, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2549,11 +2549,11 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for years when the Release Tier is Equalization. It also calculates and sets the Controlling Equalization Condition slot, which indicates the equalization condition that dictated the volume to be released. This version executes in Run Cycle 4 if Lower Basin Demand Variability is in effect.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only fires in Run Cycle 4 with demand variability in effect, it is August, and the model has selected the Equalization teir for the current year. - sc 02/02/11; TP 08/20/2014; MC, 20170511";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint. Disabled PowellData.ReleaseVolumeSetFlag since this flag should be set in the Refine Equalization rule. <br>S.Baker, 2018/10/17: updated run cycle execution constraint to RC == 4 (was 3 which was incorrect).";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint. Disabled PowellData.ReleaseVolumeSetFlag since this flag should be set in the Refine Equalization rule. <br>S.Baker, 2018/10/17: updated run cycle execution constraint to RC == 4 (was 3 which was incorrect).<br>S.Baker, 20200417: Updated rule to match the RC 3 rule and make sure release isnt less than 8.23 maf. Before fix, TARV was being set to less than 8.23 maf during equalization.";
     BEGIN
 
     DESCRIPTION          "Outyear with Equalization";
-      $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) );
+      $ "PowellData.TargetAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := "MaxItem"( { GET @INDEX 0.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) ) , NaNToZero ( $ "PowellData.UserInput_MinAnnualReleaseVolume" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) , 8230000.00000000 "acre-feet" } );
 
       $ "PowellData.ControllingEqualizationCondition" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] := GET @INDEX 1.00000000 FROM "EqualizationTierCalculationForRelease"( "DateToCheckEOWYElevation"( @"t", FALSE ) );
 
@@ -13652,32 +13652,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fbffa85a-e00a-4234-9325-45101dee6439}";
+    UUID "{d2747869-3619-4296-9769-7a9788a3523c}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{568f5ef3-321e-483b-98fd-7c87b73e69ea}";
+    UUID "{4cd89695-4f96-4024-a0f9-b0b4262db958}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ec4c7999-5d0c-48e9-94e0-edf06ade9231}";
+    UUID "{9215f8fe-7af8-4312-83e9-94278a2340fc}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a0243a1e-a754-4267-a1b6-adea4a1cf997}";
+    UUID "{3310b7a8-7a7f-49d2-b132-80fdb7d9a037}";
 ;
 
   END
-  UUID "{305b6801-ac05-425e-a75f-15e288801a52}";;
+  UUID "{84f7c3e2-6b80-4cab-929e-62bfe060bc19}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13688,11 +13688,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{cfdfdf8d-1daa-402a-86a8-36f7c383f6d4}";
+    UUID "{5fd0cc1d-94bb-4a51-9a0a-6d12ac43b848}";
 ;
 
   END
-  UUID "{5ed89c47-f10d-44e3-80b5-f4f5e5ebd9be}";;
+  UUID "{7e2ba926-d68f-4c3e-89ad-690209b735eb}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13703,11 +13703,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{46e9c02f-aaf1-43c9-ba04-fe48fb65fbb9}";
+    UUID "{d65c53dd-d072-4db3-a1b5-8a4d695c6bbd}";
 ;
 
   END
-  UUID "{92af4fcc-ebb9-4b0f-b2f9-4a3e5c1a3138}";;
+  UUID "{8b86ad96-0833-4f6a-9261-1eedce68b82e}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13718,11 +13718,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{53da8952-cfbd-4655-b4b3-a7cec65c2a13}";
+    UUID "{ba14fe15-00d2-4d6f-bbaf-67eb754108c8}";
 ;
 
   END
-  UUID "{7d5f261c-6cb8-4c81-a818-4503a7619bf7}";;
+  UUID "{bc5f411a-5d2c-42b5-bae3-eddfc44ec82c}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
