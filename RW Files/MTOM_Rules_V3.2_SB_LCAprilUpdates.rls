@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 13:29 April 20, 2020
+# Created 14:02 April 20, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -593,7 +593,7 @@ BEGIN
   WITH NUMERIC NonSNWANevadaDivReqs = FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
    "FlowToVolume"( $ "FtMohaveIndRes:NV.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:BigBend.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:SCE.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Nv Mohave.Diversion Requested" [date], date )
   ENDFOR DO
-   ( "Min"( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume, $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] ) - NonSNWANevadaDivReqs ) COMMENTED_BY "Annual SNWP volume = (NV annual allotment - Priority users diversions + Developed Shortage <br>Supplies - Shortage volume) <br>"
+   ( ( "Min"( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume, $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] ) - NonSNWANevadaDivReqs ) * "MeadPumpingDemandVariabilityFactor"( @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "Annual SNWP volume = (NV annual allotment - Priority users diversions + Developed Shortage <br>Supplies - Shortage volume) <br>"
   ENDWITH
  ENDWITH COMMENTED_BY "Adjust SNWA by shortage volume contribution <br>") DO
           DESCRIPTION          "DCP volume reduction <br>";
@@ -625,7 +625,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts Arizona's diversion for CAP. The diversion requested is calculated as an annual value  based on the diversion request, firming obligation, shortage volume, DCP volume reduction, and ICS delivery. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
-    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. ";
+    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>Apivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus";
     BEGIN
 
       WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
@@ -639,7 +639,12 @@ BEGIN
       WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.AnnualICSDelivery_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
           DESCRIPTION          "DCP reduction volume <br>";
       WITH_STATEMENT (NUMERIC DCPreductionCAWCD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
-            WITH_STATEMENT (NUMERIC CAPDivRequested = $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC CAPDivRequested = IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) )
+ THEN
+  $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ELSE
+  $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ENDIF) DO
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             WITH_STATEMENT (NUMERIC MonthPercent = $ "CAPDiversion.Total Diversion Requested" [date] / "SumSlot"( $ "CAPDiversion.Total Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
             $ "CAPDiversion.Total Diversion Requested" [date] := "VolumeToFlow"( ( ( ( CAPDivRequested + GET @INDEX 0.00000000 FROM AZFirming ) - DCPreductionCAWCD + CAWCDICSdiversionAdjustment ) - CAPShortageVolume ) * MonthPercent, date );
@@ -1516,8 +1521,8 @@ BEGIN
     RULE                 "AZ Annual ICS Delivery";
     DESCRIPTION          "DESCRIPTION: This rule sets ICS deliveries for CAWCD. If it is the start year and April-December, the ICS delivery will be set to the default value from the 24MS. Otherwise, determine the ICS delivery desired for CAWCD, and restrict delivery to not take more water than is banked in Mead (minus non-CAWCD ICS) based on pool elevation and capping the delivery at canal capacity. <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, or it is quantified surplus or flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20200309: Updated and edited description.<br>S.Baker, 20200310: Removed Min() inside MinItem() to reduce redundancy. Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S.Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged() .";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsQuantifiedOrFloodControl"(  ) ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20200309: Updated and edited description.<br>S.Baker, 20200310: Removed Min() inside MinItem() to reduce redundancy. Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S.Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged().<br>APivarnik, 20200416: Removed execution constraint which cause rule to fire in RC 4 if the model is in domestic surplus ";
     BEGIN
 
       IF_STATEMENT (@"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  )) THEN
