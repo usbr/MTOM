@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 12:43 April 21, 2020
+# Created 15:57 April 21, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -9594,7 +9594,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split, edited to more accurately reflect ICS  flood control in interim guidlines (% ICS change)<br>SB 20200413: Add constraint to check that the total EC ICS volume is greater than 0 acre-ft when reducing the Total ICS Volume for each state. This caused errors when the totalECICS value is 0 acre-ft, which happens during hindcast runs. ";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>12/11/18, AP: edited to include MWD / IID ICS CA split, edited to more accurately reflect ICS  flood control in interim guidlines (% ICS change)";
     BEGIN
 
       WITH NUMERIC mwdECICS = $ "ICS Credits.ExtraordinaryConservationICS_MWD" ["Dec31ofYear"( @"t" )] DO
@@ -9610,7 +9610,7 @@ BEGIN
            WITH NUMERIC iidOtherICS = $ "ICS Credits.TotalICS_IID" ["Dec31ofYear"( @"t" )] - iidECICS DO
             WITH NUMERIC nvOtherICS = $ "ICS Credits.TotalICS_NV" ["Dec31ofYear"( @"t" )] - nvECICS DO
              WITH NUMERIC cawcdOtherICS = $ "ICS Credits.TotalICS_CAWCD" ["Dec31ofYear"( @"t" )] - cawcdECICS DO
-              IF ( fcvolume < totalECICS AND totalECICS > 0.00000000 "acre-ft" )
+              IF ( fcvolume < totalECICS )
               THEN
                WITH LIST stateECBalLista = { mwdECICS - ( mwdECICS / totalECICS ) * fcvolume , iidECICS - ( iidECICS / totalECICS ) * fcvolume , nvECICS - ( nvECICS / totalECICS ) * fcvolume , cawcdECICS - ( cawcdECICS / totalECICS ) * fcvolume , critECICS - ( critECICS / totalECICS ) * fcvolume , gricECICS - ( gricECICS / totalECICS ) * fcvolume , mviddECICS - ( mviddECICS / totalECICS ) * fcvolume , wmECICS - ( wmECICS / totalECICS ) * fcvolume } DO
                 WITH LIST totalICSBalList = { mwdOtherICS + GET @INDEX 0.00000000 FROM stateECBalLista , iidOtherICS + GET @INDEX 1.00000000 FROM stateECBalLista , nvOtherICS + GET @INDEX 2.00000000 FROM stateECBalLista , cawcdOtherICS + GET @INDEX 3.00000000 FROM stateECBalLista } DO
