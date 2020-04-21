@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 09:41 April 21, 2020
+# Created 12:43 April 21, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -10373,10 +10373,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/2013<br><br>S.Baker 20200331: Added MTOM run type to if statement.";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/2013<br><br>S.Baker 20200331: Added MTOM run type to if statement.<br>S.Baker, 20200421: Added LBDV_OnOff slot instead of RunType check. We need the LBDV to be able to be used in hindcast mode. ";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
+      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) AND $ "MTOMRunType.LBDV_OnOff" [] == 1.00000000 )
  THEN
   IF ( ( $ "LowerBasinDemandVariability.LocalInflowAboveHooverTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowAboveHoover90"] ) COMMENTED_BY "For high inflow year, pumping reduced" )
   THEN
@@ -10403,10 +10403,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/13<br><br>GCAA, 20200330: Added a separate coefficient for IID and CVWD.<br>S.Baker 20200331: Added MTOM run type to if statement.";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 3/12/13<br><br>GCAA, 20200330: Added a separate coefficient for IID and CVWD.<br>S.Baker 20200331: Added MTOM run type to if statement.<br>S.Baker, 20200421: Added LBDV_OnOff slot instead of RunType check. We need the LBDV to be able to be used in hindcast mode. ";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
+      IF ( "IsMRM"(  ) AND $ "MTOMRunType.LBDV_OnOff" [] == 1.00000000 )
  THEN
   IF ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] )
   THEN
@@ -10443,10 +10443,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 3/12/2013<br><br>S.Baker 20200331: Added MTOM run type to if statement.";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 3/12/2013<br><br>S.Baker 20200331: Added MTOM run type to if statement.<br>S.Baker, 20200421: Added LBDV_OnOff slot instead of RunType check. We need the LBDV to be able to be used in hindcast mode. ";
     BEGIN
 
-      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) AND $ "MTOMRunType.RunType" [] != 1.00000000 )
+      IF ( "IsMRM"(  ) AND NOT "IsSurplusOrDCP"(  ) AND $ "MTOMRunType.LBDV_OnOff" [] == 1.00000000 )
  THEN
   IF ( ( $ "LowerBasinDemandVariability.LocalInflowBelowParkerTrigger" ["Dec31ofYear"( date )] > $ "LowerBasinDemandVariability.LBDemandVariabilityTriggerThreshholds" [0.00000000, "SideInflowBelowParker90"] ) COMMENTED_BY "High local inflows" )
   THEN
