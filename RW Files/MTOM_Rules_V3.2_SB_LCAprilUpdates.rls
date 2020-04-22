@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.3
-# Created 15:57 April 21, 2020
+# Created 10:58 April 22, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -10149,14 +10149,14 @@ BEGIN
     FUNCTION       "IsMeadBelowDCPRecoveryElevation" ( DATETIME date )
     RETURN_TYPE    BOOLEAN;
     SCALE_UNITS    "";
-    DESCRIPTION    "DESCRIPTION: Check if Mead projected pool elevation is below the DCP Recovery Elevation.<br><br>RETURNS: Boolean<br><br>ARGUMENTS:<br>1. NUMERIC date - date to check Mead pool elevation";
+    DESCRIPTION    "DESCRIPTION: Check if Mead projected pool elevation is below the DCP Recovery Elevation.The DCP language states that the DCP Recover Elevation is 'above 1,100ft'.<br><br>RETURNS: Boolean<br><br>ARGUMENTS:<br>1. NUMERIC date - date to check Mead pool elevation";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
     NOTES          "Author: S.Baker 20200310";
     BEGIN
 
-      "GetProjectedPoolElevation"( "Mead", date ) < $ "DCP.RecoveryElevation" [];
+      "GetProjectedPoolElevation"( "Mead", date ) <= $ "DCP.RecoveryElevation" [];
 
     END
     UUID "{5e3eebab-0e9e-473e-abe9-528fe3a1372a}";;
@@ -10164,7 +10164,7 @@ BEGIN
     FUNCTION       "IsMeadAboveDCPRecoveryElevation" ( DATETIME date )
     RETURN_TYPE    BOOLEAN;
     SCALE_UNITS    "";
-    DESCRIPTION    "DESCRIPTION: Check if Mead projected pool elevation is above the DCP Recovery Elevation.<br><br>RETURNS: Boolean<br><br>ARGUMENTS:<br>1. NUMERIC date - date to check Mead pool elevation";
+    DESCRIPTION    "DESCRIPTION: Check if Mead projected pool elevation is above the DCP Recovery Elevation. The DCP language states that the DCP Recover Elevation is 'above 1,100ft'.<br><br>RETURNS: Boolean<br><br>ARGUMENTS:<br>1. NUMERIC date - date to check Mead pool elevation";
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
@@ -13660,32 +13660,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d5411efd-f0ae-481a-91db-8d56d5fe9bea}";
+    UUID "{ee8311b0-c776-4e0d-9a50-acafc7f5a4a6}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fd728dfb-ffd3-4965-a326-e0616a602113}";
+    UUID "{4a05b1ac-9572-4084-a366-51ca2045d518}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{114c3aa7-8515-4443-a75b-86c0bd14cca4}";
+    UUID "{12d2265a-4e2c-433b-86c7-309e9b970048}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ca8456da-70de-404e-a0b9-10772346caef}";
+    UUID "{c996d777-59b5-46f8-9a6c-55d9e148fa70}";
 ;
 
   END
-  UUID "{04d89a68-1e69-4efe-a0fb-63eee1f0c9b2}";;
+  UUID "{f9877fc6-7483-4138-aca4-e46c7642190a}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13696,11 +13696,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d6314e1f-e17f-447f-9fff-0f8daeb46721}";
+    UUID "{ba059671-a71e-48c2-9eda-ca7b48c5aa6e}";
 ;
 
   END
-  UUID "{fe2f27ea-f79a-4516-8c87-5f738d670342}";;
+  UUID "{1a479372-d55f-4f06-a76d-430c705427a1}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13711,11 +13711,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0bc7fda5-b9f4-41c6-a069-d1bed9393aab}";
+    UUID "{bed1f267-6715-4dd9-ba95-8bddc7013173}";
 ;
 
   END
-  UUID "{166797d4-e3ec-4ab2-a164-b24cb689b811}";;
+  UUID "{32c350ba-56ad-42f1-851a-4d243e85d66c}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13726,11 +13726,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f7f249de-236e-4d67-86c9-247c554c7593}";
+    UUID "{2c79eca6-d199-487e-8ff6-5736582494e5}";
 ;
 
   END
-  UUID "{62f89c2b-e8e3-4a3c-b2de-43f544dec7bf}";;
+  UUID "{39843652-99f2-4c28-a760-40a0c816b280}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
