@@ -67,6 +67,3 @@ Icon
 /Scenario
 /ScenarioSet
 /Working
-
-#ignore csv output file
-MTOMcsvOutput.csv
