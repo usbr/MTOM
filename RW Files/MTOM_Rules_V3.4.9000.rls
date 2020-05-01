@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 15:52 April 24, 2020
+# Created 10:17 May 1, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -578,7 +578,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts Nevada's diversion for SNWP. The diversion requested is calculated as an annual value based on the diversion requested, shortage volume, DCP contribution, and ICS delivey. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>PumpingFromLakeMead:SNWP.Diversion Requested; PumpingFromLakeMead:SNWP.Depletion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
-    NOTES                "S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. ";
+    NOTES                "S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>20200501, AP: Replaced non SNWP water users individually listed with function call";
     BEGIN
 
       WITH_STATEMENT (NUMERIC SNWADivVol = WITH NUMERIC shortageVolume = IF ( ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
@@ -588,7 +588,7 @@ BEGIN
   0.00000000 "acre-ft"
  ENDIF DO
   WITH NUMERIC NonSNWANevadaDivReqs = FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
-   "FlowToVolume"( $ "FtMohaveIndRes:NV.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:BigBend.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:SCE.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Nv Mohave.Diversion Requested" [date], date )
+   "Sum Non SNWP Nevada Users"( date )
   ENDFOR DO
    ( ( "Min"( $ "AnnualWaterUse.NV_BasicApportionment" [] - shortageVolume, $ "AnnualWaterUse.Nevada_Apportionment" ["Dec31ofYear"( @"t" )] ) - NonSNWANevadaDivReqs ) * "MeadPumpingDemandVariabilityFactor"( @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "Annual SNWP volume = (NV annual allotment - Priority users diversions + Developed Shortage <br>Supplies - Shortage volume) <br>"
   ENDWITH
@@ -1811,7 +1811,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule will set the Total Annual Schedules for all water users impacted by Domestic Surplus. Domestic Surplus is the lowest priority surplus, meaning that a Quantified or Flood Control Surplus will override these values.  <br><br>EXECUTION CONSTRAINTS: This rule fires when the projected Mead previous EOCY pool elevation is above the Domestic Surplus Trigger elevation. <br><br>SLOTS SET: <br>Surplus Total Annual Schedules.SNWA<br>Surplus Total Annual Schedules.MWD<br>Surplus Total Annual Schedules.Gila Monster Farms<br>Surplus Total Annual Schedules.AzPumpersBlwImp<br>Surplus Total Annual Schedules.CAP";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND @"t" == @"24:00:00 January 31, Current Year" AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>GCAA, 20181030: Changed reference from the Forecast1 slots to ResetAnnualFC slots and replaced hardcoded MWD annual canal capacity with the MWDCanal_AnnualCapacity slot. Removed &quot;- Minute 323&quot; from rule name.<br>GCAA, 20200330: Updated execution constraint to only fire on Jan 31, Current yea in the third run cycle. Updated rule to allow SNWA to take DCP ICS if their demand is greater than the basic apportionment<br>S.Baker, 20200306: Edited rule description.<br>A Pivarnik, 20200416: Added with statement to SNWA total annual schedules. The temporary variable subtracts the non snwa water use in NV from the apportionment";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>GCAA, 20181030: Changed reference from the Forecast1 slots to ResetAnnualFC slots and replaced hardcoded MWD annual canal capacity with the MWDCanal_AnnualCapacity slot. Removed &quot;- Minute 323&quot; from rule name.<br>GCAA, 20200330: Updated execution constraint to only fire on Jan 31, Current yea in the third run cycle. Updated rule to allow SNWA to take DCP ICS if their demand is greater than the basic apportionment<br>S.Baker, 20200306: Edited rule description.<br>A Pivarnik, 20200416: Added with statement to SNWA total annual schedules. The temporary variable subtracts the non snwa water use in NV from the apportionment<br>20200501, AP: Replaced non SNWP water users individually listed with function call";
     BEGIN
 
       $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := "Min"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"], $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"] );
@@ -1823,7 +1823,7 @@ BEGIN
       $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"];
 
       WITH_STATEMENT (NUMERIC NonSNWANevadaDivReqs = FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
-  "FlowToVolume"( $ "FtMohaveIndRes:NV.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:BigBend.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:SCE.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Nv Mohave.Diversion Requested" [date], date )
+  "Sum Non SNWP Nevada Users"( date )
  ENDFOR) DO
             $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.Nevada_Apportionment" [@"24:00:00 December 31, Current Year"] - NonSNWANevadaDivReqs + "Min"( $ "ICS Credits.TotalICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"], "Max"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] - $ "AnnualWaterUse.NV_BasicApportionment" [], 0.00000000 "acre-ft" ) );
 
@@ -4886,14 +4886,14 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Sum the monthly AZ no CAP, NV, and CA no MWD orders based on the set diversion request for each state's diversion locations.<br><br>SLOTS SET: AnnualWaterUse.AzNoCAPTotalMonthlyOrder; AnnualWaterUse.NvTotalMonthlyOrder; AnnualWaterUse.CaNoMWDTotalMonthlyOrder";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>AP 5/1/2020: Replaced non SNWP water users individually listed with function call";
     BEGIN
 
     DESCRIPTION          "Sum the Monthly AZ no CAP, Nevada, and CA no MWD orders based on the set diversion request <br><br>for each state's diversion locations. ";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AnnualWaterUse.AzNoCAPTotalMonthlyOrder" [date] := "FlowToVolume"( $ "AzPkrToImp.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "GilaGravityMainCanal.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "GilaAndYumaUsers.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CRIR:CRIRAz.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:BlmPumpersBlwImp.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:SouthernPacific.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:YAO.Diversion Requested" [date], date ) + "FlowToVolume"( $ "FtMohaveIndRes:AZ.Diversion Requested" [date], date ) + "FlowToVolume"( $ "AzDvsToPkr.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "PumpingFromLakeMead:LMNRA Az Mead.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Az Mohave.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:Ft Yuma.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:DavisDamProject.Diversion Requested" [date], date );
 
-            $ "AnnualWaterUse.NvTotalMonthlyOrder" [date] := "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "FtMohaveIndRes:NV.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Nv Mohave.Diversion Requested" [date], date );
+            $ "AnnualWaterUse.NvTotalMonthlyOrder" [date] := "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) + "Sum Non SNWP Nevada Users"( date );
 
             $ "AnnualWaterUse.CaNoMWDTotalMonthlyOrder" [date] := "FlowToVolume"( $ "AAC.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CaDvsToPkr.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CaPkrToImp.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CRIR:CRIRCa.Diversion Requested" [date], date ) + "FlowToVolume"( $ "FtMohaveIndRes:CA.Diversion Requested" [date], date ) + "FlowToVolume"( $ "PaloVerde.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:YumaIsland.Diversion Requested" [date], date );
 
@@ -5011,12 +5011,12 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the SNWP Forecast value to the difference between the Nevada State Apportionment and the other Nevada users. <br><br>SLOTS SET: ForecastUse.SNWPResetAnnualFC";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>20200501, AP: Replaced non SNWP water users individually listed with function call";
     BEGIN
 
     DESCRIPTION          "Set the SNWP Forecast value to the difference between the Nevada State <br>Apportionment and the other Nevada users. ";
       $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.Nevada_Apportionment" [@"24:00:00 December 31, Current Year"] - FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
-  "FlowToVolume"( $ "FtMohaveIndRes:NV.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:BigBend.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:SCE.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Nv Mohave.Diversion Requested" [date], date )
+  "Sum Non SNWP Nevada Users"( date )
  ENDFOR COMMENTED_BY "Sum all Non SNWP Nevada Diversion Requests";
 
     END
@@ -13640,6 +13640,21 @@ BEGIN
     END
     UUID "{1c46abdf-5158-4df5-8faa-843d756c060a}";;
 
+    FUNCTION       "Sum Non SNWP Nevada Users" ( DATETIME Date )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Function added 4/29/2020 by AJP<br><br>Sums Non SNWP Water User in Nevada";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "";
+    BEGIN
+
+      "FlowToVolume"( $ "FtMohaveIndRes:NV.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:BigBend.Diversion Requested" [date], date ) + "FlowToVolume"( $ "NvDvsToPkr:SCE.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Nv Mohave.Diversion Requested" [date], date );
+
+    END
+    UUID "{ecc51a7f-8770-4cdc-be84-c04ca39aa8d5}";;
+
   END
   UUID "{e12722c5-cd2e-4fc8-a9c7-df9184cd5532}";;
 
@@ -13652,32 +13667,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{734be9da-0530-49c4-956a-703f2f25c2ee}";
+    UUID "{9cb671db-a4be-4feb-a483-884e38741593}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3c569f1a-02d6-46ec-8ec7-eb8a74e4500e}";
+    UUID "{94ce38d5-1a8e-4942-b6dd-1a939d07bd7c}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0a2e1ca2-3def-43a0-bc50-e783688d72d1}";
+    UUID "{19872b0e-63cd-49a3-aa83-1204da7b28fb}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3afbebf3-d2f2-4327-b00b-d19f21c8ac4d}";
+    UUID "{c81249de-6f61-4387-a416-89e7accc6809}";
 ;
 
   END
-  UUID "{94cf5b5f-beb8-4d97-88b1-c052466822c8}";;
+  UUID "{8b766c53-3dcf-4ff5-9c78-500bb6811125}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13688,11 +13703,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4890736e-4382-41f2-ab48-aa997ff77a79}";
+    UUID "{3b6dce31-0432-452f-a219-140c3af3662d}";
 ;
 
   END
-  UUID "{8d9040c8-82b3-4406-9e04-83563fdee1e1}";;
+  UUID "{b6181e58-4040-4662-abd7-94f2d3a3ffa8}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13703,11 +13718,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{19aaa024-b5ea-4793-958d-d54d6995b702}";
+    UUID "{baea3580-16e0-41c9-ba00-f3d7dc8e296c}";
 ;
 
   END
-  UUID "{008f32f4-2b24-4a0d-93a8-39ab09676f10}";;
+  UUID "{d583f0b4-7f8b-487b-b397-64a81c2d99c1}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13718,11 +13733,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{64af0ebe-3a26-48e4-813b-0b24043b2397}";
+    UUID "{97200ca9-5004-47b0-947f-fb77cfb14a9c}";
 ;
 
   END
-  UUID "{8fdee75a-00cb-4a0a-a5d2-ccded205ae44}";;
+  UUID "{27dc47f1-4d62-4782-8f2e-23c8357461c6}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
