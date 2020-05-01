@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 14:14 May 1, 2020
+# Created 14:49 May 1, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -666,8 +666,8 @@ BEGIN
     RULE                 "CA Diversion Adjustment";
     DESCRIPTION          "DESCRIPTION: This rule adjusts California's diversion for MWD, Coachella, and IID. For Coachella and IID, the diversion requested is reduced by the DCP contribution and by a LBDV factor if it is January (allow LBDV in Jan of start year if side inflows below Parker are above 90%). The MWD adjusted diversion requested is based on the deliveries and creation of ICS and is constrained by the states apportionment. The adjusted annual diversion is spread to monthly values based on the current proportion diversion each month.<br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes at the start timestep if before April in MRM or in January and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3 and the rule has not yet fired successfully. <br><br>SLOTS SET: <br>AAC:Coachella.Diversion Requested<br>AAC:IID.Diversion Requested<br>MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND @"t" < @"24:00:00 April 30, Start Year" ) AND "IsMRM"(  ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND @"t" < @"24:00:00 April 30, Start Year" ) AND "IsMRM"(  ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND NOT "IsQuantifiedOrFloodControl"(  );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation. Added If statment to MWDDivRequested to set domestic surplus schedules within this rule. Changed run constraint to fire if we are in domestic surplus scenario";
     BEGIN
 
       WITH_STATEMENT (NUMERIC dcpContributionCVWD = IF ( @"t" == @"Start Timestep" )
@@ -700,7 +700,12 @@ BEGIN
   $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ENDIF) DO
             WITH_STATEMENT (NUMERIC DCPreductionMWD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - dcpContributionCVWD) DO
-            WITH_STATEMENT (NUMERIC MWDDivRequested = $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC MWDDivRequested = IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) )
+ THEN
+  $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ELSE
+  $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ENDIF) DO
             WITH_STATEMENT (NUMERIC DeliveryToDate = "GetDiversionToDate"( $ "California_CU_Actual.MWDDiversion" )) DO
             WITH_STATEMENT (NUMERIC AnnualAdjustedDivRequested = ( MWDDivRequested + ( totalDeliveryMWDICS - totalCreationECICS - DCPreductionMWD - DeliveryToDate ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery that might be <br>occuring in a given scenario, or decrease the delivery if any creation of water for a given <br>scenario. TP 12/22/2017  <br>" )) DO
             WITH_STATEMENT (LIST newMWDDivDepList = FOR ( DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year" ) WITH LIST result = {  } DO
@@ -1593,18 +1598,10 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule converts volumes allowed under Domestic Surplus into monthly flow rates  for the year and sets associated slots. <br><br>EXECUTION CONSTRAINTS: This rule fires in January in run cycles 3 and 4 when the projected Mead pool elevation for the previous EOCY is above the Domestic Surplus Trigger elevation. <br><br>SLOTS SET: <br>PumpingFromLakeMead:SNWP.Diversion Requested<br>PumpingFromLakeMead:SNWP.Depletion Requested<br>MWDDiversion:MWD.Diversion Requested<br>MWDDiversion:MWD.Depletion Requested<br>GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested<br>OthersBlwImp:AzPumpersBlwImp.Diversion Requested<br>CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved the setting of Surplus.Surplus Flag and Surplus.Domestic Surplus Flag slots to new rule Set Domestic Surplus Flag; removed IsNaN Surplus.Surplus Flag[] execution constraint from this rule<br>S.Baker, 20180925: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>S.Baker, 20200306: Edited rule description. Added constraint for Jan of current year to match similar Quantified Surplus rule. <br>APivarnik, 20200416: Disabled CAP diversion adjustment. The Total annual schedule was added the the AZ Diversion adjustment rule higher in the ruleset. Setting diversion here would cause available canal space to decrease and a miscalculation in the ICS delivery calculation.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved the setting of Surplus.Surplus Flag and Surplus.Domestic Surplus Flag slots to new rule Set Domestic Surplus Flag; removed IsNaN Surplus.Surplus Flag[] execution constraint from this rule<br>S.Baker, 20180925: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>S.Baker, 20200306: Edited rule description. Added constraint for Jan of current year to match similar Quantified Surplus rule. <br>APivarnik, 20200416: Disabled CAP diversion adjustment. The Total annual schedule was added the the AZ Diversion adjustment rule higher in the ruleset. Setting diversion here would cause available canal space to decrease and a miscalculation in the ICS delivery calculation.<br>Apivarnik, 20200501: Removed disabled slot assignments and MWD diversion/depletion assignment. The Total annual schedule was added the the CA Diversion adjustment rule higher in the ruleset. ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
-          INACTIVE      $ "Surplus.Surplus Flag" [date] := 1.00000000;
-
-          INACTIVE      $ "Surplus.Domestic Surplus Flag" [date] := 1.00000000;
-
-          INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" ["Dec31ofYear"( date )] := 2.00000000;
-
-          INACTIVE      $ "LowerBasinDemandVariability.BlwParkerTriggerSet" ["Dec31ofYear"( date )] := 2.00000000;
-
             $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] := IF ( $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] > "SumAnnualSNWADivRequest"(  ) )
  THEN
   "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "SNWA" ), date )
@@ -1615,18 +1612,9 @@ BEGIN
   "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "SNWA" ), date )
  ENDIF;
 
-            $ "MWDDiversion:MWD.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "MWD" ), date );
-
-            $ "MWDDiversion:MWD.Depletion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "MWD" ), date ) - "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date );
-
             $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "Gila Monster Farms" ), date );
 
             $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "AzPumpersBlwImp" ), date );
-
-          INACTIVE      $ "CAPDiversion.Total Diversion Requested" [date] := IF ( $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] > "SumAnnualCAPDivRequest"(  ) )
- THEN
-  "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "CAP" ), date )
- ENDIF;
 
       ENDFOREACH;
 
@@ -13573,32 +13561,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{732cc803-2721-4799-b641-25c857b364ba}";
+    UUID "{1b9c1648-ab31-4265-869d-b29f98272bd7}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d07afb5d-ace4-4735-84dc-cdc44d70816b}";
+    UUID "{26eea47e-6f03-47c2-ba39-87a3f77b23e8}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9df941d7-b235-4d0c-a33e-0fac81275d46}";
+    UUID "{692bc44d-9fce-4f25-a2de-5c08c233a265}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0f9fa233-a117-4d3d-9cdc-7db65403401f}";
+    UUID "{f71ca9c9-a409-4031-942b-54f3027f4a82}";
 ;
 
   END
-  UUID "{7b118175-2341-43b9-8f36-cc10d5312f58}";;
+  UUID "{9c38e1a5-66d9-4853-baba-327e17442ee1}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13609,11 +13597,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{020121d6-20c8-4259-b079-eb2fef234f6c}";
+    UUID "{f225e17d-9714-4cfa-9878-4379d0a3aa0a}";
 ;
 
   END
-  UUID "{973d010e-66cf-4119-a41e-5bed88be1308}";;
+  UUID "{0c4829af-13ab-4dd8-9ca2-34dbcbe417be}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13624,11 +13612,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8be6b4da-d0f4-4a25-999b-629659094285}";
+    UUID "{9bef7373-577f-4c0f-bcc3-4694d9bc069b}";
 ;
 
   END
-  UUID "{1cfb1d56-a8d5-4ff3-b0f5-d2ef1222c89c}";;
+  UUID "{da8a20b5-5859-46d2-8194-46b252e9db98}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13639,11 +13627,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{cc2e88d0-e6ff-4636-939f-4c3d89f901a7}";
+    UUID "{355b4dd6-9420-4a26-abc3-b8ad19fa8980}";
 ;
 
   END
-  UUID "{607df045-3af4-40da-8fb2-d98067e43ebd}";;
+  UUID "{527269f6-fcff-4d7f-b2ed-653309540468}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
