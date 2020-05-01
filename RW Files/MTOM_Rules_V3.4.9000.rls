@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 13:00 May 1, 2020
+# Created 14:14 May 1, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -667,10 +667,15 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts California's diversion for MWD, Coachella, and IID. For Coachella and IID, the diversion requested is reduced by the DCP contribution and by a LBDV factor if it is January (allow LBDV in Jan of start year if side inflows below Parker are above 90%). The MWD adjusted diversion requested is based on the deliveries and creation of ICS and is constrained by the states apportionment. The adjusted annual diversion is spread to monthly values based on the current proportion diversion each month.<br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes at the start timestep if before April in MRM or in January and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3 and the rule has not yet fired successfully. <br><br>SLOTS SET: <br>AAC:Coachella.Diversion Requested<br>AAC:IID.Diversion Requested<br>MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND @"t" < @"24:00:00 April 30, Start Year" ) AND "IsMRM"(  ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC dcpContributionCVWD = $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+      WITH_STATEMENT (NUMERIC dcpContributionCVWD = IF ( @"t" == @"Start Timestep" )
+ THEN
+  0.00000000 "acre-ft"
+ ELSE
+  $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ENDIF) DO
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AAC:Coachella.Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.Coachella" [date] * IF ( "GetMonth"( @"t" ) == 1.00000000 )
  THEN
@@ -681,11 +686,7 @@ BEGIN
 
       ENDFOREACH;
 
-      END_WITH_STATEMENT;
-
-      BREAKPOINT BEFORE_EXEC FALSE;
-    BREAKPOINT AFTER_EXEC TRUE;
-      WITH_STATEMENT (NUMERIC IIDadjustment = $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualCreationEC_IID_Default" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] + $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] )) DO
+            WITH_STATEMENT (NUMERIC IIDadjustment = $ "ICSProjectionData.AnnualDeliveryEC_IID_Default" ["Dec31ofYear"( @"t" )] + $ "ICSProjectionData.AnnualCreationEC_IID_Default" ["Dec31ofYear"( @"t" )] - ( $ "ICS Credits.AnnualDeliveryEC_IID" ["Dec31ofYear"( @"t" )] + $ "ICS Credits.AnnualCreationEC_IID" ["Dec31ofYear"( @"t" )] )) DO
             WITH_STATEMENT (NUMERIC totalDeliveryMWDICS = IF ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  ) )
  THEN
   0.00000000 "acre-ft"
@@ -698,7 +699,7 @@ BEGIN
  ELSE
   $ "ICS Credits.AnnualCreationEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ENDIF) DO
-            WITH_STATEMENT (NUMERIC DCPreductionMWD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC DCPreductionMWD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - dcpContributionCVWD) DO
             WITH_STATEMENT (NUMERIC MWDDivRequested = $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC DeliveryToDate = "GetDiversionToDate"( $ "California_CU_Actual.MWDDiversion" )) DO
             WITH_STATEMENT (NUMERIC AnnualAdjustedDivRequested = ( MWDDivRequested + ( totalDeliveryMWDICS - totalCreationECICS - DCPreductionMWD - DeliveryToDate ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery that might be <br>occuring in a given scenario, or decrease the delivery if any creation of water for a given <br>scenario. TP 12/22/2017  <br>" )) DO
@@ -777,17 +778,19 @@ BEGIN
 
           DESCRIPTION          "Adjust IID Diversion Requested <br>";
       IF_STATEMENT ("RoundToFactor"( IIDadjustment, 1.00000000 "acre-ft" ) != 0.00000000 "acre-ft") THEN
-            FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AAC:IID.Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.IID" [date] * IF ( "GetMonth"( @"t" ) == 1.00000000 )
  THEN
   "AgUsersBelowParkerDemandVariabilityFactor"( date, "IID" )
  ELSE
   1.00000000
- ENDIF + IIDadjustment * $ "Shortage.MonthlyPercents" ["GetMonth"( date ) - 1.00000000, "Equal"], date );
+ ENDIF + IIDadjustment * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"], date );
 
       ENDFOREACH;
 
       END_IF_STATEMENT;
+
+      END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
 
@@ -13570,32 +13573,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c2fd725a-88fb-4c71-bf25-cece9a258392}";
+    UUID "{732cc803-2721-4799-b641-25c857b364ba}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{09e1b9b8-ace5-4784-a88a-405127c0b9b3}";
+    UUID "{d07afb5d-ace4-4735-84dc-cdc44d70816b}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{782c37bb-45ab-4ccb-bde3-b024d4d1dd30}";
+    UUID "{9df941d7-b235-4d0c-a33e-0fac81275d46}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{74f726bd-e3f5-4d5d-bde2-f548aed99f3f}";
+    UUID "{0f9fa233-a117-4d3d-9cdc-7db65403401f}";
 ;
 
   END
-  UUID "{fb8d43fb-8a9e-4b8a-a6d5-ce943acd9379}";;
+  UUID "{7b118175-2341-43b9-8f36-cc10d5312f58}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13606,11 +13609,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{48fa2338-75d6-4b27-849d-c6a327465d1f}";
+    UUID "{020121d6-20c8-4259-b079-eb2fef234f6c}";
 ;
 
   END
-  UUID "{6e9f981d-7a67-4faa-b1ac-6498797f856e}";;
+  UUID "{973d010e-66cf-4119-a41e-5bed88be1308}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13621,11 +13624,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{71ccd3ec-a0c3-4c18-a4f1-f25398b1cd06}";
+    UUID "{8be6b4da-d0f4-4a25-999b-629659094285}";
 ;
 
   END
-  UUID "{0d08d8dd-e569-4d18-9681-c8a977cf9b2a}";;
+  UUID "{1cfb1d56-a8d5-4ff3-b0f5-d2ef1222c89c}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13636,11 +13639,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f1f2f128-0c65-4fe0-ba66-5a6fc52e5014}";
+    UUID "{cc2e88d0-e6ff-4636-939f-4c3d89f901a7}";
 ;
 
   END
-  UUID "{22b09467-3afa-4007-832d-96afb8885a96}";;
+  UUID "{607df045-3af4-40da-8fb2-d98067e43ebd}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
