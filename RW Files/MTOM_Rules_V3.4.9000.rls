@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 10:37 May 1, 2020
+# Created 13:00 May 1, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -534,7 +534,7 @@ BEGIN
   END
   UUID "{9605f34a-8ce0-4545-8453-6df3df83363a}";;
 
-  POLICY_GROUP   "Lower Basin Shortage ICS Adjustments";
+  POLICY_GROUP   "Lower Basin Diversion Adjustments";
   DESCRIPTION    "";
   ACTIVE         TRUE;
   NOTES          "";
@@ -578,7 +578,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts Nevada's diversion for SNWP. The diversion requested is calculated as an annual value based on the diversion requested, shortage volume, DCP contribution, and ICS delivey. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>PumpingFromLakeMead:SNWP.Diversion Requested; PumpingFromLakeMead:SNWP.Depletion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
-    NOTES                "S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>20200501, AP: Replaced non SNWP water users individually listed with function call";
+    NOTES                "S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Replaced non SNWP water users individually listed with function call. Changed the month percent calculation to be based off volume and not flow";
     BEGIN
 
       WITH_STATEMENT (NUMERIC SNWADivVol = WITH NUMERIC shortageVolume = IF ( ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
@@ -599,7 +599,7 @@ BEGIN
       WITH_STATEMENT (NUMERIC NVICSDelivery = $ "ICS Credits.AnnualICSDelivery_NV" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
           DESCRIPTION          "Adjust SNWA delivery <br>";
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC MonthPercent = $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] / "SumSlot"( $ "PumpingFromLakeMead:SNWP.Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
+            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) / SNWADivVol) DO
             FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" }) DO
             slot [date] := "VolumeToFlow"( ( SNWADivVol + NVICSDelivery - AdditionalDCPReductionNV ) * MonthPercent, date );
 
@@ -622,7 +622,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts Arizona's diversion for CAP. The diversion requested is calculated as an annual value  based on the diversion request, firming obligation, shortage volume, DCP volume reduction, and ICS delivery. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsQuantifiedOrFloodControl"(  );
-    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>Apivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus";
+    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus schedule<br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow";
     BEGIN
 
       WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
@@ -643,7 +643,7 @@ BEGIN
   $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ENDIF) DO
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC MonthPercent = $ "CAPDiversion.Total Diversion Requested" [date] / "SumSlot"( $ "CAPDiversion.Total Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
+            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "CAPDiversion.Total Diversion Requested" [date], date ) / CAPDivRequested) DO
             $ "CAPDiversion.Total Diversion Requested" [date] := "VolumeToFlow"( ( ( ( CAPDivRequested + GET @INDEX 0.00000000 FROM AZFirming ) - DCPreductionCAWCD + CAWCDICSdiversionAdjustment ) - CAPShortageVolume ) * MonthPercent, date );
 
       END_WITH_STATEMENT;
@@ -667,7 +667,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts California's diversion for MWD, Coachella, and IID. For Coachella and IID, the diversion requested is reduced by the DCP contribution and by a LBDV factor if it is January (allow LBDV in Jan of start year if side inflows below Parker are above 90%). The MWD adjusted diversion requested is based on the deliveries and creation of ICS and is constrained by the states apportionment. The adjusted annual diversion is spread to monthly values based on the current proportion diversion each month.<br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes at the start timestep if before April in MRM or in January and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3 and the rule has not yet fired successfully. <br><br>SLOTS SET: <br>AAC:Coachella.Diversion Requested<br>AAC:IID.Diversion Requested<br>MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND @"t" < @"24:00:00 April 30, Start Year" ) AND "IsMRM"(  ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND NOT "IsDomesticOrQuantifiedOrFloodControl"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow";
     BEGIN
 
       WITH_STATEMENT (NUMERIC dcpContributionCVWD = $ "ICS Credits.AnnualDCPContribution_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
@@ -704,7 +704,7 @@ BEGIN
             WITH_STATEMENT (NUMERIC AnnualAdjustedDivRequested = ( MWDDivRequested + ( totalDeliveryMWDICS - totalCreationECICS - DCPreductionMWD - DeliveryToDate ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery that might be <br>occuring in a given scenario, or decrease the delivery if any creation of water for a given <br>scenario. TP 12/22/2017  <br>" )) DO
             WITH_STATEMENT (LIST newMWDDivDepList = FOR ( DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year" ) WITH LIST result = {  } DO
   WITH NUMERIC MaximumMonthlyDiv = $ "MWDDiversionData.MWDCanal_DailyCapacity" [] * "GetDaysInMonth"( date ) DO
-   WITH NUMERIC newMWDDivAmount = WITH NUMERIC monthPercent = $ "MWDDiversion:MWD.Diversion Requested" [date] / "SumSlot"( $ "MWDDiversion:MWD.Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" ) DO
+   WITH NUMERIC newMWDDivAmount = WITH NUMERIC monthPercent = "FlowToVolume"( $ "MWDDiversion:MWD.Diversion Requested" [date], date ) / MWDDivRequested DO
     WITH NUMERIC MWDAdjustedDiv = AnnualAdjustedDivRequested * monthPercent DO
      "Min"( MaximumMonthlyDiv, MWDAdjustedDiv )
     ENDWITH
@@ -13570,32 +13570,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{417a51fc-1cdd-4cd5-bfe0-1905f667d05a}";
+    UUID "{c2fd725a-88fb-4c71-bf25-cece9a258392}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fe6bbeeb-06f0-4ddc-a7df-be21d5e7e0ec}";
+    UUID "{09e1b9b8-ace5-4784-a88a-405127c0b9b3}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c79cc6e5-b39c-4586-970e-6bc6cd7e16e8}";
+    UUID "{782c37bb-45ab-4ccb-bde3-b024d4d1dd30}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{dc9c61ac-9330-4a07-8b51-a9dc4e5ff5c3}";
+    UUID "{74f726bd-e3f5-4d5d-bde2-f548aed99f3f}";
 ;
 
   END
-  UUID "{bed94aae-4844-4d1c-aa74-83eca5e375b9}";;
+  UUID "{fb8d43fb-8a9e-4b8a-a6d5-ce943acd9379}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13606,11 +13606,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2a629ebc-3261-497c-8f4b-d689c2fc9e55}";
+    UUID "{48fa2338-75d6-4b27-849d-c6a327465d1f}";
 ;
 
   END
-  UUID "{150c165b-2164-4668-94b2-840de85a28db}";;
+  UUID "{6e9f981d-7a67-4faa-b1ac-6498797f856e}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13621,11 +13621,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{14a60442-8d27-4e45-9b70-3dbcac3fd57a}";
+    UUID "{71ccd3ec-a0c3-4c18-a4f1-f25398b1cd06}";
 ;
 
   END
-  UUID "{ce6ef15a-e9ee-47f2-8f3a-1d86dd6fde39}";;
+  UUID "{0d08d8dd-e569-4d18-9681-c8a977cf9b2a}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13636,11 +13636,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ad61c866-15e0-4d03-a8f1-6f366fbccc4b}";
+    UUID "{f1f2f128-0c65-4fe0-ba66-5a6fc52e5014}";
 ;
 
   END
-  UUID "{9783caa5-76f2-4071-a3ac-c0b29aae7dca}";;
+  UUID "{22b09467-3afa-4007-832d-96afb8885a96}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
