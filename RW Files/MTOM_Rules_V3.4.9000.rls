@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 14:49 May 1, 2020
+# Created 15:45 May 1, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -670,7 +670,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation. Added If statment to MWDDivRequested to set domestic surplus schedules within this rule. Changed run constraint to fire if we are in domestic surplus scenario";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC dcpContributionCVWD = IF ( @"t" == @"Start Timestep" )
+      WITH_STATEMENT (NUMERIC dcpContributionCVWD = IF ( "GetYear"( @"t" ) == "GetYear"( @"Start Timestep" ) )
  THEN
   0.00000000 "acre-ft"
  ELSE
@@ -13561,32 +13561,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1b9c1648-ab31-4265-869d-b29f98272bd7}";
+    UUID "{df3534bc-5b9f-4745-bf5a-4cfdae6ed89a}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{26eea47e-6f03-47c2-ba39-87a3f77b23e8}";
+    UUID "{d95b7e09-8567-4a44-888e-1f5562f131a3}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{692bc44d-9fce-4f25-a2de-5c08c233a265}";
+    UUID "{d5058949-9738-475b-9950-292dc47a55b5}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f71ca9c9-a409-4031-942b-54f3027f4a82}";
+    UUID "{cb796c5d-287d-4b1d-bbd7-bbc0f3e9a91e}";
 ;
 
   END
-  UUID "{9c38e1a5-66d9-4853-baba-327e17442ee1}";;
+  UUID "{2f1dd690-073d-4a57-8358-1fc83570a161}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13597,11 +13597,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f225e17d-9714-4cfa-9878-4379d0a3aa0a}";
+    UUID "{ac01f2d8-be16-4bb8-b140-7dc278f09910}";
 ;
 
   END
-  UUID "{0c4829af-13ab-4dd8-9ca2-34dbcbe417be}";;
+  UUID "{df822ac9-a794-4e1a-aab0-81abea723d02}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13612,11 +13612,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9bef7373-577f-4c0f-bcc3-4694d9bc069b}";
+    UUID "{54e4a1b7-82c7-4dd0-8826-7ff04539cdd6}";
 ;
 
   END
-  UUID "{da8a20b5-5859-46d2-8194-46b252e9db98}";;
+  UUID "{d11f781e-b575-4fa5-a9fe-7d04bc91826d}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13627,11 +13627,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{355b4dd6-9420-4a26-abc3-b8ad19fa8980}";
+    UUID "{cafaec9c-ad09-456e-910c-85e85e049963}";
 ;
 
   END
-  UUID "{527269f6-fcff-4d7f-b2ed-653309540468}";;
+  UUID "{b5bd468e-1140-4804-9689-dc3495427e95}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
