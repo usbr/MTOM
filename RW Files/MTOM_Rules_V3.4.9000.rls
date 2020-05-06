@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 15:53 May 6, 2020
+# Created 16:25 May 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -544,20 +544,13 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts Mexico's diversion. The diversion requested is calculated as an annual value based on the diversion requested and Mexico Recoverable Water Savings contribution. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January or the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>MexicoTreatyDelivery:MexicoSched.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule does not need to fire in the start year because MX does not have demand variability in <br>the first year. All adjustments are assumed to be included in the start year schedule.  <br>";
-    NOTES                "GCAA, 20200330: Updated rule to include SetOutYearSchedules logic and to only fire in outyears.<br>S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200506: Added temporary variable for surplus volume to be used in calculation of MX diversion. ";
+    NOTES                "GCAA, 20200330: Updated rule to include SetOutYearSchedules logic and to only fire in outyears.<br>S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200506: Added temporary variable for surplus volume to be used in calculation of MX diversion. Refernced Annual Shortage volume slot instead of calculating shortage via table";
     BEGIN
 
       WITH_STATEMENT (NUMERIC MXSurplusVol = NaNToZero ( $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"] )) DO
-            WITH_STATEMENT (NUMERIC MxShortageVolume = IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 )
- THEN
-  $ "Mexico Shortage and Surplus.Mexico Shortage Volumes" [$ "Shortage.Shortage Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] - 1.00000000, "Mexico"]
- ELSE
-  0.00000000 "acre-ft"
- ENDIF) DO
+            WITH_STATEMENT (NUMERIC MxShortageVolume = $ "Mexico Shortage and Surplus.Mexico Annual Shortage" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC BNWSCPreduction = $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC MXdivRequested = "SumFlowsToVolume"( $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested", @"t", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
-            $ "Mexico Shortage and Surplus.Mexico Annual Shortage" [@"24:00:00 December Max DayOfMonth, Current Year"] := MxShortageVolume;
-
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date], date ) / MXdivRequested) DO
             $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( ( MXdivRequested + MXSurplusVol - BNWSCPreduction - MxShortageVolume ) * MonthPercent, date );
@@ -581,7 +574,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts Nevada's diversion for SNWP. The diversion requested is calculated as an annual value based on the diversion requested, shortage volume, DCP contribution, and ICS delivey. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>PumpingFromLakeMead:SNWP.Diversion Requested; PumpingFromLakeMead:SNWP.Depletion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) COMMENTED_BY "This rule needs to run in the start year in order to apply SNWA demand variability <br>" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  );
-    NOTES                "S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Replaced non SNWP water users individually listed with function call. Changed the month percent calculation to be based off volume and not flow. Adjusted logic and run constraint to allow rule to adjust for domestic surplus<br>A. Pivarnik, 20200501: Reorded delivery logic and added notes. Rule now solves for quantified surplus scenarios. Changed run constraint to allow rule to fire in quantified surplus<br>";
+    NOTES                "S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Replaced non SNWP water users individually listed with function call. Changed the month percent calculation to be based off volume and not flow. Adjusted logic and run constraint to allow rule to adjust for domestic surplus<br>A. Pivarnik, 20200505: Reorded delivery logic and added notes. Rule now solves for quantified surplus scenarios. Changed run constraint to allow rule to fire in quantified surplus. Refernced Annual Shortage volume slot instead of calculating shortage via table<br>";
     BEGIN
 
     DESCRIPTION          "SNWADivVol = total yearly volume of diversion for SNWA <br>";
@@ -595,12 +588,7 @@ BEGIN
   ELSE
    WITH NUMERIC AdditionalDCPReductionNV = ( $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) DO
     WITH NUMERIC NVICSDelivery = $ "ICS Credits.AnnualICSDelivery_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-     WITH NUMERIC shortageVolume = IF ( ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 )
-     THEN
-      $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) - 1.00000000, "Nevada"]
-     ELSE
-      0.00000000 "acre-ft"
-     ENDIF DO
+     WITH NUMERIC shortageVolume = $ "Shortage.SNWP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
       WITH NUMERIC NonSNWANevadaDivReqs = FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
        "Sum Non SNWP Nevada Users"( date )
       ENDFOR DO
@@ -632,17 +620,12 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts Arizona's diversion for CAP. The diversion requested is calculated as an annual value  based on the diversion request, firming obligation, shortage volume, DCP volume reduction, and ICS delivery. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule does not need to fire in the start year because there is no CAP demand varibility applied <br>directly to the diversion. All adjustments are assumed to be included in the start year schedule.    <br>";
-    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus schedule<br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow<br>A. Pivarnik, 20200505: Updated logic and run constraint to allow rule to solve in quantified surplus scenarios. Moved non CAP AZ water diversion assignments to this rule for Domestic/Quantified surplus enetitlement holders";
+    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus schedule<br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow<br>A. Pivarnik, 20200505: Updated logic and run constraint to allow rule to solve in quantified surplus scenarios. Moved non CAP AZ water diversion assignments to this rule for Domestic/Quantified surplus enetitlement holders. Refernced Annual Shortage volume slot instead of calculating shortage via table";
     BEGIN
 
       WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
           DESCRIPTION          "Shortage reduction volume <br>";
-      WITH_STATEMENT (NUMERIC CAPShortageVolume = IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
- THEN
-  $ "Shortage.State Shortage Volumes" [$ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000, "Arizona"]
- ELSE
-  0.00000000 "acre-ft"
- ENDIF COMMENTED_BY "Adjust CAP for shortage <br>") DO
+      WITH_STATEMENT (NUMERIC CAPShortageVolume = $ "Shortage.CAP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] COMMENTED_BY "Adjust CAP for shortage <br>") DO
           DESCRIPTION          "Adjust diversion by difference of ICS delivery calculated by MTOM vs the value passed from the 24 MS.  <br>";
       WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.AnnualICSDelivery_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
           DESCRIPTION          "DCP reduction volume <br>";
@@ -1563,6 +1546,46 @@ BEGIN
 
   END
   UUID "{7d23b72b-fd8b-40be-8e47-056a0c6b9de8}";;
+
+  POLICY_GROUP   "Shortage";
+  DESCRIPTION    "";
+  ACTIVE         TRUE;
+  NOTES          "";
+  BEGIN
+
+    RULE                 "Set Outyear Shortage Volumes";
+    DESCRIPTION          "Sets outyear shortage volumes for SNWA, CAP and Mexico";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) );
+    NOTES                "";
+    BEGIN
+
+      $ "Mexico Shortage and Surplus.Mexico Annual Shortage" [@"24:00:00 December Max DayOfMonth, Current Year"] := IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 )
+ THEN
+  $ "Mexico Shortage and Surplus.Mexico Shortage Volumes" [$ "Shortage.Shortage Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] - 1.00000000, "Mexico"]
+ ELSE
+  0.00000000 "acre-ft"
+ ENDIF;
+
+      $ "Shortage.CAP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] := IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 )
+ THEN
+  $ "Shortage.State Shortage Volumes" [$ "Shortage.Shortage Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] - 1.00000000, "Arizona"]
+ ELSE
+  0.00000000 "acre-ft"
+ ENDIF;
+
+      $ "Shortage.SNWP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] := IF ( ( $ "Shortage.Shortage Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 )
+ THEN
+  $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - 1.00000000, "Nevada"]
+ ELSE
+  0.00000000 "acre-ft"
+ ENDIF;
+
+    END
+    UUID "{c9d32adb-af95-41e4-9ada-40f25c37c3c7}";;
+
+  END
+  UUID "{18926ca0-7d63-4131-9528-7579068d3f76}";;
 
   POLICY_GROUP   "LB Surplus";
   DESCRIPTION    "This policy group contains the rules required to simulate Lower Basin Surplus operations. Lower Basin Surplus operations are based on the 2007 Interim Guidelines as well as IBWC Minute 323. Surplus volume entitlements are based on contracts between Reclamation and the various water users, as well as the 2007 Interim Guidelines and Minute 323.";
@@ -13683,32 +13706,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e2b998b8-bce5-4cd7-912a-6c624f607172}";
+    UUID "{6a4b9a91-3cba-4b85-9c0b-6ba7ee8a594b}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7ddfa034-0228-4c40-a905-76110aa2637b}";
+    UUID "{b9b2f64e-c20a-4692-8c24-86a950c04e1c}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f1939797-90e0-4575-a590-cb91d0480ac2}";
+    UUID "{15d656e3-dd2d-4928-815f-d2a35618457c}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9ad003fa-5a29-4010-808a-e303d7813562}";
+    UUID "{5c7efc40-dc02-4e50-bf29-85bb007c7fe5}";
 ;
 
   END
-  UUID "{c4c01003-bbf7-4562-bae9-285ebfbc7064}";;
+  UUID "{08c7c2ea-e22b-4ef4-85c3-69d63a0e4377}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13719,11 +13742,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{acd3ca33-143d-4e57-a93f-7deca1e95149}";
+    UUID "{c1611d69-0c47-4242-9967-ad9147ae71c5}";
 ;
 
   END
-  UUID "{a804da27-9494-4822-bafe-565ac866d5ef}";;
+  UUID "{dbd64851-a88a-4990-a878-1e4a8464f4b0}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13734,11 +13757,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{029b2eea-a3d9-4803-b5a6-06615077f1b9}";
+    UUID "{5e6e328f-da58-4a60-aa19-cf5ff8e79ba1}";
 ;
 
   END
-  UUID "{e228274f-ceb6-4d54-bd6c-9d8af53d55a0}";;
+  UUID "{821eb5d3-dedf-4ac5-b694-527e742c67cc}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13749,11 +13772,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fc648325-cace-4091-bde1-073dfcdbfd2a}";
+    UUID "{a966938e-63fb-4b33-a3c6-a34d0f1d0c4f}";
 ;
 
   END
-  UUID "{0dff675d-cdce-414e-922a-27c3b1e152f8}";;
+  UUID "{85a8bb94-3d37-417e-a475-1c9aacfe7ae3}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
