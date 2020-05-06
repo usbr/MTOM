@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 15:36 May 6, 2020
+# Created 15:53 May 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -631,7 +631,7 @@ BEGIN
     RULE                 "AZ Diversion Adjustment";
     DESCRIPTION          "DESCRIPTION: This rule adjusts Arizona's diversion for CAP. The diversion requested is calculated as an annual value  based on the diversion request, firming obligation, shortage volume, DCP volume reduction, and ICS delivery. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule does not need to fire in the current year because there is no CAP demand varibility <br>applied directly to the diversion. All adjustments are assumed to be included in the start year <br>schedule.   <br>";
+    RULE_EXEC_CONSTRAINT ( ( "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule does not need to fire in the start year because there is no CAP demand varibility applied <br>directly to the diversion. All adjustments are assumed to be included in the start year schedule.    <br>";
     NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus schedule<br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow<br>A. Pivarnik, 20200505: Updated logic and run constraint to allow rule to solve in quantified surplus scenarios. Moved non CAP AZ water diversion assignments to this rule for Domestic/Quantified surplus enetitlement holders";
     BEGIN
 
@@ -1257,7 +1257,7 @@ BEGIN
     RULE                 "CA ICS Delivery";
     DESCRIPTION          "DESCRIPTION: This rule sets the annual delivery for each MWD ICS account. The annual delivery is constrained by the bank capacity, Mead's pool elevation, and the delivery limit. The rule determines which ICS account type the annual ICS delivery comes from using a list. The order in which the ICS deliveries are made is: DCP (constrained by Mead recovery elevation), Extraordinary Conservation, System Efficiency, and Binational. The EC ISC balance is the previous years account balance minus the EC to DCP conversion(from the previous year). MWD can either create or deliver EC ICS based on Sac WY index, not both. <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition have changed between run cycle 3 and 4. <br><br>SLOTS SET: <br>ICS Credits.AnnualDeliveryDCP_MWD<br>ICS Credits.AnnualDeliveryEC_MWD<br>ICS Credits.AnnualDeliverySysEff_MWD<br>ICS Credits.AnnualDeliveryBiNat_MWD<br>ICS Credits.AnnualICSDelivery_MWD";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) );
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: <br><br>AP, 20191117: DCP development.<br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadBelowDCPRecoveryElevation() to replace frequently used boolean. Replace OR statement with & IsLBorDCPconditionChanged() .";
     BEGIN
 
@@ -13683,32 +13683,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{81c8c1d8-06aa-4777-8263-132904355986}";
+    UUID "{e2b998b8-bce5-4cd7-912a-6c624f607172}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a58bc80c-4091-4e88-a265-cdca052b436e}";
+    UUID "{7ddfa034-0228-4c40-a905-76110aa2637b}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{54c027d2-4f7c-4ab2-9572-a293fa0b9c93}";
+    UUID "{f1939797-90e0-4575-a590-cb91d0480ac2}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{de9bfa4a-0984-4fd8-ab0b-b9762508035e}";
+    UUID "{9ad003fa-5a29-4010-808a-e303d7813562}";
 ;
 
   END
-  UUID "{4e99b55a-5990-4766-b54a-5040897a2afe}";;
+  UUID "{c4c01003-bbf7-4562-bae9-285ebfbc7064}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13719,11 +13719,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{469572d1-8908-4ecb-87a6-305b7b52724f}";
+    UUID "{acd3ca33-143d-4e57-a93f-7deca1e95149}";
 ;
 
   END
-  UUID "{7a1995a0-2f12-464e-86d8-8a68835e91ab}";;
+  UUID "{a804da27-9494-4822-bafe-565ac866d5ef}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13734,11 +13734,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c50752a1-6eb7-4a92-aa24-3625934b0609}";
+    UUID "{029b2eea-a3d9-4803-b5a6-06615077f1b9}";
 ;
 
   END
-  UUID "{03b1dd46-53b7-417b-91aa-c29ae92e312e}";;
+  UUID "{e228274f-ceb6-4d54-bd6c-9d8af53d55a0}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13749,11 +13749,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1b3a0754-5000-40e2-bb84-8a818ad09b77}";
+    UUID "{fc648325-cace-4091-bde1-073dfcdbfd2a}";
 ;
 
   END
-  UUID "{d4da2d93-e6f5-4476-93c9-eeb1e69e61fb}";;
+  UUID "{0dff675d-cdce-414e-922a-27c3b1e152f8}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
