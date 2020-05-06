@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 15:42 May 5, 2020
+# Created 11:02 May 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -623,8 +623,8 @@ BEGIN
     RULE                 "AZ Diversion Adjustment";
     DESCRIPTION          "DESCRIPTION: This rule adjusts Arizona's diversion for CAP. The diversion requested is calculated as an annual value  based on the diversion request, firming obligation, shortage volume, DCP volume reduction, and ICS delivery. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  );
-    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus schedule<br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow<br>A. Pivarnik, 20200505: Updated logic and run constraint to allow rule to solve in quantified surplus scenarios";
+    RULE_EXEC_CONSTRAINT ( "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  );
+    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus schedule<br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow<br>A. Pivarnik, 20200505: Updated logic and run constraint to allow rule to solve in quantified surplus scenarios. Moved non CAP AZ water diversion assignments to this rule for Domestic/Quantified surplus enetitlement holders";
     BEGIN
 
       WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
@@ -663,6 +663,28 @@ BEGIN
       END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
+
+    DESCRIPTION          "These water users have both quantified and domestic surplus entitlements  <br>";
+      IF_STATEMENT ("IsDomesticOrQuantified"(  )) THEN
+            FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "Gila Monster Farms" ), date );
+
+            $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "AzPumpersBlwImp" ), date );
+
+      ENDFOREACH;
+
+      END_IF_STATEMENT;
+
+    DESCRIPTION          "These water users have quantified surplus entitlements only <br>";
+      IF_STATEMENT ("IsQuantifiedSurplus"(  )) THEN
+            FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            $ "AzPkrToImp:CibolaValleyIID.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "CibolaValleyIID" ), date );
+
+            $ "AzPkrToImp:Parker.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "City of Parker" ), date );
+
+      ENDFOREACH;
+
+      END_IF_STATEMENT;
 
     END
     UUID "{1574216e-dc24-4ea2-9307-60c03d96cdbb}";;
@@ -1551,7 +1573,7 @@ BEGIN
 
     RULE                 "Quantified Surplus Schedules Data Volume to Simulation Flow";
     DESCRIPTION          "DESCRIPTION: This rule converts volumes allowed under Quantified Surplus into monthly flow rates for the year and sets associated slots. <br><br>EXECUTION CONSTRAINTS: This rule fires in January during run cycle 3 and 4 when Quantified Surplus Volume is greater than zero. <br><br>SLOTS SET: <br><br>AAC.Coachella.Diversion Requested<br>AAC:IID.Diversion Requested<br>OthersBlwImp:AzPumpersBlwImp.Diversion Requested<br>GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested<br>AzPkrToImp:CibolaValleyIID.Diversion Requested<br>AzPkrToImp:Parker.Diversion Requested<br>";
-    ACTIVE               TRUE;
+    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND @"t" == @"24:00:00 January 31, Current Year" AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved the setting of Surplus.Surplus Flag and Surplus.Quantified Surplus Flag slots to new rule Set Quantified Surplus Flag; removed IsNaN Surplus.Surplus Flag[] execution constraint from this rule.<br>S.Baker, 20200306: Edited rule description. <br>A. Pivarnik, 20200505: Removed disbaled, pumping from mead (SNWA), MWD, and CAP slot assigments";
     BEGIN
@@ -1561,13 +1583,13 @@ BEGIN
 
             $ "AAC:IID.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "IID" ), date );
 
-            $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "AzPumpersBlwImp" ), date );
+          INACTIVE      $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "AzPumpersBlwImp" ), date );
 
-            $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "Gila Monster Farms" ), date );
+          INACTIVE      $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "Gila Monster Farms" ), date );
 
-            $ "AzPkrToImp:CibolaValleyIID.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "CibolaValleyIID" ), date );
+          INACTIVE      $ "AzPkrToImp:CibolaValleyIID.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "CibolaValleyIID" ), date );
 
-            $ "AzPkrToImp:Parker.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "City of Parker" ), date );
+          INACTIVE      $ "AzPkrToImp:Parker.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "City of Parker" ), date );
 
       ENDFOREACH;
 
@@ -1576,7 +1598,7 @@ BEGIN
 
     RULE                 "Domestic Surplus Schedules Data Volume to Simulation Flow";
     DESCRIPTION          "DESCRIPTION: This rule converts volumes allowed under Domestic Surplus into monthly flow rates  for the year and sets associated slots. <br><br>EXECUTION CONSTRAINTS: This rule fires in January in run cycles 3 and 4 when the projected Mead pool elevation for the previous EOCY is above the Domestic Surplus Trigger elevation. <br><br>SLOTS SET: <br><br>GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested<br>OthersBlwImp:AzPumpersBlwImp.Diversion Requested<br>";
-    ACTIVE               TRUE;
+    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [];
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved the setting of Surplus.Surplus Flag and Surplus.Domestic Surplus Flag slots to new rule Set Domestic Surplus Flag; removed IsNaN Surplus.Surplus Flag[] execution constraint from this rule<br>S.Baker, 20180925: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>S.Baker, 20200306: Edited rule description. Added constraint for Jan of current year to match similar Quantified Surplus rule. <br>APivarnik, 20200416: Disabled CAP diversion adjustment. The Total annual schedule was added the the AZ Diversion adjustment rule higher in the ruleset. Setting diversion here would cause available canal space to decrease and a miscalculation in the ICS delivery calculation.<br>Apivarnik, 20200501: Removed disabled slot assignments, assignments for SNWP diversion and MWD diversion/depletion assignment. The Total annual schedule was added the the CA Diversion adjustment rule higher in the ruleset. ";
     BEGIN
@@ -10356,6 +10378,46 @@ BEGIN
     END
     UUID "{77c6cb47-3924-443d-80b2-7e8f9c14ffcc}";;
 
+    FUNCTION       "IsDomesticSurplus" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Check if Domestic Surplus for current year.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, S.Baker 20200311";
+    BEGIN
+
+      IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{556c0a86-e519-4a67-af64-ea8cacfbef0b}";;
+
+    FUNCTION       "IsQuantifiedSurplus" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Check if Domestic Surplus for current year.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, S.Baker 20200311";
+    BEGIN
+
+      IF ( ( NaNToZero ( $ "Surplus.Quantified Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{ad3e62f1-e978-4110-a9db-401185deb5a3}";;
+
     FUNCTION       "IsDomesticOrQuantified" (  )
     RETURN_TYPE    BOOLEAN;
     SCALE_UNITS    "";
@@ -10375,6 +10437,66 @@ BEGIN
 
     END
     UUID "{1b6eceb1-c37f-4b6b-a557-69aa6d420cb1}";;
+
+    FUNCTION       "IsFloodControl" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Checks whether the lower basin is in flood control surplus for a given year<br><br>Added 5/5/2020 by APivarnik<br><br>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  TRUE;
+    POST_EXEC_DIAG TRUE;
+    NOTES          "";
+    BEGIN
+
+      IF ( ( NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{53ef8e92-067c-409b-b264-6aa2f7193bc4}";;
+
+    FUNCTION       "IsDomesticOrQuantifiedOrFloodControl" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Check if Domestic or Quantified Surplus or Flood Control for current year.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "Author, S.Baker 20200311";
+    BEGIN
+
+      IF ( "IsQuantifiedOrFloodControl"(  ) OR "IsDomesticSurplus"(  ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{2c04ee45-8310-4567-9a7f-56fd04962ab7}";;
+
+    FUNCTION       "IsJANofOutyear" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Checks whether the lower basin is in domestic or quantified surplus for a given year<br><br>Added 5/5/2020 by APivarnik";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "";
+    BEGIN
+
+      IF ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{ca0b24d2-527c-4ced-8dec-8967f5c30dc4}";;
 
     FUNCTION       "IsAPRtoDECofStartYear" (  )
     RETURN_TYPE    BOOLEAN;
@@ -10421,26 +10543,6 @@ BEGIN
     END
     UUID "{43700a2b-b93e-4abd-93d1-439824e212a9}";;
 
-    FUNCTION       "IsFloodControl" (  )
-    RETURN_TYPE    BOOLEAN;
-    SCALE_UNITS    "";
-    DESCRIPTION    "Checks whether the lower basin is in flood control surplus for a given year<br><br>Added 5/5/2020 by APivarnik<br><br>";
-    ACTIVE         TRUE;
-    PRE_EXEC_DIAG  TRUE;
-    POST_EXEC_DIAG TRUE;
-    NOTES          "";
-    BEGIN
-
-      IF ( ( NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) )
- THEN
-  TRUE
- ELSE
-  FALSE
- ENDIF;
-
-    END
-    UUID "{53ef8e92-067c-409b-b264-6aa2f7193bc4}";;
-
     FUNCTION       "IsQuantifiedOrFloodControl" (  )
     RETURN_TYPE    BOOLEAN;
     SCALE_UNITS    "";
@@ -10480,46 +10582,6 @@ BEGIN
 
     END
     UUID "{92349f2c-df3a-4918-ab7f-7afdefb584a8}";;
-
-    FUNCTION       "IsDomesticOrQuantifiedOrFloodControl" (  )
-    RETURN_TYPE    BOOLEAN;
-    SCALE_UNITS    "";
-    DESCRIPTION    "Check if Domestic or Quantified Surplus or Flood Control for current year.";
-    ACTIVE         TRUE;
-    PRE_EXEC_DIAG  FALSE;
-    POST_EXEC_DIAG FALSE;
-    NOTES          "Author, S.Baker 20200311";
-    BEGIN
-
-      IF ( "IsQuantifiedOrFloodControl"(  ) OR "IsDomesticSurplus"(  ) )
- THEN
-  TRUE
- ELSE
-  FALSE
- ENDIF;
-
-    END
-    UUID "{2c04ee45-8310-4567-9a7f-56fd04962ab7}";;
-
-    FUNCTION       "IsDomesticSurplus" (  )
-    RETURN_TYPE    BOOLEAN;
-    SCALE_UNITS    "";
-    DESCRIPTION    "Check if Domestic Surplus for current year.";
-    ACTIVE         TRUE;
-    PRE_EXEC_DIAG  FALSE;
-    POST_EXEC_DIAG FALSE;
-    NOTES          "Author, S.Baker 20200311";
-    BEGIN
-
-      IF ( ( NaNToZero ( $ "Surplus.Domestic Surplus Flag" [@"24:00:00 December 31, Current Year"] ) > 0.00000000 ) )
- THEN
-  TRUE
- ELSE
-  FALSE
- ENDIF;
-
-    END
-    UUID "{556c0a86-e519-4a67-af64-ea8cacfbef0b}";;
 
     FUNCTION       "MonthIs" ( LIST months )
     RETURN_TYPE    BOOLEAN;
@@ -13592,32 +13654,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{64823672-ec47-4f49-9fd0-6085df7b9073}";
+    UUID "{965f48d0-3a16-4399-90e5-b88bf50f3c1b}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8ab14970-fbe6-4dd1-9df0-a76c1f4de632}";
+    UUID "{829a0a7d-593b-40e8-9c44-4ec5eab7bb13}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4c0ca492-56cd-468a-92a2-b1e06ead3d8d}";
+    UUID "{0a1db081-0909-4b90-b0fd-7518c7a5f984}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9d7ff74e-a949-499f-8653-35c0ddfdb0e7}";
+    UUID "{caed934f-5623-4547-a9de-390745c4bd0b}";
 ;
 
   END
-  UUID "{a9b2e974-5439-4d73-953a-907b6b8b6a8a}";;
+  UUID "{fc456242-823f-49ed-b9bf-95fe2ef95fa2}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13628,11 +13690,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ce43fa39-f6ab-41b7-a2ef-a90d0efc5440}";
+    UUID "{186ca750-6b6e-4a0b-bf5a-e6223b0266d2}";
 ;
 
   END
-  UUID "{4e17403e-ddbc-451f-8458-9ec936b9dbcf}";;
+  UUID "{8f59bac5-ce1e-4d7d-83a3-c18c78cf15ee}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13643,11 +13705,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5446fcfe-d6f2-42a6-9ceb-985d315357d7}";
+    UUID "{a58c7440-1116-4674-bc6e-16b137bea69c}";
 ;
 
   END
-  UUID "{82093dba-724b-434c-8dc0-5775f55022ae}";;
+  UUID "{924d84a0-0bfb-4abc-b47b-0452136d12f4}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13658,11 +13720,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f50b0743-8cb5-4c78-91a6-8fb399a5a812}";
+    UUID "{f6408dfa-bc99-4059-9978-2e73095ba743}";
 ;
 
   END
-  UUID "{c94681bf-256f-4591-9cf6-9844486eb67f}";;
+  UUID "{a6ba43fd-03a2-4a75-81f9-6ffd154e8c4e}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
