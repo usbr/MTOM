@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 07:55 May 7, 2020
+# Created 08:07 May 7, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1883,11 +1883,11 @@ BEGIN
     END
     UUID "{5b328700-3564-4714-b5ad-22cdf863945f}";;
 
-    RULE                 "Set Outyear Surplus Schedules for Mexico";
+    RULE                 "Set Outyear Surplus Entitlement for Mexico";
     DESCRIPTION          "DESCRIPTION: This rule uses the volume associated with the Mexico Surplus Flag to set the Mexico diversion request for surplus according to the Mexico Surplus Table. The shortage monthly percent is used to apply the surplus over the year. Also, set the annual surplus volume based on the surplus flag. <br><br>EXECUTION CONSTRAINTS: This rule fires in January as long as it is not the start timestep, and if the Mexico surplus flag for the current year is greater than zero. <br><br>SLOTS SET:<br>MexicanTreatyDelivery:MexicoSched.Diversion Requested<br>Mexico Shortage and Surplus.Mexico Annual Surplus";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br>S.Baker, 20200306: Edited rule description. <br>A. Pivarnik, 20200506: removed Mexico Div requested slot asssignment. Moved slot assignment to MX div adjustment rule higher in ruleset";
+    RULE_EXEC_CONSTRAINT "IsJANofOutyear"(  ) AND $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br>S.Baker, 20200306: Edited rule description. <br>A. Pivarnik, 20200506: removed Mexico Div requested slot asssignment. Moved slot assignment to MX div adjustment rule higher in ruleset. Placed IsJanofOutyear function in execution constraint";
     BEGIN
 
       $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"] := $ "Mexico Shortage and Surplus.Mexico Surplus Table" [$ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000, "Volume"];
@@ -13709,32 +13709,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{900aa687-5ccd-4049-9170-3b5c17f31bf3}";
+    UUID "{92bc83f2-5d2c-41b3-af7a-fc94aba1e0e4}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2cdbbdf8-a625-44f9-9335-08d097fb845f}";
+    UUID "{ec6d944f-e7ca-4dad-9e3f-9e84af73dfa8}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bac47633-14f0-44ce-906c-51bf8991051a}";
+    UUID "{4f539bab-06b1-4399-8a97-e0d38563840e}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ecdcda40-268c-46c6-9e3f-36125a9489e6}";
+    UUID "{bfbecf86-a6db-4b39-989f-b37dfc57fc30}";
 ;
 
   END
-  UUID "{1c29e3ba-1ec5-4c08-afb9-16e54697eae9}";;
+  UUID "{6bcb99db-75d4-47c9-a874-a89dc39ae7e1}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13745,11 +13745,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{be7ffb4f-a0aa-4367-8d17-394837dbe2f5}";
+    UUID "{db90851e-da6c-42cd-b9eb-ae03dc8df799}";
 ;
 
   END
-  UUID "{5b9f51c7-d4f5-4122-a344-3a2b1c6d6f3a}";;
+  UUID "{e5a05588-85f8-4e83-83fb-8fc9f998d6a2}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13760,11 +13760,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{183e393d-aab8-42e1-ae1d-931c58735d20}";
+    UUID "{32de55a0-5977-4d20-b2c0-be0ba13e6feb}";
 ;
 
   END
-  UUID "{4dc385ff-8d98-4e94-8c3c-5d3ade8af3ec}";;
+  UUID "{75a58a85-e2af-4a8d-bb0b-2cafff3021d1}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13775,11 +13775,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4bbeff9a-de3c-4d73-93ac-f7e1615428e0}";
+    UUID "{f3d3379b-f2f5-40b8-8831-05d55ce7e74e}";
 ;
 
   END
-  UUID "{8a685428-574b-4e38-807a-ac982dc2d5b2}";;
+  UUID "{145030e0-5391-41ab-a985-05b31c048cdf}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
