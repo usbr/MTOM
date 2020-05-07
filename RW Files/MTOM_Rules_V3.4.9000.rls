@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 09:05 May 7, 2020
+# Created 12:29 May 7, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -601,7 +601,7 @@ BEGIN
  ENDIF COMMENTED_BY "Only adjust SNWA's diversion by demand variability when in the start year. It is assumed that all <br>other diversion adjustments have been included in the start year schedule <br>") DO
           DESCRIPTION          "Adjust SNWA delivery <br>";
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) / SNWADivVol) DO
+            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) / $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             FOREACH (SLOT slot IN { $ "PumpingFromLakeMead:SNWP.Diversion Requested" , $ "PumpingFromLakeMead:SNWP.Depletion Requested" }) DO
             slot [date] := "VolumeToFlow"( SNWADivVol * MonthPercent, date );
 
@@ -797,28 +797,42 @@ BEGIN
       END_WITH_STATEMENT;
 
     DESCRIPTION          "Adjust Coachella Valley Water District Diverison (CVWD) in quantified surplus or DCP scenarios. <br>Adjust CVWD only if its january to apply DV or if there is a DCP contribution <br>";
-      IF_STATEMENT ("GetMonth"( @"t" ) == 1.00000000 OR "CVWD DCP Contribution"(  ) != 0.00000000 "acre-ft") THEN
+      IF_STATEMENT ("GetMonth"( @"t" ) == 1.00000000 OR "CVWD DCP Contribution"(  ) != 0.00000000 "acre-ft" OR "IsQuantifiedSurplus"(  )) THEN
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "AAC:Coachella.Diversion Requested" [date] := "VolumeToFlow"( ( ( "Max"( NaNToZero ( $ "Surplus Total Annual Schedules.Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] ), $ "California_CU_Forecast1.Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - "CVWD DCP Contribution"(  ) ) COMMENTED_BY "Total yearly diversion prior to Demand variability and applying a distribution <br>" * IF ( "GetMonth"( @"t" ) == 1.00000000 )
+            $ "AAC:Coachella.Diversion Requested" [date] := WITH NUMERIC CVWDMonthlyDiv = IF ( "IsQuantifiedSurplus"(  ) )
  THEN
-  "AgUsersBelowParkerDemandVariabilityFactor"( date, "CVWD" )
+  "Set Monthly Surplus Schedule"( date, "Coachella" )
  ELSE
-  1.00000000
- ENDIF COMMENTED_BY "Apply demand variability to the total yearly diversion <br>" ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"], date );
+  $ "California_CU_Schedules.Coachella" [date] * IF ( "GetMonth"( @"t" ) == 1.00000000 )
+  THEN
+   "AgUsersBelowParkerDemandVariabilityFactor"( date, "CVWD" )
+  ELSE
+   1.00000000
+  ENDIF - "CVWD DCP Contribution"(  ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"]
+ ENDIF DO
+  "VolumeToFlow"( CVWDMonthlyDiv, date )
+ ENDWITH;
 
       ENDFOREACH;
 
       END_IF_STATEMENT;
 
     DESCRIPTION          "Adjust IID Diversion Requested if there is an IID ICS Diversion adjustment or quantified surplus <br>scenario <br>";
-      IF_STATEMENT ("RoundToFactor"( "IID ICS Diversion Adjustment"(  ), 1.00000000 "acre-ft" ) != 0.00000000 "acre-ft" OR "GetMonth"( @"t" ) == 1.00000000) THEN
+      IF_STATEMENT ("RoundToFactor"( "IID ICS Diversion Adjustment"(  ), 1.00000000 "acre-ft" ) != 0.00000000 "acre-ft" OR "GetMonth"( @"t" ) == 1.00000000 OR "IsQuantifiedSurplus"(  )) THEN
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "AAC:IID.Diversion Requested" [date] := "VolumeToFlow"( ( "Max"( NaNToZero ( $ "Surplus Total Annual Schedules.IID" [@"24:00:00 December Max DayOfMonth, Current Year"] ), $ "California_CU_Forecast1.IID" [@"24:00:00 December Max DayOfMonth, Current Year"] ) + "IID ICS Diversion Adjustment"(  ) ) * IF ( "GetMonth"( @"t" ) == 1.00000000 )
+            $ "AAC:IID.Diversion Requested" [date] := WITH NUMERIC IIDMonthlyDiv = IF ( "IsQuantifiedSurplus"(  ) )
  THEN
-  "AgUsersBelowParkerDemandVariabilityFactor"( date, "IID" )
+  "Set Monthly Surplus Schedule"( date, "IID" )
  ELSE
-  1.00000000
- ENDIF * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"], date );
+  $ "California_CU_Schedules.IID" [date] * IF ( "GetMonth"( @"t" ) == 1.00000000 )
+  THEN
+   "AgUsersBelowParkerDemandVariabilityFactor"( date, "IID" )
+  ELSE
+   1.00000000
+  ENDIF + "IID ICS Diversion Adjustment"(  ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"]
+ ENDIF DO
+  "VolumeToFlow"( IIDMonthlyDiv, date )
+ ENDWITH;
 
       ENDFOREACH;
 
@@ -13709,32 +13723,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c1047948-220d-458f-8b37-bf55eee4e820}";
+    UUID "{b316de15-839e-498a-96fd-d249b1cd8832}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c6aa2933-73f1-48d6-a28b-1ccef5abc6c8}";
+    UUID "{4edd0214-6fa3-41d3-b6a1-f8d91f5a60a9}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c02886ac-4d22-4ed8-a251-fb55a7d2b87e}";
+    UUID "{f10a0a7b-3bcc-4307-8153-634dc426300f}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{37875cb5-f4c8-4512-b68a-521cdf46c586}";
+    UUID "{1377d873-a7ae-4b73-907e-6f9f86503368}";
 ;
 
   END
-  UUID "{b7331de1-dbab-4690-8541-96cd77603386}";;
+  UUID "{8825aba2-2e0f-4e2d-8769-1ae9812a4090}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13745,11 +13759,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{36a3d293-bd5f-416c-aa87-3601a6b10dc9}";
+    UUID "{987876aa-3f8e-49a8-9b72-73a4c867d964}";
 ;
 
   END
-  UUID "{0d64e270-4643-467e-863f-ae7ceefbe2e2}";;
+  UUID "{3c16e6ed-763d-4bf5-acf8-27360e556c72}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13760,11 +13774,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a2e5bee3-cd9e-4526-8d0e-9e6b73f3095f}";
+    UUID "{811638c6-6595-4b94-88ca-846979303868}";
 ;
 
   END
-  UUID "{f8ef837b-f2f1-4054-bf1d-045e0725f1c3}";;
+  UUID "{a8819eb7-bf3d-4ba0-b426-5816b09c526e}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13775,11 +13789,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{169e7334-255d-4cb1-946a-20b97698e93c}";
+    UUID "{01327b70-0dae-4daa-9de2-e963ffc357c7}";
 ;
 
   END
-  UUID "{73a9ce5e-5f4e-4d18-af18-78a3de153eec}";;
+  UUID "{a9a8b832-7b7c-4730-8ba0-17fbcb5f0774}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
