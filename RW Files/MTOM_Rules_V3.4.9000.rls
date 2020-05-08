@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 14:21 May 7, 2020
+# Created 09:44 May 8, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -683,10 +683,11 @@ BEGIN
     RULE                 "CA Diversion Adjustment";
     DESCRIPTION          "DESCRIPTION: This rule adjusts California's diversion for MWD, Coachella, and IID. For Coachella and IID, the diversion requested is reduced by the DCP contribution and by a LBDV factor if it is January (allow LBDV in Jan of start year if side inflows below Parker are above 90%). The MWD adjusted diversion requested is based on the deliveries and creation of ICS and is constrained by the states apportionment. The adjusted annual diversion is spread to monthly values based on the current proportion diversion each month.<br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes at the start timestep if before April in MRM or in January and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3 and the rule has not yet fired successfully. <br><br>SLOTS SET: <br>AAC:Coachella.Diversion Requested<br>AAC:IID.Diversion Requested<br>MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( NOT "IsAPRtoDECofStartYear"(  ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule needs to run in months prior to April in the start year to apply demand variability to <br>MWD <br>";
+    RULE_EXEC_CONSTRAINT ( ( ( ( NOT "IsAPRtoDECofStartYear"(  ) AND @"t" == @"Start Timestep" ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule needs to run in months prior to April in the start year to apply demand variability to <br>MWD <br>";
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation. Added If statment to MWDDivRequested to set domestic surplus schedules within this rule. Changed run constraint to fire if we are in domestic surplus scenario<br>A. Pivarnik: 20200505: Adjusted logic and run constriant to allow for rule to solve in quantified surplus scenario";
     BEGIN
 
+      BREAKPOINT BEFORE_EXEC TRUE;
     DESCRIPTION          "MWD Diversion adjustment logic <br>";
       WITH_STATEMENT (NUMERIC totalDeliveryMWDICS = IF ( "IsAPRtoDECofStartYear"(  ) OR NOT "IsMRM"(  ) )
  THEN
@@ -817,6 +818,7 @@ BEGIN
 
       END_IF_STATEMENT;
 
+    BREAKPOINT AFTER_EXEC TRUE;
     DESCRIPTION          "Adjust IID Diversion Requested if there is an IID ICS Diversion adjustment or quantified surplus <br>scenario <br>";
       IF_STATEMENT ("RoundToFactor"( "IID ICS Diversion Adjustment"(  ), 1.00000000 "acre-ft" ) != 0.00000000 "acre-ft" OR "GetMonth"( @"t" ) == 1.00000000 OR "IsQuantifiedSurplus"(  )) THEN
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
@@ -1411,8 +1413,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>TP, 20171218: In domestic surplus, reduce the ICS Delivery by the amount of Domestic surplus entitlement for MWD. Make sure the amount of Delivery taken is within the MWD ICS bank or below the Maximum Take that MWD can have.<br>AP, 20191921: Updated for DCP. Added constraint for max available ICS limited based on recovery elevation for DCP.<br>S.Baker, 20200309: Updated and edited description. Added WITH statement for SacWY_Take. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged(). <br>GCAA, 20200330: Updated rule to constrain MWD's ICS delivery by the normal operational maximum (1.2 maf) in non-surplus years and annual canal capacity (1.25 maf) if in surplus years<br>Apivarnuj, 20200423: Replace sum of MWD div requested with sim of Forecast use Reset annual and returns";
     BEGIN
 
-      BREAKPOINT BEFORE_EXEC TRUE;
-    BREAKPOINT AFTER_EXEC TRUE;
       IF_STATEMENT ("IsAPRtoDECofStartYear"(  ) OR NOT "IsMRM"(  )) THEN
           DESCRIPTION          "If April-December in start year or not a MRM run, use the default value passed from the 24 MS <br>";
       $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := $ "ICSProjectionData.AnnualCreationEC_MWD_Default" ["Dec31ofYear"( @"t" )];
@@ -1440,8 +1440,7 @@ BEGIN
   $ "ICS Credits.TotalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"]
  ENDIF COMMENTED_BY "Total available ICS for delivery limited by DCP recovery elevation. EC ICS creation and delivery are mutually <br>exclusive (either create or deliver, not both). <br>" ) COMMENTED_BY "Available ICS Water <br>" } );
 
-            BREAKPOINT BEFORE_EXEC TRUE;
-      $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := IF ( "IsDomesticOrQuantifiedOrFloodControl"(  ) COMMENTED_BY "No ICS creation if a Quantified Surplus, Flood Control, or DCP<br>" )
+            $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := IF ( "IsDomesticOrQuantifiedOrFloodControl"(  ) COMMENTED_BY "No ICS creation if a Quantified Surplus, Flood Control, or DCP<br>" )
  THEN
   0.00000000 "acre-ft"
  ELSE
@@ -1900,11 +1899,16 @@ BEGIN
     RULE                 "Set Outyear Surplus Entitlement for Mexico";
     DESCRIPTION          "DESCRIPTION: This rule uses the volume associated with the Mexico Surplus Flag to set the Mexico diversion request for surplus according to the Mexico Surplus Table. The shortage monthly percent is used to apply the surplus over the year. Also, set the annual surplus volume based on the surplus flag. <br><br>EXECUTION CONSTRAINTS: This rule fires in January as long as it is not the start timestep, and if the Mexico surplus flag for the current year is greater than zero. <br><br>SLOTS SET:<br>MexicanTreatyDelivery:MexicoSched.Diversion Requested<br>Mexico Shortage and Surplus.Mexico Annual Surplus";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "IsJANofOutyear"(  ) AND $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
+    RULE_EXEC_CONSTRAINT "IsJANofOutyear"(  );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br>S.Baker, 20200306: Edited rule description. <br>A. Pivarnik, 20200506: removed Mexico Div requested slot asssignment. Moved slot assignment to MX div adjustment rule higher in ruleset. Placed IsJanofOutyear function in execution constraint";
     BEGIN
 
-      $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"] := $ "Mexico Shortage and Surplus.Mexico Surplus Table" [$ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000, "Volume"];
+      $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"] := IF ( $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
+ THEN
+  $ "Mexico Shortage and Surplus.Mexico Surplus Table" [$ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000, "Volume"]
+ ELSE
+  0.00000000 "acre-ft"
+ ENDIF;
 
     END
     UUID "{f3dbd19c-a6c1-48f9-84f5-897b39f6ea58}";;
@@ -13723,32 +13727,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{81356377-6fe5-4c8f-9981-3bb71cc837a2}";
+    UUID "{904c9fe3-73bf-4bc6-9a7e-b22875f38413}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d9026a5e-5ad2-4d5a-80e6-4a72dd1d6b97}";
+    UUID "{4b538bf6-d6a4-4187-b630-6e294c6158c7}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5a6a38a3-7ad8-4e96-9cc3-9fce03befaf6}";
+    UUID "{cd71e9c0-0d7f-4988-8f8f-bf36d4485876}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{57123138-da88-494e-bb91-e8d82e67e8b1}";
+    UUID "{23fa1d58-6ae4-41e3-ab3e-82d0526e41df}";
 ;
 
   END
-  UUID "{912df4b0-b9d3-47fd-ad9b-9b51a2281694}";;
+  UUID "{2da50f5f-952e-42b4-8b47-cb4809fc1943}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13759,11 +13763,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e00ceca9-0fd0-480e-866e-fa20bee24cfa}";
+    UUID "{50fab647-f63f-48c2-b15d-20c137e5132d}";
 ;
 
   END
-  UUID "{463a1de6-da95-4786-abc2-3e5c68e3ca0a}";;
+  UUID "{b631caff-0867-4465-a970-c068414a5ed9}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13774,11 +13778,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4462c797-1550-4df1-b8f4-a0142d0b1120}";
+    UUID "{7158f031-17a1-48e1-a572-0a849303e11e}";
 ;
 
   END
-  UUID "{39d4c161-6622-4a01-9d63-3119e17d51c4}";;
+  UUID "{a2921044-8644-45ef-8091-7863899a4905}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13789,11 +13793,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8ab14b73-ceeb-4fef-a962-8478a247e4d9}";
+    UUID "{05fa570f-ddd6-4aea-9d71-4b9ff4b4047f}";
 ;
 
   END
-  UUID "{7cdb042e-e6e5-49fe-979e-2d94d388d20b}";;
+  UUID "{61eea7b7-09f2-42e8-bb2d-b079f6a31980}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
