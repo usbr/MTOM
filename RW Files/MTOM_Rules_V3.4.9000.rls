@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 11:49 May 11, 2020
+# Created 13:04 May 11, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -221,7 +221,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: In the event of Flood Control the Diversion Schedules are set to the Monthly Surplus Schedules for Flood Control. <br><br>EXECUTION CONTRAINT: This rule fires in run cycle 3 or 4 if the Flood Control or Exlusive Space Flags are greater than zero and the Flood Control Surplus Flag is NaN.<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Flood Control Surplus Flag; OthersBlwImp.AzPumpersBlwImp.Diversion Requested; AzPkrToImp:CibolaValleyIID.Diversion Requested; AzPkrToImp:Parker.Diversion Requested; GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested; CAPDiversion.Total Diversion Requested; MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested; AAC:Coachella.Diversion Requested; AAC:IID.Diversion Requested; CaPkrToImp:CaPumpersAbvImp.Diversion Requested; CaDvsToPkr:Needles.Diversion Requested; MexicanTreatyDelivery:MexicoSched.Diversion Requested; PumpingFromLakeMead:SNWP.Diversion Requested; PumpingFromLakeMead:SNWP.Depletion Requested<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 ) AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br>MC, 20170920: Changed beginning datetime in FOR loop from @&quot;24:00:00 January 31, Current Year&quot; to @&quot;t&quot; per Sep 19 email from Shana T. and Corinne H.<br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br>A.Pivarnik, 20200416: Per group discussion, removed if statement preventing reset of SNWP diversion if the FC Surplus Schedule was less than the sum of SNWA schedules.  Causing issue if FC Surplus Schedule was changed between RC 3 and 4. Changed run control constraint to remove Surplus.Surplus is Nan requirement (prevented rule from firing in RC 4).";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br>MC, 20170920: Changed beginning datetime in FOR loop from @&quot;24:00:00 January 31, Current Year&quot; to @&quot;t&quot; per Sep 19 email from Shana T. and Corinne H.<br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br>A.Pivarnik, 20200416: Per group discussion, removed if statement preventing reset of SNWP diversion if the FC Surplus Schedule was less than the sum of SNWA schedules.  Causing issue if FC Surplus Schedule was changed between RC 3 and 4. Changed run control constraint to remove Surplus.Surplus is Nan requirement (prevented rule from firing in RC 4).<br>A. Pivarnik, 20200511: Added MX TJ div to MWD depletion calculation";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -245,7 +245,7 @@ BEGIN
 
             $ "MWDDiversion:MWD.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "MWD" ), date );
 
-            $ "MWDDiversion:MWD.Depletion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "MWD" ), date ) - "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date );
+            $ "MWDDiversion:MWD.Depletion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "MWD" ), date ) - "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date ) - "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoTJ" [date], date );
 
             $ "AAC:Coachella.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "Coachella" ), date );
 
@@ -13726,32 +13726,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{339b7397-aa44-4c21-9af6-50376f3926cd}";
+    UUID "{5c6917f5-5097-448b-893e-b67859207f95}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8ebe555d-6a8e-4173-a311-94788953d137}";
+    UUID "{b38c0f13-73a3-469b-87f6-0b25e994e4d3}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{665fab38-cb34-4fb4-8ecb-50753e86a58d}";
+    UUID "{5a1f01b3-6b24-4222-b3b5-9291af5dc549}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{25c0df70-ba61-4ca7-ac77-944a2e57f1e7}";
+    UUID "{0f15149f-6576-413c-afd6-1ad5410d16af}";
 ;
 
   END
-  UUID "{0fc64717-fcd4-4dca-a1e5-4b09749b9c56}";;
+  UUID "{63fb684d-75ed-4d53-a2d3-ccd97b6a06c8}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13762,11 +13762,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1c82e945-61d9-40a5-b7a7-11cee649d344}";
+    UUID "{222397ce-373a-46dd-9990-f37ec12de5fe}";
 ;
 
   END
-  UUID "{63c8f06a-c1ec-4632-9ff7-16044c6f8f83}";;
+  UUID "{44a98844-32c2-41a7-a765-1a82507efda0}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13777,11 +13777,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3a418d6b-5689-452b-bec9-cb187627a04d}";
+    UUID "{ccbc55af-61d7-421b-b8eb-883f390dec62}";
 ;
 
   END
-  UUID "{71a0f3d0-6e32-4e27-9367-aa03944a07d5}";;
+  UUID "{313f1bac-f839-477f-95fb-3c883c238a62}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13792,11 +13792,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bbba32ff-59b3-413c-a26e-cbf3a0f5bae1}";
+    UUID "{ef506fb4-3c40-44e3-9665-02bdfe372557}";
 ;
 
   END
-  UUID "{93b18111-c55a-42ea-9a0e-33559cdaad36}";;
+  UUID "{c79c0c82-9bc5-46f0-819d-22769918592e}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
