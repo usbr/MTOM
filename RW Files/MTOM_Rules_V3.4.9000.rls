@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 10:07 May 11, 2020
+# Created 11:49 May 11, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -704,7 +704,7 @@ BEGIN
             WITH_STATEMENT (NUMERIC DCPreductionMWD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - "CVWD DCP Contribution"(  )) DO
             WITH_STATEMENT (NUMERIC MWDDivRequested = IF ( "IsDomesticOrQuantified"(  ) )
  THEN
-  $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"]
+  $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] COMMENTED_BY "Checks against return flows/TJ div in calculation of total annual sched<br>"
  ELSE
   $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ENDIF) DO
@@ -1735,10 +1735,10 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule will set the Total Annual Schedules for all water users impacted by Domestic Surplus. Domestic Surplus is the lowest priority surplus, meaning that a Quantified or Flood Control Surplus will override these values.  <br><br>EXECUTION CONSTRAINTS: This rule fires when the projected Mead previous EOCY pool elevation is above the Domestic Surplus Trigger elevation. <br><br>SLOTS SET: <br>Surplus Total Annual Schedules.SNWA<br>Surplus Total Annual Schedules.MWD<br>Surplus Total Annual Schedules.Gila Monster Farms<br>Surplus Total Annual Schedules.AzPumpersBlwImp<br>Surplus Total Annual Schedules.CAP";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND @"t" == @"24:00:00 January 31, Current Year" AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>GCAA, 20181030: Changed reference from the Forecast1 slots to ResetAnnualFC slots and replaced hardcoded MWD annual canal capacity with the MWDCanal_AnnualCapacity slot. Removed &quot;- Minute 323&quot; from rule name.<br>GCAA, 20200330: Updated execution constraint to only fire on Jan 31, Current yea in the third run cycle. Updated rule to allow SNWA to take DCP ICS if their demand is greater than the basic apportionment<br>S.Baker, 20200306: Edited rule description.<br>A Pivarnik, 20200416: Added with statement to SNWA total annual schedules. The temporary variable subtracts the non snwa water use in NV from the apportionment<br>20200501, AP: Replaced non SNWP water users individually listed with function call";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>GCAA, 20181030: Changed reference from the Forecast1 slots to ResetAnnualFC slots and replaced hardcoded MWD annual canal capacity with the MWDCanal_AnnualCapacity slot. Removed &quot;- Minute 323&quot; from rule name.<br>GCAA, 20200330: Updated execution constraint to only fire on Jan 31, Current yea in the third run cycle. Updated rule to allow SNWA to take DCP ICS if their demand is greater than the basic apportionment<br>S.Baker, 20200306: Edited rule description.<br>A Pivarnik, 20200416: Added with statement to SNWA total annual schedules. The temporary variable subtracts the non snwa water use in NV from the apportionment<br>20200501, AP: Replaced non SNWP water users individually listed with function call<br>20200511: Removed refernce to TJ flows in MWD calc. Added mwd returns into calculation to check against canal capacity";
     BEGIN
 
-      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := "Min"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"], $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"] );
+      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := "Min"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"] );
 
       $ "Surplus Total Annual Schedules.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"];
 
@@ -13726,32 +13726,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{afa970b1-6e55-42c2-ab1e-3583c6e32d18}";
+    UUID "{339b7397-aa44-4c21-9af6-50376f3926cd}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c579fb4c-546e-440b-a661-935216a380e0}";
+    UUID "{8ebe555d-6a8e-4173-a311-94788953d137}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{98d2df43-4214-4ba5-8d90-cd872cf2df0e}";
+    UUID "{665fab38-cb34-4fb4-8ecb-50753e86a58d}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{afa49657-ff6b-4e21-b222-db7918ff0a55}";
+    UUID "{25c0df70-ba61-4ca7-ac77-944a2e57f1e7}";
 ;
 
   END
-  UUID "{61b75037-fd06-4641-8424-c10318615b57}";;
+  UUID "{0fc64717-fcd4-4dca-a1e5-4b09749b9c56}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13762,11 +13762,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4dca864a-dd40-430b-8dba-b9ab4ffc5e64}";
+    UUID "{1c82e945-61d9-40a5-b7a7-11cee649d344}";
 ;
 
   END
-  UUID "{beecc513-06fe-4821-8f77-6894d0fba772}";;
+  UUID "{63c8f06a-c1ec-4632-9ff7-16044c6f8f83}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13777,11 +13777,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{cca352f1-f3f8-4bbb-b29d-dd13291cd299}";
+    UUID "{3a418d6b-5689-452b-bec9-cb187627a04d}";
 ;
 
   END
-  UUID "{c8b791d0-19aa-412a-96e7-ce22d1a84876}";;
+  UUID "{71a0f3d0-6e32-4e27-9367-aa03944a07d5}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13792,11 +13792,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{92fc6671-cf58-4f4b-8045-1db03ed9070f}";
+    UUID "{bbba32ff-59b3-413c-a26e-cbf3a0f5bae1}";
 ;
 
   END
-  UUID "{5d264f8d-9c55-45a2-b27c-8b7813086b22}";;
+  UUID "{93b18111-c55a-42ea-9a0e-33559cdaad36}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
