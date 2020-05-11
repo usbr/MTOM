@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.2
-# Created 13:24 May 8, 2020
+# Created 10:02 May 11, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -666,6 +666,7 @@ BEGIN
 
       END_IF_STATEMENT;
 
+    BREAKPOINT AFTER_EXEC TRUE;
     DESCRIPTION          "These water users have quantified surplus entitlements only <br>";
       IF_STATEMENT ("IsQuantifiedSurplus"(  )) THEN
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
@@ -703,9 +704,9 @@ BEGIN
             WITH_STATEMENT (NUMERIC DCPreductionMWD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - "CVWD DCP Contribution"(  )) DO
             WITH_STATEMENT (NUMERIC MWDDivRequested = IF ( "IsDomesticOrQuantified"(  ) )
  THEN
-  $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "Mexico_CU_Schedules.MexicoTJ" [@"24:00:00 December Max DayOfMonth, Current Year"]
+  $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ELSE
-  $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "Mexico_CU_Schedules.MexicoTJ" [@"24:00:00 December Max DayOfMonth, Current Year"]
+  $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ENDIF) DO
             WITH_STATEMENT (NUMERIC DeliveryToDate = "GetDiversionToDate"( $ "California_CU_Actual.MWDDiversion" )) DO
             WITH_STATEMENT (NUMERIC AnnualAdjustedDivRequested = ( MWDDivRequested + ( totalDeliveryMWDICS - totalCreationECICS - DCPreductionMWD - DeliveryToDate ) COMMENTED_BY "Increase the MWD depletion amount by the total delivery less any over delivery that might be <br>occuring in a given scenario, or decrease the delivery if any creation of water for a given <br>scenario. TP 12/22/2017  <br>" )) DO
@@ -717,7 +718,7 @@ BEGIN
     ENDWITH
    ENDWITH DO
     WITH NUMERIC val = "DebuggerStop"(  ) DO
-     WITH NUMERIC newDivReq = newMWDDivAmount - $ "Mexico_CU_Schedules.MexicoTJ" [date] DO
+     WITH NUMERIC newDivReq = newMWDDivAmount DO
       WITH NUMERIC newDepReq = newDivReq - $ "California_CU_Schedules.MWDReturns" [date] DO
        WITH NUMERIC RemainingCanalSpace = MaximumMonthlyDiv - newDivReq DO
         APPEND { date , newDivReq , newDepReq , RemainingCanalSpace } ONTO result
@@ -817,7 +818,6 @@ BEGIN
 
       END_IF_STATEMENT;
 
-    BREAKPOINT AFTER_EXEC TRUE;
     DESCRIPTION          "Adjust IID Diversion Requested if there is an IID ICS Diversion adjustment or quantified surplus <br>scenario <br>";
       IF_STATEMENT ("RoundToFactor"( "IID ICS Diversion Adjustment"(  ), 1.00000000 "acre-ft" ) != 0.00000000 "acre-ft" OR "GetMonth"( @"t" ) == 1.00000000 OR "IsQuantifiedSurplus"(  )) THEN
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
@@ -1412,7 +1412,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>TP, 20171218: In domestic surplus, reduce the ICS Delivery by the amount of Domestic surplus entitlement for MWD. Make sure the amount of Delivery taken is within the MWD ICS bank or below the Maximum Take that MWD can have.<br>AP, 20191921: Updated for DCP. Added constraint for max available ICS limited based on recovery elevation for DCP.<br>S.Baker, 20200309: Updated and edited description. Added WITH statement for SacWY_Take. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged(). <br>GCAA, 20200330: Updated rule to constrain MWD's ICS delivery by the normal operational maximum (1.2 maf) in non-surplus years and annual canal capacity (1.25 maf) if in surplus years<br>Apivarnuj, 20200423: Replace sum of MWD div requested with sim of Forecast use Reset annual and returns";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC TRUE;
       IF_STATEMENT ("IsAPRtoDECofStartYear"(  ) OR NOT "IsMRM"(  )) THEN
           DESCRIPTION          "If April-December in start year or not a MRM run, use the default value passed from the 24 MS <br>";
       $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := $ "ICSProjectionData.AnnualCreationEC_MWD_Default" ["Dec31ofYear"( @"t" )];
@@ -1430,9 +1429,9 @@ BEGIN
   ENDIF
  ENDWITH , IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December Max DayOfMonth, Previous Year" ) <= $ "Surplus.Domestic Surplus Trigger Elevation" [] )
  THEN
-  $ "AnnualWaterUse.MWD_NormalOpMax" [] - ( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "Mexico_CU_Schedules.MexicoTJ" [@"24:00:00 December Max DayOfMonth, Current Year"] )
+  $ "AnnualWaterUse.MWD_NormalOpMax" [] - ( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December Max DayOfMonth, Current Year"] )
  ELSE
-  $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - ( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "Mexico_CU_Schedules.MexicoTJ" [@"24:00:00 December Max DayOfMonth, Current Year"] )
+  $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - ( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December Max DayOfMonth, Current Year"] )
  ENDIF COMMENTED_BY "MWD at full ditch (Conveyance Capacity)<br>" , "Min"( ( $ "ICS Credits.MeadBankParameters" ["California", "Max Delivery"] - ( ( GET @INDEX 0.00000000 FROM IIDAccounting ) + GET @INDEX 1.00000000 FROM IIDAccounting ) ) COMMENTED_BY "Available ICS delivery amount left for MWD based on other user delivery in CA <br>", IF ( "IsMeadAboveDCPRecoveryElevation"( @"24:00:00 December Max DayOfMonth, Previous Year" ) )
  THEN
   $ "ICS Credits.TotalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"]
@@ -5779,7 +5778,7 @@ BEGIN
     RULE                 "SetCaliforniaPreliminaryStateAdjustedApportionment";
     DESCRIPTION          "DESCRIPTION: For any out year, the California State Apportionment needs to be adjusted based on the estimated Payback and estimated EC ICS Creation for IID that is input to the model. This preliminary adjustment to the CA State Apportionment allows for a calculation of MWD Diversion that takes the estimated parameters into consideration. This is a more realistic calculation than using the standard CA State Apportionment. The payback and ICS Creation can be adjusted in later logic and the MWD can be adjusted again.<br><br>SLOTS SET: AnnualWaterUse.California_PreliminaryAdjustedApportionment[Current Year]";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January 31, Current Year" AND ( ( "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "ThisRule" ) ) OR ( "GetRunCycleIndex"(  ) == 3.00000000 AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 ) );
+    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January 31, Current Year" AND ( ( "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "ThisRule" ) ) OR ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsLBorDCPconditionChanged"(  ) ) ) );
     NOTES                "DEVELOPMENT NOTES:<br>AUTHOR, DATE: Unknown<br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 AND Shortage is in effect and the alternate calculation in the rule if that is the case.  In the case of shortage, EC ICS Creation is not allowed and the value (Input to the model) is not used in the calculation of apportionment.  Subsequent rules (Reset MWD Annual Forecast Use - Force to CA Apportionment, Reset Monthly Forecast Use MWD - All Months Outyears, Reset Monthly Forecast Use MWD - Nov and Dec, Cur Year, and Redistribute MWD Nov & Dec Div Request) that depend on the value calculated in this rule were also modified to allow execution in Run Cycle 3 if Shortage is in effect.";
     BEGIN
 
@@ -13727,32 +13726,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{79733cec-2af3-4e32-ab95-c59be6abf182}";
+    UUID "{afa970b1-6e55-42c2-ab1e-3583c6e32d18}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c6c72a9d-993d-450e-aa41-b9329348cfea}";
+    UUID "{c579fb4c-546e-440b-a661-935216a380e0}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{113effdb-fc78-4fed-a419-75353a1c25bb}";
+    UUID "{98d2df43-4214-4ba5-8d90-cd872cf2df0e}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2a5b039d-d384-4691-8ed2-b0d441b50042}";
+    UUID "{afa49657-ff6b-4e21-b222-db7918ff0a55}";
 ;
 
   END
-  UUID "{b5cd3cf2-f5c3-4556-ae4a-a64f81cc47b7}";;
+  UUID "{61b75037-fd06-4641-8424-c10318615b57}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13763,11 +13762,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{98a6f700-8f49-4fa7-9413-1ee8a08c08fa}";
+    UUID "{4dca864a-dd40-430b-8dba-b9ab4ffc5e64}";
 ;
 
   END
-  UUID "{2a3d87da-963c-401a-a317-90202bc4c426}";;
+  UUID "{beecc513-06fe-4821-8f77-6894d0fba772}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13778,11 +13777,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f42ee773-541e-469f-8520-065c95581b3f}";
+    UUID "{cca352f1-f3f8-4bbb-b29d-dd13291cd299}";
 ;
 
   END
-  UUID "{40853c36-7847-47de-977b-580000000ba9}";;
+  UUID "{c8b791d0-19aa-412a-96e7-ce22d1a84876}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13793,11 +13792,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c7f8997d-e96a-4215-98b9-5f778e87eb32}";
+    UUID "{92fc6671-cf58-4f4b-8045-1db03ed9070f}";
 ;
 
   END
-  UUID "{fe4ac5bf-c0c9-4fe1-bcbd-53331d7881de}";;
+  UUID "{5d264f8d-9c55-45a2-b27c-8b7813086b22}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
