@@ -10,8 +10,10 @@ MTOM_Stakeholder_User_Manual.pdf
 # ignore other backup files of zipped rules, models, and RiverSMART files
 *.bak.gz
 *.bak
-*.rsm
 *bak.rms
+
+# ignore testbed study, but not dev testing tool
+MTOM_Testbed_*.rsm
 
 # generic files not to track
 #excel backup files
