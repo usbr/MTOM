@@ -1,6 +1,3 @@
-MTOM Model Run Date: Feb-2020
-MTOM Distribution Date: Feb-2020
-
 ------------------------Disclaimer-------------------------------------------------------
 The Bureau of Reclamation (Reclamation) provides the contents of this model package as 
 a courtesy and service to our customers and stakeholders. Reclamation makes efforts to 
