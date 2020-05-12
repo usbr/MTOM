@@ -12,7 +12,6 @@
 # Input data/script for Dev Testing and testbed
 "Input Data/DevTesting" export-ignore
 "Input Data/TestbedData" export-ignore
-AdjustDates.R export-ignore
 "Code/" export-ignore
 
 # readme in inflow forecasts folder
