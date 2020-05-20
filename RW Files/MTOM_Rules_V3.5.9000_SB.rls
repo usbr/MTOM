@@ -1,5 +1,5 @@
-# RiverWare_Ruleset 8.0.3
-# Created 11:09 May 13, 2020
+# RiverWare_Ruleset 8.0.2
+# Created 15:40 May 20, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4634,7 +4634,7 @@ BEGIN
   "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" ) COMMENTED_BY "Operational MTOM runs only  <br>"
  ELSE
   $ "HavasuOutflow.ParkerRequirement" [@"t"] COMMENTED_BY "Hindcast MTOM runs <br>"
- ENDIF + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", $ "Mohave.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", $ "Havasu.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month", @"t" ) );
+ ENDIF + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - ( "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + $ "California_CU_Schedules.MWDReturns" [@"t"] ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", $ "Mohave.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", $ "Havasu.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month", @"t" ) );
 
     END
     UUID "{5a2f1e38-f3a3-4800-9a33-a26b907141e7}";;
@@ -13723,32 +13723,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{885390ca-62c8-46ff-a9d6-013d4bc1c372}";
+    UUID "{ebb5f5e8-09e8-4ab0-b88f-d029121c4c58}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{165198e7-a511-4809-8860-444fd5d67199}";
+    UUID "{3c4697c6-f93f-4b5f-b7bc-74db5f00f00a}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fc21e20d-845b-4f40-a7f5-a76fc3b450d1}";
+    UUID "{0cecbf58-e9bb-4590-bd06-a275d58daf41}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2aa5c6f2-a96d-490b-98e5-c8b42321b58c}";
+    UUID "{85d2f103-3133-4374-9e91-5b82ef850d88}";
 ;
 
   END
-  UUID "{583210ab-a52e-417f-9e7a-35147639b107}";;
+  UUID "{35c4edd7-ed0e-4c8c-b3ad-a004754d2f9e}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13759,11 +13759,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ce0b8fd1-4f8b-49bd-895c-416242790689}";
+    UUID "{a94b3fdd-48db-46bb-ac4d-055db1ffe3b7}";
 ;
 
   END
-  UUID "{ee383225-266f-400c-9fa4-8135a7226d27}";;
+  UUID "{bb2a11c7-6978-4aee-ae29-3fc7fa0e6b74}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13774,11 +13774,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a1b311b7-0c07-4cd4-bd05-cae9021fc8fb}";
+    UUID "{f6a69a4d-2161-440a-acaf-ac464972979a}";
 ;
 
   END
-  UUID "{efffc709-d0ce-44ab-88ca-3bbbbc4895df}";;
+  UUID "{6532e86f-069a-4c60-bcd2-81018643249a}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13789,11 +13789,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{35c997f2-ac7a-45c2-9806-38cc46fd545f}";
+    UUID "{ec241559-79b4-46d9-91dc-a542c89a3d66}";
 ;
 
   END
-  UUID "{da607769-4493-42a0-932e-c52fa632ff6d}";;
+  UUID "{10dc85ad-852f-470a-8de4-9d9e17af9f99}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
