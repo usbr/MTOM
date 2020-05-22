@@ -126,7 +126,7 @@ Vallecito.Storage: file = $MTOM_DIR/rdfOutput/res.rdf
 
 
 ## Diversions ##
-PumpingFromLakeMead:SNWP.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
+PumpingFromLakeMead:SNWP.Diversion Requested: file = $MTOM_DIR/rdfOutput/diversion.rdf
 MWDDiversion.Total Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
 CAPDiversion.Total Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
 TunnelDiversionBelowCrystalForAg.Diversion: file = $MTOM_DIR/rdfOutput/diversion.rdf
