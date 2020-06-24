@@ -53,6 +53,7 @@ Icon
 
 #pass through sheets 
 /Output Data/EnsembleOutput.xlsx
+/Output Data/MTOMcsvOutput.csv
 
 # Testbed Forecasts and IC data
 /Inflow Forecasts/Testbed_Historical_Forecasts
