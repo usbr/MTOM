@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 09:57 June 30, 2020
+# Created 13:11 June 30, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -5715,7 +5715,7 @@ BEGIN
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "";
+    NOTES                "APivarnik 20200630: No change made to rule in integration effort";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"Finish Timestep") DO
@@ -5735,7 +5735,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the local gains for each reservoir and local inflow in the upper basin from the relevent RFC forecasts. - CE 9/17/13 Assign each one of the reach simulation Local Inlow slots in the Upper basin based on the input <br>CBRFC forecast values that are input to the model on data objects.  The CBRFC forecasts for the headwater reservoirs (Taylor Park, Fontenelle and Vallecito) are input directly to the simulation reservoir object.  For the reach objects, consideration needs to be made to any upstream forecasts and the appropriate intervening flow for the reach needs to be determined.  This rule makes that calculation.<br><br>SLOTS SET: ColoradoAbovePowell:InterveningAbovePowell.Local Inflow; UpperSanJuan.Inflow; GreenBelowFlamingGorge:YampaRiver.Local Inflow; SanJuanBelowNavajo:AnimasRiver.Local Inflow; GunnisonBelowCrystal:GunnisonNrGJ_Whitewater.Local Inflow; GunnisonAboveMorrowPoint:InterveningAboveMorrowPoint.Local Inflow; GunnisonAboveCrystal:InterveningAboveCrystal.Local Inflow; GunnisonAboveBlueMesa:InterveningAboveBlueMesa.Local Inflow; Azotea Tunnel.Fractional Return Flow; GreenAboveFlamingGorge:InterveningAboveFlamingGorge.Local Inflow; GReenAboveFlamingGorge.Outflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200630: Added If statement for 24 MS assignments vs MTOM assignments";
     BEGIN
 
       FOREACH (DATETIME index IN @"Start Timestep" TO @"Finish Timestep") DO
@@ -5758,18 +5758,29 @@ BEGIN
           DESCRIPTION          "This assignment is necessary for RW 6.6. Per instruction from BoR this value is set to 0 for all <br>timesteps. LJ 03/19/2015.";
       $ "Azotea Tunnel.Fractional Return Flow" [index] := 0.00000000;
 
-          INACTIVE    DESCRIPTION          "This is added because these local inflows need to be assigned and the previous rule &quot;Forecast <br>Test&quot; has been removed. The Local Inflow at the Gila River is set to 0 AF/Month. TP 6/12/2015<br><br>LBDV.GilaRiverLocalInflow and BID:Gila River.Local Inflow share the name &quot;GilaRiver&quot; in the OutToMTPO name map used in the Excel Input DMI. LBDV.GilaRiverLocalInflow is set by DMI for the period (Start-12) to (Dec, Finish Year), <br>but BID:Gila River.Local Inflow is set here with LBDV.GilaRiverLocalInflow. Can BID.Gila River be set by DMI or does it need to be set by rule? MC 20161101<br>";
-      $ "BelowImperialDam:Gila River.Local Inflow" [index] := $ "LowerBasinDemandVariability.GilaRiverLocalInflow" [index];
+          DESCRIPTION          "UC CHECK<br>";
+      IF_STATEMENT ("Is24MonthStudy"(  )) THEN
+          DESCRIPTION          "Move non-headwater reservoir inflow forecasts into reaches above reservoirs (FG, BM, MP, CR, NV) to get intervening gains for those reservoirs";
+      $ "GreenAboveFlamingGorge:InterveningAboveFlamingGorge.Local Inflow" [index] := $ "FlamingGorgeInflow.Unregulated" [index] - $ "Fontenelle.Inflow" [index];
 
-      ENDFOREACH;
+            $ "NavajoIndianIrrigationProjectNIIP.Fractional Return Flow" [index] := 0.00000000;
 
-      FOREACH (DATETIME index IN "OffsetDate"( "RunStartDate"(  ), - 12.00000000, "1 months" ) TO "OffsetDate"( "RunEndDate"(  ), 12.00000000, "1 months" )) DO
+            $ "NavajoIndianIrrigationProjectNIIP.Diversion" [index] := $ "NavajoIndianIrrigationProjectNIIP.Diversion Requested" [index];
+
+            $ "Azotea Tunnel.Diversion" [index] := $ "Azotea Tunnel.Diversion Requested" [index];
+
+      ELSE
+            FOREACH (DATETIME index IN "OffsetDate"( "RunStartDate"(  ), - 12.00000000, "1 months" ) TO "OffsetDate"( "RunEndDate"(  ), 12.00000000, "1 months" )) DO
             $ "GreenAboveFlamingGorge:InterveningAboveFlamingGorge.Local Inflow" [index] := $ "FlamingGorgeInflow.Unregulated" [index] - $ "Fontenelle.Inflow" [index];
 
       ENDFOREACH;
 
-      FOREACH (DATETIME index IN "OffsetDate"( "RunStartDate"(  ), - 12.00000000, "1 months" ) TO "OffsetDate"( "RunStartDate"(  ), - 1.00000000, "1 months" )) DO
+            FOREACH (DATETIME index IN "OffsetDate"( "RunStartDate"(  ), - 12.00000000, "1 months" ) TO "OffsetDate"( "RunStartDate"(  ), - 1.00000000, "1 months" )) DO
             $ "GreenAboveFlamingGorge.Outflow" [index] := $ "FlamingGorgeInflow.Unregulated" [index] - $ "Fontenelle.Inflow" [index] + $ "Fontenelle.Outflow" [index];
+
+      ENDFOREACH;
+
+      END_IF_STATEMENT;
 
       ENDFOREACH;
 
@@ -13772,32 +13783,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{12170954-8e2b-4394-8b1a-83417f78b2d8}";
+    UUID "{d3d3f853-3fc2-48f9-ac06-c82b953c7b87}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ae3916ff-f6b7-407d-a0d7-44901528da27}";
+    UUID "{0922d45e-5387-471a-b41a-e41a521ecfa8}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a751f762-ae15-45ca-a48c-ff62097a38b6}";
+    UUID "{47bbe816-23d0-4feb-a8c9-a562daa75d14}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{de67b953-b591-4249-9bf1-f21f31fedb9e}";
+    UUID "{866e5043-f21f-4916-a65e-f10d8f4d7baf}";
 ;
 
   END
-  UUID "{e91cb00d-d68f-4a94-87f3-a8c999b37ad4}";;
+  UUID "{841969f8-d1f0-4bf8-a4b8-35ecf5ba3ba8}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13808,11 +13819,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0394aab0-7c67-4ee7-b2c7-03b44dfb175b}";
+    UUID "{2ae82048-e973-4c7b-9b01-af5306fa38cf}";
 ;
 
   END
-  UUID "{e489d22e-55a6-4e6e-a20c-bfa9b6678f0f}";;
+  UUID "{670b089e-f8f6-4003-89f3-a9cfce22b636}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13823,11 +13834,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{71741a7f-eed9-45ab-9015-ae6b407f4b48}";
+    UUID "{d6d21169-c0ed-4979-84e6-a407a706e796}";
 ;
 
   END
-  UUID "{c72f569c-f405-458c-a5ac-4ed50846f34e}";;
+  UUID "{341ec6c2-d594-4ac0-b889-a3b6ee17c991}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13838,11 +13849,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b670caae-964e-470c-8857-f67368a23708}";
+    UUID "{7b2669dc-f52d-4006-912d-de778179a165}";
 ;
 
   END
-  UUID "{3df35b6c-1381-4564-b215-2d40dcd76914}";;
+  UUID "{c1893197-55ac-49e9-b03c-784980df46d1}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";

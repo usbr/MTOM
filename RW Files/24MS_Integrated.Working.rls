@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 09:57 June 30, 2020
+# Created 13:10 June 30, 2020
 # 
 RULESET
 NAME "24month";
@@ -3016,7 +3016,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Set 242 Well Field";
+    RULE                 "Int - Set 242 Well Field";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep";
@@ -3036,7 +3036,7 @@ BEGIN
     END
     UUID "{c6f086e6-f7a2-4852-ba27-8c3c6ee9b6b2}";;
 
-    RULE                 "Compute Upper Basin Gains";
+    RULE                 "Int -  Compute Upper Basin Gains";
     DESCRIPTION          "This rule calculates the local gains for each reservoir and local inflow in the upper basin from the relevent RFC forecasts. - CE 9/17/13";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
