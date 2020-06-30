@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 10:59 June 24, 2020
+# Created 09:57 June 30, 2020
 # 
 RULESET
 NAME "24month";
@@ -3076,7 +3076,7 @@ BEGIN
     END
     UUID "{ae6e1e50-7cdc-4965-9110-31c079c0afe4}";;
 
-    RULE                 "INPUT MISSING NOTIFICATION";
+    RULE                 "Int - INPUT MISSING NOTIFICATION";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -3151,7 +3151,7 @@ BEGIN
     END
     UUID "{9efef435-baeb-4db3-be37-3e0630c23f21}";;
 
-    RULE                 "DebuggingRule";
+    RULE                 "Int - DebuggingRule";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -3163,7 +3163,7 @@ BEGIN
     END
     UUID "{c6b2b52d-b775-4e43-aaec-431eb53d70cf}";;
 
-    RULE                 "Set Average Longterm Hydrology";
+    RULE                 "NI - Set Average Longterm Hydrology";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -3189,7 +3189,7 @@ BEGIN
     END
     UUID "{270f1020-253d-4ce3-b352-fcb432190aaa}";;
 
-    RULE                 "Set 24 Month Study Data To Extended Out Years";
+    RULE                 "NI - Set 24 Month Study Data To Extended Out Years";
     DESCRIPTION          "This Rule uses the data from the 24 month study and projects it forward by  using the previous years values for any out years that are not input from the 24 month study. This was suggested by the BoR LC office in the document &quot;Five Year lower basin inputs for MTOM&quot;. TP 3/6/2013<br><br>";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "ThisRule" );
@@ -3580,7 +3580,7 @@ BEGIN
   END
   UUID "{021dfdd7-55b9-4be0-a27d-0f984d524469}";;
 
-  UTILITY_GROUP "General Functions";
+  UTILITY_GROUP "24 Month General Functions";
   DESCRIPTION   "";
   ACTIVE        TRUE;
   NOTES          "";
