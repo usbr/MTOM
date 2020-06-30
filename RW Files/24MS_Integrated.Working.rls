@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 13:10 June 30, 2020
+# Created 16:02 June 30, 2020
 # 
 RULESET
 NAME "24month";
@@ -2866,7 +2866,7 @@ BEGIN
     END
     UUID "{77021eef-9541-4364-97ff-efcad1c2951e}";;
 
-    RULE                 "Set SNWP Actual Depletion";
+    RULE                 "NI - Set SNWP Actual Depletion";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2881,13 +2881,14 @@ BEGIN
     END
     UUID "{bd05759b-60ad-4ba2-8204-4bd62edb24f4}";;
 
-    RULE                 "Set MWD CU Actual";
+    RULE                 "NI - Set MWD CU Actual";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule assignment is incorporated in the Set LC Actuals Rule <br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"Start Timestep - 1") DO
             $ "California_CU_Actual.MWD" [date] := IF ( IsNaN $ "California_CU_Actual.MWD" [date] AND NOT IsNaN $ "California_CU_Actual.MWDDiversion" [date] )
  THEN
@@ -2899,13 +2900,14 @@ BEGIN
     END
     UUID "{cb12058d-7a97-4e7a-8c5e-56e5e524ded0}";;
 
-    RULE                 "Set NaN Actuals To Schedule";
+    RULE                 "NI - Set NaN Actuals To Schedule";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule is the same in both MTOM and 24 MS <br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"Start Timestep - 1") DO
             FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" , "Mexico" }) DO
             FOREACH (STRING user IN "SlotToString"( "GetObject"( state CONCAT "_CU_Actual" ) )) DO
@@ -2926,25 +2928,27 @@ BEGIN
     END
     UUID "{a3e0f78d-8c69-44c8-9ba7-1b3cde91af97}";;
 
-    RULE                 "Set MWD CU Schedule -  annual";
+    RULE                 "NI - Set MWD CU Schedule -  annual";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This is covered under thhe set lc annual schedules rule<br>";
       $ "California_CU_AnnualApproval.MWD" [@"24:00:00 December 31, Current Year"] := "AnnualVolumeSlot"( $ "California_CU_Schedules.MWD" );
 
     END
     UUID "{03059459-755e-47d3-bca1-3b13a1d29ac1}";;
 
-    RULE                 "Set MWD CU Schedule - monthly";
+    RULE                 "NI - Set MWD CU Schedule - monthly";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "Covered in &quot;Set LC Monthly schedules&quot; rule <br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December 31, Finish Year") DO
             $ "California_CU_Schedules.MWD" [date] := $ "California_CU_Schedules.MWDDiversion" [date] - $ "California_CU_Schedules.MWDReturns" [date];
 
@@ -2953,25 +2957,27 @@ BEGIN
     END
     UUID "{d9cf137c-ec05-4412-b2a5-ed51158e58b9}";;
 
-    RULE                 "Set MWD Returns Schedule -  annual";
+    RULE                 "NI - Set MWD Returns Schedule -  annual";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This slot assignment is covered in the set LC Annual Schedules rule in MTOM. Since this rule is <br>turned off, the slot assignment in the integrated model has an if statement <br>";
       $ "California_CU_AnnualApproval.MWDReturns" [@"24:00:00 December 31, Current Year"] := "AnnualVolumeSlot"( $ "California_CU_Schedules.MWDReturns" );
 
     END
     UUID "{f8421703-1238-4ce2-aad3-6a45f1d609b7}";;
 
-    RULE                 "Set MWD Returns Schedule - monthly";
+    RULE                 "NI - Set MWD Returns Schedule - monthly";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "Should this assignment be in the MTOM ruleset??????????????/<br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December 31, Finish Year") DO
             $ "California_CU_Schedules.MWDReturns" [date] := 8.50000000 "acre-feet" * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
 
@@ -2980,25 +2986,27 @@ BEGIN
     END
     UUID "{015f8d8a-8d6e-4617-9975-5b973ecc0e63}";;
 
-    RULE                 "Set SNWP CU Schedule -  annual";
+    RULE                 "NI - Set SNWP CU Schedule -  annual";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This slot assignments happens in the Set LC annual Shedules rule in the MTOM ruleset<br>";
       $ "Nevada_CU_AnnualApproval.SNWP" [@"24:00:00 December 31, Current Year"] := "AnnualVolumeSlot"( $ "Nevada_CU_Schedules.SNWP" );
 
     END
     UUID "{d17c8b60-7957-4c2b-a511-fe345ab516b3}";;
 
-    RULE                 "Set SNWP CU Schedule - monthly";
+    RULE                 "NI - Set SNWP CU Schedule - monthly";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule is incorporated under the Set LC MOnthly Schedules Rule in MTOM<br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December 31, Finish Year") DO
             $ "Nevada_CU_Schedules.SNWP" [date] := $ "Nevada_CU_Schedules.SNWADiversion" [date] + $ "Nevada_CU_Schedules.BasicManagement" [date] + $ "Nevada_CU_Schedules.LMNRA Mead" [date] + $ "Nevada_CU_Schedules.BoulderCanyonProject" [date] + $ "Nevada_CU_Schedules.NvDeptFishGame" [date] + $ "Nevada_CU_Schedules.PacificCoastBuilding" [date] + $ "Nevada_CU_Schedules.City of Henderson" [date] - $ "Nevada_CU_Schedules.LVWashReturns" [date];
 
