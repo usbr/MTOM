@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 16:02 June 30, 2020
+# Created 15:40 July 1, 2020
 # 
 RULESET
 NAME "24month";
@@ -2161,7 +2161,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Set Normal Schedules CAP";
+    RULE                 "INT - Set Normal Schedules CAP";
     DESCRIPTION          "May need 2nd condition (@t = Jan, current year) for full surplus<br>Need to separate CAP from MWD & SNWP for full surplus<br><br>DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2188,7 +2188,7 @@ BEGIN
     END
     UUID "{b057de7b-3937-4024-b71e-39c003ddce51}";;
 
-    RULE                 "Set Normal Schedules MWD & SNWP";
+    RULE                 "INT - Set Normal Schedules MWD & SNWP";
     DESCRIPTION          "Need to separate CAP & CVWD from MWD & SNWP for full surplus<br><br>DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;<br>202005 (AP): Added MWD depletion/Tijuana Depletion requested slot assignment to the rule";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2236,7 +2236,7 @@ BEGIN
     END
     UUID "{6a7e5b7c-0d93-4e51-aa02-40068b856809}";;
 
-    RULE                 "Set Operational GainLoss";
+    RULE                 "INT - Set Operational GainLoss";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2256,13 +2256,14 @@ BEGIN
     END
     UUID "{2ded6860-7a6e-405e-9dbb-5ab5123809c5}";;
 
-    RULE                 "Set Parker Schedule Requirement";
+    RULE                 "NI - Set Parker Schedule Requirement";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND IsNaN $ "HavasuOutflow.ParkerScheduleRequirement" [];
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule matches the MTOM <br>";
       FOREACH (DATETIME date IN @"Start Timestep" TO @"Finish Timestep") DO
             $ "HavasuOutflow.ParkerScheduleRequirement" [date] := "FlowToVolume"( $ "AAC.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "AzPkrToImp.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CRIR.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CaPkrToImp.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "GilaAndYumaUsers.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "GilaGravityMainCanal.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "PaloVerde.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "MexicanTreatyDelivery.Total Diversion Requested" [date], date ) - ( "FlowToVolume"( $ "HavasuToImperial:GainsPkrToImp.Local Inflow" [date], date ) + "FlowToVolume"( $ "BelowImperialDam:GainsImpToNIB.Local Inflow" [date], date ) + "FlowToVolume"( $ "BelowImperialDam:Gila River.Local Inflow" [date], date ) );
 
@@ -2271,13 +2272,14 @@ BEGIN
     END
     UUID "{ca88a223-4842-409f-850c-0433985e1fde}";;
 
-    RULE                 "SumStateMonthlyActualCU-noP123b or IID";
+    RULE                 "NI - SumStateMonthlyActualCU-noP123b or IID";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>GCAA, 11/13/17: The assignment for AnnualWateruse.AzNoCAPTotalMonthlyActual modified to include BLM Pumpers.<br><br>ST, 20190624: Removed CANoPVYPIID and P123b in clean-up effort - those slots are not needed and not used";
     BEGIN
 
+    DESCRIPTION          "This rule is covered by the Sum state monthly actual CU in the integrated ruleset <br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"Start Timestep - 1") DO
             $ "AnnualWaterUse.AzNoCAPTotalMonthlyActual" [date] := $ "Arizona_CU_Actual.CRIRAz" [date] + $ "Arizona_CU_Actual.CibolaNWR" [date] + $ "Arizona_CU_Actual.CibolaValleyIID" [date] + $ "Arizona_CU_Actual.City of Parker" [date] + $ "Arizona_CU_Actual.ImperialNWR" [date] + $ "Arizona_CU_Actual.BrookeWater" [date] + $ "Arizona_CU_Actual.Ehrenberg" [date] + $ "Arizona_CU_Actual.AzPumpersAbvImp" [date] + $ "Arizona_CU_Actual.AzPumpersBlwImp" [date] + $ "Arizona_CU_Actual.NGVIDD" [date] + $ "Arizona_CU_Actual.WMIDD" [date] + $ "Arizona_CU_Actual.YCWUA" [date] + $ "Arizona_CU_Actual.MCAirStation" [date] + $ "Arizona_CU_Actual.YMIDD" [date] + $ "Arizona_CU_Actual.YID" [date] + $ "Arizona_CU_Actual.UnitB" [date] + $ "Arizona_CU_Actual.City of Yuma" [date] + $ "Arizona_CU_Actual.UofA" [date] + $ "Arizona_CU_Actual.LakeHavasuCity" [date] + $ "Arizona_CU_Actual.YumaUnionHighScl" [date] + $ "Arizona_CU_Actual.YumaProvingGround" [date] + $ "Arizona_CU_Actual.Cocopah Indian Res" [date] + $ "Arizona_CU_Actual.Gila Monster Farms" [date] + $ "Arizona_CU_Actual.DesertLawnMemorial" [date] + $ "Arizona_CU_Actual.SouthernPacific" [date] + $ "Arizona_CU_Actual.YAO" [date] + $ "Arizona_CU_Actual.BullheadCity" [date] + $ "Arizona_CU_Actual.FtMohaveAz" [date] + $ "Arizona_CU_Actual.DavisDamProject" [date] + $ "Arizona_CU_Actual.MohaveValleyIID" [date] + $ "Arizona_CU_Actual.MohaveWaterConsDist" [date] + $ "Arizona_CU_Actual.HavasuNWR" [date] + $ "Arizona_CU_Actual.GoldenShores" [date] + $ "Arizona_CU_Actual.LMNRA Az Mead" [date] + $ "Arizona_CU_Actual.LMNRA Az Mohave" [date] + $ "Arizona_CU_Actual.Ft Yuma" [date] + $ "Arizona_CU_Actual.AzPumpersDvsToPkr" [date] + $ "Arizona_CU_Actual.BlmPumpersAbvImp" [date] + $ "Arizona_CU_Actual.BlmPumpersBlwImp" [date];
 
@@ -2288,7 +2290,7 @@ BEGIN
     END
     UUID "{1e3201ed-cc8e-44e6-b6c3-44b1406ea447}";;
 
-    RULE                 "SetActualToZeroInFuture";
+    RULE                 "INT- SetActualToZeroInFuture";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2313,13 +2315,14 @@ BEGIN
     END
     UUID "{6f314acd-5280-4ee0-a0ba-cd3be717aa37}";;
 
-    RULE                 "Overruns Based on State Apportionments";
+    RULE                 "NI - Overruns Based on State Apportionments";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule matches whats in MTOM, not moved over<br>";
       FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" }) DO
             "GetObject"( state CONCAT "_CU_Overrun" ) & ( state CONCAT "_Overrun_State_Ap" ) [] := % "AnnualWaterUse" & ( state CONCAT "_Forecast1" ) [@"24:00:00 December 31, Current Year"] - % "AnnualWaterUse" & ( state CONCAT "_Apportionment" ) [@"24:00:00 December 31, Current Year"];
 
@@ -2328,13 +2331,14 @@ BEGIN
     END
     UUID "{5f6e9efc-8a51-4bb4-9be4-fa27344de5c3}";;
 
-    RULE                 "Set CU Over-Underruns User-By-User";
+    RULE                 "NI - Set CU Over-Underruns User-By-User";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule was not migrated over to the integrated ruleset. This is disabled in the 24 MS and not in <br>MTOM <br>";
       FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" }) DO
             FOREACH (STRING user IN "SlotToString"( "GetObject"( state CONCAT "_CU_AnnualApproval" ) )) DO
             "GetObject"( state CONCAT "_CU_Overrun" ) & user [] := "GetObject"( state CONCAT "_CU_Forecast1" ) & user [@"24:00:00 December 31, Current Year"] - "GetObject"( state CONCAT "_CU_AnnualApproval" ) & user [@"24:00:00 December 31, Current Year"];
@@ -2346,7 +2350,7 @@ BEGIN
     END
     UUID "{fdf2a1b0-5088-4254-992f-a4dfb949d128}";;
 
-    RULE                 "Sum Annual Approvals for Lower Basin States";
+    RULE                 "NI - Sum Annual Approvals for Lower Basin States";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2371,7 +2375,7 @@ BEGIN
     END
     UUID "{f40aee0c-96d6-4970-bfba-c4a7505ec702}";;
 
-    RULE                 "Sum Annual Forecast1 for Lower Basin States";
+    RULE                 "NI - Sum Annual Forecast1 for Lower Basin States";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2396,7 +2400,7 @@ BEGIN
     END
     UUID "{15bec5d1-9d4e-41e6-87bd-53618546b7d6}";;
 
-    RULE                 "Set Forecast1";
+    RULE                 "NI - Set Forecast1";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2419,13 +2423,14 @@ BEGIN
     END
     UUID "{d9dd1b52-06ee-4a76-aed1-40b638befbb1}";;
 
-    RULE                 "Set Schedules Volume to Flow";
+    RULE                 "NI - Set Schedules Volume to Flow";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
-    NOTES                "GCAA, 202006: Added LMNRA Az Mead Depletion slot assignment to help model solve for correct return flow to system";
+    NOTES                "GCAA, 202006: Added LMNRA Az Mead Depletion slot assignment to help model solve for correct return flow to system<br>";
     BEGIN
 
+    DESCRIPTION          "This rule matches whats in the MTOM ruleset<br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December 31, Finish Year") DO
             $ "PaloVerde.Total Diversion Requested" [date] := IF ( date < @"Start Timestep" )
  THEN
@@ -2977,7 +2982,7 @@ BEGIN
     NOTES                "";
     BEGIN
 
-    DESCRIPTION          "Should this assignment be in the MTOM ruleset??????????????/<br>";
+    DESCRIPTION          "LC CHECK<br><br>Should this assignment be in the MTOM ruleset??????????????/<br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December 31, Finish Year") DO
             $ "California_CU_Schedules.MWDReturns" [date] := 8.50000000 "acre-feet" * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
 
