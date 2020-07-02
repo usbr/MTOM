@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:40 July 1, 2020
+# Created 15:13 July 2, 2020
 # 
 RULESET
 NAME "24month";
@@ -1939,7 +1939,7 @@ BEGIN
     END
     UUID "{cdc3759c-b7ff-4832-b24b-0227c4aec55d}";;
 
-    RULE                 "Reset Monthly Forecast Use CAP - Nov and Dec, Cur Year";
+    RULE                 "INT - Reset Monthly Forecast Use CAP - Nov and Dec, Cur Year";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT IsNaN $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetMonth"( @"t" ) < 11.00000000;
@@ -1956,7 +1956,7 @@ BEGIN
     END
     UUID "{e8550185-bbb4-4410-baeb-8fdf8b69d805}";;
 
-    RULE                 "Reset Monthly Forecast Use CAP - All Months Outyears";
+    RULE                 "INT - Reset Monthly Forecast Use CAP - All Months Outyears";
     DESCRIPTION          "For start timestep in December the outyear schedules are only adjusted February through December, in all other start timesteps the schedules are adjusted January through December. In December, January of the outyear is the second month of the run and we have operational schedules for that month.";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" );
@@ -1973,7 +1973,7 @@ BEGIN
     END
     UUID "{27c5cfbc-0d92-43d5-813c-31bf4768373d}";;
 
-    RULE                 "Reset Monthly Forecast Use SNWP All Years";
+    RULE                 "INT - Reset Monthly Forecast Use SNWP All Years";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" );
@@ -2000,7 +2000,7 @@ BEGIN
     END
     UUID "{910472e8-a62b-43ef-a9d7-e37323bbc28f}";;
 
-    RULE                 "Reset Monthly Forecast Use MWD - Nov and Dec, Cur Year";
+    RULE                 "INT -  Reset Monthly Forecast Use MWD - Nov and Dec, Cur Year";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetMonth"( @"t" ) < 11.00000000;
@@ -2017,7 +2017,7 @@ BEGIN
     END
     UUID "{f9e06a83-4be4-447c-9bb0-bb6256ce665c}";;
 
-    RULE                 "Reset Monthly Forecast Use MWD - All Months Outyears";
+    RULE                 "INT - Reset Monthly Forecast Use MWD - All Months Outyears";
     DESCRIPTION          "For start timestep in December the outyear schedules are only adjusted February through December, in all other start timesteps the schedules are adjusted January through December. In December, January of the outyear is the second month of the run and we have operational schedules for that month.";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" );
@@ -2034,7 +2034,7 @@ BEGIN
     END
     UUID "{d2d277e8-8026-4f76-913d-6d2752028bc8}";;
 
-    RULE                 "SumAnnualStateUse - Div Req";
+    RULE                 "INT - SumAnnualStateUse - Div Req";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2054,13 +2054,14 @@ BEGIN
     END
     UUID "{dd7ad3a8-95d5-403d-ad11-2c66e62e950c}";;
 
-    RULE                 "SumStateMonthlyOrders - DivReq-noP123b or IID";
+    RULE                 "INT - SumStateMonthlyOrders - DivReq-noP123b or IID";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January 31, Current Year";
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>GCAA, 11/13/17: BLM Pumpers are now included in the the assignment for AnnualWateruse.AzNoCAPTotalMonthlyOrderl.";
     BEGIN
 
+    DESCRIPTION          "This rule covered under the &quot;SumStateMonthlyOrders - DivReq&quot; rule <br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AnnualWaterUse.AzNoCAPTotalMonthlyOrder" [date] := "FlowToVolume"( $ "AzPkrToImp.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "GilaGravityMainCanal.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "GilaAndYumaUsers.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CRIR:CRIRAz.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:SouthernPacific.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:YAO.Diversion Requested" [date], date ) + "FlowToVolume"( $ "FtMohaveIndRes:AZ.Diversion Requested" [date], date ) + "FlowToVolume"( $ "AzDvsToPkr.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "PumpingFromLakeMead:LMNRA Az Mead.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:LMNRA Az Mohave.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:Ft Yuma.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersMeadToMohave:DavisDamProject.Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:BlmPumpersBlwImp.Diversion Requested" [date], date );
 
@@ -2092,19 +2093,20 @@ BEGIN
     END
     UUID "{d4d2ba24-fe3d-42de-b588-e256bfa639d1}";;
 
-    RULE                 "Reset Annual CAP Forecast Use - Keep Hardcode Value";
+    RULE                 "NI - Reset Annual CAP Forecast Use - Keep Hardcode Value";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"];
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule was not in MTOM and turned off in the 24 MS. Not moved into the integrated ruleset <br>";
       $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] := "AnnualVolumeSlot"( $ "Arizona_CU_Schedules.CAP" );
 
     END
     UUID "{84465160-7675-4ed7-ad6a-6b2a673487ad}";;
 
-    RULE                 "Reset Annual CAP Forecast Use - Force to AZ Apportionment";
+    RULE                 "INT - Reset Annual CAP Forecast Use - Force to AZ Apportionment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"];
@@ -2116,7 +2118,7 @@ BEGIN
     END
     UUID "{71b3d046-f66f-4699-bf09-923246302a9d}";;
 
-    RULE                 "Reset Annual SNWP Forecast Use - Force to NV Apportionment";
+    RULE                 "INT - Reset Annual SNWP Forecast Use - Force to NV Apportionment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"];
@@ -2128,25 +2130,27 @@ BEGIN
     END
     UUID "{e549c9a5-ed7e-4ef6-bd86-22cc0ac3b194}";;
 
-    RULE                 "Reset Annual SNWP Forecast Use - Allow Overrun";
+    RULE                 "NI - Reset Annual SNWP Forecast Use - Allow Overrun";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"];
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule was turned off in the 24 MS and was not in the MTOM ruleset. This was not moved into <br>the integrated model <br>";
       $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] := $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] - "Min"( $ "Nevada_CU_Overrun.Nevada_Overrun_State_Ap" [], 0.00000000 "acre-ft" );
 
     END
     UUID "{408b0f4c-688a-4874-9b7f-8e764316ca37}";;
 
-    RULE                 "Reset Annual SNWP Forecast Use - Allow Underrun";
+    RULE                 "NI - Reset Annual SNWP Forecast Use - Allow Underrun";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"];
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule is not in MTOM and is turned off in the 24 MS. It was not moved into the integrated <br>ruleset<br>";
       $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] := $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] - "Max"( $ "Nevada_CU_Overrun.Nevada_Overrun_State_Ap" [], 0.00000000 "acre-ft" );
 
     END
@@ -2256,7 +2260,7 @@ BEGIN
     END
     UUID "{2ded6860-7a6e-405e-9dbb-5ab5123809c5}";;
 
-    RULE                 "NI - Set Parker Schedule Requirement";
+    RULE                 "INT -  Set Parker Schedule Requirement";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND IsNaN $ "HavasuOutflow.ParkerScheduleRequirement" [];
@@ -2272,7 +2276,7 @@ BEGIN
     END
     UUID "{ca88a223-4842-409f-850c-0433985e1fde}";;
 
-    RULE                 "NI - SumStateMonthlyActualCU-noP123b or IID";
+    RULE                 "INT - SumStateMonthlyActualCU-noP123b or IID";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2315,7 +2319,7 @@ BEGIN
     END
     UUID "{6f314acd-5280-4ee0-a0ba-cd3be717aa37}";;
 
-    RULE                 "NI - Overruns Based on State Apportionments";
+    RULE                 "INT - Overruns Based on State Apportionments";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2350,7 +2354,7 @@ BEGIN
     END
     UUID "{fdf2a1b0-5088-4254-992f-a4dfb949d128}";;
 
-    RULE                 "NI - Sum Annual Approvals for Lower Basin States";
+    RULE                 "INT - Sum Annual Approvals for Lower Basin States";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2375,7 +2379,7 @@ BEGIN
     END
     UUID "{f40aee0c-96d6-4970-bfba-c4a7505ec702}";;
 
-    RULE                 "NI - Sum Annual Forecast1 for Lower Basin States";
+    RULE                 "INT - Sum Annual Forecast1 for Lower Basin States";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2400,7 +2404,7 @@ BEGIN
     END
     UUID "{15bec5d1-9d4e-41e6-87bd-53618546b7d6}";;
 
-    RULE                 "NI - Set Forecast1";
+    RULE                 "INT - Set Forecast1";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2423,7 +2427,7 @@ BEGIN
     END
     UUID "{d9dd1b52-06ee-4a76-aed1-40b638befbb1}";;
 
-    RULE                 "NI - Set Schedules Volume to Flow";
+    RULE                 "INT - Set Schedules Volume to Flow";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2871,13 +2875,14 @@ BEGIN
     END
     UUID "{77021eef-9541-4364-97ff-efcad1c2951e}";;
 
-    RULE                 "NI - Set SNWP Actual Depletion";
+    RULE                 "INT - Set SNWP Actual Depletion";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "Assignment in LC Actuals rule <br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"Start Timestep - 1") DO
             $ "Nevada_CU_Actual.SNWP" [date] := $ "Nevada_CU_Actual.SNWADiversion" [date] + $ "Nevada_CU_Actual.BasicManagement" [date] + $ "Nevada_CU_Actual.LMNRA Mead" [date] + $ "Nevada_CU_Actual.BoulderCanyonProject" [date] + $ "Nevada_CU_Actual.NvDeptFishGame" [date] + $ "Nevada_CU_Actual.PacificCoastBuilding" [date] + $ "Nevada_CU_Actual.City of Henderson" [date] - $ "Nevada_CU_Actual.LVWashReturns" [date];
 
@@ -2886,7 +2891,7 @@ BEGIN
     END
     UUID "{bd05759b-60ad-4ba2-8204-4bd62edb24f4}";;
 
-    RULE                 "NI - Set MWD CU Actual";
+    RULE                 "INT - Set MWD CU Actual";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2905,7 +2910,7 @@ BEGIN
     END
     UUID "{cb12058d-7a97-4e7a-8c5e-56e5e524ded0}";;
 
-    RULE                 "NI - Set NaN Actuals To Schedule";
+    RULE                 "INT - Set NaN Actuals To Schedule";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2933,7 +2938,7 @@ BEGIN
     END
     UUID "{a3e0f78d-8c69-44c8-9ba7-1b3cde91af97}";;
 
-    RULE                 "NI - Set MWD CU Schedule -  annual";
+    RULE                 "INT - Set MWD CU Schedule -  annual";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2946,7 +2951,7 @@ BEGIN
     END
     UUID "{03059459-755e-47d3-bca1-3b13a1d29ac1}";;
 
-    RULE                 "NI - Set MWD CU Schedule - monthly";
+    RULE                 "INT - Set MWD CU Schedule - monthly";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2962,7 +2967,7 @@ BEGIN
     END
     UUID "{d9cf137c-ec05-4412-b2a5-ed51158e58b9}";;
 
-    RULE                 "NI - Set MWD Returns Schedule -  annual";
+    RULE                 "INT - Set MWD Returns Schedule -  annual";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2975,7 +2980,7 @@ BEGIN
     END
     UUID "{f8421703-1238-4ce2-aad3-6a45f1d609b7}";;
 
-    RULE                 "NI - Set MWD Returns Schedule - monthly";
+    RULE                 "NI??? - Set MWD Returns Schedule - monthly";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
@@ -2991,7 +2996,7 @@ BEGIN
     END
     UUID "{015f8d8a-8d6e-4617-9975-5b973ecc0e63}";;
 
-    RULE                 "NI - Set SNWP CU Schedule -  annual";
+    RULE                 "INT - Set SNWP CU Schedule -  annual";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -3004,7 +3009,7 @@ BEGIN
     END
     UUID "{d17c8b60-7957-4c2b-a511-fe345ab516b3}";;
 
-    RULE                 "NI - Set SNWP CU Schedule - monthly";
+    RULE                 "INT - Set SNWP CU Schedule - monthly";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
