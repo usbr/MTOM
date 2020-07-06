@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:13 July 2, 2020
+# Created 15:47 July 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4525,7 +4525,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule computes the flow to Mexico as the scheduled diversion requested plus the excess and stores it on the Lower Basin Output data object in the slot NIBFlow for subsequent write to hdb<br><br>SLOTS SET: Lower Basin Output.NIBFlow<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br>";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>A. Pivarnik, 07062020: No changes made to the rule during the integration effort. This rule matched the 24 MS rule";
     BEGIN
 
     DESCRIPTION          "Calculate the NIB Flow based on any calculated excess to Mexico less the scheduled request for Mexico. ";
@@ -4538,7 +4538,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION:  This rule determines the excess flow to Mexico which is just the actual Mead release minus the release determined to meet downstream requirements <br><br>SLOTS SET: Lower Basin Output.MexicoExcessFlow<br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown";
+    NOTES                "AUTHOR, DATE: Unknown<br>A. Pivarnik, 20200706: No changes made to the rule during the integration effort.";
     BEGIN
 
     DESCRIPTION          "If the Mead outflow is greater than the sum of the downtream demands, then Mexico gets the excess";
@@ -4551,7 +4551,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the demand downstream of Lake Mead. It should get reset if shortage or surplus schedules are applied.<br><br>SLOTS SET: Lower Basin Output.DownstreamReq<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>S. Baker, 20180620: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>A. Pivarnik, 20200706: Added California_CU_Schedules.MWD Returns to match the rule in the 24 MS. No other changes made to rule in integration effort";
     BEGIN
 
     DESCRIPTION          "Set the data object that reports the necessary water required downstream of Mead to meet all demands. ";
@@ -4559,8 +4559,8 @@ BEGIN
  THEN
   "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" )
  ELSE
-  $ "HavasuOutflow.ParkerRequirement" []
- ENDIF + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation" [] + $ "Havasu.Evaporation" [];
+  $ "HavasuOutflow.ParkerRequirement" [] COMMENTED_BY "Use in 24 MS mode <br>"
+ ENDIF + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - ( "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + $ "California_CU_Schedules.MWDReturns" [@"t"] COMMENTED_BY "LC CHECK<br><br>In 24 MS, should be in MTOM? <br>" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation" [] + $ "Havasu.Evaporation" [];
 
     END
     UUID "{3e563966-f875-4a72-9b74-d19d15d4a098}";;
@@ -4569,7 +4569,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the data object slot HavasuOutflow.ParkerRequirement to the difference between the diversions and the local inflows below Havasu<br><br>SLOTS SET: HavasuOutflow.ParkerRequirement<br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added time constraint to use historical Gila flows during the testbed simulation during high Gila flows.";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added time constraint to use historical Gila flows during the testbed simulation during high Gila flows.<br><br>A. Pivarnik 20200706: No changes to this ruleset during the integration. The if statement is not in the 24 MS rule but it does not effect the results of the 24 MS run since it should evaluate to 0";
     BEGIN
 
       $ "HavasuOutflow.ParkerRequirement" [] := "SumAllDiversionsBelowVolume"( % "Havasu", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Havasu", @"t", @"t" ) + IF ( "GetDate"( "January 31, 1993" ) <= @"t" AND @"t" <= "GetDate"( "April 30, 1993" ) )
@@ -4585,8 +4585,8 @@ BEGIN
     RULE                 "Havasu Rule Curve";
     DESCRIPTION          "DESCRIPTION: In any month except the Start Timestep, set the Havasu outflow such that the reservoir pool elevation target is met. For testbed hindcasts, this rule executes in the Start Timestep to solve for outflow which is not input using the slot HavasuOutflow.BHOPSParkerOutflow.<br><br>SLOTS SET: Havasu.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( @"t" >= @"Start Timestep" AND $ "MTOMRunType.RunType" [] != 0.00000000 ) COMMENTED_BY "For testbed hindcasts, this rule solves for Havasu.Outflow in Start Timestep <br>" );
-    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 0 (allows for no dependence on BHOPS during development testing). ";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( @"t" >= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] != 0.00000000 OR "Is24MonthStudy"(  ) ) ) COMMENTED_BY "For testbed hindcasts, this rule solves for Havasu.Outflow in Start Timestep <br>" );
+    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 0 (allows for no dependence on BHOPS during development testing). <br>A. Pivarnik 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same. Added execution constraing to fire in 24 MS mode";
     BEGIN
 
       $ "Havasu.Outflow" [] := "SolveOutflow"( % "Havasu", $ "Havasu.Inflow" [], "GetTargetStorage"( % "Havasu", @"t" ), $ "Havasu.Storage" [@"t - 1"], @"t" );
@@ -4597,8 +4597,8 @@ BEGIN
     RULE                 "Set Havasu Outflow Exp";
     DESCRIPTION          "DESCRIPTION: If the Havasu outflow is not set at the Start Timestep, set it to the BHOPS Parker Outflow, which is a user input value and comes from the 24 MS. <br><br>SLOTS SET: Havasu.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT IsNaN $ "Havasu.Outflow" [] AND @"t" <= @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 1.00000000 AND ( $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM only <br>";
-    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160426: LC changed this from setting the first 2 months of the run to just the first month<br><br>S.Baker 06/20/2018: Added execution constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.";
+    RULE_EXEC_CONSTRAINT IsNaN $ "Havasu.Outflow" [] AND @"t" <= @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 1.00000000 AND ( $ "MTOMRunType.RunType" [] == 0.00000000 OR "Is24MonthStudy"(  ) ) COMMENTED_BY "For operational MTOM and 24 MS only  <br>";
+    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160426: LC changed this from setting the first 2 months of the run to just the first month<br><br>S.Baker 06/20/2018: Added execution constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>A. Pivarnik 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same. Added execution constraing to fire in 24 MS mode";
     BEGIN
 
       $ "Havasu.Outflow" [] := $ "HavasuOutflow.BHOPSParkerOutflow" [];
@@ -4610,7 +4610,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the Outflow from Mohave to what is necesary to hit the Mohave Target Storages. This rule passes the inflow necessary to meet downstream demands and preserve the target storage for Mohave.<br><br>SLOTS SET: Mohave.Outflow<br><br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknow Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.";
+    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknow Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>A. Pivarnik 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same";
     BEGIN
 
       $ "Mohave.Outflow" [] := "SolveOutflow"( % "Mohave", $ "Mohave.Inflow" [], "GetTargetStorage"( % "Mohave", @"t" ), $ "Mohave.Storage" [@"t - 1"], @"t" );
@@ -4622,7 +4622,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the Lake Mead outflow to the smaller of the sum of the lower basin demands OR the water available in Mead (if Run Cycle >=3; otherwise use 9,999,999 acre-ft/month). This rule can execute as many times as necessary to set releases to meet demands. <br><br>SLOTS SET: Mead.Outflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker, 20200326: Edited IF ELSE statement to reduce redundancy. <br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>S.Baker 2018/10/17: Replace SumAllDiversionsBelowVolume(Havasu) - SumAllGainsBelowVolume(Havasu) with HavasuOutflow.ParkerRequirement. This change was made because this calculation was already performed in rule &quot;Set Parker Final Requirement&quot;, so it was repetative and problematic to recalculate them. This change is important during hindcast runs when the Gila River has ver high local inflows (Jan-Apr 1993). ";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>S.Baker, 20200326: Edited IF ELSE statement to reduce redundancy. <br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>S.Baker 2018/10/17: Replace SumAllDiversionsBelowVolume(Havasu) - SumAllGainsBelowVolume(Havasu) with HavasuOutflow.ParkerRequirement. This change was made because this calculation was already performed in rule &quot;Set Parker Final Requirement&quot;, so it was repetative and problematic to recalculate them. This change is important during hindcast runs when the Gila River has ver high local inflows (Jan-Apr 1993). <br>A. Pivarnik 20200706: No change to the rule logic in the integration effort. This rule logic should provide the same result as the old 24 MS logic";
     BEGIN
 
       $ "Mead.Outflow" [] := "Min"( IF ( "GetRunCycleIndex"(  ) >= 3.00000000 )
@@ -13880,32 +13880,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8c3e67e4-4f34-482d-8627-c6c8b134f9cf}";
+    UUID "{a44ac5ed-e3e7-422d-a0b7-2bd16a9d093a}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d66ae80a-ce97-4c10-8a18-f479627e4f8d}";
+    UUID "{9b132124-a2a1-49da-ba22-64e79af52518}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7ed5e5fd-9de6-488f-8abc-8d7d1fd52a45}";
+    UUID "{ccf1a4a5-8a81-48a7-8ec9-2d31756cd892}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{13aa4ced-15d5-4606-8b54-de9fcc357a3e}";
+    UUID "{b227cd7e-23c6-458e-a9b0-2976779aaf99}";
 ;
 
   END
-  UUID "{a4a261b1-0771-4feb-a940-5f2e18ac34c7}";;
+  UUID "{ede01b3f-36c7-4756-889f-59ab7b421f25}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13916,11 +13916,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9ddcd3af-a604-4831-b0ec-8fcca2bea958}";
+    UUID "{4dd7fd03-013d-4184-89db-92bc5fbcb7df}";
 ;
 
   END
-  UUID "{2b8150e6-2a82-4961-8c2c-586265162283}";;
+  UUID "{748d9e6e-bc03-4c80-9d57-092b9777f615}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13931,11 +13931,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a24c4b91-2bc7-43e7-a8f1-b970a15a61e9}";
+    UUID "{1eb66371-da78-442f-a72a-0dc3cb8b96bb}";
 ;
 
   END
-  UUID "{75bcb1e9-6a39-4967-b324-30641a971fc6}";;
+  UUID "{094e0c7a-1f3a-4ea7-8048-3132529af116}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13946,11 +13946,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{faaf4f2d-4ba3-4797-a608-ff763aa9ab95}";
+    UUID "{41dc9642-9300-4534-b857-1203a8fcdaf7}";
 ;
 
   END
-  UUID "{0d902dce-1cda-48df-824b-a61d0f27832c}";;
+  UUID "{33b76c30-a0f9-4ba4-9812-a7193ee0a62a}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";

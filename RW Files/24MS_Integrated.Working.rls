@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:13 July 2, 2020
+# Created 15:47 July 6, 2020
 # 
 RULESET
 NAME "24month";
@@ -1817,31 +1817,33 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Set Flow To Mexico (flow at NIB) exp";
+    RULE                 "INT - Set Flow To Mexico (flow at NIB) exp";
     DESCRIPTION          "This rule just computes the flow to Mexico and stores it on the<br>MexicoExcess data object in the slot NIBFlow for subsequent write to hdb<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "24MS = MTOM <br>";
       $ "Lower Basin Output.NIBFlow" [] := $ "Lower Basin Output.MexicoExcessFlow" [] + $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [];
 
     END
     UUID "{984763cc-a31e-42f9-b362-27d31364044e}";;
 
-    RULE                 "Set Mexico Excess";
+    RULE                 "INT - Set Mexico Excess";
     DESCRIPTION          " this rule determines the excess flow to Mexico which is just the<br> actual Mead release minus the release determined to meet downstream requirements <br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "MTOM = 24 MS rule <br>";
       $ "Lower Basin Output.MexicoExcessFlow" [] := $ "Mead.Outflow" [] - "VolumeToFlow"( $ "Lower Basin Output.DownstreamReq" [], @"t" );
 
     END
     UUID "{a519d10f-17f7-4260-8f4d-04d824bf5ba5}";;
 
-    RULE                 "Set DownStream Requirement exp";
+    RULE                 "INT - Set DownStream Requirement exp";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -1853,25 +1855,27 @@ BEGIN
     END
     UUID "{b3f50db7-53f5-40b6-9670-fc54b394595a}";;
 
-    RULE                 "Set Parker Final Requirement";
+    RULE                 "INT - Set Parker Final Requirement";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule is almost the same. Small change in MTOM that shouldnt effect the results of the run<br>";
       $ "HavasuOutflow.ParkerRequirement" [] := "SumAllDiversionsBelowVolume"( % "Havasu", @"t", @"t" ) - "SumAllGainsBelowVolume"( % "Havasu", @"t", @"t" );
 
     END
     UUID "{f30fd1f8-e11a-47af-979f-c371adf99691}";;
 
-    RULE                 "Set Below Imp Outflow";
+    RULE                 "NI - Set Below Imp Outflow";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT IsNaN $ "FloodControlOutput.Flood Control Flag" [];
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule is turned off in the 24 MS and not in MTOM. Not integrated <br>";
       $ "BelowImperialDam.Outflow" [] := 0.00000000 "acre-ft/month";
 
     END
@@ -1886,7 +1890,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Havasu Rule Curve";
+    RULE                 "INT - Havasu Rule Curve";
     DESCRIPTION          "This rule could just as easily use a target elevation rather than a storage.<br>It would probably be safer to do so.";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" > @"Start Timestep + 1";
@@ -1898,7 +1902,7 @@ BEGIN
     END
     UUID "{432ac534-ce9a-4aaf-b042-4720f5c146c7}";;
 
-    RULE                 "Set Havasu Outflow Exp";
+    RULE                 "INT - Set Havasu Outflow Exp";
     DESCRIPTION          "This rule sets Havasu's outflow to the the scheduled release from the <br>data object, HavasuOutflow.Outflow we only do this if the outflow is currently not set.  this allows<br>for setting Hoover's outflow manually";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "Havasu.Outflow" [] AND @"t" <= @"Start Timestep + 1";
@@ -1910,7 +1914,7 @@ BEGIN
     END
     UUID "{9a9f245e-3b6d-44f0-9554-e40f427f44bc}";;
 
-    RULE                 "Mohave Rule Curve";
+    RULE                 "INT -  Mohave Rule Curve";
     DESCRIPTION          "This rule could just as easily use a target elevation rather than a storage.<br>It would probably be safer to do so.";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -1922,13 +1926,14 @@ BEGIN
     END
     UUID "{c795cd00-417c-4415-a144-50cb9c8e7e22}";;
 
-    RULE                 "Set Mead Outflow To Demands";
+    RULE                 "INT - Set Mead Outflow To Demands";
     DESCRIPTION          "202005 (AP): Added refernce to gMWD reurns in calculation (was not being taken into account as a gain below Mead)";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
     NOTES                "DEVELOPMENT NOTES: <br>CH, 8/25/17: Replaced call to SumGainsBelowVolume with SumAllGainsBelowVolume";
     BEGIN
 
+    DESCRIPTION          "Using updated logic in the MTOM ruleset <br>";
       $ "Mead.Outflow" [] := IF ( @"t" <= @"Start Timestep + 1" )
  THEN
   "VolumeToFlow"( "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" ) + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - ( "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + $ "California_CU_Schedules.MWDReturns" [@"t"] ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Mohave", "GetTargetStorage"( % "Mohave", @"t" ) ) + "StorageToArea"( % "Mohave", $ "Mohave.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month" + $ "Havasu.Evaporation Coefficients" ["GetMonth"( @"t" ) - 1.00000000, 0.00000000] * ( ( "StorageToArea"( % "Havasu", "GetTargetStorage"( % "Havasu", @"t" ) ) + "StorageToArea"( % "Havasu", $ "Havasu.Storage" [@"t - 1"] ) ) / 2.00000000 ) * 1.00000000 "month", @"t" )
