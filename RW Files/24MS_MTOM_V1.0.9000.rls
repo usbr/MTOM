@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:47 July 6, 2020
+# Created 16:19 July 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2205,7 +2205,7 @@ BEGIN
     RULE                 "Set Steady Flow Experiment Release";
     DESCRIPTION          "";
     ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT $ "PowellData.SteadyFlowExperimentFlag" [] == 1.00000000 AND "GetRunCycleIndex"(  ) == 3.00000000;
+    RULE_EXEC_CONSTRAINT ( $ "PowellData.SteadyFlowExperimentFlag" [] == 1.00000000 AND "GetRunCycleIndex"(  ) == 3.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "";
     BEGIN
 
@@ -2250,7 +2250,7 @@ BEGIN
     RULE                 "Set Steady Flow Reductions";
     DESCRIPTION          "";
     ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT "MonthIs"( { "April" } ) AND "GetRunCycleIndex"(  ) == 3.00000000;
+    RULE_EXEC_CONSTRAINT ( "MonthIs"( { "April" } ) AND "GetRunCycleIndex"(  ) == 3.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "";
     BEGIN
 
@@ -2281,7 +2281,7 @@ BEGIN
     RULE                 "Set Lower Balancing Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Lower Elevation Balancing Tier. This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.";
     BEGIN
 
@@ -2296,7 +2296,7 @@ BEGIN
     RULE                 "Set Mid-Elevation Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Mid-Elevation Tier. This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
     BEGIN
 
@@ -2316,14 +2316,14 @@ BEGIN
     RULE                 "Refine Equalization Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule refines the annual release volume from Powell when either the Equalization Tier or Upper Elevation Balancing Tier B3 branch is operative for setting the annual release from Powell.  The release needs to be refined by this rule because when it is originally set, it is a preliminary &quot;guess&quot; for the volume it will take to arrive at the appropriate final (end of water year) condition (Equalized storage volumes, or Powell at a specific pool elevation at the end of the year - see Equalization Tier logic for more details as to what the final eowy condition should be).  This volume is then released and the end of year condition is checked against what it is supposed to be.  The first guess will almost always be off by some amount because of the non-linear elements in the water balance in both Powell and Mead of Evaporation and Bank Storage.  So rather than trying to set up a calculation or mini-simulation to calculate the exact right release volume to hit the end of water year condtion the first time, the guess volume is actually released and then this rule, because it can see the results of the original release, adjusts the release volume to eliminate the deviation from the target that it observes as a result of the initial guess release.  This rule is allowed to fire multiple times in a timestep and may do so in order to hit exactly the end of water year target condition. - sc 06/21/12<br><br>This version of the rule executes in Run Cycle 4 with Lower Basin Demand Variability in effect.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT WITH DATETIME eoyDate = IF ( "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) )
+    RULE_EXEC_CONSTRAINT ( WITH DATETIME eoyDate = IF ( "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) )
  THEN
   "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )
  ELSE
   "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )
  ENDIF DO
   "HasRuleFiredSuccessfully"( "Set Equalization Release Volume post-LBDV" ) OR ( "HasRuleFiredSuccessfully"( "Set Upper Balancing Release Volume post-LBDV" ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.30000000 ) AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND ( "TierIs"( "Upper", @"t", TRUE ) OR "TierIs"( "Equalization", @"t", TRUE ) )
- ENDWITH;
+ ENDWITH ) AND NOT "Is24MonthStudy"(  );
     NOTES                "S.Baker, 2018/10/17: Copied from normal Powell policy set and changed execution constraints for Run Cycle 4 and LBDV. Go to original rule for development details prior to this date. <br>S.Baker, 2018/11/26: [edited to match normal Powell rule for RC #3] Added WITH statement to store TARV and use in IF statement to look if solved TARV was equal to previous TARV. Then, allow for setting of the PowellData.ReleaseVolumeSetFlag when TARV solved in the current iteration is equal to the previously set TARV. This is necessary for solving for the carryover release pattern from Powell. This occurs normally when TARV is not changed from 8.23 MAF. ";
     BEGIN
 
@@ -2429,7 +2429,7 @@ BEGIN
     RULE                 "Set Upper Balancing Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3). This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The GetRunCycleIndex()==3 condition will never be satisfied due to the Execution Constraints. Compare with initial version of rule for Run Cycle 4 and correct<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead Pool Elevation. This will allow MTOM to determine which PE projection to use (ie. AugEOYProjectedMeadPE).";
     BEGIN
 
@@ -2470,7 +2470,7 @@ BEGIN
     RULE                 "Set Equalization Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for years when the Release Tier is Equalization. It also calculates and sets the Controlling Equalization Condition slot, which indicates the equalization condition that dictated the volume to be released. This version executes in Run Cycle 4 if Lower Basin Demand Variability is in effect.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only fires in Run Cycle 4 with demand variability in effect, it is August, and the model has selected the Equalization teir for the current year. - sc 02/02/11; TP 08/20/2014; MC, 20170511";
+    RULE_EXEC_CONSTRAINT ( ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only fires in Run Cycle 4 with demand variability in effect, it is August, and the model has selected the Equalization teir for the current year. - sc 02/02/11; TP 08/20/2014; MC, 20170511" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint. Disabled PowellData.ReleaseVolumeSetFlag since this flag should be set in the Refine Equalization rule. <br>S.Baker, 2018/10/17: updated run cycle execution constraint to RC == 4 (was 3 which was incorrect).<br>S.Baker, 20200417: Updated rule to match the RC 3 rule and make sure release isnt less than 8.23 maf. Before fix, TARV was being set to less than 8.23 maf during equalization.";
     BEGIN
 
@@ -2487,7 +2487,7 @@ BEGIN
     RULE                 "Set Release Tier post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule fires at the Start Timestep and in August timesteps to set the Powell Release tier, as well as preliminarily setting the Upper Elevation Balancing Branch and Controlling Equalization Condition values to 999<br><br>SLOTS SET: PowellData.ReleaseTier; PowellData.UpperElevBalBranch; PowellData.ControllingEqualizationCondition<br><br>DEVELOPMENT NOTES:<br>AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 02/02/2011 (copied to LBDV from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint. <br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier post-LBDV&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. The priority issue was causing incorrectly calculated Release Tiers in the post-LBDV rules. When the ruleset got to the rule &quot;Set Release Tier post-LBDV&quot; the release for the water year was still set to a higher TARV (9.0MAF). This caused the rules to calculate the wrong release. MTOM then reset the TARV to 8.23MAF in &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. Switching the order of the rules allows for the TARV to be reset to 8.23MAF before calculating the release tier. ";
     BEGIN
 
@@ -2570,7 +2570,7 @@ BEGIN
     RULE                 "Preliminary Set Out Year Release Volume To 8.23MAF post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20190710: Edited the Max() statement to match the normal rule. The rule was using a function used in the Equalization rule instead of setting initial TARV to 8.23 (or close). <br>S.Baker, 20180925: Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. <br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier post-LBDV&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. The priority issue was causing incorrectly calculated Release Tiers in the post-LBDV rules. When the ruleset got to the rule &quot;Set Release Tier post-LBDV&quot; the release for the water year was still set to a higher TARV (9.0MAF). This caused the rules to calculate the wrong release. MTOM then reset the TARV to 8.23MAF in &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. Switching the order of the rules allows for the TARV to be reset to 8.23MAF before calculating the release tier. ";
     BEGIN
 
@@ -2621,7 +2621,7 @@ BEGIN
     RULE                 "Set WY1 Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for the first WY for any release Tier designation. It also calculates and sets the Controlling Equalization Condition slot, which indicates the condition that dictated the volume to be released based on which Tier has been set. <br><br>SLOTS SET: Some combination of the following - PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition; PowellData.UpperElevBalBranch<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 4; at the Start Timestep for only the first <br>WY;  and if the rule has not already fired successfully for the timestep   <br>";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 4; at the Start Timestep for only the first <br>WY;  and if the rule has not already fired successfully for the timestep   <br>" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown (copied rule from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint. <br>AP, 2019/04/11: Added contstraint where it sets TARV to make sure the model won't equalize when the upper elevation balan branch is an input";
     BEGIN
 
@@ -2703,7 +2703,7 @@ BEGIN
     RULE                 "Set WY1 Release Tier post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule fires at the Start Timestep and in August timesteps to set the Powell Release tier, as well as preliminarily setting the Upper Elevation Balancing Branch and Controlling Equalization Condition values to 999, for the First Water Year<br><br>SLOTS SET: PowellData.ReleaseTier; PowellData.UpperElevBalBranch; PowellData.ControllingEqualizationCondition";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND IsNaN $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )];
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND IsNaN $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 02/02/2011 (copied rule from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint";
     BEGIN
 
@@ -2726,7 +2726,7 @@ BEGIN
     RULE                 "Preliminary Set WY1 Release Volume To 8.23MAF post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) );
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Edited execution constraints to match Powell policy group rule. Changed rule TARV calculation to match Powell policy set rule. <br><br>S.Baker, 2018/10/17: Changed column number in releaseTable[AnnualVolume, Ncol - 3]<br>MTOM was failing in testbed runs in this rule in high inflow years when Powell was trying to release a large volume. In the historical run of 1983-06, the model aborted since it sets the initial TARV to 30 MAF based on the condition releaseTable[AnnualVolume, Ncol ? 2].  This caused the model to look for too high of upper bound in the function ?CalculatePowellMonthlyRelease?.  The upper bound was being reset in function 'FindRemainingReleaseUpperBoundColumn' by adding + 1 index which cause model to look for table index that didn?t exist. When we use Ncol ? 3, the TARV is initially set to 20 MAF and MTOM runs successfully finding a realistic TARV (18 MAF). ";
     BEGIN
 
@@ -2767,7 +2767,7 @@ BEGIN
     RULE                 "Set Lower Balancing Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Lower Elevation Balancing Tier. <br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>TP 20171017: Removed Setting the volume for the first water year, only sets outyear volumes now<br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.";
     BEGIN
 
@@ -2782,7 +2782,7 @@ BEGIN
     RULE                 "Set Mid-Elevation Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Mid-Elevation Tier for Out Years. <br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170718: Added &quot;OR StartMonthIsSeptember()&quot; to condition originally for August; Sarah B. discovered this error and proposed the fix<br><br>TP, 20171017: Removed any setting of the First water year from this Rule<br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).";
     BEGIN
 
@@ -2802,14 +2802,14 @@ BEGIN
     RULE                 "Refine Equalization Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule refines the annual release volume from Powell when either the Equalization Tier or Upper Elevation Balancing Tier B3 branch is operative for setting the annual release from Powell.  The release needs to be refined by this rule because when it is originally set, it is a preliminary &quot;guess&quot; for the volume it will take to arrive at the appropriate final (end of water year) condition (Equalized storage volumes, or Powell at a specific pool elevation at the end of the year - see Equalization Tier logic for more details as to what the final eowy condition should be).  This volume is then released and the end of year condition is checked against what it is supposed to be.  The first guess will almost always be off by some amount because of the non-linear elements in the water balance in both Powell and Mead of Evaporation and Bank Storage.  So rather than trying to set up a calculation or mini-simulation to calculate the exact right release volume to hit the end of water year condtion the first time, the guess volume is actually released and then this rule, because it can see the results of the original release, adjusts the release volume to eliminate the deviation from the target that it observes as a result of the initial guess release.  This rule is allowed to fire multiple times in a timestep and may do so in order to hit exactly the end of water year target condition. - sc 06/21/12<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT WITH DATETIME eoyDate = IF ( "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) )
+    RULE_EXEC_CONSTRAINT ( WITH DATETIME eoyDate = IF ( "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) )
  THEN
   "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )
  ELSE
   "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )
  ENDIF COMMENTED_BY "Make sure using appropriate year value" DO
   ( "TierIs"( "Upper", @"t", TRUE ) OR "TierIs"( "Equalization", @"t", TRUE ) ) AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND ( "HasRuleFiredSuccessfully"( "Set Equalization Release Volume" ) OR ( "HasRuleFiredSuccessfully"( "Set Upper Balancing Release Volume" ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.30000000 ) ) ) AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) )
- ENDWITH;
+ ENDWITH ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 06/21/2012<br><br>MC, 20171102: Added use of new slot PowellData.TARVTolerance to determine when refinement of TARV will stop.<br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement. Add time step run constraint to match IFs in rule.<br><br>S.Baker, 2018/10/17 & 2018/11/26: (edited #1 at later date)<br>(1) Added WITH statement to store TARV and use in IF statement to look if solved TARV was equal to previous TARV. Then, allow for setting of the PowellData.ReleaseVolumeSetFlag when TARV solved in the current iteration is equal to the previously set TARV. This is necessary for solving for the carryover release pattern from Powell. This occurs normally when TARV is not changed from 8.23 MAF. <br>(2) When calculating if the [ TARV - (CurrentAnnualRelease + VolumeDeviation) ] is within the TARV tolerance, carryover needs to be subtracted from the calculated volume. If there was a carryover volume calculated from the current year, the CurrentAnnualRelease would not account for this carryover volume that could not be released from Powell. <br>(3) When taking the MaxItem, the first IF statement needs to account for negative values for ReleaseAdjustment. This is done by taking the absolute value of ReleaseAdjustment. <br>(4) The calculation resulting from a true IF statement (in the MaxItem function) needs to account for carryover. The new TARV calculation should account be: [ CurrentAnnualRelease - Carryover(from last year if not UEB) + Release Adjust + Carryover(from current year) ] ";
     BEGIN
 
@@ -2915,7 +2915,7 @@ BEGIN
     RULE                 "Set Upper Balancing Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier for out years. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3)<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>SB, 20190712: Added NaNToZero to PowelltoMead.Carryover() so rule doesnt fail. <br><br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The IsYearDemandVariabilityAndRunCycle4 condition will never be met because the rule does not execute in Run Cycle 4 due to the Execution Constraints<br><br>TP, 10/17/2017: Only allow out year to be set by this rule<br><br>MC, 20171102: This rule was changed by Tony to only operate on out years after the addition of two new rules that set WY1 only; I added IF-ELSE version to only set Release flag if NOT in EQ from UEB<br><br>S.Baker, 20180829: Added function 'GetMeadProjectedPoolElevation' instead of using Mead.Pool Elevation. Also, edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement.<br>S.Baker, 20180925: Replaced function 'GetMeadProjectedPoolElevation' with function 'GetProjectedPoolElevation'.";
     BEGIN
 
@@ -2956,7 +2956,7 @@ BEGIN
     RULE                 "Set Equalization Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for out years when the Release Tier is Equalization. It also calculates and sets the Controlling Equalization Condition slot, which indicates the equalization condition that dictated the volume to be released.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep in September or in any August; with <br>a timestep more than 2 away from the model run finish; and if the rule has not already fired <br>successfully for the timestep and only sets volumes in out years <br>";
+    RULE_EXEC_CONSTRAINT ( ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep in September or in any August; with <br>a timestep more than 2 away from the model run finish; and if the rule has not already fired <br>successfully for the timestep and only sets volumes in out years <br>" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br>Initial changes: sc 02/02/11;TP 08/20/2014; MC, 20170511; TP 10/17/2017  <br><br>S.Baker, 20180924: Added new Execution Constraint that looks at TierIs(). This allows the removal of the IF statement. Disabled PowellData.ReleaseVolumeSetFlag since this flag should be set in the Refine Equalization rule. ";
     BEGIN
 
@@ -2972,7 +2972,7 @@ BEGIN
     RULE                 "Set Release Tier";
     DESCRIPTION          "DESCRIPTION: This rule fires at the Start Timestep and in August timesteps to set the Powell Release tier, as well as preliminarily setting the Upper Elevation Balancing Branch and Controlling Equalization Condition values to 999<br><br>SLOTS SET: PowellData.ReleaseTier; PowellData.UpperElevBalBranch; PowellData.ControllingEqualizationCondition<br><br>DEVELOPMENT NOTES:<br>AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints and removed from each IF statement in rule.<br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot;. This doesn't cause problems in the normal Powell policy group since the rule &quot;Set Release Tier&quot; doesn't have the EOCY Powell Pool Elevation. Therefore, the rule &quot;Set Release Tier&quot; is skipped until the rule &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot; has executed successfully. The rule priorities were changed to make the ruleset more efficiently. ";
     BEGIN
 
@@ -3055,7 +3055,7 @@ BEGIN
     RULE                 "Preliminary Set Out Year Release Volume To 8.23MAF";
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160728: Changed the local variable &quot;watYearIndex&quot; name to &quot;waterYearNumber&quot; for consistency with the rule Set Powell Outflow; make a function to do the calculation?; added the setting of Powell.Outflow values for testing with new carryover functionality<br>MC, 20170405: Can add use of user-defined function GetWaterYearNumber in calculation of local varaible waterYearNumber<br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot;. This doesn't cause problems in the normal Powell policy group since the rule &quot;Set Release Tier&quot; doesn't have the EOCY Powell Pool Elevation. Therefore, the rule &quot;Set Release Tier&quot; is skipped until the rule &quot;Preliminary Set Out Year Release Volume to 8.23MAF&quot; has executed successfully. The rule priorities were changed to make the ruleset more efficiently. ";
     BEGIN
 
@@ -3115,7 +3115,7 @@ BEGIN
     RULE                 "Set WY1 Release Volume";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for the first WY for any release Tier designation. It also calculates and sets the Controlling Equalization Condition slot, which indicates the condition that dictated the volume to be released based on which Tier has been set. <br><br>SLOTS SET: Some combination of the following - PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition; PowellData.UpperElevBalBranch<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep for only the first WY;  and if the rule <br>has not already fired successfully for the timestep <br>";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 3; at the Start Timestep for only the first WY;  and if the rule <br>has not already fired successfully for the timestep <br>" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br>Initial changes: SC 02/02/11;TP 08/20/2014; MC, 20170511; TP 10/13/2017  <br><br>TP: 20171017: Added and set the rule to only set the first water year.<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. Edited setting of 'PowellData.UpperElevBalBranch to check if this value is input before trying to set it. This issue was initially causing this rule to exit without setting values. <br>S.Baker, 20180921: Removed run cycle constraint in rule (2nd IF). Removed IF @t = start timestep within rules since this is an execution constraint. Added IsInput(TARV) constraint to execution constraints and removed from each IF statement in rule.";
     BEGIN
 
@@ -3197,7 +3197,7 @@ BEGIN
     RULE                 "Set WY1 Release Tier";
     DESCRIPTION          "DESCRIPTION: This rule fires at the Start Timestep and in August timesteps to set the Powell Release tier, as well as preliminarily setting the Upper Elevation Balancing Branch and Controlling Equalization Condition values to 999, for the First Water Year<br><br>SLOTS SET: PowellData.ReleaseTier; PowellData.UpperElevBalBranch; PowellData.ControllingEqualizationCondition";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND IsNaN $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )];
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND IsNaN $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination<br>TP, 20171017: Added this rule and only allow it to execute in the start timestep for the first water year<br>S.Baker, 20180924: Added IsNaN(ReleaseTier) constraint to execution constraints. <br><br><br>";
     BEGIN
 
@@ -3220,7 +3220,7 @@ BEGIN
     RULE                 "Preliminary Set WY1 Release Volume To 8.23MAF";
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) );
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 03/25/2011<br>MC, 20160908: Previously added SumFlowsToVolume(...) to MaxItem; added IF-ELSE to deal with October when no previous WY release would have occurred<br><br>S.Baker, 20180620: Time constraint on release table added to allow hindcast runs.<br>S.Baker, 20180924: Added IsInput(TARV) constraint to execution constraints. <br>S.Baker, 2018/10/17: Changed column number in releaseTable[AnnualVolume, Ncol - 3]<br>MTOM was failing in testbed runs in this rule in high inflow years when Powell was trying to release a large volume. In the historical run of 1983-06, the model aborted since it sets the initial TARV to 30 MAF based on the condition releaseTable[AnnualVolume, Ncol ? 2].  This caused the model to look for too high of upper bound in the function ?CalculatePowellMonthlyRelease?.  The upper bound was being reset in function 'FindRemainingReleaseUpperBoundColumn' by adding + 1 index which cause model to look for table index that didn?t exist. When we use Ncol ? 3, the TARV is initially set to 20 MAF and MTOM runs successfully finding a realistic TARV (18 MAF). ";
     BEGIN
 
@@ -3244,7 +3244,7 @@ BEGIN
     RULE                 "Set Powell Outflow";
     DESCRIPTION          "DESCRIPTION: In most months, interpolate values from the monthly release table using the current value of annual release volume. In August and September the annual release volume has already been set for the subsequent water year, so use the previous water year's annual volume. <br><br>SLOTS SET: Powell.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep";
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) >= 3.00000000 AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>SB, 20190712: Edited how carryover is set. Added IF so carryover is only set during EQ or UEBT. This is what is done in CRSS. Carryover was causing this rule to reach max executions when Powell and Mead were at very low pool elevations. ";
     BEGIN
 
@@ -3334,7 +3334,7 @@ BEGIN
     RULE                 "Fall Peak Release ";
     DESCRIPTION          "DESCRIPTION: This Rule Uses the already set pool elevations for Navajo from the prevoius rule and uses the October Pool elevation to check if the elevation is above 6,065 ft.  If the volume at the beginning of October is above 6,065, then increase the September release so the pool elevation at the beginning of October is 6,065.  The reason we are looking at the October pool elevation is in the rare event that October is Wet, then the pool elevation in September will allow for the high flows in October to result in a Pool Elevation of 6,065 heading into the Winter months.  If we use the September Pool elevation and don' t release enough the system might have to release more the next spring than needed. <br><br>This rule only fires in months after the Spring Peak Release cannot be set (July - September) and only after the model has the opportunity to set outflows from Navajo at the maximum 1,000 cfs per day for the months of July - September. <br><br>SLOTS SET: Navajo.Outflow[September, Current Year]<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetMonth"( @"t" ) >= 7.00000000 AND "GetMonth"( @"t" ) <= 9.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( "GetMonth"( @"t" ) >= 7.00000000 AND "GetMonth"( @"t" ) <= 9.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: TP 9/13/2012<br><br>MC, 20170502: The description written by Tony suggests the rule is targeting an end of October pool elevation, but the rule is setting the September outflow to lead to a beginning of October (end of September) target pool elevation";
     BEGIN
 
@@ -3358,7 +3358,7 @@ BEGIN
     RULE                 "Dam Protection Flood Control";
     DESCRIPTION          "DESCRIPTION: If Navajo Pool Elevation is in threat of going above the maximum pool elevation (6,082 ft) then release the amount of outflow to reduce the pool elevation to the max pool elevation. This rule is a flood protection rule. <br><br>SLOTS SET: Navajo.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" );
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3401,7 +3401,7 @@ BEGIN
     RULE                 "Reduce Outflow and Diversions if Navajo is below Min Level";
     DESCRIPTION          "DESCRIPTION: If the reservoir is in threat of going below 5,990 ft, apply shortage sharing to the outflow of Navajo and NIIP diversions.<br><br>SLOTS SET: Navajo.Outflow; NavajoIndianIrrigationProjectNIIP.Diversion<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "IsLowFlowAdjustmentNecessary"(  ) AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" );
+    RULE_EXEC_CONSTRAINT ( "IsLowFlowAdjustmentNecessary"(  ) AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3420,7 +3420,7 @@ BEGIN
     RULE                 "SumNavajoOutflowtoMonthly";
     DESCRIPTION          "DESCRIPTION: Solve Navajo Daily outflow on the data object and set the monthly outflow on the Reservoir simulation object.  This rule only on the start timestep and in March timesteps.<br><br>SLOTS SET: Navajo.Outflow<br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 3.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 3.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: TP 9/30/2015";
     BEGIN
 
@@ -3454,7 +3454,7 @@ BEGIN
     RULE                 "March through July Daily Release";
     DESCRIPTION          "DESCRIPTION: Calculate the Daily release given the policy constraints outlined by the Flow recomendation document from the San Juan Flow Recommendations and recommendations on the policy by the Bureau of Reclation.  These flows will be based on the policy from the release level calculated and not the actual available water. That will come after a scale value is applied. <br><br>SLOT SET: NavajoData.MarchThruJulyDaily<br><br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 3.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 3.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "DEVELOPMENT NOTES:<br>AUTHOR, DATE: TP, 20120531 (?)";
     BEGIN
 
@@ -3470,7 +3470,7 @@ BEGIN
     RULE                 "DetermineReleaseLevelValues";
     DESCRIPTION          "DESCRIPTION: Determine the release level (0-4) for the spring release based on the calculated available flow to achieve the EOWYTargetPE. The determination of level is based on the values in the SpringPeakReleaseLevels table.  The Rule sets the Release Level, the Spring Peak Release Volume, the Nose Level (If Applicable), the Nose Volume (if Applicable), and the excess of a Nose Volume (If Applicable).<br><br>SLOTS SET: NavajoData.ReleaseLevel; NavajoData.SpringPeakRelease; NavajoData.NoseLevel; NavajoData.SpringPeakNose; NavajoData.ExcessOfRelease<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "March" } ) ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 1.00000000 AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "March" } ) ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: TP, 5/31/2012 (?)<br><br>MC, 20170717: Reorganized rule to combine the cases for Month == March and (Start Timestep AND Month < Oct)";
     BEGIN
 
@@ -3516,7 +3516,7 @@ BEGIN
     RULE                 "Preliminarily Set Navajo Outflow to Desired Base Flow";
     DESCRIPTION          "DESCRIPTION: This rule sets the outflow from Navajo for the current timestep to the end of February of the next year. The outflow is set to the greater of the Base Release or what is necessary, together with the Animas contribution, to meet the downstream flow targets. Doing this allows Navajo to solve for the Available water calculation.<br><br>SLOTS SET: Navajo.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT TRUE;
+    RULE_EXEC_CONSTRAINT NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3548,7 +3548,7 @@ BEGIN
     RULE                 "SetNavajoDiversions";
     DESCRIPTION          "DESCRIPTION: Sets the NIIPDiversions Requested slot, the SanJuanBelowNavajo.TotalDiversion Slot, and NIIP.Fractional Return Flow Slot values based on user input.  The Fractional Inflow values will at some point need to be changed in the future to the value that would be the fractional return flow. This rule fires so that the input values in the NavajoData.NIIPAnnualRequest and NavajoData.SJDownstreamDiversions slots  are assigned if input is provided for those two slots. <br><br>SLOTS SET: SanJuanBelowNavajo.Total Diversion; NavajoIndianIrrigationProjectNIIP.Fractional Return Flow; NavajoIndianIrrigationProjectNIIP.Diversion; Azotea Tunnel.Diversion<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND @"t" == @"Start Timestep";
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 1.00000000 AND @"t" == @"Start Timestep" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: TP, 8/5/2012 (?)";
     BEGIN
 
@@ -3582,7 +3582,7 @@ BEGIN
     RULE                 "Calculate Daily Jensen Flows";
     DESCRIPTION          "DESCRIPTION: Calculates the daily Jensen flow using daily FG releases and daily Yampa flows with the assumption that FG releases are lagged one day.<br><br>SLOTS SET: KNN_MTOM.JensenDaily<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3608,7 +3608,7 @@ BEGIN
     RULE                 "Fill Daily Flaming Gorge Releases for Months Outside of April-July";
     DESCRIPTION          "DESCRIPTION: Sets the daily FG releases and daily Yampa releases to the average monthly FG outflow and Yampa gaged outflow, respectively.<br><br>SLOTS SET: KNN_MTOM.FlamingGorgeDaily; KNN_MTOM.YampaDailyDeerlodgeDepleted<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT "MonthIs"( { "April" , "May" , "June" , "July" , "August" } ) AND "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT ( NOT "MonthIs"( { "April" , "May" , "June" , "July" , "August" } ) AND "GetRunCycleIndex"(  ) == 2.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3625,7 +3625,7 @@ BEGIN
     RULE                 "Sum Daily Flaming Gorge Release Schedule to Monthly";
     DESCRIPTION          "Execution Constraint: April-August <br>  <br>Description: Sets FG outflow to the aggregated daily release volume.<br><br>IF daily flow summation is greater than the amount of water that is in FG reassign daily flows to only release as much water as is in FG (constant value).<br><br> <br>Slots Set: FlamingGorge.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "MonthIs"( { "April" , "May" , "June" , "July" , "August" } ) AND "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT ( "MonthIs"( { "April" , "May" , "June" , "July" , "August" } ) AND "GetRunCycleIndex"(  ) == 2.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "CF, 20181212: Added a constraint on outflow via FGConstrainedOutflow() to allow running VIC hydrology. Change to include an IF daily flow summation is greater than the amount of water that is in FG reassign daily flows to only release as much water as is in FG (constant value).   <br> ";
     BEGIN
 
@@ -3645,7 +3645,7 @@ BEGIN
     RULE                 "Min Flow in Extremely Dry Years with Low Storage";
     DESCRIPTION          "Execution Constraint: NA <br>  <br>Description: Flaming Gorge releases 800 cfs to protect the remaining water in storage if Flaming Gorge pool elevation is below MinReleaseTrigger and there is extremely low hydrology (.98 exceedance). This is reduce this further via funcion constraint when FG can't release 800 cfs without draining the live storage. <br><br>The rule sets the LowReleaseFlag when FG is releasing max water in FG (second IF) or MinFlow in HClass = 0 and PE < MinReleaseTrigger (first IF). <br><br>Slots Set: FlamingGorge.Outflow, FlamingGorgeData.LowReleaseFlag Execution Constraint: Not May, June or July ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "CF, 20181212: Exec Const removed, rule now fires in all timesteps. Rule moved earlier in priority than Sum Daily. Added a constraint on outflow via FGConstrainedOutflow() to MinFlow. AbsoluteMinRelease no longer needed since it was changed to MinFlow of 800 cfs based on the latest FEIS according to HP.  Rule sets the LowReleaseFlag when FG is releasing max water in FG or MinFlow in HClass = 0 and PE < MinReleaseTrigger. Fixes to allow running VIC. ";
     BEGIN
 
@@ -3667,7 +3667,7 @@ BEGIN
     RULE                 "Adjust Daily for August Base Flow";
     DESCRIPTION          "DESCRIPTION: Determines if July releases were at power plant or bypass capacity during moderately wet and wet hydrology and ramps down in August.  Rule sets August releases at steady base flows or downramps from high FG releases through July 31st to August base flows. August ramp down is contained in the Flow Recommendations. <br><br>SLOTS SET: KNN_MTOM.FlamingGorgeDaily; KNN_MTOM.YampaDailyDeerlodgeDepleted<br><br><br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "MonthIs"( { "August" } ) AND "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT ( "MonthIs"( { "August" } ) AND "GetRunCycleIndex"(  ) == 2.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "20191018, CF: The August rule considers if down ramping needs to occur or not. If it does then AugustDownRamp() is called which has a provision that sets the outflow required to avoid MaxPE but only after downramping has occurred. This was modified to have daily outflow to avoid MaxPE checked for to all days in August (regardless of where FG is in the down ramp). Additionally add GetFGBaseFlowMagnitude() to Aug1 max check. If down ramping does not need to occur in August than the rule set daily outflow equal to the baseflow. This was modified to have a max avoid MaxPE check. I've <br><br><br>AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3705,7 +3705,7 @@ BEGIN
     RULE                 "Set Flaming Gorge Daily April to July Schedule";
     DESCRIPTION          "Execution Constraint: April-July <br>  <br>Description: Makes the daily date and flow list using function MakeDailyFlamingGorgeReleaseDateandFlowList and assigns it to the data object.<br><br>SLOTS SET: KNN_MTOM.FlamingGorgeDaily<br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "MonthIs"( { "April" , "May" , "June" , "July" } ) AND "GetRunCycleIndex"(  ) == 2.00000000 ) COMMENTED_BY "CF,20190129: Changed to match CRSS. MTOM was only executing this in April or at start <br>timestep which wasn't setting dailyflows in later months.   <br>";
+    RULE_EXEC_CONSTRAINT ( ( "MonthIs"( { "April" , "May" , "June" , "July" } ) AND "GetRunCycleIndex"(  ) == 2.00000000 ) COMMENTED_BY "CF,20190129: Changed to match CRSS. MTOM was only executing this in April or at start <br>timestep which wasn't setting dailyflows in later months.   <br>" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "CF,20190129: Changed to match CRSS. MTOM was only executing this in April or at start timestep which wasn't setting dailyflows in later months.  <br><br>AUTHOR, DATE: Unknown<br>MC, 20170503: Should the rule fire for an August Start Timestep? No consideration for August date in rule, but will use July 1 based on logic";
     BEGIN
 
@@ -3735,7 +3735,7 @@ BEGIN
     RULE                 "Release to Meet ULDE";
     DESCRIPTION          "Execution Constraint: March, April <br>  <br>Description: Release at whatever rate is necessary to meet the May 1 upper limit draw-down elevation (ULDE) from the EIS.  Note that if the reservoir is already below the ULDE, then the outflow will be constrained to the minimum base flow for the current year type. <br><br>HP: March-April are the only months that do not have BC constraints regulated by the ROD. The constraint here is a physical constraint, no magnitude constraints are applied to Mar-Apr unlike other months (Baseflow Operations Rule) <br>  <br>Slots Set: FlamingGorge.Outflow ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "MonthIs"( { "March" , "April" } ) AND "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT ( "MonthIs"( { "March" , "April" } ) AND "GetRunCycleIndex"(  ) == 2.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "CF, 20181212: Added a constraint on outflow via FGConstrainedOutflow() to allow running VIC hydrology.";
     BEGIN
 
@@ -3748,7 +3748,7 @@ BEGIN
     RULE                 "Spring Flow Hydrologic Classification";
     DESCRIPTION          "DESCRIPTION: Sets the spring flow classification based on ROD percent exceedance ranges.  Hydrologic class exceedance percentile limits: Dry (0) = 100-90%; ModDry (1) = 90-70%; Average (2) = 70-30%; ModWet (3) = 30-10%; Wet (4) = 10-0%<br><br>SLOTS SET: KNN_MTOM.SpringHClass<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetMonthAsString"( @"t" ) IN { "March" , "April" , "May" , "June" , "July" , "August" } AND "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT ( "GetMonthAsString"( @"t" ) IN { "March" , "April" , "May" , "June" , "July" , "August" } AND "GetRunCycleIndex"(  ) == 2.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3782,7 +3782,7 @@ BEGIN
     RULE                 "Base Flow Operations";
     DESCRIPTION          "Execution Constraint: Not March, April <br>  <br>Description: Sets the base flows for all months except March and April.  Base flow releases are set to stay below maximum pool elevation (PE), minimum flows or stay within the base flow range based on the hydrologic classification.  <br><br>Slots Set: FlamingGorge.Outflow ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT "MonthIs"( { "March" , "April" } ) AND "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT ( NOT "MonthIs"( { "March" , "April" } ) AND "GetRunCycleIndex"(  ) == 2.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "CF, 20190128: MaxPE and MinFlow applied at the rule level to match CRSS.  <br><br>CF, 20181212: Added a constraint on outflow via FGConstrainedOutflow() to allow running VIC hydrology.";
     BEGIN
 
@@ -3794,7 +3794,7 @@ BEGIN
     RULE                 "Base Flow Hydrologic Classification";
     DESCRIPTION          "DESCRIPTION: Sets the base flow classification based on ROD percent exceedance ranges.  Under ROD compliance, base flows can change one classification higher or lower depending upon the previous month's observed unregulated inflow. Hydrologic class exceedance percentile limits: Dry (0) = 100-90%; ModDry (1) = 90-70%; Average (2) = 70-30%; ModWet (3) = 30-10%; Wet (4) = 10-0%<br><br>SLOTS SET: KNN_MTOM.BaseFlowHClass<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3830,7 +3830,7 @@ BEGIN
     RULE                 "Calc Percent Exceedance";
     DESCRIPTION          "DESCRIPTION: Calculate the percent exceedance for the April-July Base and Spring flow volumes, and the Yampa April-July flow volume<br><br>SLOTS SET: KNN_MTOM.AprJulPercentExceedanceSpringFlow; KNN_MTOM.AprJulPercentExceedanceBaseFlow; FlamingGorgeData.YampaAprJulPercentExceedance<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170725: Modified some date calculations to remove use of CONCAT in favor of more recent RW capabilities (e.g., &quot;Previous Year&quot;)<br>MC, 20160913: Calculate exceedance percentages for April to July Spring and Base flow volumes; is the UpdateHistoricRecord flag still necessary after the changes to the HDB DMI and automating the HydrologicClassificationEndYear dates?";
     BEGIN
 
@@ -3875,7 +3875,7 @@ BEGIN
     RULE                 "Calc April July Volume Monthly";
     DESCRIPTION          "DESCRIPTION: This rule calculates the April-July unregulated inflow volumes for Flaming Gorge for Base Flow and Spring Flow purposes, and the April-July volume for the Yampa at the Deerlodge gage.<br><br>SLOTS SET: KNN_MTOM.AprJulSpringFlow; KNN_MTOM.AprJulVolBaseFlow; FlamingGorgeData.YampaAprJulVol<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3903,7 +3903,7 @@ BEGIN
     RULE                 "Update Historic Record";
     DESCRIPTION          "DESCRIPTION: If necessary (i.e., the April-July Volume is NaN), the most recent April to July volume (previous year if earlier than August, current year if later) is calculated. <br><br>SLOTS SET: FlamingGorgeData.YampaAprJulVolAnnual; FlamingGorgeData.AprJulVolAnnual<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "MonthIs"( { "August" } ) OR @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT ( "MonthIs"( { "August" } ) OR @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 2.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unkinown<br><br>MC, 20160913: Was this made unnecessary by automating the HydrologicClassificationEndYear slots for FG and Yampa?";
     BEGIN
 
@@ -3939,7 +3939,7 @@ BEGIN
     RULE                 "Calculate April To July Volume Annual Slot";
     DESCRIPTION          "DESCRIPTION: Calculates the Flaming Gorge Unregulated Inflow and Yampa River at Deerlodge April to July volumes for each year between the classification Start Year and End Year<br><br>SLOTS SET: FlamingGorgeData.AprJulVolAnnual; FlamingGorgeData.YampaAprJulVolAnnual<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == "RunStartDate"(  ) AND "GetRunCycleIndex"(  ) == 2.00000000;
+    RULE_EXEC_CONSTRAINT ( @"t" == "RunStartDate"(  ) AND "GetRunCycleIndex"(  ) == 2.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160908: Changed variable reference in calculation of FlamingGorgeData.YampaAprJulVolAnnual from KNN_MTOM.HistoricYampaAtDeerlodge to YampaRiverInflow.Yampa_at_Deerlodge; <br><br>S.Baker June 2018 EDITS: update where the historic data is located for MTOM Testbed Hindcast vs Operational MTOM Runs<br>S.Baker 07/08/2019: changed the order of IF statemetns for historical testbed data. This allows the rules to work for new development RunType. <br>";
     BEGIN
 
@@ -3980,7 +3980,7 @@ BEGIN
     RULE                 "Set Peak Yampa Flow";
     DESCRIPTION          "DESCRIPTION: This rule finds the maximum daily flow of Deerlodge Depleted for the current year's KNN StartMonth to EndMonth period (currently April - July)<br><br>SLOTS SET: KNN_MTOM.YampaPeakDailyFlow[Current year]<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -3992,7 +3992,7 @@ BEGIN
     RULE                 "Set Yampa Daily Depleted Flow at Deerlodge For Second Stage Disagg";
     DESCRIPTION          "DESCRIPTION: Sets the daily depleted flow value at Deerlodge equal to the daily natural flow after the second stage disaggregation<br><br>SLOTS SET: KNN_MTOM.YampaDailyDeerlodgeDepleted[Current year's spring period]<br><br>";
     ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "HasRuleFiredSuccessfully"( "Set Yampa Daily Natural - Second Stage Disagg" ) AND "GetRunCycleIndex"(  ) == 1.00000000 AND $ "KNN_MTOM.SecondStageDisaggFlag" [@"24:00:00 December Max DayOfMonth, Current Year"] == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "HasRuleFiredSuccessfully"( "Set Yampa Daily Natural - Second Stage Disagg" ) AND "GetRunCycleIndex"(  ) == 1.00000000 AND $ "KNN_MTOM.SecondStageDisaggFlag" [@"24:00:00 December Max DayOfMonth, Current Year"] == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "CF,20181010: Disabled. This is only needed for CRSS since MTOM isn't in natural flow space. <br><br>AUTHOR, DATE: Unknown<br>";
     BEGIN
 
@@ -4007,7 +4007,7 @@ BEGIN
     RULE                 "Set Yampa Daily Natural - Second Stage Disagg";
     DESCRIPTION          "DESCRIPTION: This rule calculates a daily flow rate for each day in the current year's period based on the volume proportion for the day in the historical index year's monthly volume<br><br>SLOTS SET: KNN_MTOM.YampaDailyNatural[Current year's dates]; KNN_MTOM.SecondStageDisaggFlag[Current year]<br>";
     ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "MinItem"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"24:00:00 April 1, Current Year", @"24:00:00 July Max DayOfMonth, Current Year" ) ) < 0.00000000 "cfs" AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "MinItem"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"24:00:00 April 1, Current Year", @"24:00:00 July Max DayOfMonth, Current Year" ) ) < 0.00000000 "cfs" AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "CF,20181010: Disabled. This is only needed for CRSS since MTOM isn't in natural flow space. <br><br>AUTHOR, DATE: Unknown<br><br>";
     BEGIN
 
@@ -4025,7 +4025,7 @@ BEGIN
     RULE                 "Set Yampa Daily Depleted Flow at Deerlodge";
     DESCRIPTION          "DESCRIPTION: Sets the daily depleted flow value at Deerlodge equal to the daily natural flow<br><br>SLOTS SET: KNN_MTOM.YampaDailyDeerlodgeDepleted[Current year's spring period]<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -4040,7 +4040,7 @@ BEGIN
     RULE                 "Set Yampa Daily Natural Flow from KNN - primary disagg";
     DESCRIPTION          "DESCRIPTION: This function calcluates a daily flow vector that represents a disaggregation of the current spring volume based on the daily volume proportions of the historical index year and sets the second stage disaggregation slot flag to a value of 0.<br><br>SLOTS SET: KNN_MTOM.YampaDailyNatural[Current year's spring period]; KNN_MTOM.SecondStageDisaggFlag[Dec 31, Current Year]<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -4059,7 +4059,7 @@ BEGIN
     RULE                 "Set Index Year- Ratios";
     DESCRIPTION          "DESCRIPTION: This rule sets the value of the index year chosen from the K nearest neighbors of the current year. The K nearest neighbors are calculated based on the seasonal volume proportions of each month in the April-July period<br><br>SLOTS SET: KNN_MTOM.IndexYear[Current Year]<br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -4073,7 +4073,7 @@ BEGIN
     RULE                 "Set Random Number";
     DESCRIPTION          "DESCRIPTION: This rule generates a random number between 0 and 1 used in selecting a nearest neighbor historical year to use as an index year<br><br>SLOTS SET: KNN_MTOM.randomNum[Current Year]";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000 ) COMMENTED_BY "Changing the month this rule executes will change the random number generated <br>by the funciton call as the random number index is different for every month/year.<br>";
+    RULE_EXEC_CONSTRAINT ( ( ( @"t" == @"24:00:00 March Max DayOfMonth, Current Year" ) OR ( @"t" == @"Start Timestep" ) AND "GetRunCycleIndex"(  ) == 1.00000000 ) COMMENTED_BY "Changing the month this rule executes will change the random number generated <br>by the funciton call as the random number index is different for every month/year.<br>" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -4094,7 +4094,7 @@ BEGIN
     RULE                 "Crystal Outflow";
     DESCRIPTION          "Execution Constraint: Only fires if the rule has not successfully fired yet. <br>  <br>Description: Crystal and Morrow Point Reservoirs just need to pass inflow which Blue Mesa is sending down to meet flow requirements while accounting for evaporation in order to maintain a constant storage. Blue Mesa releases do not attempt to get Crystal to its storage target if it not already there. Instead Crystal holds back/releases more water in the first timestep to meet this goal. This logic should be revisited later. UBConstrainedOutflow() prevents this from exceeding min/max constraints.  <br>  <br>Slots Set: Crystal.Outflow ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT "HasRuleFiredSuccessfully"( "ThisRule" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT NOT "HasRuleFiredSuccessfully"( "ThisRule" ) AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "CF,20190403: Moved in from Apr 2019 Offc CRSS. <br><br>CF,20190409: Get Crystal to target Elevation by holding back water.<br><br>CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
     BEGIN
 
@@ -4106,7 +4106,7 @@ BEGIN
     RULE                 "Morrow Point Outflow";
     DESCRIPTION          "Execution Constraint: Only fires if the rule has not successfully fired yet. <br>  <br>Description: Crystal and Morrow Point Reservoirs just need to pass inflow which Blue Mesa is sending down to meet flow requirements while accounting for evaporation in order to maintain a constant storage. Blue Mesa also releases to get Morrow Point to its storage target if it not already there. UBConstrainedOutflow() prevents this from exceeding min/max constraints.  <br>  <br>Slots Set: MorrowPoint.Outflow ";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT "HasRuleFiredSuccessfully"( "ThisRule" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT NOT "HasRuleFiredSuccessfully"( "ThisRule" ) AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "CF,20190403: Moved in from Apr 2019 Offc CRSS. <br><br>CF,20190405: Created to replace old rule Set Morrow Point and Crystal Storage which did not allow for Morrow Point and Crystal to respond to Blue Mesa operations. ";
     BEGIN
 
@@ -4118,7 +4118,7 @@ BEGIN
     RULE                 "Blue Mesa Operations";
     DESCRIPTION          "DESCRIPTION: This rule uses the function BlueMesaOutflowCalc to determine monthly releases from Blue Mesa Reservoir<br><br>SLOTS SET: BlueMesa.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT IsNaN $ "BlueMesa.Outflow" [] AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT IsNaN $ "BlueMesa.Outflow" [] AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -4130,7 +4130,7 @@ BEGIN
     RULE                 "Calculate May Release Volume";
     DESCRIPTION          "DESCRIPTION: Sets the Total May release volume by summing the daily flow requirements necessary to meet the 2012 ROD Flows for the Whitewater Gage and the Federal Reserve Water Right flows through the Black Canyon.  This rule also calculates the daily outflow from Blue Mesa necessary to meet those two flow requirements.  That data is written to the Blue Mesa Data object and is for informative purposes only.  TP 9/25/2015<br><br>SLOTS SET: BlueMesaData.MayReleaseVolume; BlueMesaData.TargetDailyOutflowFromBlueMesa<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 1.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 1.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170705: In calculation of MayReleaseVolume, conditional statement was IF (date < @&quot;Start Timestep&quot; AND NOT GetMonth(date) == 5.00), and was changed to just IF (date < @&quot;Start Timestep&quot;) because all dates being considered are in May, so second part of Boolean was never true and past outflows were not being used for May dates prior to Start Timestep<br><br>MC, 20170712: Added DateMin(..., @&quot;Finish Timestep&quot;) to calculation of BMD.TargetDailyOutflowFromBlueMesa; without it, the final year of the run could not calculate completely, and the rule was finishing ineffectively meaning the MayReleaseVolume did not get populated for the final year of the run";
     BEGIN
 
@@ -4155,7 +4155,7 @@ BEGIN
     RULE                 "Annual Daily Black Canyon Flow Determination";
     DESCRIPTION          "DESCRIPTION: This rule calculates the preliminary daily flow targets for the flow through the Black Cayone that satisfies the Federal Reserve Water Right for the entire year of a model run.  The ramp up and down to the peak date are included.   This rule will set each day to either the ramp up or down value, the peak flow (as determined on the algorithm to satisfy the Water Right) or the base flow value for any day outside of this range for the Flow through the Black Canyon.  Though the model is monthly, these values are written to a daily slot on BlueMesaData that will be aggregated and converted to a monthly release from Blue Mesa Res in a subsequent rule (Blue Mesa Operations). - sc 12/27/10<br><br>SLOTS SET: BlueMesaData.TargetDailyBlackCanyonFlows<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 1.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 1.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown";
     BEGIN
 
@@ -4224,7 +4224,7 @@ BEGIN
     RULE                 "Annual Daily Whitewater Flow Determination";
     DESCRIPTION          "DESCRIPTION: This rule calculates the preliminary daily flow targets for the Whitewater Gage for the entire year of a model run. They are preliminary in that the ramp up and ramp down from the peak flow target are not included yet. This rule will set each day to either the shoulder flow, the peak flow (as determined on the Spring Peak And Duration Canyon Targets slot) or the base flow value for any day outside of this range for the Whitewater Gage. Though the model is monthly, these values are written to a daily slot on BlueMesaData.TargetDailyWhitewaterFlows that will be aggregated and converted to a monthly release from Blue Mesa Res in a subsequent rule (Blue Mesa Operations). <br><br>SLOTS SET: BlueMesaData.TargetDailyWhitewaterFlows<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 1.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 1.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170705: Added BlueMesaData.WhitewaterOpsAssurance value to the peak and shoulder flows per Rick C.'s recommendation to improve probability of achieving ROD Whitewater targets. The daily flows are then averaged into the local variable MonthlyWhitewaterTarget in the function BlueMesaOutflowCalc<br><br>CF, 5/5/2017:  This rule was restructured so that new slots  Peak & ShoulderFlowDuration. The shoulder flow function was removed since shoulder/half-bank flow is now fixed by the ROD to 8,070. This value is stored in slot BlueMesaData.ShoulderFlowTarget. - CF 5/5/2017<br><br>TP/MC, 9/25/2015: This rule calculates the may peak flow target for the Whitewater Gage, the shoulder flow is set to 8,070 cfs as part of the 2012 ROD, the May Peak Flow Level which is a value between 0 adn 5 that is based on the 2012 ROD for the Aspinall Unit which is calculated with the Blue Mesa Unregulated Inflow for April through July.  The rule also determines the Black Canyon Peak flow that will meet the Federal Reserve Water Right and the April through July volume for Blue Mesa Reservoir unregulated inflow. This rule only fires on the first day of the year or first day of the run.";
     BEGIN
 
@@ -4296,7 +4296,7 @@ BEGIN
     RULE                 "Calculate Gunnison Flow Targets";
     DESCRIPTION          "DESCRIPTION: This rule calculates: <br>- The peak flow target for the Whitewater Gage. <br>- The hydrologic year classification which is a value between 0 (Dry) and 5 (Wet) that is based on the 2012 ROD which is calculated with the Blue Mesa Unregulated Inflow for April-July. <br>- The Black Canyon peak flow that will meet the Federal Reserve Water Right <br>- The April through July volume for Blue Mesa Reservoir unregulated inflow.  <br>- The WW peak and shoulder flow durations acording to the ROD.  <br><br>SLOTS SET: BlueMesaData.WWPeakFlowTarget; BlueMesaData.GunnisonHClass; BlueMesaData.CanyonPeakFlowTarget; BlueMesaData.BlueMesaAprilThroughJulyVolume <br><br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 1.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR "GetMonth"( @"t" ) == 1.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000 ) AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br><br>TP/MC, 20150925: This rule calculates the may peak flow target for the Whitewater Gage, the shoulder flow is set to 8,070 cfs as part of the 2012 ROD, the May Peak Flow Level which is a value between 0 adn 5 that is based on the 2012 ROD for the Aspinall Unit which is calculated with the Blue Mesa Unregulated Inflow for April through July.  The rule also determines the Black Canyon Peak flow that will meet the Federal Reserve Water Right and the April through July volume for Blue Mesa Reservoir unregulated inflow. This rule only fires on the first day of the year or first day of the run.<br><br>CF, 5/5/2017: This rule and the accompanying functions were restructured so that AprilThoughJulyVolume and  Gunnison Hydroglogic year class (GunnisonHClass), previously called MayFlowLevel, are calculated only once and then passed as arguments to the functions rather than being recalculated by each function. The shoulder flow function was removed since shoulder/half-bank flow is now fixed by the ROD to 8,070. This value is stored in slot BlueMesaData.ShoulderFlowTarget. - The WW peak and shoulder flow durations are now calculated and set to seperate slots for reference by later rules. <br><br><br>";
     BEGIN
 
@@ -4333,7 +4333,7 @@ BEGIN
     RULE                 "VallecitoFloodControlProtection";
     DESCRIPTION          "DESCRIPTION: Determines the Vallacito outflow when the pool elevation exceeds the target elevation for the given month. The Vallecito outflow is increased until either the maximum outflow is reached, or the Vallecito pool elevation is equal to the end of month target elevation for Vallecito. -ce 6/6/13<br><br>SLOTS SET: Vallecito.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND $ "Vallecito.Pool Elevation" [] > "GetEOMTargetElevation"( % "Vallecito", @"t" );
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND $ "Vallecito.Pool Elevation" [] > "GetEOMTargetElevation"( % "Vallecito", @"t" ) AND NOT "Is24MonthStudy"(  );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: CE, 6/6/2013 (?)";
     BEGIN
 
@@ -4348,7 +4348,7 @@ BEGIN
     RULE                 "Vallecito Guide Release";
     DESCRIPTION          "DESCRIPTION: This rule sets the Vallecito Reservoir releases for the entire run on the first timestep.  The ability to do this is predicated on the fact that Vallecito operations only need to know the inflow to the reservoir and nothing else about the state of the system.  If this changes, then it will have be done each timestep.<br><br>SLOTS SET: Vallecito.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE:  SC, 12/15/2010";
     BEGIN
 
@@ -4372,7 +4372,7 @@ BEGIN
     RULE                 "Taylor Park Guide Release";
     DESCRIPTION          "DESCRIPTION: This rule sets the Taylor Park Reservoir releases for the entire run on the first timestep.  The ability to do this is predicated on the fact that Taylor Park operations only need to know the inflow to the reservoir and nothing else about the state of the system.  If this changes, then it will have be done each timestep<br><br>SLOTS SET: TaylorPark.Outflow<br><br><br><br>";
     ACTIVE               FALSE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 12/31/2010<br><br>MC, 20170720: Wrote modifed version of reduced MinFlow situation to adaptively reduce MinFlow values so that MinElevation is avoided; not active yet because haven't run it by USBR<br><br>MC, 20170621: (a) Changed reference  in local variable ToSpillway from 9,330 feet to TaylorParkData.SpillwayElevation; (b) Changed reference in first IF statement from TaylorParkData.TaylorPark_LowestFlow to TaylorParkData.MinFlow * TaylorParkData.MinFlowReductionFactor. (b) will allow more flexibility in flow reductions due to low pool elevations than hard-coding new min flow values.<br><br>MC, 20170508: Added conditional logic and LowestFlow slot to address problems Sarah B. was having with her model runs; changes developed by Sarah and confirmed with Erik K.<br><br>MC, 20170124: With midmonth ensembles, situation occurred in which the maximum release constraint in SimulateHeadwaterRes prevented use of spillway and led to storage greater than maximum in storage-volume table and aborted runs. I rewrote the rule so now TP only solves one timestep at a time but utilizes spill possibility. Three possibilities for relative size of outflows calculated:<br>1. ToSpillway < ToTarget < MaximumControlled: release to hit target<br>2. ToSpillway < MaximumControlled < ToTarget: release maximum and end of month elevation will be lower than spillway but higher than target<br>3. MaximumControlled < ToSpillway < ToTarget: release to spillway, which will require spill, but not excessive spill that would be required to reach target<br><br>Need Minimum Flow in case inflow is insufficient to reach Target";
     BEGIN
 
@@ -4417,7 +4417,7 @@ BEGIN
     RULE                 "Taylor Park Guide Release_new";
     DESCRIPTION          "DESCRIPTION: This rule sets the Taylor Park Reservoir releases for the entire run on the first timestep.  The ability to do this is predicated on the fact that Taylor Park operations only need to know the inflow to the reservoir and nothing else about the state of the system.  If this changes, then it will have be done each timestep<br><br>SLOTS SET: TaylorPark.Outflow<br><br><br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: SC, 12/31/2010<br><br>SB, 20190709: Taylor Park needed lower release for very dry scenarios. Added a max statement to release only the available water in Taylor Park. <br><br>MC, 20170720: Wrote modifed version of reduced MinFlow situation to adaptively reduce MinFlow values so that MinElevation is avoided; not active yet because haven't run it by USBR<br><br>MC, 20170621: (a) Changed reference  in local variable ToSpillway from 9,330 feet to TaylorParkData.SpillwayElevation; (b) Changed reference in first IF statement from TaylorParkData.TaylorPark_LowestFlow to TaylorParkData.MinFlow * TaylorParkData.MinFlowReductionFactor. (b) will allow more flexibility in flow reductions due to low pool elevations than hard-coding new min flow values.<br><br>MC, 20170508: Added conditional logic and LowestFlow slot to address problems Sarah B. was having with her model runs; changes developed by Sarah and confirmed with Erik K.<br><br>MC, 20170124: With midmonth ensembles, situation occurred in which the maximum release constraint in SimulateHeadwaterRes prevented use of spillway and led to storage greater than maximum in storage-volume table and aborted runs. I rewrote the rule so now TP only solves one timestep at a time but utilizes spill possibility. Three possibilities for relative size of outflows calculated:<br>1. ToSpillway < ToTarget < MaximumControlled: release to hit target<br>2. ToSpillway < MaximumControlled < ToTarget: release maximum and end of month elevation will be lower than spillway but higher than target<br>3. MaximumControlled < ToSpillway < ToTarget: release to spillway, which will require spill, but not excessive spill that would be required to reach target<br><br>Need Minimum Flow in case inflow is insufficient to reach Target";
     BEGIN
 
@@ -4471,7 +4471,7 @@ BEGIN
     RULE                 "Set Fontenelle Outflow";
     DESCRIPTION          "DESCRIPTION: This rule uses a more in depth function that replaces 11 rules that previously set the Fontenelle outflow.  The rule uses the function to set the Fontenelle outflow for the current timestep.<br><br>SLOTS SET: Fontenelle.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: TP, 5/11/2015";
     BEGIN
 
@@ -4483,7 +4483,7 @@ BEGIN
     RULE                 "Set Unset Outflow";
     DESCRIPTION          "DESCRIPTION: Sets the outflow equal to inflow so that  spillCalc and power methods can execute, registering dependencies so that higher priority rules can set values. <br><br>SLOTS SET: Fontenelle.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
     NOTES                "AUTHOR, DATE: Unknown<br>";
     BEGIN
 
@@ -4495,8 +4495,8 @@ BEGIN
     RULE                 "ForecastFutureFGInflow";
     DESCRIPTION          "DESCRIPTION: Determines the projected inflow for Flaming Gorge based on the sum of the projected outflow from Fontenelle and the local inflows between Fontenelle and Flaming Gorge.<br><br>SLOTS SET: FlamingGorgeData.ProjectedInflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: ce 6/6/13 (?)";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "Is24MonthStudy"(  );
+    NOTES                "AUTHOR, DATE: ce 6/6/13 (?)<br>";
     BEGIN
 
       FOREACH (NUMERIC index IN "GetNumbers"( 1.00000000, IF ( ( "GetMonth"( @"24:00:00 April Max DayOfMonth, Next Year" ) - "GetMonth"( @"t + 1" ) < 0.00000000 ) COMMENTED_BY "Next month is greater than April, forecast to April of next year" )
@@ -13880,32 +13880,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a44ac5ed-e3e7-422d-a0b7-2bd16a9d093a}";
+    UUID "{1cae448f-d3b8-47b6-b0d3-bd0a507c5b18}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9b132124-a2a1-49da-ba22-64e79af52518}";
+    UUID "{cd5680a7-866a-4fd5-933e-92ed19803eed}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ccf1a4a5-8a81-48a7-8ec9-2d31756cd892}";
+    UUID "{60e4c2e7-8d6c-4bf5-9c22-3e42103218d7}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b227cd7e-23c6-458e-a9b0-2976779aaf99}";
+    UUID "{f40fbfd9-2557-4631-88d4-c95255cbcaa1}";
 ;
 
   END
-  UUID "{ede01b3f-36c7-4756-889f-59ab7b421f25}";;
+  UUID "{f92e50ac-dc7a-4349-b23d-a8ab0f05bf49}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13916,11 +13916,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4dd7fd03-013d-4184-89db-92bc5fbcb7df}";
+    UUID "{d5435faf-ec1d-4129-8026-9b5e8e01d80b}";
 ;
 
   END
-  UUID "{748d9e6e-bc03-4c80-9d57-092b9777f615}";;
+  UUID "{790bde38-35aa-4840-995b-8df5c233c322}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13931,11 +13931,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1eb66371-da78-442f-a72a-0dc3cb8b96bb}";
+    UUID "{2d0d3069-95fd-4e1d-952e-c89c87151978}";
 ;
 
   END
-  UUID "{094e0c7a-1f3a-4ea7-8048-3132529af116}";;
+  UUID "{e50e12ef-d48f-4229-8328-0d1535cd7478}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13946,11 +13946,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{41dc9642-9300-4534-b857-1203a8fcdaf7}";
+    UUID "{41d2033f-280d-4a9e-bf27-7e61615887b8}";
 ;
 
   END
-  UUID "{33b76c30-a0f9-4ba4-9812-a7193ee0a62a}";;
+  UUID "{2de896ec-cbc0-4c5e-9117-a1a9b10f2505}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
