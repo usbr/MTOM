@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 13:50 July 9, 2020
+# Created 15:45 July 9, 2020
 # 
 RULESET
 NAME "24month";
@@ -1151,13 +1151,14 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Quantified Surplus Schedules Data Volume to Simulation Flow";
+    RULE                 "NI - Quantified Surplus Schedules Data Volume to Simulation Flow";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January 31, Current Year" AND IsNaN $ "Surplus.Surplus Flag" [] AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
     NOTES                "DEVELOPER NOTES:<br>GCAA, 20181030: ForecastUse.SNWPResetAnnualFC added to replace Nevada_CU_Forecast1.SNWP which was being incorrectly used to calculate the SNWP requested diversion<br>APivarnik, 202005: Added MWD depletion and CAP depletion slot assignments to help model solve for correct return flow to system (no returns for CAP/returns for MWD)<br>GCAA, 202006: Added SNWA Depletion slot assignment to help model solve for correct return flow to system";
     BEGIN
 
+    DESCRIPTION          "No longer in integrated ruleset. this happens in the diversion adjustment rule in the integrated <br>ruleset<br>";
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
             $ "Surplus.Surplus Flag" [date] := 2.00000000;
 
@@ -1198,13 +1199,14 @@ BEGIN
     END
     UUID "{12c609cb-88c2-4d61-ad76-1565d99f0525}";;
 
-    RULE                 "Domestic Surplus Schedules Data Volume to Simulation Flow";
+    RULE                 "NI - Domestic Surplus Schedules Data Volume to Simulation Flow";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND IsNaN $ "Surplus.Surplus Flag" [];
     NOTES                "DEVELOPER NOTES<br><br>GCAA, 20181030: ForecastUse.CAPResetAnnualFC and ForecastUse.SNWPResetAnnualFC added to replace Nevada_CU_Forecast1.SNWP and Arizona_CU_Forecasr1.CAP which were incorrectly used to calculate the total diversion requested for CAP and SNWP<br>APivarnik, 202005: Added MWD depletion and CAP depletion slot assignments to help model solve for correct return flow to system (no returns for CAP/returns for MWD)<br>GCAA, 202006: Added SNWA Depletion slot assignment to help model solve for correct return flow to system";
     BEGIN
 
+    DESCRIPTION          "No longer in integrated ruleset. this happens in the diversion adjustment rule in the integrated <br>ruleset<br>";
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
             $ "Surplus.Surplus Flag" [date] := 1.00000000;
 
@@ -1335,7 +1337,7 @@ BEGIN
     END
     UUID "{1d3ad784-4734-4186-9d79-fb15e3fd1e19}";;
 
-    RULE                 "Set Quantified Surplus Entitlement Vols CAP and MWD";
+    RULE                 "INT - Set Quantified Surplus Entitlement Vols CAP and MWD";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
@@ -1359,7 +1361,7 @@ BEGIN
     END
     UUID "{d0226228-f2e3-41bd-b2d2-2818e7df5f57}";;
 
-    RULE                 "Set Domestic and FC Surplus Entitlement Vols for MWD";
+    RULE                 "INT - Set Domestic and FC Surplus Entitlement Vols for MWD";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -1389,7 +1391,7 @@ BEGIN
     END
     UUID "{d397a29b-92f3-41e1-b981-e53eb968b643}";;
 
-    RULE                 "Set Domestic and FC Surplus Entitlement Vols for CAP";
+    RULE                 "INT - Set Domestic and FC Surplus Entitlement Vols for CAP";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -1414,7 +1416,7 @@ BEGIN
     END
     UUID "{eb94f4dc-f100-4e27-8b5d-6a53882d6799}";;
 
-    RULE                 "Set Quantified Volumes by State";
+    RULE                 "INT - Set Quantified Volumes by State";
     DESCRIPTION          "If there is a positive Quantified Surplus volume, this rule will distribute it amond the lower basin states of AZ, CA, and NV. The distribution amounts (shares) are stored in a slot on the Surplus object. <br>IF there is not a positive Quantified Surplus, the execution contraints will prevent this rule from firing. -HMG 8/2/11";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
@@ -1441,13 +1443,14 @@ BEGIN
     END
     UUID "{7c0cbe1d-1d77-44d3-8c65-2987500f9924}";;
 
-    RULE                 "Set Outyear Surplus Schedules for Mexico";
+    RULE                 "NI - Set Outyear Surplus Schedules for Mexico";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "The div is adjusted in a different rule in the MTOM ruleset.<br><br>The slot assignment for the surplus volume still exists<br>";
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
             $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date] + $ "Mexico Shortage and Surplus.Mexico Surplus Table" [$ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000, "Volume"] * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Mexico"], date );
 
