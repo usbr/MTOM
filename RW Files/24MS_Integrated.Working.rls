@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 09:36 July 9, 2020
+# Created 13:50 July 9, 2020
 # 
 RULESET
 NAME "24month";
@@ -1494,13 +1494,14 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "California Conversion DCP";
+    RULE                 "INT - California Conversion DCP";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep";
     NOTES                "GCAA, 202006: Added SystemTaxAssesment funtion to replace reference to the scalar slot";
     BEGIN
 
+    DESCRIPTION          "DCP was written slightly different in MTOM. Kept MTOM logic since moving 24 MS into MTOM. Still <br>gets same result  <br>";
       IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" AND $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"] < $ "DCP.ReducedTakeElevation" []) THEN
           DESCRIPTION          "This assignment calculates whether MWD's DCP contribution will be made as through a <br>schedule reduction to create EC ICS to DCP ICS or conversion of EC ICS to DCP ICS. <br>Accounting for this will happen in the ICS Accounting policy group.<br><br>If a schedule reduction to meet the DCP contribution is needed, it assumed that the schedule <br>reduction will be converted to DCP ICS through EC ICS.   <br><br>Check EC ICS balance, check current year EC creation, else reduce schedule to create EC ICS<br>which will then be converted to DCP ICS<br><br><br>AP, 7/11/19<br>";
       WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
@@ -1562,13 +1563,14 @@ BEGIN
     END
     UUID "{28fae62c-8cd4-4b02-bd75-73e96ee3d2a8}";;
 
-    RULE                 "Nevada Conversion DCP";
+    RULE                 "INT - Nevada Conversion DCP";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep";
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "DCP was written slightly different in MTOM. Kept MTOM logic since moving 24 MS into MTOM. Still <br>gets same result  <br>";
       IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-feet" AND $ "Mead.Pool Elevation" [@"24:00:00 December 31, Previous Year"] < $ "DCP.DCP_StartElevation" []) THEN
           DESCRIPTION          "This assignment calculates whether NV's DCP contribution will be made as through a schedule <br>reduction to create EC ICS then DCP ICS or conversion of EC ICS to DCP ICS. Accounting for <br>this will happen in the ICS Accounting policy group.<br><br>If a schedule reduction to meet the DCP contribution is needed, it assumed that the schedule <br>reduction will be converted to DCP ICS through EC ICS.   <br><br>Check EC ICS balance, check current year EC creation, else reduce schedule to create EC ICS <br>which will then be converted to DCP ICS<br><br>AP, 7/11/19<br>";
       WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
@@ -1624,13 +1626,14 @@ BEGIN
     END
     UUID "{b3758270-d1db-4bf4-9eb0-2b5e39b5aecc}";;
 
-    RULE                 "Arizona DCP";
+    RULE                 "INT - Arizona DCP";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep";
     NOTES                "GCAA, 202006: Added SystemTaxAssesment funtion to replace reference to the scalar slot";
     BEGIN
 
+    DESCRIPTION          "DCP was written slightly different in MTOM. Kept MTOM logic since moving 24 MS into MTOM. Still <br>gets same result  <br>";
       WITH_STATEMENT (NUMERIC DCP_Contribution = $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC AnnualCreationECICS_CAWCD = $ "ICSProjectionData.AnnualCreationEC_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC AnnualDCPCreation_CAWCD = $ "ICSProjectionData.AnnualCreationEC_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  )) DO
@@ -1665,7 +1668,7 @@ BEGIN
     END
     UUID "{f4a36b93-5e7b-423f-82b8-ac3108f3d12d}";;
 
-    RULE                 "Determine DCP and BWSCP Contrib";
+    RULE                 "INT - Determine DCP and BWSCP Contrib";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep";

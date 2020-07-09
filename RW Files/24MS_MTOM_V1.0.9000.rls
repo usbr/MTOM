@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 09:36 July 9, 2020
+# Created 13:50 July 9, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1926,24 +1926,27 @@ BEGIN
     DESCRIPTION          "DESCRIPTION:  This rule sets California's DCP contribution and determines whether the contribution can be made with existing EC ICS. The rule sets the amount of converted EC ICS to DCP ICS based on the total DCP contribution required and determines if there are remaining DCP contribution after all previous year's ICS has been converted. These values will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>NOTE: Coachella can not &quot;officially&quot; create DCP ICS. Instead DCP creation for Coachella will be done &quot;unofficially&quot; and held in MWD account. Coachella will reduce diversion by 7% to help CA meet DCP contribution and will be stored store in MWD's system. MWD to pay tax for now. No logic for Coachella besides 7% reduction to diversion to create water for MWD. CVWD account in MWD system will not be tracked, all DCP ICS will be assumed to be MWD. -AP 7/31/19     <br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICS Credits.AnnualRemainingDCPContributions_MWD<br>ICS Credits.AnnualConversionPreviousECtoDCP_MWD<br>ICS Credits.AnnualSimultaneousCreationDCPICS_MWD [only if DCP contributions > 0]<br>ICS Credits.AnnualSysWaterforDCP_MWD [only if DCP contributions > 0]";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.<br><br>A. Pivarnik, 20200709: Integration effort. This rule was streamlined for the MTOM ruleset when created. It was written differently than the 24 MS rule but accomplishes the same thing. General structure for the rule did not change in the integration effort because the 24 MS ruleset is being merged into MTOM, and the MTOM structure is what solves correctly within this ruleset. Added a start year dcp creation function call to for solve the DCP creation volume in year 1 if we end in a DCP tier that is lower than the one projected by the 24 MS in August.";
     BEGIN
 
-    DESCRIPTION          "If DCP contribution are needed for the year, preliminarily set MWD's DCP contribution based on existing EC ICS <br>";
-      IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
-            WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
-            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( dcpContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
-            WITH_STATEMENT (NUMERIC RemainingContribution = IF ( dcpContribution == PreviousECtoDCP )
+      WITH_STATEMENT (NUMERIC AnnualDCPContribution = IF ( "IsStartYear"(  ) )
+ THEN
+  GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "CA" )
+ ELSE
+  $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ENDIF) DO
+          DESCRIPTION          "If DCP contribution are needed for the year, preliminarily set MWD's DCP contribution based on existing EC ICS <br>";
+      IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-ft") THEN
+            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( AnnualDCPContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
+            WITH_STATEMENT (NUMERIC RemainingContribution = IF ( AnnualDCPContribution == PreviousECtoDCP )
  THEN
   0.00000000 "acre-ft"
  ELSE
-  dcpContribution - PreviousECtoDCP
+  AnnualDCPContribution - PreviousECtoDCP
  ENDIF) DO
             $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP;
 
             $ "ICS Credits.AnnualRemainingDCPContribution_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := RemainingContribution;
-
-      END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
 
@@ -1960,6 +1963,8 @@ BEGIN
 
       END_IF_STATEMENT;
 
+      END_WITH_STATEMENT;
+
     END
     UUID "{c862f2bd-77c9-4b9d-957d-8c1f3f2b3bfe}";;
 
@@ -1967,23 +1972,26 @@ BEGIN
     DESCRIPTION          "DESCRIPTION:  This rule sets Nevada's DCP contribution and determines whether the contribution will be made as conversion of existing EC ICS (including previous year Imported or Tributary ICS creation) to DCP ICS or as scheduled reductions (simultaneous conversion or system water). The rule sets the amount of converted EC+Trib+Imported ICS to DCP ICS based on the total DCP contribution required and determines if there are remaining DCP contribution after all previous year's ICS has been converted. These values will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICS Credits.AnnualRemainingDCPContributions_NV<br>ICS Credits.AnnualConversionPreviousECtoDCP_NV";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.<br><br>A. Pivarnik, 20200709: Integration effort. This rule was streamlined for the MTOM ruleset when created. It was written differently than the 24 MS rule but accomplishes the same thing. General structure for the rule did not change in the integration effort because the 24 MS ruleset is being merged into MTOM, and the MTOM structure is what solves correctly within this ruleset. Added a start year dcp creation function call to for solve the DCP creation volume in year 1 if we end in a DCP tier that is lower than the one projected by the 24 MS in August.";
     BEGIN
 
-      IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-feet") THEN
-            WITH_STATEMENT (NUMERIC dcpContribution = $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
-            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( dcpContribution, $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December 31, Previous Year"] ) COMMENTED_BY "Imported and Tributary from the previous year included in the calculation because the balance <br>will be converted to EC ICS at EOCY   <br>" )) DO
-            WITH_STATEMENT (NUMERIC RemainingContribution = IF ( dcpContribution == PreviousECtoDCP )
+      WITH_STATEMENT (NUMERIC AnnualDCPContribution = IF ( "IsStartYear"(  ) )
+ THEN
+  GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "NV" )
+ ELSE
+  $ "ICS Credits.AnnualDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ENDIF) DO
+            IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-feet") THEN
+            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( AnnualDCPContribution, $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December 31, Previous Year"] ) COMMENTED_BY "Imported and Tributary from the previous year included in the calculation because the balance <br>will be converted to EC ICS at EOCY   <br>" )) DO
+            WITH_STATEMENT (NUMERIC RemainingContribution = IF ( AnnualDCPContribution == PreviousECtoDCP )
  THEN
   0.00000000 "acre-ft"
  ELSE
-  dcpContribution - PreviousECtoDCP
+  AnnualDCPContribution - PreviousECtoDCP
  ENDIF) DO
             $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := PreviousECtoDCP;
 
             $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := RemainingContribution;
-
-      END_WITH_STATEMENT;
 
       END_WITH_STATEMENT;
 
@@ -1996,6 +2004,8 @@ BEGIN
 
       END_IF_STATEMENT;
 
+      END_WITH_STATEMENT;
+
     END
     UUID "{6e31581a-a7c2-4a0d-b9ae-34e4ae15b347}";;
 
@@ -2003,17 +2013,25 @@ BEGIN
     DESCRIPTION          "DESCRIPTION:  This rule sets Arizona's DCP contribution if a DCP contribution is needed (solved for in previous rule). The DCP contribution is made by converting any EC ICS water created for the current year to DCP ICS by imposing a tax on the water. The annual creation of DCP ICS is input from the 24MS and is the desired DCP ICS creation [unsure how this is set for 24MS?]. The Arizona DCP ICS creation and DCP contribute is set here, but will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICSProjectedData.AnnualCreationECtoDCPICS_CAWCD_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. ";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. <br><br>A. Pivarnik, 20200709: Integration effort. This rule was streamlined for the MTOM ruleset when created. It was written differently than the 24 MS rule but accomplishes the same thing. General structure for the rule did not change in the integration effort because the 24 MS ruleset is being merged into MTOM, and the MTOM structure is what solves correctly within this ruleset. Added a start year dcp creation function call to for solve the DCP creation volume in year 1 if we end in a DCP tier that is lower than the one projected by the 24 MS in August. ";
     BEGIN
 
-    DESCRIPTION          "Set Arizona DCP contribution based off the desired DCP ICS creation input from the 24MS <br>";
-      IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
+      WITH_STATEMENT (NUMERIC AnnualDCPContribution = IF ( "IsStartYear"(  ) )
+ THEN
+  GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "AZ" )
+ ELSE
+  $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ENDIF) DO
+          DESCRIPTION          "Set Arizona DCP contribution based off the desired DCP ICS creation input from the 24MS <br>";
+      IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-ft") THEN
             $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICSProjectionData.AnnualCreationDCPICS_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  );
 
       ELSE
             $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
 
       END_IF_STATEMENT;
+
+      END_WITH_STATEMENT;
 
     END
     UUID "{0ae60bc0-928a-4151-b115-4a58787c56dd}";;
@@ -2022,7 +2040,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule determines DCP contributions and sets DCP flags in the out-year. For the first year, these slots should be input through a DMI from the 24MS. The DCP users set include MX, AZ, CA, NV, MWD, and Coachella. The rule uses the projected Mead pool elevation from the 24MS if available (in start months of August - December). The DCP flags set which the elevation level for DCP contributions. A check flag is used to see if the DCP contribution level changes between run cycle 3 and 4. <br><br>CONSTRAINTS: The rule fires in run cycles 3 and 4 in January, as long as it is not the start timestep, and only if the rule has not fired successfully. <br><br>SLOTS SET: <br>Mexico Shortabe and Surplus.Mexico Recoverable Water Savings_AnnualContributions<br>ICS Credits.AnnualDCPContribution_AZ<br>ICS Credits.AnnualDCPContribution_CA<br>ICS Credits.cAnnualDCPContribution_NV<br>ICS Credits.AnnualDCPContribution_MWD<br>ICS Credits.AnnualDCPContribution_Coachella<br>DCP BWSCP Flags.LB DCP BWSCP<br>DCP BWSCP Flags.LB DCP BWSCP Check<br><br>NOTE: If the slots are input, the rule fails to execute. This is the desired execution for the hindcast runs in the testbed. ";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) >= 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.<br><br>A. Pivarnik, 20200709: No change to this rule in the integrated model. This rule is the same as the 24 MS but the flag set in the 24 MS rule is different. Move to using the new flag for diagnostic";
     BEGIN
 
     DESCRIPTION          "Set DCP contributions in out-years and set DCP flag <br>";
@@ -6930,6 +6948,26 @@ BEGIN
     END
     UUID "{92349f2c-df3a-4918-ab7f-7afdefb584a8}";;
 
+    FUNCTION       "IsStartYear" (  )
+    RETURN_TYPE    BOOLEAN;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Returns True if the timestep is the start timestep, and False otherwise. -CE 6/11/13";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "";
+    BEGIN
+
+      IF ( "GetYear"( @"t" ) == "GetYear"( @"Start Timestep" ) )
+ THEN
+  TRUE
+ ELSE
+  FALSE
+ ENDIF;
+
+    END
+    UUID "{2df1daae-14b0-4bc8-91ef-c88e83ed7618}";;
+
     FUNCTION       "IsQuantifiedOrFloodControl" (  )
     RETURN_TYPE    BOOLEAN;
     SCALE_UNITS    "";
@@ -11573,6 +11611,30 @@ BEGIN
     END
     UUID "{4f9d5209-c72a-40f3-bb66-53276980799c}";;
 
+    FUNCTION       "StartYearDCPContribution" ( STRING user )
+    RETURN_TYPE    LIST;
+    SCALE_UNITS    "";
+    DESCRIPTION    "";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "";
+    BEGIN
+
+      WITH NUMERIC MandatedECICSCreation = "Max"( "ICS Credits.AnnualDCPContribution_" CONCAT user [@"24:00:00 December Max DayOfMonth, Current Year"] - "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ), 0.00000000 "acre-ft" ) DO
+  WITH NUMERIC DCPContribution = IF ( "GetRowIndex"( $ "DCP.Contributions", STRINGIFY "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, $ "PowellToMeadData.AugEOYMeadPEProjection" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ) ) >= "GetRowIndex"( $ "DCP.Contributions", STRINGIFY "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ) ) )
+  THEN
+   "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "PowellToMeadData.AugEOYMeadPEProjection" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE )
+  ELSE
+   "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE )
+  ENDIF DO
+   { MandatedECICSCreation , DCPContribution }
+  ENDWITH
+ ENDWITH;
+
+    END
+    UUID "{6d9dd8e0-a9dd-47f7-834e-8ca822e7ea3a}";;
+
   END
   UUID "{dfbd709e-fde0-42ae-a9cd-6ba134319bf4}";;
 
@@ -13724,21 +13786,6 @@ BEGIN
     END
     UUID "{d925d665-ce76-4ffb-bd92-26a7244a2c3d}";;
 
-    FUNCTION       "StartYear" (  )
-    RETURN_TYPE    BOOLEAN;
-    SCALE_UNITS    "";
-    DESCRIPTION    "Returns True if the timestep is the start timestep, and False otherwise. -CE 6/11/13";
-    ACTIVE         FALSE;
-    PRE_EXEC_DIAG  FALSE;
-    POST_EXEC_DIAG FALSE;
-    NOTES          "";
-    BEGIN
-
-      "GetYearAsString"( @"t" ) == "GetYearAsString"( @"Start Timestep" );
-
-    END
-    UUID "{83c7ebc0-4266-4c52-a230-06b4dc3c2521}";;
-
     FUNCTION       "SumAnnualDivRequest" ( OBJECT object, STRING wateruser )
     RETURN_TYPE    NUMERIC;
     SCALE_UNITS    "";
@@ -13847,32 +13894,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a8c36159-19b6-4529-8393-1ecca99dcf9d}";
+    UUID "{8bbef446-50b3-4828-b612-87825cf97098}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bbc27123-d25d-4843-b680-e85969b232fe}";
+    UUID "{d6aaf46e-8988-43cc-9858-e2a17955ca60}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2dfc10fc-605f-4f8e-a44d-b3e3ca207c5a}";
+    UUID "{28d56bc7-6cc1-4d65-a75e-b2f4de82829f}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6c644974-42cf-4d3d-8283-f26c14b0d5a4}";
+    UUID "{3adcb2ac-b6cf-4b0e-877f-65f82a829c93}";
 ;
 
   END
-  UUID "{cb40a731-2c7a-4b39-87a5-2417e384d9a1}";;
+  UUID "{57a5f408-bcde-444f-9d4c-704f385b02ea}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13883,11 +13930,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c7c822e8-ace9-47e9-ad18-8a5193cdee6e}";
+    UUID "{a59a1ec6-1d3b-44ed-a665-226762cf5332}";
 ;
 
   END
-  UUID "{e35533fc-cb91-4453-85fc-ba693dd2fafc}";;
+  UUID "{5bcced34-70d4-4185-8591-e740cffda831}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13898,11 +13945,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{661fa313-41e1-4233-9dbd-93b8bcb03542}";
+    UUID "{2936fc3c-1e20-46b3-9ee1-2fef59c5e25d}";
 ;
 
   END
-  UUID "{e9092bcb-69db-4eaf-9e83-863c44771652}";;
+  UUID "{e83d4ee2-991f-4274-8ff6-867cdbe14d04}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13913,11 +13960,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fe04aef4-a653-4c34-ad70-2aca60a01530}";
+    UUID "{b29b31e4-0ea6-449f-86f6-1f99401efb54}";
 ;
 
   END
-  UUID "{d2e8fed2-3544-4e91-8b4d-381fac5c7fae}";;
+  UUID "{dafb821b-8138-4f7d-87b1-c5f95e6c8d9b}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
