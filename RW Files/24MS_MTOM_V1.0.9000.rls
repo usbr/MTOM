@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 16:18 July 7, 2020
+# Created 09:36 July 9, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2066,7 +2066,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the flags that indicate a Quantified Surplus condition<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Quantified Surplus Flag; LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND @"t" == @"24:00:00 January 31, Current Year" AND IsNaN $ "Surplus.Surplus Flag" [] AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Quantified Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition. Note that the Execution Constraints for this rule depend on the Surplus.Quantified Surplus Volume slot, which isn't set until Rule 39-Copute Quantified Surplus Volume - Minute 323; so, this rule will not fire successfully until after that rule<br><br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Quantified Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition. Note that the Execution Constraints for this rule depend on the Surplus.Quantified Surplus Volume slot, which isn't set until Rule 39-Copute Quantified Surplus Volume - Minute 323; so, this rule will not fire successfully until after that rule<br><br>A. Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br><br>A. Pivarnik, 20200709: Integration effort. Deleted disabled slot assignment. These slot assignments are imbedded within a different rule in the 24 MS ruleset. This rule is unchanged";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -2076,8 +2076,6 @@ BEGIN
 
       ENDFOREACH;
 
-    INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := 2.00000000;
-
     END
     UUID "{daaf29da-016c-4ea8-966c-f83cf3956b4d}";;
 
@@ -2085,7 +2083,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the flags that indicate a Domestic Surplus condition<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Domestic Surplus Flag; LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND IsNaN $ "Surplus.Surplus Flag" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Domestic Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition<br><br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Domestic Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition<br><br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br><br>A. Pivarnik, 20200709: Integration effort. Deleted disabled slot assignment. These slot assignments are imbedded within a different rule in the 24 MS ruleset. This rule is unchanged";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -2095,18 +2093,17 @@ BEGIN
 
       ENDFOREACH;
 
-    INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := 2.00000000;
-
     END
     UUID "{80df0f7b-b6ae-4c02-86da-f2fcd9a0bff8}";;
 
-    RULE                 "Compute Quantified Surplus Volume";
+    RULE                 "?? - Compute Quantified Surplus Volume";
     DESCRIPTION          "DESCRIPTION: This rule computes the total volume of Quantified Surplus water for the year. This slot only computes once per year in January and is NOT recalculated if Lower Basin demands are revised. If this value is postitive, there is a Quantified Surplus determination and water use schedules are revised as appropriate. <br>Equation:   Surplus Volume = (Powell Storage + Mead Storage - maxstorage - previous year ICS credits)*(1+avgBankStorcoef) + runoff - UBDemand - LBDemand <br>Variable Definitions:<br>  Powell Storage = Powell storage at beginning of the year (December month-end) <br>  Mead Storage = Mead storage at the beginning of the year (December month-end) <br>  Max Storage = 47.96 maf <br>  Previous year ICS credits - cumulative ICS credits over entire Lower Basin over all years <br>  avgBankStorcoef = average of Powell and Mead bank storage coefficients <br>  Runoff = 17.4 maf (70th percentile non-exceedence flow) <br>  UBDemand = Upper Basin depletion scheduled for the year + average evaporation loss in the Upper Basin (same as in 602a calculation, 560 kaf) <br>  LBDemand = sum of depletions below Powell + evaporation losses in the Lower Basin (avg 900 kaf) ? avg gains below Powell (Powell to Mead and below Mead) <br><br>-HMG 8/2/11<br><br>SLOTS SET: Surplus.Quantified Surplus Volume<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year";
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br>MC, 20160114: There is a function, QuantifiedSurplusVolume, with the same calculation in it.  Are both necessary?<br>MC, 20170512: Need to edit Execution Constraints to ensure execution in January?<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
     BEGIN
 
+    DESCRIPTION          "LC CHECK<br><br>Rule and execution constriant<br>";
       $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] := "QuantifiedSurplusVolume"(  );
 
     END
@@ -2115,8 +2112,8 @@ BEGIN
     RULE                 "Determine Mead and Lower Basin Condition";
     DESCRIPTION          "DESCRIPTION: This rule sets a slot that determines the Condition of Lake Mead and the Lower Basin. A setting of 0 means a normal year, a 1 means shortage, a 2 means Domestic Surplus and a 3 is Quantified Surplus.  In the condition of anything that is not normal. TP 7/28/2015<br>                         Sets LBDV.schedulecheck to something other than 0 if the LB condition changes in RC 3. AP 9/18/2018<br><br>SLOTS SET: LowerBasinDemandVariability.LowerBasinCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>9/18/2018, AP: Removed logic to determine LB operating condition and moved it into LBConditionDetermination function. Rule now sets LBDV.Schedule check value to either a 1 (shortage) or 2 (surplus) if the LB condition switches to something other than normal in run cycle 3. This value does not change after run cycle 3.<br>S.Baker, 20180925: Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in function to Dec Previous year. This will allow the rule to execute correctly in start timestep. Edited date input in second assignment to be consistent with the first assignment (shouldnt change how rule works). ";
+    RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000 ) AND NOT "Is24MonthStudy"(  );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>9/18/2018, AP: Removed logic to determine LB operating condition and moved it into LBConditionDetermination function. Rule now sets LBDV.Schedule check value to either a 1 (shortage) or 2 (surplus) if the LB condition switches to something other than normal in run cycle 3. This value does not change after run cycle 3.<br><br>S.Baker, 20180925: Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in function to Dec Previous year. This will allow the rule to execute correctly in start timestep. Edited date input in second assignment to be consistent with the first assignment (shouldnt change how rule works). <br><br>A. Pivarnik. 20200709: this rule is not in the 24 MS but is needed by MTOM to fire later rules. This rule was turned off in 24 MS mode";
     BEGIN
 
       $ "LowerBasinDemandVariability.LowerBasinCondition" [@"24:00:00 December 31, Current Year"] := "LBConditionDetermination"(  );
@@ -2138,7 +2135,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Mexico Surplus flag as a function of Mead compared to the Mexico Surplus Table. A Mead elevation of >= 1,200 ft. receives a value of 3, a value greater than 1,170 ft and less than the level 3 elevation, receives a value of 2, a value of 1,145 ft and less than a level 2 receives a value of 0 and any other condition receives a value of 0. This flag is used in subsequent Mexico Surplus rules. TP 7/28/2015<br><br>SLOTS SET: Mexico Shortage and Surplus.Mexico Surplus Flag<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 41 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow execution in start timestep.<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 41 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow execution in start timestep.<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br><br>A. Pivarnik, 20200709: Integration effort.  This rule is essentially the same as the 24 MS rule except it uses te GetProjectedPoolElevation function. No other changes were made to the rule during the integration effort. ";
     BEGIN
 
       $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [2.00000000, "Elevation"] )
@@ -2165,7 +2162,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: In the event that a Lower Basin shortage is projected, this rule sets the Shortage Flag slot to indicate the level of shortage. No shortage = 0. Most severe shortage (Mead < 1025 feet) = 3. Mead < 1050 ft = 2, Mead < 1075 ft = 1. If there is a shortage or surplus then the Abv Hoover Trigger is set to a 2 and no LBDV will occur for the parties that look at the Above Hoover Trigger Set for LBDV.  (SNWP)<br><br>SLOTS SET: Shortage.Shortage Flag, LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 46 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 20180925: Changed IF statements to use function 'GetProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in function to Dec Previous year. This will allow the rule to execute correctly in start timestep.";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 46 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 20180925: Changed IF statements to use function 'GetProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in function to Dec Previous year. This will allow the rule to execute correctly in start timestep.<br><br>A. Pivarnik, 20200709: Integration effort. Deleted disabled slot assingment. This rule is essentially the same as the 24 MS rule except it uses te GetProjectedPoolElevation function. No other changes were made to the rule during the integration effort";
     BEGIN
 
       $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [2.00000000, 0.00000000] )
@@ -2183,11 +2180,6 @@ BEGIN
     0.00000000
    ENDIF
   ENDIF
- ENDIF;
-
-    INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
- THEN
-  2.00000000
  ENDIF;
 
     END
@@ -13855,32 +13847,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{339b34ff-1182-4979-9ea4-9262ffc9bde5}";
+    UUID "{a8c36159-19b6-4529-8393-1ecca99dcf9d}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e07978da-9806-4ffa-8e43-75b6afc84cf7}";
+    UUID "{bbc27123-d25d-4843-b680-e85969b232fe}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e5a2ec5a-fe73-4657-99a1-9e32f8a56dcb}";
+    UUID "{2dfc10fc-605f-4f8e-a44d-b3e3ca207c5a}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1618cd0b-49ff-4d03-b280-b8d2aafc061a}";
+    UUID "{6c644974-42cf-4d3d-8283-f26c14b0d5a4}";
 ;
 
   END
-  UUID "{d748c67f-631b-4ade-a47d-4a432b84acc9}";;
+  UUID "{cb40a731-2c7a-4b39-87a5-2417e384d9a1}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13891,11 +13883,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9d6ae690-e364-4263-926d-f32475d077bc}";
+    UUID "{c7c822e8-ace9-47e9-ad18-8a5193cdee6e}";
 ;
 
   END
-  UUID "{3111fbce-70ae-47c0-add8-1e88ea04d2ae}";;
+  UUID "{e35533fc-cb91-4453-85fc-ba693dd2fafc}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13906,11 +13898,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{deef4fe1-a385-4604-ad48-701042b5d6bb}";
+    UUID "{661fa313-41e1-4233-9dbd-93b8bcb03542}";
 ;
 
   END
-  UUID "{3c56d3d1-ed10-4065-9dad-41b28cfb8399}";;
+  UUID "{e9092bcb-69db-4eaf-9e83-863c44771652}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13921,11 +13913,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e6e765ad-360f-496c-8eef-27c6079ae928}";
+    UUID "{fe04aef4-a653-4c34-ad70-2aca60a01530}";
 ;
 
   END
-  UUID "{6f68b8c1-de4d-45d6-bba6-3580e618de5a}";;
+  UUID "{d2e8fed2-3544-4e91-8b4d-381fac5c7fae}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";

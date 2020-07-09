@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 16:10 July 6, 2020
+# Created 09:36 July 9, 2020
 # 
 RULESET
 NAME "24month";
@@ -1429,7 +1429,7 @@ BEGIN
     END
     UUID "{d30f089a-fca1-4ff2-8a08-1fcc4cf73e1e}";;
 
-    RULE                 "Compute Quantified Surplus Volume";
+    RULE                 "?? - Compute Quantified Surplus Volume";
     DESCRIPTION          "Computes the total volume of Quantified Surplus water for the year. This slot only computes once per year in January and is NOT recalculted if Lower Basin demands are revised.<br><br>If this value is postitive,  there is a Quantified Surplus determination and water use schedules are revised as appropriate. <br><br>Equation:   Surplus Volume = (Powell Storage + Mead Storage ? maxstorage - previous year ICS credits)*(1+avgBankStorcoef) + runoff ? UBDemand ? LBDemand <br>Variable Definitions:<br>  Powell Storage = Powell storage at beginning of the year (December month-end) <br>  Mead Storage = Mead storage at the beginning of the year (December month-end) <br>  Max Storage = 47.96 maf <br>  Previous year ICS credits ? cumulative ICS credits over entire Lower Basin over all years <br>  avgBankStorcoef = average of Powell and Mead bank storage coefficients <br>  Runoff = 17.4 maf (70th percentile non-exceedence flow) <br>  UBDemand = Upper Basin depletion scheduled for the year + average evaporation loss in the Upper Basin (same as in 602a calculation, 560 kaf) <br>  LBDemand = sum of depletions below Powell + evaporation losses in the Lower Basin (avg 900 kaf) ? avg gains below Powell (Powell to Mead and below Mead) <br><br>-HMG 8/2/11";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"];
@@ -1458,7 +1458,7 @@ BEGIN
     END
     UUID "{865594fe-e574-4577-a881-aefe2416f5f9}";;
 
-    RULE                 "Set Mexico Surplus Flag";
+    RULE                 "INT - Set Mexico Surplus Flag";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep";
@@ -1702,13 +1702,14 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Set Mexico Outyear Shortage Schedules";
+    RULE                 "NI - Set Mexico Outyear Shortage Schedules";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "This rule was not moved into the integrated ruleset. Mexico's diversion adjustment happens in a <br>single rule due to run cycles and this rule is not needed. The annual shortage volume is set in a <br>rule called (&quot;Set Outyear Shortage Volumes&quot; in the integrated ruleset <br>";
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
             $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date] - $ "Mexico Shortage and Surplus.Mexico Shortage Volumes" [$ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000, "Mexico"] * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Mexico"], date );
 
@@ -1719,13 +1720,14 @@ BEGIN
     END
     UUID "{f8df3dab-9254-449c-9f4f-e59db3ba463a}";;
 
-    RULE                 "Set Outyear Shortage Schedules";
+    RULE                 "NI - Set Outyear Shortage Schedules";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000;
     NOTES                "GCAA, 202006: Added SNWA Depletion slot assignment to help model solve for correct return flow to system";
     BEGIN
 
+    DESCRIPTION          "This rule was not moved over to the integrated ruleset. Diversion adjustements happen in a <br>single run in MTOM and those take care of the shortage adjustments for SNWA and CAP <br>";
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
             $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] := WITH NUMERIC MonthPercent = "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) / "SumFlowsToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" ) DO
   WITH NUMERIC snwpDivVol = WITH NUMERIC dssDeliveries = $ "ICS Credits.AnnualDeliveryTribDSS_NV" ["Dec31ofYear"( @"t" )] + $ "ICS Credits.AnnualDeliveryImpDSS_NV" ["Dec31ofYear"( @"t" )] DO
@@ -1764,13 +1766,14 @@ BEGIN
     END
     UUID "{bf2db773-6e4e-4b28-9ad7-197185f5ef94}";;
 
-    RULE                 "Set CAP Annual Shortage Volume";
+    RULE                 "NI - Set CAP Annual Shortage Volume";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep";
     NOTES                "";
     BEGIN
 
+    DESCRIPTION          "There is a similar rule used in the MTOM ruleset which sets the shortage volume for CAP. This slot <br>is not used anywhere else in the current 24 MS ruleset <br>";
       $ "Shortage.CAP Annual Shortage Volume" [@"24:00:00 December 31, Current Year"] := IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
  THEN
   "GetAnnualCAPShortage"( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000 )
@@ -1781,7 +1784,7 @@ BEGIN
     END
     UUID "{7fe0c1d1-4699-47c9-a9c1-72bdf12e0bdb}";;
 
-    RULE                 "Set Shortage Flag";
+    RULE                 "INT - Set Shortage Flag";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep";
