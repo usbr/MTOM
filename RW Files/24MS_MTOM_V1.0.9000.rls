@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:45 July 9, 2020
+# Created 12:59 July 10, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1658,19 +1658,9 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"];
 
-      $ "Surplus Total Annual Schedules.Coachella" [@"24:00:00 December 31, Current Year"] := IF ( $ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"] )
- THEN
-  $ "California_CU_Forecast1.Coachella" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CA Ag" [@"24:00:00 December 31, Current Year"] * $ "Surplus.Share of CA Ag Surplus" [0.00000000, 0.00000000]
- ELSE
-  $ "California_CU_Forecast1.Coachella" [@"24:00:00 December 31, Current Year"]
- ENDIF;
+      $ "Surplus Total Annual Schedules.Coachella" [@"24:00:00 December 31, Current Year"] := $ "California_CU_Forecast1.Coachella" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Coachella Quantified" [@"24:00:00 December 31, Current Year"];
 
-      $ "Surplus Total Annual Schedules.IID" [@"24:00:00 December 31, Current Year"] := IF ( $ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"] )
- THEN
-  $ "California_CU_Forecast1.IID" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CA Ag" [@"24:00:00 December 31, Current Year"] * $ "Surplus.Share of CA Ag Surplus" [0.00000000, 1.00000000]
- ELSE
-  $ "California_CU_Forecast1.IID" [@"24:00:00 December 31, Current Year"]
- ENDIF;
+      $ "Surplus Total Annual Schedules.IID" [@"24:00:00 December 31, Current Year"] := $ "California_CU_Forecast1.IID" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.IID Quantified" [@"24:00:00 December 31, Current Year"];
 
       $ "Surplus Total Annual Schedules.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"];
 
@@ -1680,11 +1670,9 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.CibolaValleyIID" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.CibolaValleyIID" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CibolaValleyIID" [@"24:00:00 December 31, Current Year"];
 
-    INACTIVE      $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := 1835000.00000000 "acre-ft" COMMENTED_BY "<assumes CAP will take a full ditch even lacking full surplus volume for interstate banking. Surplus Volume Entitlement contains actual CAP quantified surplus volume>";
-
       $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := ( $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Quantified" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "CAP Diversion Request plus Quantified CAP entitlement plus ICS Available";
 
-      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Quantified" [@"24:00:00 December 31, Current Year"] + ( ( $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) * "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.DCPICS_NV" [@"24:00:00 December 31, Previous Year"] );
+      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Quantified" [@"24:00:00 December 31, Current Year"];
 
     END
     UUID "{e12f7e26-7b0d-4a0b-8ca3-55b0125684cf}";;
@@ -1693,10 +1681,10 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule will set the Total Annual Schedules for all water users impacted by Domestic Surplus. Domestic Surplus is the lowest priority surplus, meaning that a Quantified or Flood Control Surplus will override these values.  <br><br>EXECUTION CONSTRAINTS: This rule fires when the projected Mead previous EOCY pool elevation is above the Domestic Surplus Trigger elevation. <br><br>SLOTS SET: <br>Surplus Total Annual Schedules.SNWA<br>Surplus Total Annual Schedules.MWD<br>Surplus Total Annual Schedules.Gila Monster Farms<br>Surplus Total Annual Schedules.AzPumpersBlwImp<br>Surplus Total Annual Schedules.CAP";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND @"t" == @"24:00:00 January 31, Current Year" AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>GCAA, 20181030: Changed reference from the Forecast1 slots to ResetAnnualFC slots and replaced hardcoded MWD annual canal capacity with the MWDCanal_AnnualCapacity slot. Removed &quot;- Minute 323&quot; from rule name.<br>GCAA, 20200330: Updated execution constraint to only fire on Jan 31, Current yea in the third run cycle. Updated rule to allow SNWA to take DCP ICS if their demand is greater than the basic apportionment<br>S.Baker, 20200306: Edited rule description.<br>A Pivarnik, 20200416: Added with statement to SNWA total annual schedules. The temporary variable subtracts the non snwa water use in NV from the apportionment<br>20200501, AP: Replaced non SNWP water users individually listed with function call<br>20200511: Removed refernce to TJ flows in MWD calc. Added mwd returns into calculation to check against canal capacity";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>GCAA, 20181030: Changed reference from the Forecast1 slots to ResetAnnualFC slots and replaced hardcoded MWD annual canal capacity with the MWDCanal_AnnualCapacity slot. Removed &quot;- Minute 323&quot; from rule name.<br>GCAA, 20200330: Updated execution constraint to only fire on Jan 31, Current yea in the third run cycle. Updated rule to allow SNWA to take DCP ICS if their demand is greater than the basic apportionment<br>S.Baker, 20200306: Edited rule description.<br>A Pivarnik, 20200416: Added with statement to SNWA total annual schedules. The temporary variable subtracts the non snwa water use in NV from the apportionment<br>20200501, AP: Replaced non SNWP water users individually listed with function call<br>20200511: Removed refernce to TJ flows in MWD calc. Added mwd returns into calculation to check against canal capacity<br><br>A Pivarnik 20200709: Moved additional logic to calulcate surplus volumes to other rules. This makes all assignments in this rule te resetannual/forecast1 value + entitlement";
     BEGIN
 
-      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := "Min"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December 31, Current Year"] );
+      $ "Surplus Total Annual Schedules.MWD" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"];
 
       $ "Surplus Total Annual Schedules.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] := $ "Arizona_CU_Forecast1.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"];
 
@@ -1704,31 +1692,41 @@ BEGIN
 
       $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"];
 
-      WITH_STATEMENT (NUMERIC NonSNWANevadaDivReqs = FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
-  "Sum Non SNWP Nevada Users"( date )
- ENDFOR) DO
-            $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.Nevada_Apportionment" [@"24:00:00 December 31, Current Year"] - NonSNWANevadaDivReqs + "Min"( $ "ICS Credits.TotalICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"], "Max"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] - $ "AnnualWaterUse.NV_BasicApportionment" [], 0.00000000 "acre-ft" ) );
-
-      END_WITH_STATEMENT;
+      $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"];
 
     END
     UUID "{9621c0f9-717b-412a-93e9-d568c632783b}";;
 
-    RULE                 "Set Quantified Surplus Entitlement Vols MWD, CAP, SNWA";
+    RULE                 "Set Quantified Surplus Entitlement Vols MWD, CAP, SNWA, CVWD, IID";
     DESCRIPTION          "DESCRIPTION: This rule distributes the volume of Quantified Surplus available between MWD and CAP. If California's Quantified Surplus volume is greater than the MWD's Domestic Surplus volume, the MWD Quantified Surplus volume is equal to the canal capacity minus the current water diversion requested, allowing MWD to take full canal capacity, otherwise MWD receives only the water entitled from the Domestic Surplus. The Quantified Surplus volume for CAP after 1992 (canal finished) is set based on the remaining Quantified Surplus volume available. If there is any remaining Quantified Surplus volume after the Gila Monster Farmers, the Arizona pumpers below Imperial, and the CAP Domestic Surplus take thier entitlement, CAP receives the remaining volume up to thier canal capacity.  Otherwise, they receive their Domestic Surplus volume.<br><br>EXECUTION CONSTRAINTS: This rule fires if the rule has not fired successfully in run cycle 3 and 4 and if the Quantified Surplus Volume greater than zero.<br><br>SLOTS SET: <br>Surplus Volume Entitlements.MWD Quantified<br>Surplus Volume Entitlements.CAP Quantified<br>Surplus Volume Entitlements.SNWA Quantified";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" AND NOT "HasRuleFiredSuccessfully"( "Current Rule" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name. Replaced hardcoded MWD surplus entitlement values with reference to DefaultSurplusEntitlement slot<br>GCAA, 20200330: Added logic to determine SNWA's Quantified Surplus Entitlement.<br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. See comments, potentially no changes";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name. Replaced hardcoded MWD surplus entitlement values with reference to DefaultSurplusEntitlement slot<br>GCAA, 20200330: Added logic to determine SNWA's Quantified Surplus Entitlement.<br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. Added assignment/calculations for CVWD and IID quantified surplus scedules";
     BEGIN
 
-      $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"] := IF ( $ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] )
+      WITH_STATEMENT (NUMERIC MWDQuantified = IF ( $ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] )
  THEN
   $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - FOR ( DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year" ) STAT_SUM
    "FlowToVolume"( $ "MWDDiversion:MWD.Diversion Requested" [date], date )
   ENDFOR COMMENTED_BY "Total current year MWD diversion request volume<br><br><br>LC CHECK<br><br>Reset Annual FC?<br>"
  ELSE
   $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"]
- ENDIF;
+ ENDIF) DO
+            $ "Surplus Volume Entitlements.MWD Quantified" [@"24:00:00 December 31, Current Year"] := MWDQuantified;
+
+            IF_STATEMENT ($ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > MWDQuantified) THEN
+            $ "Surplus Volume Entitlements.Coachella Quantified" [@"24:00:00 December 31, Current Year"] := $ "California_CU_Forecast1.Coachella" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CA Ag" [@"24:00:00 December 31, Current Year"] * $ "Surplus.Share of CA Ag Surplus" [0.00000000, 0.00000000];
+
+            $ "Surplus Volume Entitlements.IID Quantified" [@"24:00:00 December 31, Current Year"] := $ "California_CU_Forecast1.IID" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CA Ag" [@"24:00:00 December 31, Current Year"] * $ "Surplus.Share of CA Ag Surplus" [0.00000000, 1.00000000];
+
+      ELSE
+            $ "Surplus Volume Entitlements.Coachella Quantified" [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-ft";
+
+            $ "Surplus Volume Entitlements.IID Quantified" [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-ft";
+
+      END_IF_STATEMENT;
+
+      END_WITH_STATEMENT;
 
       $ "Surplus Volume Entitlements.CAP Quantified" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) > 1992.00000000 )
  THEN
@@ -1746,12 +1744,12 @@ BEGIN
   0.00000000 "acre-ft"
  ENDIF COMMENTED_BY "Testbed Hindcast Simulations - Prior to 1992 do not allow CAP to take water since canal was not <br>built  <br><br>LC CHECK<br><br>This logic is a little different but seems correct<br>";
 
-      $ "Surplus Volume Entitlements.SNWA Quantified" [@"24:00:00 December 31, Current Year"] := IF ( $ "Surplus.Nevada Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"] )
+      $ "Surplus Volume Entitlements.SNWA Quantified" [@"24:00:00 December 31, Current Year"] := ( IF ( $ "Surplus.Nevada Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"] )
  THEN
   "Min"( $ "Surplus.Nevada Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"], "Max"( $ "AnnualWaterUse.Nevada_Apportionment" [@"24:00:00 December 31, Current Year"] - $ "AnnualWaterUse.NV_BasicApportionment" [], 0.00000000 "acre-ft" ) )
  ELSE
   $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"]
- ENDIF;
+ ENDIF + ( ( $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) * "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.DCPICS_NV" [@"24:00:00 December 31, Previous Year"] ) ) COMMENTED_BY "Original entitlement calculation <br>";
 
     END
     UUID "{662dfa55-5c5c-49c7-9015-5ad6055fd735}";;
@@ -1760,28 +1758,28 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: For Domestic Surplus prior to 2017, MWD gets 1,250 KAF (canal capacity), minus the MWD Diversion to date and 1/3 of the Mexico annual surplus volume. For Domestic Surplus after 2017, if CAP and SNWA are taking domestic surplus, MWD gets 250 KAF less 1/3 the Mexico annual surplus value, otherwise NWD gets 250 kaf.  In a flood control year MWD is entitled to a full canal so their entitlement is the current diversion plus what it takes to fill the canal. <br><br>SLOTS SET:<br>Surplus Volume Entitlements.MWD Domestic<br>Surplus Volume Entitlements.MWD FC";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from name, replaced hardcoded CAP surplus entitlement value with reference to Surplus Volume Entitlements.CAP Domestic slot, replaced hardcoded share of surplus by state value with ShareofMexicoSurplusbyState() function, and replaced CAP surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot.<br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. Added RC >=3 for execution constraint. See comments for other potential changes";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from name, replaced hardcoded CAP surplus entitlement value with reference to Surplus Volume Entitlements.CAP Domestic slot, replaced hardcoded share of surplus by state value with ShareofMexicoSurplusbyState() function, and replaced CAP surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot.<br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. Added RC >=3 for execution constraint. See comments for other potential changes. Moved additional calculations of surplus volume water from the set domestic suprlus schedules rule to the entitlement calculation rule";
     BEGIN
 
       IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"]) THEN
-            $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) < 2017.00000000 )
+            $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] := "Min"( ( IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) < 2017.00000000 )
  THEN
   $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - FOR ( DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year" ) STAT_SUM
    "FlowToVolume"( $ "MWDDiversion:MWD.Diversion Requested" [date], date )
-  ENDFOR COMMENTED_BY "LC CHECK<br><br>Should this be the rest value? If not, make simialar function as CAP for readability purposes<br><br>" - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"]
+  ENDFOR COMMENTED_BY "LC CHECK<br><br>Should this be the rest value? If not, make simialar function as CAP for readability purposes<br><br>" - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ELSE
-  IF ( ( $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-ft" AND $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-ft" ) COMMENTED_BY "LC CHECK<br><br>Should this be an OR? it is in the 24 MS <br>" )
+  IF ( ( $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" AND $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" ) COMMENTED_BY "LC CHECK<br><br>Should this be an OR? it is in the 24 MS <br>" )
   THEN
-   $ "Surplus.Default Surplus Entitlements" [0.00000000, 1.00000000] - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"]
+   $ "Surplus.Default Surplus Entitlements" [0.00000000, 1.00000000] - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December Max DayOfMonth, Current Year"]
   ELSE
    $ "Surplus.Default Surplus Entitlements" [0.00000000, 1.00000000]
   ENDIF
- ENDIF;
+ ENDIF COMMENTED_BY "Original entitlement calculation <br>" ) + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] COMMENTED_BY "Additional water to take into account when finding volume domestic surplus volume to divert in a <br>year <br>", ( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] ) COMMENTED_BY "Available space in canal after diversion and water for TJ <br>" );
 
       END_IF_STATEMENT;
 
-      IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.MWD FC" [@"24:00:00 December 31, Current Year"]) THEN
-            $ "Surplus Volume Entitlements.MWD FC" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumAnnualMWDDivRequest"(  ) COMMENTED_BY "LC CHECK??<br><br>Is this right? Should we be checking annual capacity vs depletion?? Seems wrong <br>";
+      IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.MWD FC" [@"24:00:00 December Max DayOfMonth, Current Year"]) THEN
+            $ "Surplus Volume Entitlements.MWD FC" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - "SumAnnualMWDDivRequest"(  ) COMMENTED_BY "LC CHECK??<br><br>Is this right? Should we be checking annual capacity vs depletion?? Seems wrong <br>";
 
       END_IF_STATEMENT;
 
@@ -1792,16 +1790,16 @@ BEGIN
     DESCRIPTION          "DESCRIPTION:  If the year is after 2017 and if Nevada's apportionment is greater than the Nevada basic apportionment (300 kaf) and less than Nevada's share of Mexico's surplus (1/3) then set the domestic surplus entitlement equal to that volume. If it is before 2017 or Nevada's apportionment is less than the basic apportionment then the domestic surplus entitlement is 0 acre-ft. If Nevada's apportionment is greater than the basic apportionment then that difference is the surplus flood control entitlement, otherwise it is 0 acre-ft.<br><br>SLOTS SET: <br>Surplus Volume Entitlements.SNWA Domestic<br>Surplus Volume Entitlements.SNWA FC";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: GCAA, 20200330<br><br>A. Pivarnik, 20200709: Integration effort. Added execution constraint of RC >=3 so the rule does not fire in every timestep. No changes made to this rule as it is not in the 24 MS.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: GCAA, 20200330<br><br>A. Pivarnik, 20200709: Integration effort. Added execution constraint of RC >=3 so the rule does not fire in every timestep.  Moved additional calculations of domestic surplus volume water from the &quot;set domestic suprlus schedules&quot; rule to the entitlement calculation rule";
     BEGIN
 
       IF_STATEMENT (IsNaN $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"]) THEN
-            $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) < 2017.00000000 )
+            $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December 31, Current Year"] := "Min"( IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) < 2017.00000000 )
  THEN
   0.00000000 "acre-ft"
  ELSE
   "Min"( $ "Surplus.Default Surplus Entitlements" [0.00000000, 2.00000000] - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"], "Max"( $ "AnnualWaterUse.Nevada_Apportionment" [@"24:00:00 December 31, Current Year"] - $ "AnnualWaterUse.NV_BasicApportionment" [], 0.00000000 "acre-ft" ) )
- ENDIF;
+ ENDIF COMMENTED_BY "original entitlement calculation <br>" + $ "ICS Credits.TotalICS_NV" [@"24:00:00 December 31, Previous Year"], "Max"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] - $ "AnnualWaterUse.NV_BasicApportionment" [], 0.00000000 "acre-ft" ) );
 
       END_IF_STATEMENT;
 
@@ -13851,32 +13849,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ddd6d6df-7205-4af6-b7c6-d61e846f71e6}";
+    UUID "{6d4c1caf-b47e-417d-9520-95e858393e55}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6a8f2927-b869-4971-9f7a-fc419949d4c9}";
+    UUID "{81e5a7e4-65f4-4cd9-b17c-0dbe4c3472cd}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5fa6afe2-f3b1-417c-946e-1f5bcef99a08}";
+    UUID "{3d39fa86-420c-43b7-8448-57eb0082ef2d}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ebdccfe9-1d4f-48e3-8a93-4fb1fcb40084}";
+    UUID "{836d8d94-77e4-4d4b-9d91-99d4786a3694}";
 ;
 
   END
-  UUID "{89892de9-6780-47a3-ad07-1a8d0b171e33}";;
+  UUID "{99ba818f-851d-46b0-a191-6baac05c6e51}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13887,11 +13885,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a2a80347-44ca-41ff-a4fd-f6b7e6d82253}";
+    UUID "{de587106-7867-4e94-8680-4f134b70dcc3}";
 ;
 
   END
-  UUID "{a87d2ecb-d601-4867-8551-27ab2b57a4e5}";;
+  UUID "{75df70ca-e5b7-470f-b1e9-9abf2e42bcc0}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13902,11 +13900,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a5f59386-2bf0-42f7-aa61-d26fb13ac443}";
+    UUID "{e41df9db-0a10-4aa9-835b-e8e0bb62ff83}";
 ;
 
   END
-  UUID "{99d9c134-450d-4677-b2c6-155a046a27dd}";;
+  UUID "{6d7f2ff5-d84b-4bcd-9f85-ad23cf0b8274}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13917,11 +13915,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ff60445a-aba9-4203-a584-551d83052fe1}";
+    UUID "{d842cd10-a145-4595-9b69-7c2b74a517d9}";
 ;
 
   END
-  UUID "{ec3fd7a1-91d8-49d5-b378-d6d3114f03d6}";;
+  UUID "{ccc39738-691a-4d26-9ef0-97985539cd0c}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
