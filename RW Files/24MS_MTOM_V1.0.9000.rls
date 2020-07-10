@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:00 July 10, 2020
+# Created 16:33 July 10, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -676,6 +676,14 @@ BEGIN
       ENDFOREACH;
 
       END_IF_STATEMENT;
+
+    INACTIVE      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            WITH_STATEMENT (SLOT slots = $ "AzPkrToImp:CibolaValleyIID.Diversion Requested") DO
+            ? := ?;
+
+      END_WITH_STATEMENT;
+
+      ENDFOREACH;
 
     END
     UUID "{1574216e-dc24-4ea2-9307-60c03d96cdbb}";;
@@ -1609,9 +1617,24 @@ BEGIN
   NOTES          "";
   BEGIN
 
+    RULE                 "Set Surpus Schedules";
+    DESCRIPTION          "";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT ( ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) COMMENTED_BY "LC CHECK: should this be projected pool elevation function or direct refernce to the pool <br>elevation of Mead<br>" >= $ "Surplus.Domestic Surplus Trigger Elevation" [] OR $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" ) AND @"t" == @"24:00:00 January 31, Current Year" ) OR "IsFloodControl"(  ) ) AND "GetRunCycleIndex"(  ) >= 3.00000000;
+    NOTES                "";
+    BEGIN
+
+      WITH_STATEMENT (NUMERIC SurplusType = NaNToZero ( $ "Surplus.Surplus Flag" [@"24:00:00 December 31, Current Year"] )) DO
+            ? := ?;
+
+      END_WITH_STATEMENT;
+
+    END
+    UUID "{3d10b2ad-9a20-4204-806d-4a18ab6f9e63}";;
+
     RULE                 "Set Flood Control Surplus Schedules";
     DESCRIPTION          "DESCRIPTION: This rule sets the Surplus Schedules for all water users impacted by Flood Control Surplus. The computed schedules are the Total Annual Schedules for each water user, meaning Normal and Surplus schedules.  Flood Control Surplus is in priority over Quantified Surplus Volumes.<br><br>EXECUTION CONSTRAINTS: This rule fires in run cycle 3 and 4 when the Flood Control or Execlusive Flag is greather than zero. <br><br>SLOTS SET: <br>Surplus Total Annual Schedules.AzPumpersBlwImp<br>Surplus Total Annual Schedules.CAP<br>Surplus Total Annual Schedules.CibolaValleyIID<br>Surplus Total Annual Schedules.City of Parker<br>Surplus Total Annual Schedules.Gila Monster Farms<br>Surplus Total Annual Schedules.SNWA<br>Surplus Total Annual Schedules.MWD<br>Surplus Total Annual Schedules.Coachella<br>Surplus Total Annual Schedules.IID<br>Surplus Total Annual Schedules.Needles<br>Surplus Total Annual Schedules.CaPumpersAbvImp<br>Surplus Total Annual Schedules.Mexico";
-    ACTIVE               TRUE;
+    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 AND "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/2011<br><br>S.Baker 06/20/2018: Added constraint to only allow historical water use in surplus by CAP prior to 2008.<br>GCAA, 10302018: Replaced hardcoded values for MWDCanal_AnnualCapacity and Mexico Flood Control Delivery.  Corrected references to Forecast1 slots for CAP and SNWP to the Reset slots<br>GCAA, 20200330: Updated rule to allow SNWA to take DCP ICS during flood control.<br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
@@ -1645,7 +1668,7 @@ BEGIN
 
     RULE                 "Set Quantified Surplus Schedules";
     DESCRIPTION          "DESCRIPTION: This rule sets the Total Annual Schedules for all water users impacted by Quantified Surplus. The Total Annual Schedules include both the Normal and Surplus Schedules. Quantified Surplus is higher in priority than Domestic Surplus, but lower in priority than Flood Control Surplus. Therefore, this rule will override any Domestic Surplus Schedules, but may then be overriden by Flood Control Surplus Schedules if a Flood Control Surplus exists.<br><br>EXECUTION CONSTRAINTS: This rule fires if there is a positive Quantified Surplus Volume and if the run cycle is 3 or 4. <br><br>SLOTS SET: <br>Surplus Total Annual Schedules.MWD<br>Surplus Total Annual Schedules.Coachella<br>Surplus Total Annual Schedules.IID<br>Surplus Total Annual Schedules.AzPumpersBlwImp<br>Surplus Total Annual Schedules.Gila Monster Farms<br>Surplus Total Annual Schedules.City of Parker<br>Surplus Total Annual Schedules.CibolaValleyIID<br>Surplus Total Annual Schedules.CAP<br>Surplus Total Annual Schedules.SNWA";
-    ACTIVE               TRUE;
+    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" AND @"t" == @"24:00:00 January 31, Current Year";
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br><br>GCAA, 20181030: Corrected reference to the Forecast1 SNWP slot to the SNWPResetAnnualFC slot.  Removed &quot;- Minute 323&quot; from rule name.<br>GCAA, 20200330: Updated execution constraint to only fire on Jan 31, Current year. Updated rule to allow SNWA to take DCP ICS during a quantified surplus.<br>S.Baker, 20200306: Edited rule description. ";
     BEGIN
@@ -1673,7 +1696,7 @@ BEGIN
 
     RULE                 "Set Domestic Surplus Schedules";
     DESCRIPTION          "DESCRIPTION: This rule will set the Total Annual Schedules for all water users impacted by Domestic Surplus. Domestic Surplus is the lowest priority surplus, meaning that a Quantified or Flood Control Surplus will override these values.  <br><br>EXECUTION CONSTRAINTS: This rule fires when the projected Mead previous EOCY pool elevation is above the Domestic Surplus Trigger elevation. <br><br>SLOTS SET: <br>Surplus Total Annual Schedules.SNWA<br>Surplus Total Annual Schedules.MWD<br>Surplus Total Annual Schedules.Gila Monster Farms<br>Surplus Total Annual Schedules.AzPumpersBlwImp<br>Surplus Total Annual Schedules.CAP";
-    ACTIVE               TRUE;
+    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] AND @"t" == @"24:00:00 January 31, Current Year" AND "GetRunCycleIndex"(  ) >= 3.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170512: No execution constraint that forces execution in January (i.e., could happen in Start Timestep or any timestep)?<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). <br>GCAA, 20181030: Changed reference from the Forecast1 slots to ResetAnnualFC slots and replaced hardcoded MWD annual canal capacity with the MWDCanal_AnnualCapacity slot. Removed &quot;- Minute 323&quot; from rule name.<br>GCAA, 20200330: Updated execution constraint to only fire on Jan 31, Current yea in the third run cycle. Updated rule to allow SNWA to take DCP ICS if their demand is greater than the basic apportionment<br>S.Baker, 20200306: Edited rule description.<br>A Pivarnik, 20200416: Added with statement to SNWA total annual schedules. The temporary variable subtracts the non snwa water use in NV from the apportionment<br>20200501, AP: Replaced non SNWP water users individually listed with function call<br>20200511: Removed refernce to TJ flows in MWD calc. Added mwd returns into calculation to check against canal capacity<br><br>A Pivarnik 20200709: Moved additional logic to calulcate surplus volumes to other rules. This makes all assignments in this rule te resetannual/forecast1 value + entitlement";
     BEGIN
@@ -6876,7 +6899,7 @@ BEGIN
     NOTES          "";
     BEGIN
 
-      IF ( ( NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) )
+      IF ( ( NaNToZero ( $ "Surplus.Flood Control Surplus Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) OR ( NaNToZero ( $ "FloodControlOutput.Exclusive Space Flag" [@"24:00:00 December Max DayOfMonth, Current Year"] ) > 0.00000000 ) )
  THEN
   TRUE
  ELSE
@@ -13852,32 +13875,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{44ea8640-7eba-4f2f-9af0-54cf65ce9a36}";
+    UUID "{4ff5000c-0e25-4446-8218-20b182da5936}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0be74de0-8b84-4d7b-84b3-123252931fac}";
+    UUID "{fa76b933-b21f-40fb-8bc6-6c3b87af746c}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a1f96d20-5ccb-4a91-bf68-249d4bb5b4d1}";
+    UUID "{79acdeda-4e7e-4cb9-a9d3-99b1e61ed49f}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{112a92e6-8c3a-44cf-abeb-269ccd50ba74}";
+    UUID "{254282ae-e632-4c92-bab1-5dda3d8354fe}";
 ;
 
   END
-  UUID "{a7015218-17de-49c7-9432-704bcc56ebd5}";;
+  UUID "{961831ec-ef35-4262-8b67-bd2e3ae46396}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13888,11 +13911,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{aad67d79-de48-4ff7-973b-fccaeb96571f}";
+    UUID "{b315aec2-aa6e-4ad0-b6e9-ef4b4c5be0ad}";
 ;
 
   END
-  UUID "{a6aedf56-9b2f-4cbd-9737-b459f0a75c77}";;
+  UUID "{b0ff4f9f-5715-4c0f-83c9-1542c6d29517}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13903,11 +13926,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c65bde47-3b39-4099-8c15-cf9c7fab13e2}";
+    UUID "{a1d35d62-b22d-4ebd-821d-602341af7792}";
 ;
 
   END
-  UUID "{6952a1b5-3489-4b4e-b130-51b30121b342}";;
+  UUID "{c1fc5720-fa0a-4237-8298-d5314a00f0ac}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13918,11 +13941,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{15a8f127-dcd1-45a4-8f68-71e03fdecf6a}";
+    UUID "{3a964cb3-c468-47a9-af90-6c859b6101d6}";
 ;
 
   END
-  UUID "{9f68b04d-444d-4e7f-9e4c-de9ffafe6fcf}";;
+  UUID "{04ccc684-c8ac-4a4b-956d-30e889bdc133}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
