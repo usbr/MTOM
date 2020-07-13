@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:45 July 9, 2020
+# Created 15:04 July 13, 2020
 # 
 RULESET
 NAME "24month";
@@ -1119,7 +1119,7 @@ BEGIN
     END
     UUID "{6e185a2d-3b72-490c-8537-d01615b42cf0}";;
 
-    RULE                 "NV ICS Creation or Delivery";
+    RULE                 "INT - NV ICS Creation or Delivery";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep" );
