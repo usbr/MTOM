@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 09:31 July 14, 2020
+# Created 16:17 July 14, 2020
 # 
 RULESET
 NAME "24month";
@@ -552,7 +552,7 @@ BEGIN
     END
     UUID "{74cc82a6-37a3-4f05-ac56-c6a4740d1c95}";;
 
-    RULE                 "California DCP Sched Reductions";
+    RULE                 "INT - California DCP Sched Reductions";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" ) AND $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-feet";
@@ -593,7 +593,7 @@ BEGIN
     END
     UUID "{6a167f02-a4e3-4a9d-afbc-dbb176cc9988}";;
 
-    RULE                 "Nevada DCP Sched Reductions";
+    RULE                 "INT - Nevada DCP Sched Reductions";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" AND ( $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-feet" OR $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-feet" );

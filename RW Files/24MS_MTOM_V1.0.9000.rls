@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 09:31 July 14, 2020
+# Created 16:16 July 14, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -573,8 +573,13 @@ BEGIN
     RULE                 "NV Diversion Adjustment";
     DESCRIPTION          "DESCRIPTION: This rule adjusts Nevada's diversion for SNWP. The diversion requested is calculated as an annual value based on the diversion requested, shortage volume, DCP contribution, and ICS delivey. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>PumpingFromLakeMead:SNWP.Diversion Requested; PumpingFromLakeMead:SNWP.Depletion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) COMMENTED_BY "This rule needs to run in the start year in order to apply SNWA demand variability <br>" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  );
-    NOTES                "S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Replaced non SNWP water users individually listed with function call. Changed the month percent calculation to be based off volume and not flow. Adjusted logic and run constraint to allow rule to adjust for domestic surplus<br>A. Pivarnik, 20200505: Reorded delivery logic and added notes. Rule now solves for quantified surplus scenarios. Changed run constraint to allow rule to fire in quantified surplus. Refernced Annual Shortage volume slot instead of calculating shortage via table<br>";
+    RULE_EXEC_CONSTRAINT ( ( IF ( "Is24MonthStudy"(  ) )
+ THEN
+  "IsJANofOutyear"(  )
+ ELSE
+  @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year"
+ ENDIF AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) COMMENTED_BY "This rule needs to run in the start year in order to apply SNWA demand variability in MTOM mode <br>" ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  );
+    NOTES                "S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Replaced non SNWP water users individually listed with function call. Changed the month percent calculation to be based off volume and not flow. Adjusted logic and run constraint to allow rule to adjust for domestic surplus<br>A. Pivarnik, 20200505: Reorded delivery logic and added notes. Rule now solves for quantified surplus scenarios. Changed run constraint to allow rule to fire in quantified surplus. Refernced Annual Shortage volume slot instead of calculating shortage via table<br>A. PIvarnik, 20200714: Integration effort. Added execution constraint to not fire in start timestep of RC3 in 24MS mode. This rule is different than the 24 MS rule due to MTOM's ruleset structure but accomplishes that same thing. Besides the execution constraint this rule is unchanged<br>";
     BEGIN
 
     DESCRIPTION          "SNWADivVol = total yearly volume of diversion for SNWA <br>";
@@ -616,95 +621,16 @@ BEGIN
     END
     UUID "{bde8a45f-6afe-4ca8-bb72-e79b4a6c743a}";;
 
-    RULE                 "AZ Diversion Adjustment";
-    DESCRIPTION          "DESCRIPTION: This rule adjusts Arizona's diversion for CAP. The diversion requested is calculated as an annual value  based on the diversion request, firming obligation, shortage volume, DCP volume reduction, and ICS delivery. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>CAPDiversion.Total Diversion Requested";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule does not need to fire in the start year because there is no CAP demand varibility applied <br>directly to the diversion. All adjustments are assumed to be included in the start year schedule.    <br>";
-    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus schedule<br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow<br>A. Pivarnik, 20200505: Updated logic and run constraint to allow rule to solve in quantified surplus scenarios. Moved non CAP AZ water diversion assignments to this rule for Domestic/Quantified surplus enetitlement holders. Refernced Annual Shortage volume slot instead of calculating shortage via table<br>A. Pivarnik, 20200713: Integration effort. Removed if statements for setting non CAP user suprlus schedules. This allows for the schedules to be reset to normal if there is a condition change";
-    BEGIN
-
-      WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
-          DESCRIPTION          "Shortage reduction volume <br>";
-      WITH_STATEMENT (NUMERIC CAPShortageVolume = $ "Shortage.CAP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] COMMENTED_BY "Adjust CAP for shortage <br>") DO
-          DESCRIPTION          "Adjust diversion by difference of ICS delivery calculated by MTOM vs the value passed from the 24 MS.  <br>";
-      WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.AnnualICSDelivery_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
-          DESCRIPTION          "DCP reduction volume <br>";
-      WITH_STATEMENT (NUMERIC DCPreductionCAWCD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
-          DESCRIPTION          "If the LB is in Domestic or Quantified Surplus, use the total annual schedules slot. This is the base <br>diversion volume prior to any adjustments being made <br>";
-      WITH_STATEMENT (NUMERIC CAPDivRequested = IF ( "IsDomesticOrQuantified"(  ) )
- THEN
-  $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December Max DayOfMonth, Current Year"]
- ELSE
-  $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"]
- ENDIF) DO
-            FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "CAPDiversion.Total Diversion Requested" [date], date ) / "SumFlowsToVolume"( $ "CAPDiversion.Total Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
-            $ "CAPDiversion.Total Diversion Requested" [date] := "VolumeToFlow"( ( ( ( CAPDivRequested + GET @INDEX 0.00000000 FROM AZFirming ) - DCPreductionCAWCD + CAWCDICSdiversionAdjustment ) - CAPShortageVolume ) * MonthPercent, date );
-
-      END_WITH_STATEMENT;
-
-      ENDFOREACH;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      END_WITH_STATEMENT;
-
-      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsDomesticOrQuantified"(  ) )
- THEN
-  "Set Monthly Surplus Schedule"( date, "Gila Monster Farms" )
- ELSE
-  $ "Arizona_CU_Schedules.Gila Monster Farms" [date]
- ENDIF DO
-  "VolumeToFlow"( MonthlyDiv, date )
- ENDWITH;
-
-            $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsDomesticOrQuantified"(  ) )
- THEN
-  "Set Monthly Surplus Schedule"( date, "AzPumpersBlwImp" )
- ELSE
-  $ "Arizona_CU_Schedules.AzPumpersBlwImp" [date]
- ENDIF DO
-  "VolumeToFlow"( MonthlyDiv, date )
- ENDWITH;
-
-      ENDFOREACH;
-
-      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "AzPkrToImp:CibolaValleyIID.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsFloodControl"(  ) )
- THEN
-  "Set Monthly Surplus Schedule"( date, "CibolaValleyIID" )
- ELSE
-  $ "Arizona_CU_Schedules.CibolaValleyIID" [date]
- ENDIF DO
-  "VolumeToFlow"( MonthlyDiv, date )
- ENDWITH;
-
-            $ "AzPkrToImp:Parker.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsFloodControl"(  ) )
- THEN
-  "Set Monthly Surplus Schedule"( date, "City of Parker" )
- ELSE
-  $ "Arizona_CU_Schedules.City of Parker" [date]
- ENDIF DO
-  "VolumeToFlow"( MonthlyDiv, date )
- ENDWITH;
-
-      ENDFOREACH;
-
-    END
-    UUID "{1574216e-dc24-4ea2-9307-60c03d96cdbb}";;
-
     RULE                 "CA Diversion Adjustment";
     DESCRIPTION          "DESCRIPTION: This rule adjusts California's diversion for MWD, Coachella, and IID. For Coachella and IID, the diversion requested is reduced by the DCP contribution and by a LBDV factor if it is January (allow LBDV in Jan of start year if side inflows below Parker are above 90%). The MWD adjusted diversion requested is based on the deliveries and creation of ICS and is constrained by the states apportionment. The adjusted annual diversion is spread to monthly values based on the current proportion diversion each month.<br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes at the start timestep if before April in MRM or in January and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3 and the rule has not yet fired successfully. <br><br>SLOTS SET: <br>AAC:Coachella.Diversion Requested<br>AAC:IID.Diversion Requested<br>MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( ( ( NOT "IsAPRtoDECofStartYear"(  ) AND @"t" == @"Start Timestep" ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule needs to run in months prior to April in the start year to apply demand variability to <br>MWD <br>";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation. Added If statment to MWDDivRequested to set domestic surplus schedules within this rule. Changed run constraint to fire if we are in domestic surplus scenario<br>A. Pivarnik, 20200505: Adjusted logic and run constriant to allow for rule to solve in quantified surplus scenario<br>A. Pivarnik, 20200511: removed references to TJ diversion in rule to prevent double counting <br>A. Pivarnik, 20200713: Integration effort. Removed IsQuantified from if statement to enter Coachella/IID diversion adjustments. No need for the refernce because it is already in the monthlyDiv calculation for each user";
+    RULE_EXEC_CONSTRAINT ( ( IF ( "Is24MonthStudy"(  ) )
+ THEN
+  "IsJANofOutyear"(  )
+ ELSE
+  ( ( NOT "IsAPRtoDECofStartYear"(  ) AND @"t" == @"Start Timestep" ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" )
+ ENDIF AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule needs to run in months prior to April in the start year to apply demand variability to <br>MWD <br>";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation. Added If statment to MWDDivRequested to set domestic surplus schedules within this rule. Changed run constraint to fire if we are in domestic surplus scenario<br>A. Pivarnik, 20200505: Adjusted logic and run constriant to allow for rule to solve in quantified surplus scenario<br>A. Pivarnik, 20200511: removed references to TJ diversion in rule to prevent double counting <br>A. Pivarnik, 20200713: Integration effort. Removed IsQuantified from if statement to enter Coachella/IID diversion adjustments. No need for the reference because it is already in the monthlyDiv calculation for each user. This also allows the water users to be adjusted correcty if there is a switch in surplus condition<br>A. Pivarnik, 20200714: Integration effort. Added execution constraint to not fire in start timestep of RC3 in 24MS mode. This rule is different than the 24 MS rule due to MTOM's ruleset structure but accomplishes that same thing. ";
     BEGIN
 
       BREAKPOINT BEFORE_EXEC TRUE;
@@ -863,6 +789,90 @@ BEGIN
     END
     UUID "{6a54fd44-a0fc-456b-bdff-5faea9c4fc1e}";;
 
+    RULE                 "AZ Diversion Adjustment";
+    DESCRIPTION          "DESCRIPTION: This rule adjusts Arizona's diversion for CAP. The diversion requested is calculated as an annual value  based on the diversion request, firming obligation, shortage volume, DCP volume reduction, and ICS delivery. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January if not the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>CAPDiversion.Total Diversion Requested";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT ( ( "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule does not need to fire in the start year because there is no CAP demand varibility applied <br>directly to the diversion. All adjustments are assumed to be included in the start year schedule.    <br>";
+    NOTES                "S. Baker, 20200311: Added description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200416: Added if statement to CAPdiv requested temporary variable. Rule is now setting CAP domestic surplus schedule<br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow<br>A. Pivarnik, 20200505: Updated logic and run constraint to allow rule to solve in quantified surplus scenarios. Moved non CAP AZ water diversion assignments to this rule for Domestic/Quantified surplus enetitlement holders. Refernced Annual Shortage volume slot instead of calculating shortage via table<br>A. Pivarnik, 20200713: Integration effort. Removed if statements for setting non CAP user suprlus schedules. This allows for the schedules to be reset to normal if there is a condition change. No other changes made to the rule. This covers the two rules in the 24 MS which change CAP diversion based on DCP and non DCP adjustments";
+    BEGIN
+
+      WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
+          DESCRIPTION          "Shortage reduction volume <br>";
+      WITH_STATEMENT (NUMERIC CAPShortageVolume = $ "Shortage.CAP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] COMMENTED_BY "Adjust CAP for shortage <br>") DO
+          DESCRIPTION          "Adjust diversion by difference of ICS delivery calculated by MTOM vs the value passed from the 24 MS.  <br>";
+      WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.AnnualICSDelivery_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+          DESCRIPTION          "DCP reduction volume <br>";
+      WITH_STATEMENT (NUMERIC DCPreductionCAWCD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+          DESCRIPTION          "If the LB is in Domestic or Quantified Surplus, use the total annual schedules slot. This is the base <br>diversion volume prior to any adjustments being made <br>";
+      WITH_STATEMENT (NUMERIC CAPDivRequested = IF ( "IsDomesticOrQuantified"(  ) )
+ THEN
+  $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ELSE
+  $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"]
+ ENDIF) DO
+            FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "CAPDiversion.Total Diversion Requested" [date], date ) / "SumFlowsToVolume"( $ "CAPDiversion.Total Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
+            $ "CAPDiversion.Total Diversion Requested" [date] := "VolumeToFlow"( ( ( ( CAPDivRequested + GET @INDEX 0.00000000 FROM AZFirming ) - DCPreductionCAWCD + CAWCDICSdiversionAdjustment ) - CAPShortageVolume ) * MonthPercent, date );
+
+      END_WITH_STATEMENT;
+
+      ENDFOREACH;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      END_WITH_STATEMENT;
+
+      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsDomesticOrQuantified"(  ) )
+ THEN
+  "Set Monthly Surplus Schedule"( date, "Gila Monster Farms" )
+ ELSE
+  $ "Arizona_CU_Schedules.Gila Monster Farms" [date]
+ ENDIF DO
+  "VolumeToFlow"( MonthlyDiv, date )
+ ENDWITH;
+
+            $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsDomesticOrQuantified"(  ) )
+ THEN
+  "Set Monthly Surplus Schedule"( date, "AzPumpersBlwImp" )
+ ELSE
+  $ "Arizona_CU_Schedules.AzPumpersBlwImp" [date]
+ ENDIF DO
+  "VolumeToFlow"( MonthlyDiv, date )
+ ENDWITH;
+
+      ENDFOREACH;
+
+      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            $ "AzPkrToImp:CibolaValleyIID.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsFloodControl"(  ) )
+ THEN
+  "Set Monthly Surplus Schedule"( date, "CibolaValleyIID" )
+ ELSE
+  $ "Arizona_CU_Schedules.CibolaValleyIID" [date]
+ ENDIF DO
+  "VolumeToFlow"( MonthlyDiv, date )
+ ENDWITH;
+
+            $ "AzPkrToImp:Parker.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsFloodControl"(  ) )
+ THEN
+  "Set Monthly Surplus Schedule"( date, "City of Parker" )
+ ELSE
+  $ "Arizona_CU_Schedules.City of Parker" [date]
+ ENDIF DO
+  "VolumeToFlow"( MonthlyDiv, date )
+ ENDWITH;
+
+      ENDFOREACH;
+
+    END
+    UUID "{1574216e-dc24-4ea2-9307-60c03d96cdbb}";;
+
   END
   UUID "{f84695a6-60d5-4324-82b4-b0ea2bb85e38}";;
 
@@ -978,43 +988,6 @@ BEGIN
 
     END
     UUID "{3cf25486-9222-4d9a-9f7b-d151fe589f1b}";;
-
-    RULE                 "NV Accounting";
-    DESCRIPTION          "DESCRIPTION: This rule assigns the values for the Nevada ICS.  The function &quot;ICSAccountingForNV&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for Nevada ICS.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.[ BiNational, SystemEfficiency, Imported, Tributary, ExtraordinaryConservation, DCP  ]ICS_NV <br>ICS Credits.AnnualCreationEC_NV ;  ICS Credits.AnnualCreationDCP_NV<br>ICS Credits.AnnualSimultaneousCreationDCPICS_NV ;  ICS Credits.AnnualSysWaterforDCP_NV<br>ICS Credits.Bank_NV ;  ICS Credits.TotalICS_NV";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A.Pivarnik, 20200713: Integration effort. No changes to this rule. Changes to the ICS accounting function for NV";
-    BEGIN
-
-      WITH_STATEMENT (LIST ICSAccounting = "ICSAccountingForNV"(  )) DO
-            $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 0.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 1.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 2.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 3.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 4.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 5.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 6.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 7.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 8.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + GET @INDEX 4.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.Bank_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 9.00000000 FROM ICSAccounting;
-
-            $ "ICS Credits.TotalICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 10.00000000 FROM ICSAccounting;
-
-      END_WITH_STATEMENT;
-
-    END
-    UUID "{6a434372-0c7e-459f-babc-5eb600511d40}";;
 
     RULE                 "CA Accounting";
     DESCRIPTION          "DESCRIPTION: This rule assigns the values for the California ICS.  The function &quot;ICSAccountingForCA&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for California ICS.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.AnnualDeliveryBiNat_[IID, CA] ;  ICS Credits.AnnualDeliveryEC_[IID, CA] ;  ICS Credits.AnnualDeliverySysEff_CA ; ICS Credits.AnnualDeliveryDCP_CA<br>ICS Credits.AnnualCreationBiNat_CA ;  ICS Credits.AnnualCreationEC_[IID, MWD, CA] ;  ICS Credits.AnnualCreationSysEff_CA ;  ICS Credits.AnnualCreationDCP_[MWD, CA]<br>ICS Credits.BiNationalICS_[MWD, IID, CA] ;  ICS Credits.ExtraordinaryConservationICS_[MWD, IID, CA] ;  ICS Credits.SystemEfficiencyICS_[MWD, CA]<br>ICS Credits.AnnualSimultaneousCreationDCPICS_MWD ;  ICS Credits.DCPICS_[MWD, CA]; ICS Credits.AnnualSysWaterforDCP_[MWD, CA]<br>ICS Credits.TotalICS_[MWD, IID, CA] ; ICS Credits.Bank_[MWD, CA]";
@@ -1201,6 +1174,43 @@ BEGIN
 
     END
     UUID "{880fdd8a-b06f-4f83-a7c8-f99bf19d486d}";;
+
+    RULE                 "NV Accounting";
+    DESCRIPTION          "DESCRIPTION: This rule assigns the values for the Nevada ICS.  The function &quot;ICSAccountingForNV&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for Nevada ICS.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.[ BiNational, SystemEfficiency, Imported, Tributary, ExtraordinaryConservation, DCP  ]ICS_NV <br>ICS Credits.AnnualCreationEC_NV ;  ICS Credits.AnnualCreationDCP_NV<br>ICS Credits.AnnualSimultaneousCreationDCPICS_NV ;  ICS Credits.AnnualSysWaterforDCP_NV<br>ICS Credits.Bank_NV ;  ICS Credits.TotalICS_NV";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A.Pivarnik, 20200713: Integration effort. No changes to this rule. Changes to the ICS accounting function for NV";
+    BEGIN
+
+      WITH_STATEMENT (LIST ICSAccounting = "ICSAccountingForNV"(  )) DO
+            $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 0.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 1.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 2.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 3.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 4.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.AnnualCreationEC_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 5.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 6.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 7.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 8.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.AnnualCreationDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + GET @INDEX 4.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.Bank_NV" [@"24:00:00 December 31, Current Year"] := GET @INDEX 9.00000000 FROM ICSAccounting;
+
+            $ "ICS Credits.TotalICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 10.00000000 FROM ICSAccounting;
+
+      END_WITH_STATEMENT;
+
+    END
+    UUID "{6a434372-0c7e-459f-babc-5eb600511d40}";;
 
     RULE                 "NV ICS Delivery";
     DESCRIPTION          "DESCRIPTION: This rule sets the annual delivery for each Nevada ICS account. The annual delivery is constrained by the bank capacity, Mead's pool elevation, the delivery limit, and any surplus delivery. It is assumed that Nevada will take any tributary or imported ICS delivery made during the current year when in quantified surplus or flood control. The rule determines which ICS account type the annual ICS delivery comes from using a list. The order in which the ICS deliveries are made is: DCP (constrained by Mead recovery elevation), Extraordinary Conservation, Tributary, System Efficiency, Binational, and Imported.<br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition have changed between run cycle 3 and 4. <br><br>SLOTS SET: <br>ICS Credits.AnnualDeliveryDCP_NV<br>ICS Credits.AnnualDeliveryEC_NV<br>ICS Credits.AnnualDeliveryTrib_NV<br>ICS Credits.AnnualDeliverySysEff_NV<br>ICS Credits.AnnualDeliveryBiNat_NV<br>ICS Credits.AnnualDeliveryImp_NV<br>ICS Credits.AnnualICSDelivery_NV";
@@ -1437,7 +1447,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets ICS deliveries and creation for MWD. If it is the start year and April-December, the ICS creation and delivery (bi-national, system efficiency, extraordinary conservation) will be set to the default value passed from the 24MS. Otherwise, ICS delivery will be the minimum of the default based on the Sac WY type and LB conditions, the maximum ICS take based on Mead pool elevation, and capped at canal capacity. ICS creation is minimum constrained by the Sac WY type and LB conditions, the remaining space to bank ICS in Mead by MWD, the maximum annual creation by MWD, and the diversion requested that is above their annual delivery.<br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, or it is quantified surplus or flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICSProjectionData.AnnualCreationEC_MWD_Preliminary<br>ICSProjectionData.AnnualICSDelivery_MWD_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>TP, 20171218: In domestic surplus, reduce the ICS Delivery by the amount of Domestic surplus entitlement for MWD. Make sure the amount of Delivery taken is within the MWD ICS bank or below the Maximum Take that MWD can have.<br>AP, 20191921: Updated for DCP. Added constraint for max available ICS limited based on recovery elevation for DCP.<br>S.Baker, 20200309: Updated and edited description. Added WITH statement for SacWY_Take. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged(). <br>GCAA, 20200330: Updated rule to constrain MWD's ICS delivery by the normal operational maximum (1.2 maf) in non-surplus years and annual canal capacity (1.25 maf) if in surplus years<br>A.Pivarnik, 20200423: Replace sum of MWD div requested with sim of Forecast use Reset annual and returns<br>A.Pivarnik, 20200511: Added TJ div into full ditch converyance calculation<br>A.Pivarnik, 20200713: Integration effort. Added Is24MonthStudy function call to the first if statement. This way the ruleset always uses the default values when in 24 MS mode. Replaced default value for 3 types of MWD ICS delivery with an ICS default slot for MWD.Added StartYearDCP contribution function call to take into account not ending in the same tier as projected in the August 24 MS of the previous year";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>TP, 20171218: In domestic surplus, reduce the ICS Delivery by the amount of Domestic surplus entitlement for MWD. Make sure the amount of Delivery taken is within the MWD ICS bank or below the Maximum Take that MWD can have.<br>AP, 20191921: Updated for DCP. Added constraint for max available ICS limited based on recovery elevation for DCP.<br>S.Baker, 20200309: Updated and edited description. Added WITH statement for SacWY_Take. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged(). <br>GCAA, 20200330: Updated rule to constrain MWD's ICS delivery by the normal operational maximum (1.2 maf) in non-surplus years and annual canal capacity (1.25 maf) if in surplus years<br>A.Pivarnik, 20200423: Replace sum of MWD div requested with sim of Forecast use Reset annual and returns<br>A.Pivarnik, 20200511: Added TJ div into full ditch converyance calculation<br>A.Pivarnik, 20200713: Integration effort. Added Is24MonthStudy function call to the first if statement. This way the ruleset always uses the default values when in 24 MS mode. Replaced default value for 3 types of MWD ICS delivery with an ICS default slot for MWD.Added StartYearDCP contribution function call to take into account not ending in the same tier as projected in the August 24 MS of the previous year.";
     BEGIN
 
       IF_STATEMENT (( "IsAPRtoDECofStartYear"(  ) OR NOT "IsMRM"(  ) ) OR "Is24MonthStudy"(  )) THEN
@@ -2115,13 +2125,18 @@ BEGIN
     DESCRIPTION          "DESCRIPTION:  This rule sets Arizona's DCP contribution if a DCP contribution is needed (solved for in previous rule). The DCP contribution is made by converting any EC ICS water created for the current year to DCP ICS by imposing a tax on the water. The annual creation of DCP ICS is input from the 24MS and is the desired DCP ICS creation [unsure how this is set for 24MS?]. The Arizona DCP ICS creation and DCP contribute is set here, but will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICSProjectedData.AnnualCreationECtoDCPICS_CAWCD_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] ) );
-    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. <br><br>A. Pivarnik, 20200709: Integration effort. This rule was streamlined for the MTOM ruleset when created. It was written differently than the 24 MS rule but accomplishes the same thing. General structure for the rule did not change in the integration effort because the 24 MS ruleset is being merged into MTOM, and the MTOM structure is what solves correctly within this ruleset. Added a start year dcp creation function call to for solve the DCP creation volume in year 1 if we end in a DCP tier that is lower than the one projected by the 24 MS in August. ";
+    NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. <br><br>A. Pivarnik, 20200709: Integration effort. This rule was streamlined for the MTOM ruleset when created. It was written differently than the 24 MS rule but accomplishes the same thing. General structure for the rule did not change in the integration effort because the 24 MS ruleset is being merged into MTOM, and the MTOM structure is what solves correctly within this ruleset. Added a start year dcp creation function call to for solve the DCP creation volume in year 1 if Mead ends in a DCP tier that is lower than the one projected by the 24 MS in August. Changed refernce from DCP default slot to EC creation default slot in effort to use 1 input default slot similar to MWD";
     BEGIN
 
       WITH_STATEMENT (NUMERIC AnnualDCPContribution = GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "AZ" )) DO
           DESCRIPTION          "Set Arizona DCP contribution based off the desired DCP ICS creation input from the 24MS <br>";
       IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-ft") THEN
-            $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICSProjectionData.AnnualCreationDCPICS_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  );
+            $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := IF ( "IsStartYear"(  ) )
+ THEN
+  "SetNegativeToZero"( $ "ICSProjectionData.AnnualCreationEC_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "AZ" ) )
+ ELSE
+  $ "ICSProjectionData.AnnualCreationEC_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  )
+ ENDIF;
 
       ELSE
             $ "ICSProjectionData.AnnualConversionECtoDCP_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
@@ -11192,7 +11207,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>CH, 4/27/18: Deleted if else statements in creation of SE and Binat ICS so that AZ is allowed to created these types of ICS even in Shortage condition (only EC ICS cannot be created during a shortage). Cleaned up list the function returns and unused with statments: only 7 out of the 9 that were included are being used. <br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).<br>AP, 11/30/18: Changed all evap tax references  from *0.97 to the EvapTaxAdjustment function, changed all system tax references  from *0.95 to the SystemTaxAdjustment function.<br>AP, 20191130: Updated for DCP.";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>CH, 4/27/18: Deleted if else statements in creation of SE and Binat ICS so that AZ is allowed to created these types of ICS even in Shortage condition (only EC ICS cannot be created during a shortage). Cleaned up list the function returns and unused with statments: only 7 out of the 9 that were included are being used. <br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).<br>AP, 11/30/18: Changed all evap tax references  from *0.97 to the EvapTaxAdjustment function, changed all system tax references  from *0.95 to the SystemTaxAdjustment function.<br>AP, 20191130: Updated for DCP.<br>";
     BEGIN
 
       WITH NUMERIC AnnualCreationEC_CRIT = IF ( "IsQuantifiedOrFloodControl"(  ) )
@@ -14043,32 +14058,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{132c09ad-724e-425e-b513-630f4b79d55c}";
+    UUID "{7653b6c3-7eee-4d7b-a397-b06420083b35}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d5035903-85e0-4b63-9c89-672df236dccc}";
+    UUID "{82cfe416-f77f-4347-b703-38219c04b6a3}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{06a3a7a8-33b4-4b35-9a6b-43a7970429cc}";
+    UUID "{1f4b4084-45c8-4111-8443-f8bde8aa0ad8}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{355158e1-4a1e-4fc1-88ed-7a0a301eab81}";
+    UUID "{3d11331d-76fe-435b-8b93-f10edbff6a09}";
 ;
 
   END
-  UUID "{c4e0f48f-ffa0-4f1f-ae1d-4b01820c7c62}";;
+  UUID "{fbe2b5e4-2839-40a1-8bd0-5f82496a08f4}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14079,11 +14094,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{cc7b3719-7672-4f10-8b04-644aeaa66bd4}";
+    UUID "{f8479751-c571-4c5a-9795-d51cbe0ccee2}";
 ;
 
   END
-  UUID "{82a015e8-1e55-486b-b407-84533b1cc09e}";;
+  UUID "{48ceb61b-8001-4893-82f0-8eccdade1ff4}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14094,11 +14109,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3a05f943-fb77-4078-b0b8-4525319d9662}";
+    UUID "{5c276c72-b560-44ef-b73b-1c37b48a0061}";
 ;
 
   END
-  UUID "{c5fda2e1-e38d-4ea2-9b84-4a912e75f9ea}";;
+  UUID "{01f1c3e4-dce4-40ce-99a2-4fc47c07bd90}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14109,11 +14124,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b3de99fc-be41-4667-9cb4-bdedbce98440}";
+    UUID "{c9d4c9d5-206a-42bf-9146-29496a78c41c}";
 ;
 
   END
-  UUID "{ca7e5466-3edd-41b4-9f00-d59d1f0ce9dd}";;
+  UUID "{02d1a7f2-2f46-4a8c-95df-cac439195e09}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
