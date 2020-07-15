@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:42 July 15, 2020
+# Created 16:58 July 15, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -22,7 +22,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for SNWA after all schedule adjustments. Adjustments may be made to get Nevada to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: ForecastUse.SNWPAnnualFC";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This rule is the same in MTOM and 24MS. No changes needed";
     BEGIN
 
       $ "ForecastUse.SNWPAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] := "Annual Volume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" );
@@ -34,7 +34,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for CAP after all schedule adjustments. Adjustments may be made to get Arizona to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: Forecast.CAPAnnualFC<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br><br>A.Pivarnik, 20200715: Integration effort. This rule is the same in MTOM and 24MS. No changes needed";
     BEGIN
 
       $ "ForecastUse.CAPAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] := "Annual Volume"( $ "CAPDiversion.Total Diversion Requested" );
@@ -46,7 +46,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for MWD after all schedule adjustments. Adjustments may be made to get California to their projected annual apportionment, lower basin demand variability, shortage, or surplus.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: ForecastUse.MWDDiversionAnnualFC; ForecastUse.MWDAnnualFC";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This rule is written slightly differently in MTOM vs the 24 MS but it accomplishes the same goal. 24 MS reference depletion by subtracting the returns from the diversion, while the MTOM rule references the depletion slot directly";
     BEGIN
 
       $ "ForecastUse.MWDDiversionAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] := "Annual Volume"( $ "MWDDiversion:MWD.Diversion Requested" );
@@ -67,7 +67,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for California after all schedule adjustments by calculating the difference between the total annual diversion request and the annual apportionment for the current calendar year.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.CaOverrun";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort.  The MTOM rule has to differentiate between slots for an MRM vs deterministic run. Since the determinsitc run uses the same slot as the 24 MS and is not an MRM, this rule will evaluate correctly in 24MS mode";
     BEGIN
 
       $ "AnnualWaterUse.CaOverrun" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.CaTotalAnnual" [@"24:00:00 December 31, Current Year"] - IF ( "IsMRM"(  ) )
@@ -84,7 +84,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for California after all schedule adjustments by summing the non-MWD diversion requests and the MWD depletion request for the current calendar year.  This rule also calculates the value of the California Final Adjusted Apportionment.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4 and if the timestep is December or the finish timestep.<br><br>SLOTS SET: AnnualWaterUse.CaTotalAnnual; AnnualWaterUse.California_FinalAdjustedApportionment";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND ( @"t" == @"24:00:00 December 31, Current Year" OR @"t" == @"Finish Timestep" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. The CATotalAnnual slot assignment is the same as the 24 MS.The FinalAdjustedApportionment slot assignment is not used in the 24 MS and it does not make a difference if the slot is left enabled in 24 MS mode (it is left enabled in determinsitic mode and is used for the MRM in the next rule). No changes";
     BEGIN
 
       $ "AnnualWaterUse.CaTotalAnnual" [@"24:00:00 December 31, Current Year"] := FOR ( DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year" ) STAT_SUM
@@ -117,7 +117,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for Arizona after all schedule adjustments by calculating the difference between the total diversion request and the annual apportionment for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.AzOverrun<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This rule is the same in MTOM and 24MS. No changes needed";
     BEGIN
 
       $ "AnnualWaterUse.AzOverrun" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.AzTotalAnnual" [@"24:00:00 December 31, Current Year"] - $ "AnnualWaterUse.Arizona_Apportionment" [@"24:00:00 December 31, Current Year"];
@@ -129,7 +129,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for Arizona after all schedule adjustments by summing the CAP and non-CAP annual diversion requests for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.AzTotalAnnual";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A. Pivarnik, 2020.715: Integration effort. The 24 MS ruleset references the CAPAnnualFC slot while the MTOM ruleset uses the SumAnnualCAPDivRequest function. There is no difference in that value and the rule evaluates the same. No changes";
     BEGIN
 
       $ "AnnualWaterUse.AzTotalAnnual" [@"24:00:00 December 31, Current Year"] := "SumAnnualCAPDivRequest"(  ) + $ "AnnualWaterUse.AzNoCAPTotalAnnual" [@"24:00:00 December 31, Current Year"];
@@ -141,7 +141,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected overrun or underrun for Nevada after all schedule adjustments by calculating the difference between the total diversion requests and the annual apportionment for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.NVOverrun<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This rule is the same in both the 24MS and MTOM ruleset. No changes needed";
     BEGIN
 
       $ "AnnualWaterUse.NVOverrun" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.NvTotalAnnual" [@"24:00:00 December 31, Current Year"] - $ "AnnualWaterUse.Nevada_Apportionment" [@"24:00:00 December 31, Current Year"];
@@ -149,11 +149,11 @@ BEGIN
     END
     UUID "{572e18ce-04c0-4998-86a9-dc6292768c02}";;
 
-    RULE                 "Final NV Annual Use - Div Req";
+    RULE                 "??????? Final NV Annual Use - Div Req";
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for Nevada after all schedule adjustments by summing the diversion requests of Nevada water users for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.NvTotalAnnual";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: This";
     BEGIN
 
       $ "AnnualWaterUse.NvTotalAnnual" [@"24:00:00 December 31, Current Year"] := FOR ( DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year" ) STAT_SUM
@@ -165,7 +165,7 @@ BEGIN
     "FlowToVolume"( diversionSite & "Diversion Requested" [date], date )
    ENDIF
   ENDFOR
- ENDFOR;
+ ENDFOR COMMENTED_BY "This is calculated in rule 70 of the 24 MS only. Rule 70 in 24 MS is SumAnnualStateUse - Div Req. <br>Do we want this to recalculate in  both modes? There are no execution constraints on the rule in <br>either MTOM or 24 MS, so shouldnt it theoretically refire if a diversion has changed? <br>";
 
     END
     UUID "{3ce4aca2-e79b-4b7a-b7e7-7d0031d658f2}";;
@@ -174,7 +174,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: The rule calculates Lower Basin energy. This rule must fire after all schedule adjustments have been made, which is why it is in the highest priority policy group. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: Lower Basin Energy.Computed Davis Energy Using Input Eff; Lower Basin Energy.Computed Davis Head using Turbine Release; Lower Basin Energy.Davis KWH per AF; Lower Basin Energy.Computed Parker Energy Using Input Eff; Lower Basin Energy.Computed PD Project Energy Using Peak Base Power Calc; Lower Basin Energy.Computed PD Project Energy Using Input Eff";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. The MTOM rule is the saem as 24 MS. No changes needed";
     BEGIN
 
       $ "Lower Basin Energy.Computed Davis Energy Using Input Eff" [] := $ "Lower Basin Energy.Input Davis Efficiency" [] * "FlowToVolume"( $ "Mohave.Turbine Release" [], @"t" ) * "Compute Head as a Function of Turbine Release"( $ "Mohave.Turbine Release" [] ) * 9789.00000000 "newton" / ( ( 1.00000000 "m" * 1.00000000 "m" ) * 1.00000000 "m" );
@@ -195,6 +195,29 @@ BEGIN
   END
   UUID "{0e00c279-f30a-4ce4-8855-d1bab141d5de}";;
 
+  POLICY_GROUP   "AugEOYProjections";
+  DESCRIPTION    "";
+  ACTIVE         TRUE;
+  NOTES          "";
+  BEGIN
+
+    RULE                 "AugEOYPEProjections";
+    DESCRIPTION          "DEVELOPMENT NOTES<br>AUTHOR: ST<br>DESCRIPTION: In the August 24-month study, this rule saves the projected end of calendar year elevations for Powell and Mead. These  values are then transfered to MTOM so MTOM knows how to operate Powell and Mead for the year even if the actual January 1 elevation is not where the August study projected it.<br>";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT "GetMonth"( "RunStartDate"(  ) ) == 8.00000000 AND "Is24MonthStudy"(  );
+    NOTES                "A.Pivarnik, 20200715: Integration effort. This policy group and rule were brought into the integrated ruleset from the 24 MS. This rule only fires in 24 MS mode";
+    BEGIN
+
+      $ "PowellToMeadData.AugEOYMeadPEProjection" [@"24:00:00 December 31, Current Year"] := $ "Mead.Pool Elevation" [@"24:00:00 December 31, Current Year"];
+
+      $ "PowellToMeadData.AugEOYPowellPEProjection" [@"24:00:00 December 31, Current Year"] := $ "Powell.Pool Elevation" [@"24:00:00 December 31, Current Year"];
+
+    END
+    UUID "{03f55ef1-ed0d-436b-84aa-ece27393ae51}";;
+
+  END
+  UUID "{671bbe2d-ec44-4748-b5e5-436bc3cf56cf}";;
+
   POLICY_GROUP   "FloodControl";
   DESCRIPTION    "This policy group contains all the rules required to simulate Lake Mead/Hoover Dam flood control operations. Flood control operations are based on the USACE Water Control Manual for Flood Control: Hoover Dam and Lake Mead Colorado River, December 1982 (Flood Control Manual)";
   ACTIVE         TRUE;
@@ -205,12 +228,12 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the power slots for the LC dams based on their power capacity values and power plant capacity fractions<br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 4. <br><br>SLOTS SET: Mead.Power; Mohave.Power; Havasu.Power";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 4.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: LC Check then write note";
     BEGIN
 
       $ "Mead.Power" [] := $ "EnergyInfo.EffectiveHooverCapacity" [] * $ "Mead.Power Plant Cap Fraction" [];
 
-      $ "Mohave.Power" [] := $ "Lower Basin Energy.Davis_Power_Capacity" [] * $ "Mohave.Power Plant Cap Fraction" [];
+      $ "Mohave.Power" [] := $ "Lower Basin Energy.Davis_Power_Capacity" [] * $ "Mohave.Power Plant Cap Fraction" [] COMMENTED_BY "LC CHECK<br><br>Named differently in the 24MS. Is this the same slot??? <br>";
 
       $ "Havasu.Power" [] := $ "Lower Basin Energy.Parker_Power_Capacity" [] * $ "Havasu.Power Plant Cap Fraction" [];
 
@@ -221,17 +244,13 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: In the event of Flood Control the Diversion Schedules are set to the Monthly Surplus Schedules for Flood Control. <br><br>EXECUTION CONTRAINT: This rule fires in run cycle 3 or 4 if the Flood Control or Exlusive Space Flags are greater than zero and the Flood Control Surplus Flag is NaN.<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Flood Control Surplus Flag; OthersBlwImp.AzPumpersBlwImp.Diversion Requested; AzPkrToImp:CibolaValleyIID.Diversion Requested; AzPkrToImp:Parker.Diversion Requested; GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested; CAPDiversion.Total Diversion Requested; MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested; AAC:Coachella.Diversion Requested; AAC:IID.Diversion Requested; CaPkrToImp:CaPumpersAbvImp.Diversion Requested; CaDvsToPkr:Needles.Diversion Requested; MexicanTreatyDelivery:MexicoSched.Diversion Requested; PumpingFromLakeMead:SNWP.Diversion Requested; PumpingFromLakeMead:SNWP.Depletion Requested<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 ) AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br>MC, 20170920: Changed beginning datetime in FOR loop from @&quot;24:00:00 January 31, Current Year&quot; to @&quot;t&quot; per Sep 19 email from Shana T. and Corinne H.<br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br>A.Pivarnik, 20200416: Per group discussion, removed if statement preventing reset of SNWP diversion if the FC Surplus Schedule was less than the sum of SNWA schedules.  Causing issue if FC Surplus Schedule was changed between RC 3 and 4. Changed run control constraint to remove Surplus.Surplus is Nan requirement (prevented rule from firing in RC 4).<br>A. Pivarnik, 20200511: Added MX TJ div to MWD depletion calculation";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br>MC, 20170920: Changed beginning datetime in FOR loop from @&quot;24:00:00 January 31, Current Year&quot; to @&quot;t&quot; per Sep 19 email from Shana T. and Corinne H.<br>A.Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br>A.Pivarnik, 20200416: Per group discussion, removed if statement preventing reset of SNWP diversion if the FC Surplus Schedule was less than the sum of SNWA schedules.  Causing issue if FC Surplus Schedule was changed between RC 3 and 4. Changed run control constraint to remove Surplus.Surplus is Nan requirement (prevented rule from firing in RC 4).<br>A. Pivarnik, 20200511: Added MX TJ div to MWD depletion calculation<br>A.Pivarnik, 20200715: Integration effort. Disabled deleted slot assignments. Added CAP Depletion assignment to match the 24 MS. Left out if statement from 24 MS rule which check Pumping from mead Surplus total annual schedules vs forecast use ";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
             $ "Surplus.Surplus Flag" [date] := 3.00000000;
 
             $ "Surplus.Flood Control Surplus Flag" [date] := 1.00000000;
-
-          INACTIVE      $ "LowerBasinDemandVariability.AbvHooverTriggerSet" ["Dec31ofYear"( date )] := 2.00000000;
-
-          INACTIVE      $ "LowerBasinDemandVariability.BlwParkerTriggerSet" ["Dec31ofYear"( date )] := 2.00000000;
 
             $ "OthersBlwImp:AzPumpersBlwImp.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "AzPumpersBlwImp" ), date );
 
@@ -242,6 +261,8 @@ BEGIN
             $ "GilaAndYumaUsers:GilaMonsterFarms.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "Gila Monster Farms" ), date );
 
             $ "CAPDiversion.Total Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "CAP" ), date );
+
+            $ "CAPDiversion.Total Depletion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "CAP" ), date );
 
             $ "MWDDiversion:MWD.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "MWD" ), date );
 
@@ -257,7 +278,8 @@ BEGIN
 
             $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "Mexico" ), date );
 
-            $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "SNWA" ), date );
+          DESCRIPTION          "LC CHECK<br><br>Left out if statement, seemed unneccesary  <br>";
+      $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "SNWA" ), date );
 
             $ "PumpingFromLakeMead:SNWP.Depletion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "SNWA" ), date );
 
@@ -270,10 +292,10 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This Rule is used to set the EnergyInfo.EffectiveHooverCapacity so that it can go out to 60 weeks.  The regression equation provided is from the LC BoR office and can be adjusted using this rule. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 3 or 4. <br><br>SLOTS SET: EnergyInfo.EffectiveHooverCapacity; Mead.Power Plant Cap Fraction";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This logic is structured differently than the 24 MS but solves for the same thing. Add Is24MS to the top if statement which runs the portion the portion of the ruleset which is meant for the MTOM determinstic run/equivalent rule in the 24MS. The second part of the else statement is for MTOM's MRM mode";
     BEGIN
 
-      IF_STATEMENT (( NOT "IsMRM"(  ) ) COMMENTED_BY "This check determines if a run is a deterministic run or an MRM run and the data comes<br>out of the Ensemble Forecast Sheet. TP 3/28/2013") THEN
+      IF_STATEMENT (( NOT "IsMRM"(  ) OR "Is24MonthStudy"(  ) ) COMMENTED_BY "This check determines if a run is a deterministic run or an MRM run and the data comes<br>out of the Ensemble Forecast Sheet. TP 3/28/2013") THEN
             IF_STATEMENT ("IsInput"( $ "EnergyInfo.EffectiveHooverCapacityInput", @"t" )) THEN
           DESCRIPTION          "Use input value";
       $ "EnergyInfo.EffectiveHooverCapacity" [@"t"] := $ "EnergyInfo.EffectiveHooverCapacityInput" [@"t"];
@@ -285,7 +307,7 @@ BEGIN
  THEN
   2074.00000000 "MW"
  ELSE
-  ( elevMead * ( 5.64540000 "MW" / 1.00000000 "foot" ) - 4530.50000000 "MW" )
+  ( ( elevMead * ( 5.64540000 "MW" / 1.00000000 "foot" ) - 4530.50000000 "MW" ) COMMENTED_BY "Regression values provided by BOR LC on 3/8/2013 <br>" )
  ENDIF;
 
       END_WITH_STATEMENT;
@@ -317,8 +339,8 @@ BEGIN
     RULE                 "Mead Space Building";
     DESCRIPTION          "DESCRIPTION: If the storage in Mead is greater than the target storage (based on the minimum system space that must be available), this rule resets the outflow to achieve the target storage during space building months (August 1 - December 31); if the Flood Control Flag is not already set, this rule also sets it based on whether the outflow was reset by the rule<br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 3 or 4 from Aug-Dec if Mead.Outflow contains a value and the FloodControlOutput.Flood Control Flag is NaN. <br><br>SLOTS SET: Mead.Outflow; FloodControlOutput.Flood Control Flag";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND NOT IsNaN $ "Mead.Storage" [] AND @"t" > @"24:00:00 July Max DayOfMonth, Current Year" AND IsNaN $ "FloodControlOutput.Flood Control Flag" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>CH, 4/18/18: Added execution constraint: AND IsNaN FloodControlOutput.Flood Control Flag to so that in the case the Flood Control Flag is set in run cycle 3, it is not reset in run cycle 4. Once a flood control flag is set, it should not be reset (even in run cycle 4).";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND NOT IsNaN $ "Mead.Storage" [] AND @"t" > @"24:00:00 July Max DayOfMonth, Current Year" AND ( IsNaN $ "FloodControlOutput.Flood Control Flag" [] ) COMMENTED_BY "LC CHECK<br><br>Not a exec constraint in 24 MS, should it be removed... <br>";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>CH, 4/18/18: Added execution constraint: AND IsNaN FloodControlOutput.Flood Control Flag to so that in the case the Flood Control Flag is set in run cycle 3, it is not reset in run cycle 4. Once a flood control flag is set, it should not be reset (even in run cycle 4).<br>A.Pivarnik, 20200715: Integration effort. This rule is the same as the equivalent rule in the 24 MS";
     BEGIN
 
       IF_STATEMENT ($ "Mead.Storage" [] > "ComputeTargetStorage"(  )) THEN
@@ -342,8 +364,8 @@ BEGIN
     RULE                 "Mead Flood Control Release";
     DESCRIPTION          "DESCRIPTION: This rule checks that the release from Mead computed for downstream demands is large enough to satisfy flood control during the runoff season. If not, Mead Outflow is reset to the required flood control release which was previously calculated in the <Set Flood Control Release> rule and stored as FloodControlOutput.FCrelease. The flood control flag is also set to 1, which will cause the system to solve downstream and eventually force more water out of Havasu and Mohave.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 3 or 4 from Jan-July if Mead.Outflow and the FloodControlOutput.Flood Control Flag contain values. <br><br>SLOTS SET: Mead.Outflow; FloodControlOutput.Flood Control Flag";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND NOT IsNaN $ "Mead.Outflow" [] AND "GetRunCycleIndex"(  ) >= 3.00000000 AND IsNaN $ "FloodControlOutput.Flood Control Flag" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170518: Rule modified to only use 1 IF statement <br>CH, 4/18/18: Added execution constraint: AND IsNaN FloodControlOutput.Flood Control Flag to so that in the case the Flood Control Flag is set in run cycle 3, it is not reset in run cycle 4. Once a flood control flag is set, it should not be reset (even in run cycle 4).";
+    RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND NOT IsNaN $ "Mead.Outflow" [] AND "GetRunCycleIndex"(  ) >= 3.00000000 AND IsNaN $ "FloodControlOutput.Flood Control Flag" [] COMMENTED_BY "LC CHECK<br><br>This is not an execution constraint in the 24 MS, should it be removed <br>";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170518: Rule modified to only use 1 IF statement <br>CH, 4/18/18: Added execution constraint: AND IsNaN FloodControlOutput.Flood Control Flag to so that in the case the Flood Control Flag is set in run cycle 3, it is not reset in run cycle 4. Once a flood control flag is set, it should not be reset (even in run cycle 4).<br>A.Pivarnik, 20200715: Integration effort. This rule is the same as the rule in the 24 MS";
     BEGIN
 
       IF_STATEMENT ($ "Mead.Outflow" [] < $ "FloodControlOutput.FCrelease" []) THEN
@@ -363,7 +385,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule ensures that Mead does not violate the 1.5 maf space requirement (on MeadFloodControlData.MinSpace slot) at any time of the year. Although this is the highest priority rule, we don't want it to fire until the other flood control procedures have potentially executed. The rule checks the storage in Mead, and if it does not provide the minimum space, the outflow is recalculated so that the minimum space is achieved. If the outflow is recalculated, the FloodControlOutput.Exclusive Space Flag is set to 1; otherwise it is set to 0.<br><br>EXECUTION CONSTRAINT: This rule fires if the FloodControlOutput.Exclusive Space Flag is not NaN (set in this rule) and Mead.Storage is not NaN.<br><br>SLOTS SET: Mead.Outflow; FloodControlOutput.Exclusive Space Flag";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "FloodControlOutput.Flood Control Flag" [] AND NOT IsNaN $ "Mead.Storage" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>SB, 201907011: Edited execution constraint to check if FC slot was greater than 0 (not just Not NaN). This rule was setting Mead outflow during very low scenarios in which flood control rules should not be executing.<br>MC, 20170518: Modified rule to use only 1 IF statement instead of 2, and only print statement in the case the IF statement is TRUE<br>MC, 20170920: Modified calculation of Mead.Outflow to take the larger of outflow to reach min space requirement or outflow to meet downstream requirement per Sep 19 email from Shana T. and Corinne H. (previously did not consider downstream requirement)";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>SB, 201907011: Edited execution constraint to check if FC slot was greater than 0 (not just Not NaN). This rule was setting Mead outflow during very low scenarios in which flood control rules should not be executing.<br>MC, 20170518: Modified rule to use only 1 IF statement instead of 2, and only print statement in the case the IF statement is TRUE<br>MC, 20170920: Modified calculation of Mead.Outflow to take the larger of outflow to reach min space requirement or outflow to meet downstream requirement per Sep 19 email from Shana T. and Corinne H. (previously did not consider downstream requirement)<br>A.Pivarnik, 20200715: Integration effort. This rule is the same as the rule in the 24 MS. No changes needed";
     BEGIN
 
     DESCRIPTION          "If Mead storage exceeds what provides the minimum space requirement, <br>recalculate outflow so the storage provides the minimum space.";
@@ -391,7 +413,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the Mead flood control release according to Table 1 in Exhibit A of the Flood Control Manual, which dictates release steps given inflow and available storage, during flood control months (January 1 - July 31) or as the minimum of either releases needed to achieve target storage or the maximum space building release (28,000 cfs) during space building months (August 1 - December 31).<br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 3 and 4 if this rule has not effectively set the FloodControlOutput.FCrelease rule for the current timestep yet. <br><br>SLOTS SET: FloodControlOutput.FCrelease";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "FloodControlOutput.FCrelease" [] AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This rule is the same as in the 24 MS. No changes needed";
     BEGIN
 
       $ "FloodControlOutput.FCrelease" [] := IF ( @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" )
@@ -415,7 +437,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the forecasted Mead inflow and the Mead inflow volume in excess of the available space in Mead and Powell.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 3 or 4 if it is Jan-July and FloodControlOutput.Withoutrel is NaN, which is set in this rule. <br><br>SLOTS SET: FloodControlOutput.Forecas; FloodControlOutput.Withoutrel";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND IsNaN $ "FloodControlOutput.Withoutrel" [] AND "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170517: The AvailableSpace, DeltaBankStorage, and FloodControlEvap values were previously calculated in Set Forecast Data. Can those slot values be used here instead of recalculating those values? Also, replace call to ForecastMeadInflow with appropriate call to SumFlowsToVolume";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170517: The AvailableSpace, DeltaBankStorage, and FloodControlEvap values were previously calculated in Set Forecast Data. Can those slot values be used here instead of recalculating those values? Also, replace call to ForecastMeadInflow with appropriate call to SumFlowsToVolume<br>A.Pivarnik, 20200715: Integration effort. This rule is the same as in the 24 MS. No changes needed";
     BEGIN
 
       $ "FloodControlOutput.Forecas" [] := "ForecastMeadInflow"(  );
@@ -430,7 +452,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the total effective space available in Flaming Gorge (incl. Fontenelle), Blue Mesa, and Navajo until the end of July of the current year by choosing, for each individual reservoir, the minimum of the total available space remaining (*use) or the difference between the Inflow and Outflow (*pred) for the period and summing those values. Used in ForecastMeadInflow function to calculate Mead inflow forecast for calculation of flood control releases according to the Flood Control Algorithm in Exhibit One of the Flood Control Manual.<br><br>EXECUTION CONSTRAINT: This rule fires if slot in the rule has not been set before (FloodControlOutput.UBEffective)<br><br>SLOTS SET: FloodControlOutput.UBEffective";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "FloodControlOutput.UBEffective" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This rule is the same as the 24 MS. No changes needed";
     BEGIN
 
       $ "FloodControlOutput.UBEffective" [] := IF ( @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" )
@@ -447,7 +469,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates the total diversion volume requested by SNWP from the current timestep to the end of July of the current year.<br><br>EXECUTION CONSTRAINT: This rule executes in Jan-July if FloodControlOutput.Withoutrel is NaN.<br><br>SLOTS SET: FloodControlOutput.Consnev";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND IsNaN $ "FloodControlOutput.Withoutrel" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170517: The function call in this rule can be replaced by a call to the predefined function SumFlowsToVolume <br>MC, 20180312: The above replacement was made sometime between these two comments. The MTOM changelog may have the specific month that the change was made.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170517: The function call in this rule can be replaced by a call to the predefined function SumFlowsToVolume <br>MC, 20180312: The above replacement was made sometime between these two comments. The MTOM changelog may have the specific month that the change was made.<br>APivarnik, 20200715: Integration effort. This rule is the same as the 24 MS. No changes needed";
     BEGIN
 
       $ "FloodControlOutput.Consnev" [] := "SumFlowsToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested", @"t", @"24:00:00 July Max DayOfMonth, Current Year" );
@@ -459,7 +481,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule calculates and stores the current available storage and expected net change in storage between the current timestep and the end of July of the current year for Flaming Gorge, Blue Mesa, Navajo, Powell and Mead. The change in bank storage and the evaporation are also calculated and stored. These storage calculations are used to determine effective upstream reservoir storage in the Mead Space Building rule. Effective UB storage is used to calculate Mead inflow forecast in the ForecastMeadInflow function for determination of flood control releases using the Flood Control Algorithmin Exhibit One of the Flood Control Manual.<br><br>EXECUTION CONSTRAINT: The FloodControlOutput.Withoutrel is NaN. <br><br>SLOTS SET: <br>FloodControlOutput.FGuse;  FloodControlOutput.FGpred<br>FloodControlOutput.BMuse;  FloodControlOutput.BMpred<br>FloodControlOutput.NAVuse;  FloodControlOutput.NAVpred <br>FloodControlOutput.PowellPred;  FloodControlOutput.PowellCredEff<br>FloodControlOutput.MeadPred;  FloodControlOutput.MeadCredEff<br>FloodControlOutput.Evapow;  FloodControlOutput.Evapmd;  FloodControlOutput.Deltabs";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "FloodControlOutput.Withoutrel" [];
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170717: Replaced explicit calculations for UC reservoirs with calls to AvailableSpace function<br>MC, 20170531 - the GetLiveCapacity(reservoir) - reservoir.Storage[@&quot;t-1&quot;] calculation is codified in the function AvailableSpace; call that function here?";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170717: Replaced explicit calculations for UC reservoirs with calls to AvailableSpace function<br>MC, 20170531 - the GetLiveCapacity(reservoir) - reservoir.Storage[@&quot;t-1&quot;] calculation is codified in the function AvailableSpace; call that function here?<br>A.Pivarnik, 20200715: Integration effort. This rule is the same as the rule in the 24 MS. No changes needed";
     BEGIN
 
       WITH_STATEMENT (LIST MonthlyDatelist = "GetMonthlyDatelist"( @"t", @"24:00:00 July Max DayOfMonth, Current Year" )) DO
@@ -14048,32 +14070,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{99fa4909-f792-4edc-aa80-f343136a1986}";
+    UUID "{453eb08c-e98e-43ff-9054-ad5dcf7bdc2f}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d54fbf95-7ff3-4417-b3b6-5d467dec8ce8}";
+    UUID "{51abfea1-fdcf-4f1e-b940-a4c63f4cd0e7}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{28f8a548-64a3-4aad-9ab5-91754081a15f}";
+    UUID "{f0908bb6-9398-4719-9077-e86324a3c353}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f499bdde-b171-497f-ab97-c7240a8b4046}";
+    UUID "{834a4ebe-1e85-49e3-90c4-664c11b1e651}";
 ;
 
   END
-  UUID "{599506e6-5b7b-45f4-8ddc-aedd1d70f434}";;
+  UUID "{4770e01f-7207-40bc-8ce0-31db2f71c6ac}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14084,11 +14106,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2e96df99-9549-431d-85a4-019343375741}";
+    UUID "{92b85298-27be-43b1-8af6-46772ef93c07}";
 ;
 
   END
-  UUID "{a7fe0792-7a2c-4507-b6b9-7843b711e34f}";;
+  UUID "{739e0b13-e0bf-4b8b-8415-1f5bf13703c9}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14099,11 +14121,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ed290d48-70c9-4be5-924c-ed090a018e4c}";
+    UUID "{7376391a-ad42-4d48-9091-8a35a3f10ef9}";
 ;
 
   END
-  UUID "{5b1d17e0-2bc9-4e66-9399-4dcb98e49269}";;
+  UUID "{2be9c762-edcb-4178-9683-4796156c7331}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14114,11 +14136,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b003ca7a-4db7-4202-94b2-699d91b1264f}";
+    UUID "{e012fe1f-d77f-4082-bbe8-891391684489}";
 ;
 
   END
-  UUID "{387994a5-4d32-4f3d-80d2-3b989e91ad8a}";;
+  UUID "{7ae185ad-471c-41d2-b736-acca97df4a9b}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";

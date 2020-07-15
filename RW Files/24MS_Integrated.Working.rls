@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:42 July 15, 2020
+# Created 16:58 July 15, 2020
 # 
 RULESET
 NAME "24month";
@@ -15,7 +15,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Final SNWP Diversion";
+    RULE                 "INT - Final SNWP Diversion";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -27,7 +27,7 @@ BEGIN
     END
     UUID "{3dc76f04-3f8c-4978-a7f6-052d27e74730}";;
 
-    RULE                 "Final CAP Diversion";
+    RULE                 "INT  - Final CAP Diversion";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -39,7 +39,7 @@ BEGIN
     END
     UUID "{b3560b33-15ee-4b5a-ac77-345cafeb175b}";;
 
-    RULE                 "Final MWD Diversion";
+    RULE                 "INT - Final MWD Diversion";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -58,7 +58,7 @@ BEGIN
     END
     UUID "{28298619-0307-453e-8e65-458b6e30ead0}";;
 
-    RULE                 "Final CA Overrun - Div Req";
+    RULE                 "INT - Final CA Overrun - Div Req";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -70,7 +70,7 @@ BEGIN
     END
     UUID "{b2514f26-1960-4a56-b0eb-ea00f98218a2}";;
 
-    RULE                 "Final CA Annual Use - Div Req";
+    RULE                 "INT - Final CA Annual Use - Div Req";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -97,7 +97,7 @@ BEGIN
     END
     UUID "{b32ea899-a1d0-438d-bc43-66f192a6ea60}";;
 
-    RULE                 "Final AZ Overrun - Div Req";
+    RULE                 "INT - Final AZ Overrun - Div Req";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -109,7 +109,7 @@ BEGIN
     END
     UUID "{9d9f8fe6-fa7e-46de-9d05-b97f2cfeec59}";;
 
-    RULE                 "Final AZ Annual Use - Div Req";
+    RULE                 "INT - Final AZ Annual Use - Div Req";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -121,7 +121,7 @@ BEGIN
     END
     UUID "{328c2e27-0f07-488c-bba7-f5b5785413b6}";;
 
-    RULE                 "Final NV Overrun - Div Req";
+    RULE                 "INT - Final NV Overrun - Div Req";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -133,7 +133,7 @@ BEGIN
     END
     UUID "{ff6bcdf2-7d5a-429f-9afc-c72295907261}";;
 
-    RULE                 "Compute Lower Basin Energy";
+    RULE                 "INT - Compute Lower Basin Energy";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -155,7 +155,7 @@ BEGIN
     END
     UUID "{15c06a09-4178-4fd1-b0c2-013b28f461aa}";;
 
-    RULE                 "Compute LC Dam Capacity";
+    RULE                 "INT - Compute LC Dam Capacity";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -180,7 +180,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "AugEOYPEProjections";
+    RULE                 "INT - AugEOYPEProjections";
     DESCRIPTION          "DEVELOPMENT NOTES<br>AUTHOR: ST<br>DESCRIPTION: In the August 24-month study, this rule saves the projected end of calendar year elevations for Powell and Mead. These  values are then transfered to MTOM so MTOM knows how to operate Powell and Mead for the year even if the actual January 1 elevation is not where the August study projected it.";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetMonth"( "RunStartDate"(  ) ) == 8.00000000;
@@ -203,7 +203,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "FC Surplus Schedules Data Volume to Simulation Flow";
+    RULE                 "INT - FC Surplus Schedules Data Volume to Simulation Flow";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( $ "FloodControlOutput.Flood Control Flag" [] > 0.00000000 OR $ "FloodControlOutput.Exclusive Space Flag" [] > 0.00000000 ) AND IsNaN $ "Surplus.Flood Control Surplus Flag" [];
@@ -256,7 +256,7 @@ BEGIN
     END
     UUID "{f1e20e98-7478-4a70-9c55-0c72424d8819}";;
 
-    RULE                 "Compute Effective Hoover Capacity Regression";
+    RULE                 "INT - Compute Effective Hoover Capacity Regression";
     DESCRIPTION          "This Rule is used to set the EnergyInfo.EffectiveHooverCapacity so that it can go out to 60 weeks.  The regression equation provided is from the LC BoR office and can be adjusted using this rule.  ";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -265,7 +265,7 @@ BEGIN
 
       IF_STATEMENT (( $ "Mead.Pool Elevation" [@"t"] ) < 1170.00000000 "feet" AND ( IsNaN $ "EnergyInfo.EffectiveHooverCapacity" [@"t"] OR NOT "IsInput"( $ "EnergyInfo.EffectiveHooverCapacity", @"t" ) )) THEN
             WITH_STATEMENT (NUMERIC elevMead = NaNToZero ( $ "Mead.Pool Elevation" [@"t"] )) DO
-            $ "EnergyInfo.EffectiveHooverCapacity" [@"t"] := ( elevMead * ( 5.64540000 "MW" / 1.00000000 "foot" ) - 4530.50000000 "MW" ) COMMENTED_BY "Regression values provided by BOR LC on 3/8/2013";
+            $ "EnergyInfo.EffectiveHooverCapacity" [@"t"] := ( elevMead * ( 5.64540000 "MW" / 1.00000000 "foot" ) - 4530.50000000 "MW" ) COMMENTED_BY "Regression values provided by BOR LC on 3/8/2013 <br>";
 
       END_WITH_STATEMENT;
 
@@ -282,7 +282,7 @@ BEGIN
     END
     UUID "{f3b533ce-f4d8-4169-a273-c1daa991eca1}";;
 
-    RULE                 "Mead Space Building";
+    RULE                 "INT - Mead Space Building";
     DESCRIPTION          "DESCRIPTION: If the storage in Mead is greater than the target storage (based on the minimum system space that must be available), this rule resets the outflow to achieve the target storage during space building months (August1-December31); if the Flood Control Flag is not already set, this rule also sets it based on whether the outflow was reset by the rule<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" > @"24:00:00 July Max DayOfMonth, Current Year" AND NOT IsNaN $ "Mead.Storage" [];
@@ -307,7 +307,7 @@ BEGIN
     END
     UUID "{de019cd9-323c-488e-95d9-21f413b49201}";;
 
-    RULE                 "Mead Flood Control Release";
+    RULE                 "INT - Mead Flood Control Release";
     DESCRIPTION          "DESCRIPTION: This rule checks that the release from Mead computed for downstream demands is large enough to satisfy flood control during the runoff season. If not, Mead Outflow is reset to the required flood control release which was previously calculated in the <Set Flood Control Release> rule and stored as FloodControlOutput.FCrelease. The flood control flag is also set to 1, which will cause the system to solve downstream and eventually force more water out of Havasu and Mohave. <br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND NOT IsNaN $ "Mead.Outflow" [];
@@ -327,7 +327,7 @@ BEGIN
     END
     UUID "{d0444628-f05a-444c-9749-206a63b2e667}";;
 
-    RULE                 "Mead Exclusive Flood Control Space";
+    RULE                 "INT - Mead Exclusive Flood Control Space";
     DESCRIPTION          "DESCRIPTION: This rule ensures that Mead does not violate the 1.5 maf space requirement (on MeadFloodControlData.MinSpace slot) at any time of the year. Although this is the highest priority rule, we don't want it to fire until the other flood control procedures have potentially executed. The rule checks the storage in Mead, and if it does not provide the minimum space, the outflow is recalculated so that the minimum space is achieved. If the outflow is recalculated, the FloodControlOutput.Exclusive Space Flag is set to 1; otherwise it is set to 0.<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "FloodControlOutput.Flood Control Flag" [] AND NOT IsNaN $ "Mead.Storage" [];
@@ -355,7 +355,7 @@ BEGIN
     END
     UUID "{e7252bdb-715c-4f11-956a-d550d5c01a3f}";;
 
-    RULE                 "Set Flood Control Release";
+    RULE                 "INT - Set Flood Control Release";
     DESCRIPTION          "DESCRIPTION: This rule sets the Mead flood control release according to table 1 in Exhibit A of the Flood Control Manual, which dictates release steps given inflow and available storage, during flood control months (January 1-July 31) or as the minimum of either releases needed to achieve target storage or the maximum space building release (28,000 cfs) during space building months (August 1-December 31). <br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "FloodControlOutput.FCrelease" [];
@@ -379,7 +379,7 @@ BEGIN
     END
     UUID "{b6bd7f85-0df9-4a24-937f-741dc8ac1d92}";;
 
-    RULE                 "Set Without Release";
+    RULE                 "INT - Set Without Release";
     DESCRIPTION          "DESCRIPTION: This rule calculates the forecasted Mead inflow and the Mead inflow volume in excess of the available space in Mead and Powell<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND IsNaN $ "FloodControlOutput.Withoutrel" [];
@@ -394,7 +394,7 @@ BEGIN
     END
     UUID "{50a3b30e-155d-484d-b998-b0cbc1607cfb}";;
 
-    RULE                 "Set Effective Space";
+    RULE                 "INT - Set Effective Space";
     DESCRIPTION          "DESCRIPTION: This rule calculates the total effective space available in Flaming Gorge (incl. Fontenelle), Blue Mesa, and Navajo until the end of July of the current year by choosing, for each individual reservoir, the minimum of the total available space remaining (*use) or the difference between the Inflow and Outflow (*pred) for the period and summing those values. Used in ForecastMeadInflow function to calculate Mead inflow forecast for calculationof flood control releases according to the Flood Control Algorithm in Exhibit One of the Flood Control Manual. <br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "FloodControlOutput.UBEffective" [];
@@ -411,7 +411,7 @@ BEGIN
     END
     UUID "{62c8240e-4d7a-4f4e-b50e-371c09dfe9f7}";;
 
-    RULE                 "Set Consnev";
+    RULE                 "INT - Set Consnev";
     DESCRIPTION          "DESCRIPTION: This rule calculates the total diversion volume requested by SNWP from the current timestep to the end of July of the current year.<br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND IsNaN $ "FloodControlOutput.Withoutrel" [];
@@ -423,7 +423,7 @@ BEGIN
     END
     UUID "{dd3c6890-fae8-460a-b3d1-684cfa9303ce}";;
 
-    RULE                 "Set Forecast Data";
+    RULE                 "INT - Set Forecast Data";
     DESCRIPTION          "DESCRIPTION: This rule calculates and stores the current available storage and expected net change in storage between the current timestep and the end of July of the current year for Flaming Gorge, Blue Mesa, Navajo, Powell and Mead. The change in bank storage and the evaporation are also calculated and stored. These storage calculations are used to determine effective upstream reservoir storage in the Mead Space Building rule. Effective UB storage is used to calculate Mead inflow forecast in the ForecastMeadInflow function for determination of flood control releases using the Flood Control Algorithm in Exhibit One of the Flood Control Manual. <br><br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "FloodControlOutput.Withoutrel" [];
