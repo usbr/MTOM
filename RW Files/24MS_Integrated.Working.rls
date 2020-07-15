@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 16:17 July 14, 2020
+# Created 18:41 July 14, 2020
 # 
 RULESET
 NAME "24month";
@@ -487,7 +487,7 @@ BEGIN
     END
     UUID "{73aa1bf1-a964-407a-8986-dfe6abfa47c3}";;
 
-    RULE                 "Set Schedule Release";
+    RULE                 "INT - Set Schedule Release";
     DESCRIPTION          "DESCRIPTION:  This rule copies the initial Mead release needed to meet downstream demands<br>to the FloodControlOutput data object in slot MeadSchedRel. <br>The value should only be reported the first time Mead calculates its outflow <br>based on downstream demands. It should never be overwritten by another rule. <br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "Lower Basin Output.MeadSchedRel" [] AND NOT IsNaN $ "Mead.Outflow" [];
@@ -529,7 +529,7 @@ BEGIN
     END
     UUID "{c90c505a-55e7-429e-9875-5930ee7cb428}";;
 
-    RULE                 "Arizona DCP Sched Reductions";
+    RULE                 "INT - Arizona DCP Sched Reductions";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND @"t" != @"Start Timestep" ) AND $ "ICS Credits.AnnualDCPContribution_AZ" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-feet";
@@ -890,13 +890,14 @@ BEGIN
     END
     UUID "{7f2fc4db-9a2a-44c9-99cf-caccd2445627}";;
 
-    RULE                 "AZ Accounting";
+    RULE                 "INT - AZ Accounting";
     DESCRIPTION          "Computes CAP's end of year ICS balances per the 2007 Interim Guidelines";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" OR @"t" == @"Start Timestep";
     NOTES                "DEVELOPMENT NOTES<br>Fixed calculation of Extraordinary Conservation ICS to omit the annual evaporation reduction if the current year is a Shortage -ST 5/14/18 <br>";
     BEGIN
 
+    DESCRIPTION          "The AZ ICS/Accounting logic was completely rewritten during integration to be similar in logic to <br>the other users from the MTOM ruleset <br>";
       WITH_STATEMENT (LIST azICSvalues = "ICSAccountingForAZ"(  )) DO
             $ "DCP Flags.AZ Accounting Check" [@"24:00:00 December 31, Current Year"] := 0.00000000;
 
