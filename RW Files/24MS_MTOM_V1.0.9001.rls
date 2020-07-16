@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 16:58 July 15, 2020
+# Created 14:56 July 16, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -908,7 +908,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule will use the Flood Control Volume to reduce the amount of Extraordinary Conservation ICS for each state. If the Flood Control Volume is greater than the volume of EC ICS water for all of the states and EC Delivery for each state, the balance of EC water is taken to 0 AF for each state. If the volume of FC water is less than the total EC volume, then the volume reduced from each state will be proportional to the volume that each state has when the Flood Control occurs. This rule assigns the new values of EC ICS water for California, Nevada, and Arizona and also re-calculates and assignes the Total ICS Volumes for each state. <br><br>EXECUTION CONSTRAINTS: This rule fires in December or the end date of the run in run cycle 4 if it is Flood Control or Quantified Surplus and this rule has not fired sucessfully yet. <br><br>SLOTS SET: <br>ICS Credits.ExtraordinaryConservationICS_[ MWD, IID, CA, NV, CAWCD, CRIT, GRIC, MVIDD, MW, AZ ]<br>ICS Credits.TotalICS_[ MWD, IID, CA,  NV, CAWCD, AZ ]<br>ICS Creitds.Bank_[ MWD, CA, NV, CAWCD, AZ ]";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 4.00000000 AND "IsQuantifiedOrFloodControl"(  ) AND ( @"t" == @"24:00:00 December Max DayOfMonth, Current Year" OR @"t" == @"Finish Timestep" ) AND NOT "HasRuleFiredSuccessfully"( "True" );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>AP, 20181211:: edited to include MWD / IID ICS CA split<br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description. ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 11/4/2014<br><br>AP, 20181211:: edited to include MWD / IID ICS CA split<br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>A.Pivarnik, 20200716:Z LC CHECK: INtegration effort... this rule is not in the 24 MS ruleset... do we still want it to fire in FC scenarios?";
     BEGIN
 
     DESCRIPTION          "Recalulates ICS balances when in FC <br>";
@@ -975,7 +975,7 @@ BEGIN
             WITH_STATEMENT (NUMERIC MXBank_prelim = ( RecoverableWater_prelim + WaterReserveBal ) COMMENTED_BY "Calculate prelim bank space used <br>") DO
             WITH_STATEMENT (NUMERIC MXRemainingBankSpace = $ "ICS Credits.MeadBankParameters" ["Mexico", "Max Capacity"] - MXBank_prelim) DO
             WITH_STATEMENT (NUMERIC MXRemainingBankSpace_PreTax = MXRemainingBankSpace / "SystemTaxAdjustment_DCP"(  )) DO
-            WITH_STATEMENT (NUMERIC annualBWSPcontribution = $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December 31, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC annualBWSPcontribution = ( GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "MX" ) )) DO
             WITH_STATEMENT (NUMERIC recoverablewaterBWSCPcontribution = "SetNegativeToZero"( "Min"( MXRemainingBankSpace_PreTax, annualBWSPcontribution ) ) COMMENTED_BY "Recoverable water savings contribution up to allowable bank space.Rest will be system water <br>") DO
             WITH_STATEMENT (NUMERIC syswaterBWSCPcontribution = ( annualBWSPcontribution - recoverablewaterBWSCPcontribution ) COMMENTED_BY "Sys Water Calculation <br>") DO
             WITH_STATEMENT (NUMERIC RecoverableWaterSavingsBalance = RecoverableWater_prelim + recoverablewaterBWSCPcontribution * "SystemTaxAdjustment_DCP"(  )) DO
@@ -1401,17 +1401,36 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>S.Baker, 20200309: Add description. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged().<br>APivarnik, 20200501: Moved Above Hoover trigger set assignment to this rule. Moved from SNWP Demand Variability Rule (deleted)<br>A. Pivarnik, 20200713: Integration effort. This rule is written differently than in the 24 MS. It is more complex but covers the same rule logic as the 24 MS rule. A with/if statement were added to only check ICS Creation based on bank capacity in MTOM runs. Added StartYearDCP contribution function call to take into account not ending in the same tier as projected in the August 24 MS of the previous year";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC ICS = ( $ "AnnualWaterUse.NV_BasicApportionment" [] - ( $ "AnnualWaterUse.Nevada_Forecast1" [@"24:00:00 December 31, Current Year"] - $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Non SNWA Water Use <br>" - IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
+      WITH_STATEMENT (LIST ICS = WITH NUMERIC PotentialICS = ( $ "AnnualWaterUse.NV_BasicApportionment" [] - ( $ "AnnualWaterUse.Nevada_Forecast1" [@"24:00:00 December 31, Current Year"] - $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] ) COMMENTED_BY "Non SNWA Water Use <br>" - IF ( $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
  THEN
   $ "Shortage.State Shortage Volumes" [( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) - 1.00000000, "Nevada"]
  ELSE
   0.00000000 "acre-ft"
- ENDIF - $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] * "MeadPumpingDemandVariabilityFactor"( @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "ICS calculation based on annual apportionment and diversion calculation affected by demand variability   <br>") DO
+ ENDIF - $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] * "MeadPumpingDemandVariabilityFactor"( @"24:00:00 December Max DayOfMonth, Current Year" ) ) COMMENTED_BY "ICS calculation based on annual apportionment and diversion calculation affected by demand variability   <br>" DO
+  IF ( "IsStartYear"(  ) )
+  THEN
+   WITH NUMERIC StartYearDCPContribution = GET @INDEX 0.00000000 FROM "StartYearDCPContribution"( "NV" ) DO
+    { PotentialICS + IF ( PotentialICS <= 0.00000000 "acre-ft" )
+    THEN
+     StartYearDCPContribution * - 1.00000000
+    ELSE
+     0.00000000 "acre-ft"
+    ENDIF , IF ( PotentialICS >= 0.00000000 "acre-ft" )
+    THEN
+     "Max"( StartYearDCPContribution - PotentialICS * "SystemTaxAdjustment_DCP"(  ), 0.00000000 "acre-ft" )
+    ELSE
+     0.00000000 "acre-ft"
+    ENDIF }
+   ENDWITH
+  ELSE
+   { PotentialICS , 0.00000000 "acre-ft" }
+  ENDIF
+ ENDWITH) DO
             $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := "MinItem"( { IF ( "IsDomesticSurplus"(  ) )
  THEN
-  "SetNegativeToZero"( "Abs"( "Min"( ICS, 0.00000000 "acre-ft" ) ) - $ "Surplus Volume Entitlements.SNWA Domestic" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "For domestic surplus, reduce ICS delivery by the amount of surplus entitlement for SNWP<br>"
+  "SetNegativeToZero"( "Abs"( "Min"( GET @INDEX 0.00000000 FROM ICS, 0.00000000 "acre-ft" ) ) - $ "Surplus Volume Entitlements.SNWA Domestic" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "For domestic surplus, reduce ICS delivery by the amount of surplus entitlement for SNWP<br>"
  ELSE
-  "Abs"( "Min"( ICS, 0.00000000 "acre-ft" ) ) COMMENTED_BY "No surplus <br>"
+  ( "Abs"( "Min"( GET @INDEX 0.00000000 FROM ICS, 0.00000000 "acre-ft" ) ) + GET @INDEX 1.00000000 FROM ICS ) COMMENTED_BY "No surplus <br>"
  ENDIF , $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Delivery"] COMMENTED_BY "Max possible delivery <br>" , IF ( "IsMeadAboveDCPRecoveryElevation"( @"24:00:00 December 31, Previous Year" ) )
  THEN
   $ "ICS Credits.TotalICS_NV" [@"24:00:00 December 31, Previous Year"]
@@ -1429,7 +1448,7 @@ BEGIN
   ELSE
    1000000.00000000 "acre-ft" COMMENTED_BY "Extremely high value so this option can never be chosen in the min statement below<br>"
   ENDIF DO
-   "Max"( "MinItem"( { "SetNegativeToZero"( ICS ) , $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Creation"] , MaxCreationBasedonCapacity COMMENTED_BY "Max EC ICS creation based on bank availability<br>" } ), GET @INDEX 0.00000000 FROM "StartYearDCPContribution"( "NV" ) )
+   "MinItem"( { "SetNegativeToZero"( GET @INDEX 0.00000000 FROM ICS ) , $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Creation"] , MaxCreationBasedonCapacity COMMENTED_BY "Max EC ICS creation based on bank availability<br>" } )
   ENDWITH
  ENDIF;
 
@@ -1454,12 +1473,12 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets ICS deliveries and creation for MWD. If it is the start year and April-December, the ICS creation and delivery (bi-national, system efficiency, extraordinary conservation) will be set to the default value passed from the 24MS. Otherwise, ICS delivery will be the minimum of the default based on the Sac WY type and LB conditions, the maximum ICS take based on Mead pool elevation, and capped at canal capacity. ICS creation is minimum constrained by the Sac WY type and LB conditions, the remaining space to bank ICS in Mead by MWD, the maximum annual creation by MWD, and the diversion requested that is above their annual delivery.<br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition has changed between run cycle 3 and 4, or it is quantified surplus or flood control, or the Mexico Binational Water Scarcity Contingency Plan condition has changed. <br><br>SLOTS SET: <br>ICSProjectionData.AnnualCreationEC_MWD_Preliminary<br>ICSProjectionData.AnnualICSDelivery_MWD_Preliminary";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>TP, 20171218: In domestic surplus, reduce the ICS Delivery by the amount of Domestic surplus entitlement for MWD. Make sure the amount of Delivery taken is within the MWD ICS bank or below the Maximum Take that MWD can have.<br>AP, 20191921: Updated for DCP. Added constraint for max available ICS limited based on recovery elevation for DCP.<br>S.Baker, 20200309: Updated and edited description. Added WITH statement for SacWY_Take. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged(). <br>GCAA, 20200330: Updated rule to constrain MWD's ICS delivery by the normal operational maximum (1.2 maf) in non-surplus years and annual canal capacity (1.25 maf) if in surplus years<br>A.Pivarnik, 20200423: Replace sum of MWD div requested with sim of Forecast use Reset annual and returns<br>A.Pivarnik, 20200511: Added TJ div into full ditch converyance calculation<br>A.Pivarnik, 20200713: Integration effort. Added Is24MonthStudy function call to the first if statement. This way the ruleset always uses the default values when in 24 MS mode. Replaced default value for 3 types of MWD ICS delivery with an ICS default slot for MWD.Added StartYearDCP contribution function call to take into account not ending in the same tier as projected in the August 24 MS of the previous year.";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>TP, 20171218: In domestic surplus, reduce the ICS Delivery by the amount of Domestic surplus entitlement for MWD. Make sure the amount of Delivery taken is within the MWD ICS bank or below the Maximum Take that MWD can have.<br>AP, 20191921: Updated for DCP. Added constraint for max available ICS limited based on recovery elevation for DCP.<br>S.Baker, 20200309: Updated and edited description. Added WITH statement for SacWY_Take. Added SetNegativeToZero() to replace Max(0 &quot;acre-ft&quot;, xxxx). Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsDomesticSurplus() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged(). <br>GCAA, 20200330: Updated rule to constrain MWD's ICS delivery by the normal operational maximum (1.2 maf) in non-surplus years and annual canal capacity (1.25 maf) if in surplus years<br>A.Pivarnik, 20200423: Replace sum of MWD div requested with sim of Forecast use Reset annual and returns<br>A.Pivarnik, 20200511: Added TJ div into full ditch converyance calculation<br>A.Pivarnik, 20200713: Integration effort. Added Is24MonthStudy function call to the first if statement. This way the ruleset always uses the default values when in 24 MS mode. Replaced default value for 3 types of MWD ICS delivery with an ICS default slot for MWD.";
     BEGIN
 
       IF_STATEMENT (( "IsAPRtoDECofStartYear"(  ) OR NOT "IsMRM"(  ) ) OR "Is24MonthStudy"(  )) THEN
           DESCRIPTION          "If April-December in start year or not a MRM run, use the default value passed from the 24 MS <br>";
-      $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := "Max"( $ "ICSProjectionData.AnnualCreationEC_MWD_Default" ["Dec31ofYear"( @"t" )], GET @INDEX 0.00000000 FROM "StartYearDCPContribution"( "CA" ) );
+      $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := $ "ICSProjectionData.AnnualCreationEC_MWD_Default" ["Dec31ofYear"( @"t" )];
 
             $ "ICSProjectionData.AnnualICSDelivery_MWD_Preliminary" ["Dec31ofYear"( @"t" )] := $ "ICSProjectionData.AnnualICSDelivery_MWD_Default" ["Dec31ofYear"( @"t" )];
 
@@ -1488,7 +1507,7 @@ BEGIN
  THEN
   0.00000000 "acre-ft"
  ELSE
-  "Max"( "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "SetNegativeToZero"( ( ( ( $ "ICS Credits.MeadBankParameters" ["MWD", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.Bank_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Taxable ICS creation space <br>" + $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "Non Taxable ICS creation space. If EC delivery is paid back the following year, creation amount <br>equal to said delivery is not taxed   <br>" ) COMMENTED_BY "Bank space <br>" , ( $ "ICS Credits.MeadBankParameters" ["California", "Max Creation"] - GET @INDEX 2.00000000 FROM IIDAccounting ) COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "SetNegativeToZero"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "AnnualWaterUse.MWDMinimumAnnualDelivery" [] ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } ), GET @INDEX 0.00000000 FROM "StartYearDCPContribution"( "CA" ) )
+  "MinItem"( { $ "ICS Credits.MWDICS_AnnualRequestedPutTake" [NaNToZero ( $ "ICS Credits.SacWYType" [@"24:00:00 December Max DayOfMonth, Current Year"] ) - 1.00000000, "Put Step 1"] COMMENTED_BY "Annual Max <br>" , "SetNegativeToZero"( ( ( ( $ "ICS Credits.MeadBankParameters" ["MWD", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.Bank_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Taxable ICS creation space <br>" + $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "Non Taxable ICS creation space. If EC delivery is paid back the following year, creation amount <br>equal to said delivery is not taxed   <br>" ) COMMENTED_BY "Bank space <br>" , ( $ "ICS Credits.MeadBankParameters" ["California", "Max Creation"] - GET @INDEX 2.00000000 FROM IIDAccounting ) COMMENTED_BY "Maximum Creation of MWD ICS <br>" , "SetNegativeToZero"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "California_CU_Forecast1.MWDReturns" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "AnnualWaterUse.MWDMinimumAnnualDelivery" [] ) COMMENTED_BY "Difference between Diversion Requests and Minimum Required MWD Delivery <br>" } )
  ENDIF;
 
       END_WITH_STATEMENT;
@@ -1505,7 +1524,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20200309: Updated and edited description.<br>S.Baker, 20200310: Removed Min() inside MinItem() to reduce redundancy. Added function IsMeadAboveDCPRecoveryElevation() to replace frequently used boolean. <br>S.Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. Replace OR statement with & IsLBorDCPconditionChanged().<br>A.Pivarnik, 20200416: Removed execution constraint which cause rule to fire in RC 4 if the model is in domestic surplus <br>A.Pivarnik, 20200713: Integration effort. Added if statement and Is24MSStudy Function call to use the default delivery + any other delivery determined by functions in outyears for 24 MS mode. Renamed rule from AZ to CAP ICS Creation and Delivery. Added ICS creation logic for MTOM to check against bank space, max creation or default value. This is part of the AZ ICS/Accounting overhaul<br>";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC TRUE;
       IF_STATEMENT (( "Is24MonthStudy"(  ) OR ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" OR NOT "IsMRM"(  ) ) ) COMMENTED_BY "If April-December in start year or not a MRM run, use the default value passed from the 24 MS  <br>") THEN
             $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Default" [@"24:00:00 December Max DayOfMonth, Current Year"] + IF ( NOT "IsStartYear"(  ) )
  THEN
@@ -11380,7 +11398,17 @@ BEGIN
    WITH NUMERIC Imported = $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
     WITH NUMERIC Tributary = $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
      WITH NUMERIC currentECICStoDCPconversion = "Min"( $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"], "Max"( 0.00000000 "acre-ft", ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - ( BiNat + ( $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "No need to take into account DCP delivery since it wont happen if Lower basin is operating under <br>DCP, no need to take into account any conversion from EC to DCP ICS because it is just a paper <br>transfer, the water is already accounted for in the EC ICS balance from the previous year. <br><br>AP 11/19/19   <br>" ) ) COMMENTED_BY "Calculation of bank space for additional ICS creation to meet DCP calculation. could possibly be <br>negative depending on tributary conservation ICS and available space <br><br>LC CHECK<br><br>The model wont allow SNWA to create DCP ICS through simulatenous conversion higher than the <br>bank. Should this be disabled in the 24 MS mode? <br>" ) ) DO
-      WITH NUMERIC syswaterDCPcontribution = ( GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "NV" ) ) - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - currentECICStoDCPconversion DO
+      WITH NUMERIC syswaterDCPcontribution = ( GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "NV" ) ) - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - currentECICStoDCPconversion + IF ( "IsStartYear"(  ) )
+      THEN
+       IF ( $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] >= 0.00000000 "acre-ft" )
+       THEN
+        "Max"( ( GET @INDEX 0.00000000 FROM "StartYearDCPContribution"( "NV" ) ) - $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ), 0.00000000 "acre-ft" )
+       ELSE
+        0.00000000 "acre-ft"
+       ENDIF
+      ELSE
+       0.00000000 "acre-ft"
+      ENDIF DO
        WITH NUMERIC SNWPannualECICScreation = "Max"( 0.00000000 "acre-ft", $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] - currentECICStoDCPconversion / "SystemTaxAdjustment_DCP"(  ) ) DO
         WITH NUMERIC ECICS = $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + "Current Year ECICS into Bank"( SNWPannualECICScreation, $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], "Nevada" ) - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
          WITH NUMERIC DCPICS = $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliveryDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + currentECICStoDCPconversion DO
@@ -11737,6 +11765,8 @@ BEGIN
     END
     UUID "{4f9d5209-c72a-40f3-bb66-53276980799c}";;
 
+      BREAKPOINT BEFORE_EXEC FALSE;
+    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "StartYearDCPContribution" ( STRING user )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -11749,18 +11779,30 @@ BEGIN
 
       IF ( "IsStartYear"(  ) )
  THEN
-  WITH NUMERIC MandatedECICSCreation = "Max"( "ICS Credits.AnnualDCPContribution_" CONCAT user [@"24:00:00 December Max DayOfMonth, Current Year"] - "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ), 0.00000000 "acre-ft" ) DO
-   WITH NUMERIC DCPContribution = IF ( "GetRowIndex"( $ "DCP.Contributions", STRINGIFY "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, $ "PowellToMeadData.AugEOYMeadPEProjection" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ) ) >= "GetRowIndex"( $ "DCP.Contributions", STRINGIFY "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ) ) )
-   THEN
-    "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "PowellToMeadData.AugEOYMeadPEProjection" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE )
-   ELSE
-    "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE )
-   ENDIF DO
-    { MandatedECICSCreation , DCPContribution }
+  WITH SLOT slot = IF ( user == "MX" )
+  THEN
+   $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution"
+  ELSE
+   % "ICS Credits" & "AnnualDCPContribution_" CONCAT user
+  ENDIF DO
+   WITH NUMERIC MandatedECICSCreation = "Max"( slot [@"24:00:00 December Max DayOfMonth, Current Year"] - "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ), 0.00000000 "acre-ft" ) DO
+    WITH NUMERIC DCPContribution = IF ( "GetRowIndex"( $ "DCP.Contributions", STRINGIFY "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, $ "PowellToMeadData.AugEOYMeadPEProjection" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ) ) >= "GetRowIndex"( $ "DCP.Contributions", STRINGIFY "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, 0.00000000, $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE ) ) )
+    THEN
+     "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "PowellToMeadData.AugEOYMeadPEProjection" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE )
+    ELSE
+     "TableLookupDefaultTol"( $ "DCP.Contributions", 0.00000000, "GetColumnIndex"( $ "DCP.Contributions", user ), $ "Mead.Pool Elevation" [@"24:00:00 December Max DayOfMonth, Previous Year"], @"t", FALSE )
+    ENDIF DO
+     { MandatedECICSCreation , DCPContribution }
+    ENDWITH
    ENDWITH
   ENDWITH
  ELSE
-  { 0.00000000 "acre-ft" , "ICS Credits.AnnualDCPContribution_" CONCAT user [@"24:00:00 December Max DayOfMonth, Current Year"] }
+  { 0.00000000 "acre-ft" , IF ( user == "MX" )
+  THEN
+   $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December 31, Current Year"]
+  ELSE
+   "ICS Credits.AnnualDCPContribution_" CONCAT user [@"24:00:00 December Max DayOfMonth, Current Year"]
+  ENDIF }
  ENDIF;
 
     END
@@ -14070,32 +14112,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{453eb08c-e98e-43ff-9054-ad5dcf7bdc2f}";
+    UUID "{02de63d9-4a29-4795-85b5-14a7b850a34c}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{51abfea1-fdcf-4f1e-b940-a4c63f4cd0e7}";
+    UUID "{c61f4425-8dfe-4cbd-9c9d-cdce93f04f8a}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f0908bb6-9398-4719-9077-e86324a3c353}";
+    UUID "{3a387366-13b8-4a27-97e8-cd322a0e8136}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{834a4ebe-1e85-49e3-90c4-664c11b1e651}";
+    UUID "{3e8733dc-1ed1-4e57-aec3-9326824c5989}";
 ;
 
   END
-  UUID "{4770e01f-7207-40bc-8ce0-31db2f71c6ac}";;
+  UUID "{fc8f7115-0318-4b04-ac8e-80bfc433d08a}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14106,11 +14148,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{92b85298-27be-43b1-8af6-46772ef93c07}";
+    UUID "{0559ff67-c018-4482-a115-4386b97e7ad9}";
 ;
 
   END
-  UUID "{739e0b13-e0bf-4b8b-8415-1f5bf13703c9}";;
+  UUID "{b80e502e-c598-4998-93d8-54faf19cffd9}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14121,11 +14163,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7376391a-ad42-4d48-9091-8a35a3f10ef9}";
+    UUID "{170b60a9-2ae3-4cc0-983e-98ef8f378b81}";
 ;
 
   END
-  UUID "{2be9c762-edcb-4178-9683-4796156c7331}";;
+  UUID "{dc376956-1179-4d49-b694-40e316697a18}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14136,11 +14178,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e012fe1f-d77f-4082-bbe8-891391684489}";
+    UUID "{9e671751-7749-49d3-9627-dad0b6aec594}";
 ;
 
   END
-  UUID "{7ae185ad-471c-41d2-b736-acca97df4a9b}";;
+  UUID "{f77f103d-971c-4b22-b2d4-06049e99c382}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
