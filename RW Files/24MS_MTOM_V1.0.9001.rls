@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 10:39 July 17, 2020
+# Created 13:18 July 17, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -5901,7 +5901,10 @@ BEGIN
  ENDIF;
 
           DESCRIPTION          "Set the SNWP Actuals to the Actual input party values for SNWP<br><br>This assignment covers the &quot;Set SNWP Actual Depletion&quot; rule in the 24 MS <br>";
-      $ "Nevada_CU_Actual.SNWP" [date] := $ "Nevada_CU_Actual.SNWADiversion" [date] + $ "Nevada_CU_Actual.BasicManagement" [date] + $ "Nevada_CU_Actual.LMNRA Mead" [date] + $ "Nevada_CU_Actual.BoulderCanyonProject" [date] + $ "Nevada_CU_Actual.NvDeptFishGame" [date] + $ "Nevada_CU_Actual.PacificCoastBuilding" [date] + $ "Nevada_CU_Actual.City of Henderson" [date] - $ "Nevada_CU_Actual.LVWashReturns" [date];
+      $ "Nevada_CU_Actual.SNWP" [date] := IF ( IsNaN $ "Nevada_CU_Actual.SNWP" [date] )
+ THEN
+  $ "Nevada_CU_Actual.SNWADiversion" [date] + $ "Nevada_CU_Actual.BasicManagement" [date] + $ "Nevada_CU_Actual.LMNRA Mead" [date] + $ "Nevada_CU_Actual.BoulderCanyonProject" [date] + $ "Nevada_CU_Actual.NvDeptFishGame" [date] + $ "Nevada_CU_Actual.PacificCoastBuilding" [date] + $ "Nevada_CU_Actual.City of Henderson" [date] - $ "Nevada_CU_Actual.LVWashReturns" [date]
+ ENDIF;
 
       ENDFOREACH;
 
@@ -14131,32 +14134,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5509af4e-2704-4bd9-bc24-fdddc929311d}";
+    UUID "{e67c9b7b-cab0-4ae1-9dca-ef372ea7c678}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6db7c0ea-d584-42fc-b81b-08053991441f}";
+    UUID "{600c9984-7f0f-424b-bbff-0eaaaeb1232d}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4849ae90-d658-4acc-9216-1ec9b23cfb41}";
+    UUID "{1136723c-efd5-4b3a-b79f-c5efac594712}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5aa35c2a-52eb-4155-a884-f3c9d73e6e56}";
+    UUID "{af1f3c75-dd11-4ca4-b45b-794dccd67e59}";
 ;
 
   END
-  UUID "{b377350e-fb76-4e14-978d-2c597cee503e}";;
+  UUID "{1dafbc1a-b896-418c-a524-7e4afd4fd292}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14167,11 +14170,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{71bd63ef-2810-432e-88eb-934d4362251f}";
+    UUID "{edff32b5-10f4-4580-9b10-850ef751fb17}";
 ;
 
   END
-  UUID "{6e9668ab-1274-46cd-a461-2d7d547f9836}";;
+  UUID "{89c7b951-d77b-4c58-a862-5632222d91df}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14182,11 +14185,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f57a56c1-7ea6-4f94-9bc9-3d2b54be7763}";
+    UUID "{dc5f4e15-2b0f-4ee9-bc9a-7f990b1143ef}";
 ;
 
   END
-  UUID "{ca66d38b-5013-4536-a7a1-e20e06242eea}";;
+  UUID "{bbf6f182-10db-44ee-9728-ebe59b4858f9}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14197,11 +14200,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3b9fa8d5-a74d-4ea4-8dc2-9f9ea0aa1e96}";
+    UUID "{620745a3-a146-4a12-9df7-967fa3e35d29}";
 ;
 
   END
-  UUID "{cc672d19-57b4-43e5-8c9b-c9eda45ba9bb}";;
+  UUID "{2c451cf3-a320-436f-9b35-bb9113ccc2f6}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
