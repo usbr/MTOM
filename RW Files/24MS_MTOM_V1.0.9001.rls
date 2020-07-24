@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 13:18 July 17, 2020
+# Created 15:51 July 24, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1803,7 +1803,7 @@ BEGIN
 
       WITH_STATEMENT (NUMERIC SurplusType = NaNToZero ( $ "Surplus.Surplus Flag" [@"24:00:00 December 31, Current Year"] )) DO
             FOREACH (SLOT user IN "SurplusUsers_QSandFC"(  )) DO
-            IF_STATEMENT (NaNToZero ( $ "Surplus.Surplus Flag" [@"24:00:00 December 31, Current Year"] ) <= 1.00000000) THEN
+            IF_STATEMENT (SurplusType <= 1.00000000) THEN
             user [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-ft";
 
       ELSE
@@ -1841,7 +1841,7 @@ BEGIN
 
       WITH_STATEMENT (NUMERIC SurplusType = NaNToZero ( $ "Surplus.Surplus Flag" [@"24:00:00 December 31, Current Year"] )) DO
             FOREACH (SLOT user IN "SurplusUsers_AllTypes"(  )) DO
-            IF_STATEMENT (NaNToZero ( $ "Surplus.Surplus Flag" [@"24:00:00 December 31, Current Year"] ) == 0.00000000) THEN
+            IF_STATEMENT (SurplusType == 0.00000000) THEN
             user [@"24:00:00 December 31, Current Year"] := 0.00000000 "acre-ft";
 
       ELSE
@@ -1856,7 +1856,7 @@ BEGIN
  ELSEIF_CLAUSE ( " Quantified" )
  END_ELSEIF) DO
             IF_STATEMENT ("GetSlotName"( user ) == "SNWA") THEN
-            user [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPAnnualFC" [@"24:00:00 December 31, Current Year"] + % "Surplus Volume Entitlements" & "GetSlotName"( user ) CONCAT scheduleType [@"24:00:00 December 31, Current Year"];
+            user [@"24:00:00 December 31, Current Year"] := $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] + % "Surplus Volume Entitlements" & "GetSlotName"( user ) CONCAT scheduleType [@"24:00:00 December 31, Current Year"];
 
       ELSE
             user [@"24:00:00 December 31, Current Year"] := % "ForecastUse" & ( GET @INDEX FIND "GetSlotName"( user ) WITHIN "IsJPUser"(  ) FROM "IsJPUser"(  ) ) CONCAT "ResetAnnualFC" [@"24:00:00 December 31, Current Year"] + % "Surplus Volume Entitlements" & "GetSlotName"( user ) CONCAT scheduleType [@"24:00:00 December 31, Current Year"];
@@ -12019,7 +12019,7 @@ BEGIN
     NOTES          "";
     BEGIN
 
-      { $ "Surplus Total Annual Schedules.Needles" [@"24:00:00 December 31, Current Year"] , $ "Surplus Total Annual Schedules.CaPumpersAbvImp" [@"24:00:00 December 31, Current Year"] , $ "Surplus Total Annual Schedules.Mexico" [@"24:00:00 December 31, Current Year"] };
+      { $ "Surplus Total Annual Schedules.Needles" , $ "Surplus Total Annual Schedules.CaPumpersAbvImp" , $ "Surplus Total Annual Schedules.Mexico" };
 
     END
     UUID "{4dba9657-bed2-409e-88f4-f097cc336430}";;
@@ -14134,32 +14134,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e67c9b7b-cab0-4ae1-9dca-ef372ea7c678}";
+    UUID "{97436f1d-2932-470e-8cf1-007b90dbb0a7}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{600c9984-7f0f-424b-bbff-0eaaaeb1232d}";
+    UUID "{80f433de-4c75-43a7-bfcf-f08286098a11}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1136723c-efd5-4b3a-b79f-c5efac594712}";
+    UUID "{218c1f1e-96aa-4c21-9bae-d4ca36c648d9}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{af1f3c75-dd11-4ca4-b45b-794dccd67e59}";
+    UUID "{4d3bf60b-f1fa-4d1b-a645-29e591993010}";
 ;
 
   END
-  UUID "{1dafbc1a-b896-418c-a524-7e4afd4fd292}";;
+  UUID "{11e23b8e-7188-4d78-b411-01d3dd52e160}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14170,11 +14170,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{edff32b5-10f4-4580-9b10-850ef751fb17}";
+    UUID "{26d5cfeb-89e0-4047-8d1d-78f0cb662295}";
 ;
 
   END
-  UUID "{89c7b951-d77b-4c58-a862-5632222d91df}";;
+  UUID "{a70662e1-f93d-45f2-b522-10f2c5a5b5a5}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14185,11 +14185,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{dc5f4e15-2b0f-4ee9-bc9a-7f990b1143ef}";
+    UUID "{ca48bcf4-db69-4cde-9d5b-5ec40b393778}";
 ;
 
   END
-  UUID "{bbf6f182-10db-44ee-9728-ebe59b4858f9}";;
+  UUID "{d5dbbdd1-b903-4374-a9a8-037037985471}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14200,11 +14200,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{620745a3-a146-4a12-9df7-967fa3e35d29}";
+    UUID "{ecb28032-e7e4-4585-95bb-911a408a6346}";
 ;
 
   END
-  UUID "{2c451cf3-a320-436f-9b35-bb9113ccc2f6}";;
+  UUID "{05f20d1a-395c-458d-b5ae-3648084d99c6}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
