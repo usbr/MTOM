@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 16:58 July 15, 2020
+# Created 10:01 July 30, 2020
 # 
 RULESET
 NAME "24month";
@@ -2097,7 +2097,7 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Reset MWD Annual Forecast Use - Force to CA Apportionment";
+    RULE                 "INT - Reset MWD Annual Forecast Use - Force to CA Apportionment";
     DESCRIPTION          "";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"];
@@ -2983,7 +2983,7 @@ BEGIN
     END
     UUID "{d9cf137c-ec05-4412-b2a5-ed51158e58b9}";;
 
-    RULE                 "INT - Set MWD Returns Schedule -  annual";
+    RULE                 "NI  - Set MWD Returns Schedule -  annual";
     DESCRIPTION          "";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT TRUE;
@@ -2996,14 +2996,14 @@ BEGIN
     END
     UUID "{f8421703-1238-4ce2-aad3-6a45f1d609b7}";;
 
-    RULE                 "NI??? - Set MWD Returns Schedule - monthly";
+    RULE                 "NI - Set MWD Returns Schedule - monthly";
     DESCRIPTION          "DEVELOPMENT NOTES:<br>CH, 8/25/17: replaced calls to GetLastDate function with &quot;24:00 December 31, Finish Year&quot;";
     ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
     NOTES                "";
     BEGIN
 
-    DESCRIPTION          "LC CHECK<br><br>Should this assignment be in the MTOM ruleset??????????????/<br>";
+    DESCRIPTION          "LC CHECK<br><br>Should this assignment be in the MTOM ruleset??????????????/<br><br><br>NO <br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December 31, Finish Year") DO
             $ "California_CU_Schedules.MWDReturns" [date] := 8.50000000 "acre-feet" * ( "GetDaysInMonth"( date ) / 1.00000000 "day" );
 

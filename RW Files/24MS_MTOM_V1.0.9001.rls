@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 16:03 July 28, 2020
+# Created 10:00 July 30, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4981,12 +4981,12 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Reset the MWD DIversion and depletion requests based on the estimated available to MWD from the state apportionment and the other user diversion requests and the forecast scheduled volume for MWD.  This rule will only execute in the start timestep and set values for November and December.  This is so that if MWD sets a schedule in a timestep prior to November, the schedule can be adjusted in the last two months of the year such that there are no California overruns. <br><br>SLOTS SET: MWDDiversion:MWD.Depletion Requested; MWDDiversion:MWD.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetMonth"( @"t" ) < 11.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case.<br><br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules<br><br>CH, 3/18: Removed run cycle == 3.0 constraint since rule only fires in start year (therefore should not refire in run cycle 3 for any reason, even in shortage conditions - causes the rule to add twice the amount of water available)<br><br>APivarnik, 20200702: While written slightly different than the rule by the same name in the 24 MS, this rule accomplishes the same goal with different logic. No changes to the rule made in the integration effort ";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case.<br><br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules<br><br>CH, 3/18: Removed run cycle == 3.0 constraint since rule only fires in start year (therefore should not refire in run cycle 3 for any reason, even in shortage conditions - causes the rule to add twice the amount of water available)<br><br>APivarnik, 20200702: While written slightly different than the rule by the same name in the 24 MS, this rule accomplishes the same goal with different logic. No changes to the rule made in the integration effort <br><br>APivarnik, 07302020: Changed slot reference from MWD Depletion requested to CU schedule.MWD";
     BEGIN
 
     DESCRIPTION          "reset the MWD DIversion and depletion requests based on the estimated <br>available to MWD from the state apportionment and the other user diversion <br>requests and the forecast scheduled volume for MWD.  <br><br>This rule will only execute in the start timestep and set values for November and December.  This is so that if MWD sets a schedule in a timestep prior to November, the schedule can be adjusted in the last two months of the year such that there are no California overruns. ";
       FOREACH (DATETIME date IN @"24:00:00 November Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC mwdDepletionAmount = "Max"( 0.00000000 "acre-ft/month", ( "VolumeToFlow"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "California_CU_Forecast1.MWD" ["Dec31ofYear"( date )], date ) ) / 2.00000000 + $ "MWDDiversion:MWD.Depletion Requested" [date] COMMENTED_BY "LC CHECK:<br><br>This is a reference to the CU_SCHED slot in the 24 MS ruleset. Should we use the same reference <br>" )) DO
+            WITH_STATEMENT (NUMERIC mwdDepletionAmount = "Max"( 0.00000000 "acre-ft/month", ( "VolumeToFlow"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "California_CU_Forecast1.MWD" ["Dec31ofYear"( date )], date ) ) / 2.00000000 + $ "California_CU_Schedules.MWD" [date] )) DO
             $ "MWDDiversion:MWD.Depletion Requested" [date] := mwdDepletionAmount;
 
             $ "MWDDiversion:MWD.Diversion Requested" [date] := mwdDepletionAmount + "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date );
@@ -5001,7 +5001,7 @@ BEGIN
     RULE                 "Reset Monthly Forecast Use MWD - All Months Outyears";
     DESCRIPTION          "DESCRIPTION: Reset the MWD Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests).  This calculation gives the amount of water that California can take as a consumptive use amount so the diversion needs to be set to that amount plus the estimated return flow that is returned at the diversion location. <br><br>SLOTS SET: MWDDiversion:MWD.Depletion Requested; MWDDiversion:MWD.Diversion Requested";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND ( ( "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 3.00000000 AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 ) );
+    RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "IsJANofOutyear"(  ) AND ( ( "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) OR ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NaNToZero ( $ "Shortage.Shortage Flag" ["Dec31ofYear"( @"t" )] ) > 0.00000000 ) COMMENTED_BY "LC CHECK: Is this constraint needed <br>" ) );
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case.<br><br>APivarnik, 20180918: Moved MWD  logic to function called MWD_Outyear_Schedules. Referenced function in rule.<br><br>APivarnik, 20200702: While written slightly different than the rule by the same name in the 24 MS, the rule accomplishes the same goal with different logic. No changes to the rule made in the integration effort ";
     BEGIN
 
@@ -5023,17 +5023,11 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Sum the Annual State Use based on the monthly orders for AZ without CAP, NV, and CA without MWD<br><br>SLOTS SET: AnnualWaterUse.AzNoCAPTotalAnnual; AnnualWaterUse.NvTotalAnnual; AnnualWaterUse.CaNoMWDTotalAnnual";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>APivarnik, 20200702: Integration effort. Added with and if statement to choose between the different lists that were use in the MTOM vs the 24 MS ruleset";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>APivarnik, 20200702: Integration effort. Added with and if statement to choose between the different lists that were use in the MTOM vs the 24 MS ruleset<br>APivarnik, 20200730: Integration effort. Rmeoved if/with statements added previously. LC CHECK: Can this rule be deleted?";
     BEGIN
 
-      WITH_STATEMENT (LIST stateLIST = IF ( "Is24MonthStudy"(  ) )
- THEN
-  { "AzNoCAP" , "Nv" }
- ELSE
-  { "AzNoCAP" , "Nv" , "CaNoMWD" }
- ENDIF COMMENTED_BY "LC CHECK<br><br>The 24 MS doesn't set the CANoMWD slot. Can it set the slot so we can removed the with/if <br>conditional statement and go back to the list of 3? <br>") DO
-          DESCRIPTION          "Sum the Annual State Use based on the Monthly orders for AZ without CAP, Nevada, and <br><br>California with no MWD considered. ";
-      FOREACH (STRING state IN stateLIST) DO
+    DESCRIPTION          "Sum the Annual State Use based on the Monthly orders for AZ without CAP, Nevada, and <br><br>California with no MWD considered. ";
+      FOREACH (STRING state IN { "AzNoCAP" , "Nv" , "CaNoMWD" }) DO
             "AnnualWaterUse." CONCAT state CONCAT "TotalAnnual" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"t" ) == "GetYear"( @"Start Timestep" ) AND "GetMonth"( @"Start Timestep" ) > 1.00000000 )
  THEN
   "SumSlot"( % "AnnualWaterUse" & ( state CONCAT "TotalMonthlyOrder" ), @"Start Timestep", @"24:00:00 December Max DayOfMonth, Current Year" ) + "SumSlot"( % "AnnualWaterUse" & ( state CONCAT "TotalMonthlyActual" ), @"24:00:00 January Max DayOfMonth, Current Year", @"Start Timestep - 1" )
@@ -5043,8 +5037,6 @@ BEGIN
 
       ENDFOREACH;
 
-      END_WITH_STATEMENT;
-
     END
     UUID "{83e8f68d-0c6d-4521-975e-289b72ece3e4}";;
 
@@ -5052,7 +5044,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Sum the monthly AZ no CAP, NV, and CA no MWD orders based on the set diversion request for each state's diversion locations.<br><br>SLOTS SET: AnnualWaterUse.AzNoCAPTotalMonthlyOrder; AnnualWaterUse.NvTotalMonthlyOrder; AnnualWaterUse.CaNoMWDTotalMonthlyOrder";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>APivarnik, 20200501: Replaced non SNWP water users individually listed with function call<br><br>APivarnik, 20200702: Integration effort. Added if conditional statement to set assignment only when running in an MTOM mode. This slot assignment was not in the 24 MS<br>";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>APivarnik, 20200501: Replaced non SNWP water users individually listed with function call<br><br>APivarnik, 20200702: Integration effort. Added if conditional statement to set assignment only when running in an MTOM mode. This slot assignment was not in the 24 MS<br><br>APivarnik, 20200730: Removed if conditional statement. LC CHECK: IS this rule needed?<br>";
     BEGIN
 
     DESCRIPTION          "Sum the Monthly AZ no CAP, Nevada, and CA no MWD orders based on the set diversion request <br><br>for each state's diversion locations. ";
@@ -5061,18 +5053,14 @@ BEGIN
 
             $ "AnnualWaterUse.NvTotalMonthlyOrder" [date] := "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) + "Sum Non SNWP Nevada Users"( date );
 
-          DESCRIPTION          "LC CHECK<br><br>This slot is not set in the 24 MS. Can it be? <br>";
-      IF_STATEMENT (NOT "Is24MonthStudy"(  )) THEN
             $ "AnnualWaterUse.CaNoMWDTotalMonthlyOrder" [date] := "FlowToVolume"( $ "AAC.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CaDvsToPkr.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CaPkrToImp.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "CRIR:CRIRCa.Diversion Requested" [date], date ) + "FlowToVolume"( $ "FtMohaveIndRes:CA.Diversion Requested" [date], date ) + "FlowToVolume"( $ "PaloVerde.Total Diversion Requested" [date], date ) + "FlowToVolume"( $ "OthersBlwImp:YumaIsland.Diversion Requested" [date], date );
-
-      END_IF_STATEMENT;
 
       ENDFOREACH;
 
     END
     UUID "{7764ff99-7df7-485a-b1de-8bf3e55a4fab}";;
 
-    RULE                 "Set Normal Schedules MWD & SNWP";
+    RULE                 "Set Normal Schedules MWD & SNWP - AI";
     DESCRIPTION          "DESCRIPTION: Set the MWD Diversion Request and Depletion Request and the SNWP Diversion request to the normal schedules input to the MTOM model.<br><br>SLOTS SET: MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested; PumpingFromLakeMead:SNWP.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
@@ -5095,8 +5083,7 @@ BEGIN
   "VolumeToFlow"( $ "California_CU_Schedules.MWD" [date], date )
  ENDIF;
 
-          DESCRIPTION          "LC CHECK<br><br>This was added from 24 MS ruleset, does it need an if condition?  <br>";
-      $ "MWDDiversion:Tijuana.Depletion Requested" [date] := IF ( date < @"Start Timestep" )
+            $ "MWDDiversion:Tijuana.Depletion Requested" [date] := IF ( date < @"Start Timestep" )
  THEN
   "VolumeToFlow"( $ "Mexico_CU_Actual.MexicoTJ" [date], date )
  ELSE
@@ -5110,8 +5097,7 @@ BEGIN
   "VolumeToFlow"( $ "Nevada_CU_Schedules.SNWP" [date], date )
  ENDIF;
 
-          DESCRIPTION          "LC CHECK<br><br>This was added from 24 MS ruleset, does it need an if condition?  <br>";
-      $ "PumpingFromLakeMead:SNWP.Depletion Requested" [date] := IF ( date < @"Start Timestep" )
+            $ "PumpingFromLakeMead:SNWP.Depletion Requested" [date] := IF ( date < @"Start Timestep" )
  THEN
   "VolumeToFlow"( $ "Nevada_CU_Actual.SNWP" [date], date )
  ELSE
@@ -5123,11 +5109,11 @@ BEGIN
     END
     UUID "{768e94db-8bd9-47ef-9543-f7c6fe069ced}";;
 
-    RULE                 "Set Normal Schedules CAP";
+    RULE                 "Set Normal Schedules CAP - AI";
     DESCRIPTION          "DESCRIPTION: Set the CAP Diversion Request to the Normal input schedule for CAP<br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>May need 2nd condition (@t = Jan, current year) for full surplus<br>Need to separate CAP from MWD & SNWP for full surplus<br><br>APivarnik, 20200701: Integration effort. Added slot assignment for CAP depletion to match 24 MS. This rule as lower in the 24 MS as compared to the integrated ruleset but it shouldn't matter. Do we want to change this?<br>";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>May need 2nd condition (@t = Jan, current year) for full surplus<br>Need to separate CAP from MWD & SNWP for full surplus<br><br>APivarnik, 20200701: Integration effort. Added slot assignment for CAP depletion to match 24 MS. <br>";
     BEGIN
 
     DESCRIPTION          "Set the CAP Diversion Request to the Normal input schedule for CAP";
@@ -5158,32 +5144,27 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed because creation of EC ICS (an Input value) is not allowed in that case.<br><br>APivarnik, 20200702: Added if conditional statement for different calculations between MTOM and 24 MS ruleset. Renamed rule to match AZ and NV naming convention for similar rules. ";
     BEGIN
 
-    DESCRIPTION          "Set the MWD Forecast annual diversion to the state apportionment (in the deterministic run or in <br><br>the first year of the run, use the input state apportionment, in an outyear use the adjusted state <br><br>apportionment), less any senior users to MWD diversion requested. ";
-      $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] := IF ( "Is24MonthStudy"(  ) )
+    DESCRIPTION          "Set the MWD Forecast annual diversion to the state apportionment (in the deterministic run or in <br><br>the first year of the run, use the input state apportionment, in an outyear use the adjusted state <br><br>apportionment), less any senior users to MWD diversion requested. For 24 MS, use input state <br>apportionment <br>";
+      $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] := "Min"( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [], IF ( "IsMRM"(  ) )
  THEN
-  $ "California_CU_Forecast1.MWD" [@"24:00:00 December 31, Current Year"] - $ "California_CU_Overrun.California_Overrun_State_Ap" []
- ELSE
-  "Min"( $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [], IF ( "IsMRM"(  ) )
+  IF ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" )
   THEN
-   IF ( @"t" >= @"24:00:00 April 30, Start Year" AND @"t" <= @"24:00:00 December 31, Start Year" )
-   THEN
-    $ "AnnualWaterUse.California_Apportionment" [@"24:00:00 December 31, Current Year"]
-   ELSE
-    $ "AnnualWaterUse.California_PreliminaryAdjustedApportionment" [@"24:00:00 December 31, Current Year"]
-   ENDIF
-  ELSE
    $ "AnnualWaterUse.California_Apportionment" [@"24:00:00 December 31, Current Year"]
-  ENDIF - FOR ( DATETIME date IN "DateMax"( @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 January Max DayOfMonth, Current Year" ) TO @"24:00:00 December Max DayOfMonth, Current Year" ) STAT_SUM
-   FOR ( OBJECT diversionSite IN "ListSubbasin"( "California nonMWD WaterUsers" ) ) STAT_SUM
-    IF ( diversionSite == % "PaloVerde" )
-    THEN
-     "FlowToVolume"( diversionSite & "Total Diversion Requested" [date], date )
-    ELSE
-     "FlowToVolume"( diversionSite & "Diversion Requested" [date], date )
-    ENDIF
-   ENDFOR
-  ENDFOR COMMENTED_BY "Sum all Non MWD Diversion Requests" )
- ENDIF;
+  ELSE
+   $ "AnnualWaterUse.California_PreliminaryAdjustedApportionment" [@"24:00:00 December 31, Current Year"]
+  ENDIF
+ ELSE
+  $ "AnnualWaterUse.California_Apportionment" [@"24:00:00 December 31, Current Year"]
+ ENDIF - FOR ( DATETIME date IN "DateMax"( @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 January Max DayOfMonth, Current Year" ) TO @"24:00:00 December Max DayOfMonth, Current Year" ) STAT_SUM
+  FOR ( OBJECT diversionSite IN "ListSubbasin"( "California nonMWD WaterUsers" ) ) STAT_SUM
+   IF ( diversionSite == % "PaloVerde" )
+   THEN
+    "FlowToVolume"( diversionSite & "Total Diversion Requested" [date], date )
+   ELSE
+    "FlowToVolume"( diversionSite & "Diversion Requested" [date], date )
+   ENDIF
+  ENDFOR
+ ENDFOR COMMENTED_BY "Sum all Non MWD Diversion Requests" );
 
     END
     UUID "{544ed018-d60e-4aad-acb5-dd4c656bc465}";;
@@ -5192,20 +5173,15 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the CAP annual diversion to the AZ state apportionment less the more senior Arizona diversions. <br><br>SLOTS SET: ForecastUse.CAPResetAnnualFC<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200702: Added if conditional statement to choose between 24 MS calculation and MTOM calulaction. This is for the integration effort";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br><br>APivarnik, 20200702: Added if conditional statement to choose between 24 MS calculation and MTOM calulaction. This is for the integration effort<br>APivarnik, 20200730: removed if conditional statment for 24 MS calculation method. The two calculation methods would evaluate to the same value";
     BEGIN
 
-    DESCRIPTION          "Set the CAP annual diversion to the AZ state apportionment less the more senior Arizona <br>diversions. <br><br>LC CHECK<br><br>Do we need to different calculations<br>";
-      $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] := IF ( "Is24MonthStudy"(  ) )
- THEN
-  $ "Arizona_CU_Forecast1.CAP" [@"24:00:00 December 31, Current Year"] - $ "Arizona_CU_Overrun.Arizona_Overrun_State_Ap" []
- ELSE
-  $ "AnnualWaterUse.Arizona_Apportionment" [@"24:00:00 December 31, Current Year"] - FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
-   FOR ( OBJECT nonCAPUser IN "ListSubbasin"( "ArizonaNonCAPWaterUsers" ) ) STAT_SUM
-    "FlowToVolume"( nonCAPUser & "Diversion Requested" [date], date )
-   ENDFOR
-  ENDFOR COMMENTED_BY "Sum all Non CAP Diversion Requests"
- ENDIF;
+    DESCRIPTION          "Set the CAP annual diversion to the AZ state apportionment less the more senior Arizona <br>diversions.  <br>";
+      $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.Arizona_Apportionment" [@"24:00:00 December 31, Current Year"] - FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
+  FOR ( OBJECT nonCAPUser IN "ListSubbasin"( "ArizonaNonCAPWaterUsers" ) ) STAT_SUM
+   "FlowToVolume"( nonCAPUser & "Diversion Requested" [date], date )
+  ENDFOR
+ ENDFOR COMMENTED_BY "Sum all Non CAP Diversion Requests";
 
     END
     UUID "{668578ea-2770-4bda-80d5-476c189e9839}";;
@@ -5214,18 +5190,13 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Set the SNWP Forecast value to the difference between the Nevada State Apportionment and the other Nevada users. <br><br>SLOTS SET: ForecastUse.SNWPResetAnnualFC";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>APivarnik, 20200501: Replaced non SNWP water users individually listed with function call<br>Apivarnik, 20200702: Added if statement for 24 MS calculation vs MTOM calculation for integration effort<br>";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>APivarnik, 20200501: Replaced non SNWP water users individually listed with function call<br>Apivarnik, 20200702: Added if statement for 24 MS calculation vs MTOM calculation for integration effort<br>APivarnik, 20200730: removed if conditional statment for 24 MS calculation method. The two calculation methods would evaluate to the same value<br>";
     BEGIN
 
-    DESCRIPTION          "Set the SNWP Forecast value to the difference between the Nevada State Apportionment and <br>the other Nevada users. <br><br>LC CHECK<br><br>Do we need 2 different calculations? <br>";
-      $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] := IF ( "Is24MonthStudy"(  ) )
- THEN
-  $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"] - $ "Nevada_CU_Overrun.Nevada_Overrun_State_Ap" []
- ELSE
-  $ "AnnualWaterUse.Nevada_Apportionment" [@"24:00:00 December 31, Current Year"] - FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
-   "Sum Non SNWP Nevada Users"( date )
-  ENDFOR COMMENTED_BY "Sum all Non SNWP Nevada Diversion Requests"
- ENDIF;
+    DESCRIPTION          "Set the SNWP Forecast value to the difference between the Nevada State Apportionment and <br>the other Nevada users.  <br>";
+      $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] := $ "AnnualWaterUse.Nevada_Apportionment" [@"24:00:00 December 31, Current Year"] - FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
+  "Sum Non SNWP Nevada Users"( date )
+ ENDFOR COMMENTED_BY "Sum all Non SNWP Nevada Diversion Requests";
 
     END
     UUID "{6b824f48-1616-4d21-8f3e-816e455c3b3e}";;
@@ -5239,52 +5210,14 @@ BEGIN
   NOTES          "";
   BEGIN
 
-    RULE                 "Below Parker Hydrologic Demand Variability";
-    DESCRIPTION          "DESCRIPTION: Allow the senior users in the Lower Basin to take additional water or decrease their demand based on the Below Parker Hydrologic Demand Variability.  If the local inflows below Parker are greater than the historic 90th percentile (wet) observed value, then decrease the diversion requests by 10%. If the local inflows are less than the 10th percentile (dry) observed value, then increase the diversion requests by 5%. <br><br>SLOTS SET: PaloVerde.Total Diversion Requested; CRIR:CRIRAz.Diversion Requested; AAC:IID.Diversion Requested; AAC:Coachella.Diversion Requested; GilaGravityMainCanal:WMIDD.Diversion Requested; GilaGravityMainCanal:YCWUA.Diversion Requested; GilaGravityMainCanal:YMIDD.Diversion Requested; LowerBasinDemandVariability.BlwParkerTriggerSet<br><br>";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) AND "IsMRM"(  ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200701: Added run constraint to not run in 24 MS mode";
-    BEGIN
-
-      FOREACH (DATETIME date IN "DateMax"( @"24:00:00 January Max DayOfMonth, Current Year", @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            $ "PaloVerde.Total Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.PaloVerde" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "PVID" );
-
-            $ "CRIR:CRIRAz.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.CRIRAz" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "CRIRaz" );
-
-            $ "AAC:IID.Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.IID" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "IID" );
-
-            $ "AAC:Coachella.Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.Coachella" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "CVWD" );
-
-            $ "GilaGravityMainCanal:WMIDD.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.WMIDD" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "WMIDD" );
-
-            $ "GilaGravityMainCanal:YCWUA.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.YCWUA" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "YCWUA" );
-
-            $ "GilaGravityMainCanal:YMIDD.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.YMIDD" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "YMIDD" );
-
-            $ "LowerBasinDemandVariability.BlwParkerTriggerSet" ["Dec31ofYear"( date )] := IF ( "AgUsersBelowParkerDemandVariabilityFactor"( date, "PVID" ) == 1.00000000 )
- THEN
-  0.00000000
- ELSE
-  IF ( "AgUsersBelowParkerDemandVariabilityFactor"( date, "PVID" ) == 0.90000000 )
-  THEN
-   1.00000000
-  ELSE
-   - 1.00000000
-  ENDIF
- ENDIF;
-
-      ENDFOREACH;
-
-    END
-    UUID "{4a2b56f7-5971-4b70-9d9b-c299bd8286dc}";;
-
     RULE                 "Set Operational GainLoss";
     DESCRIPTION          "DESCRIPTION: Set the Operational Gain loss on the Havasu to Imperial Reach object by taking the difference between what is scheduled on the reach objects and what is input to the model as the Scheduled outflow from Havasu. <br><br>SLOTS SET: HavasuToImperial:DailyOperationalGainLoss.LocalInflow<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>APivarnik, 20200701: Added constraint to fire the rule in 24 MS mode for integration effort. The date constraint is different for MTOM and 24 MS in the if statement";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>APivarnik, 20200701: Added constraint to fire the rule in 24 MS mode for integration effort. The date constraint is different for MTOM and 24 MS in the if statement.";
     BEGIN
 
+    DESCRIPTION          "LC CHECK<br><br>Is this needed for MTOM? Talk to Sarah about testbed <br>";
       FOREACH (DATETIME date IN @"Start Timestep" TO @"Finish Timestep") DO
             $ "HavasuToImperial:DailyOperationalGainLoss.Local Inflow" [date] := IF ( ( ( date <= @"Start Timestep + 1" AND $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM <br>" ) OR ( date <= @"24:00:00 December Max DayOfMonth, Current Year" AND "Is24MonthStudy"(  ) ) COMMENTED_BY "For 24 MS <br>" )
  THEN
@@ -5317,7 +5250,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculate the Annual Consumptive Use values for all users in each of the lower basin states less the junior priority users, if applicable, for the beginning of the current year to the timestep prior to the run start. For Arizona, calculate the consumptive use forecast without CAP considered. For Nevada calculate the total Consumptive use forecast. For California, calculate the consumptive use forecast without MWD being considered.<br><br>SLOTS SET: AnnualWaterUse.AzNoCAPTotalMonthlyActual; AnnualWaterUse.NvTotalMonthlyActual; AnnualWaterUse.CaNoMWDTotalMonthlyActual<br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200701: Added if statement to only set CANoMWD assignment in MTOM mode only for integration effort. This rule covers the &quot;SumStateMonthlyActualCU-noP123b or IID&quot; from the 24 MS";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200701:  This rule covers the &quot;SumStateMonthlyActualCU-noP123b or IID&quot; from the 24 MS. LC CHECK Are these slots needed? Can this rule be deleted?";
     BEGIN
 
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"Start Timestep - 1") DO
@@ -5325,10 +5258,7 @@ BEGIN
 
             $ "AnnualWaterUse.NvTotalMonthlyActual" [date] := $ "Nevada_CU_Actual.SNWP" [date] + $ "Nevada_CU_Actual.FtMohaveNv" [date] + $ "Nevada_CU_Actual.BigBend" [date] + $ "Nevada_CU_Actual.SCE" [date] + $ "Nevada_CU_Actual.LMNRA Mohave" [date];
 
-            IF_STATEMENT (NOT "Is24MonthStudy"(  )) THEN
             $ "AnnualWaterUse.CaNoMWDTotalMonthlyActual" [date] := $ "California_CU_Actual.CaPumpersAbvImp" [date] + $ "California_CU_Actual.Chemehuevi" [date] + $ "California_CU_Actual.Coachella" [date] + $ "California_CU_Actual.CRIRCa" [date] + $ "California_CU_Actual.FtMohaveCa" [date] + $ "California_CU_Actual.IID" [date] + $ "California_CU_Actual.Needles" [date] + $ "California_CU_Actual.OtherLCWSP" [date] + $ "California_CU_Actual.PaloVerde" [date] + $ "California_CU_Actual.Ranch5" [date] + $ "California_CU_Actual.SaltonSea" [date] + $ "California_CU_Actual.Winterhaven" [date] + $ "California_CU_Actual.YumaIsland" [date] + $ "California_CU_Actual.YumaProject" [date];
-
-      END_IF_STATEMENT;
 
       ENDFOREACH;
 
@@ -5342,7 +5272,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200701: No changes made to rule in the 24 MS/MTOM integration effort";
     BEGIN
 
-    DESCRIPTION          "LC CHECK<br><br>Does this need to run every timestep in RC 1? <br>";
       FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" }) DO
             "GetObject"( state CONCAT "_CU_Overrun" ) & ( state CONCAT "_Overrun_State_Ap" ) [] := % "AnnualWaterUse" & ( state CONCAT "_Forecast1" ) [@"24:00:00 December 31, Current Year"] - % "AnnualWaterUse" & ( state CONCAT "_Apportionment" ) [@"24:00:00 December 31, Current Year"];
 
@@ -5358,7 +5287,6 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200701: No change in the rule for the 24 MS integration effort. This rule matches the 24 MS";
     BEGIN
 
-    DESCRIPTION          "LC CHECK<br><br>Does this need to run every timestep during run cycle 1?? <br>";
       FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" }) DO
             % "AnnualWaterUse" & ( state CONCAT "_AnnualApproval" ) [@"24:00:00 December 31, Current Year"] := IF ( state == "Nevada" )
  THEN
@@ -5405,8 +5333,8 @@ BEGIN
     RULE                 "Set Forecast1";
     DESCRIPTION          "DESCRIPTION: Determine the Annual Demand for each user in each &quot;State_CU_Forecast1&quot; object by summing the actual and consumptive use schedules for each user. <br><br>SLOTS SET: <state>_CU_Forecast1.<user><br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200701: No changes to ruleset in 24 MS/MTOM integration effort. This rule matches whats in the 24 MS";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND @"t" == @"Start Timestep";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200701: No changes to ruleset in 24 MS/MTOM integration effort. This rule matches whats in the 24 <br>APivarnik, 20200730: Adjusted execution constraint to only fire in start timestep";
     BEGIN
 
       FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" , "Mexico" }) DO
@@ -5424,6 +5352,45 @@ BEGIN
 
     END
     UUID "{9d1216c4-ec52-4468-a32d-0b92fff6e234}";;
+
+    RULE                 "Below Parker Hydrologic Demand Variability";
+    DESCRIPTION          "DESCRIPTION: Allow the senior users in the Lower Basin to take additional water or decrease their demand based on the Below Parker Hydrologic Demand Variability.  If the local inflows below Parker are greater than the historic 90th percentile (wet) observed value, then decrease the diversion requests by 10%. If the local inflows are less than the 10th percentile (dry) observed value, then increase the diversion requests by 5%. <br><br>SLOTS SET: PaloVerde.Total Diversion Requested; CRIR:CRIRAz.Diversion Requested; AAC:IID.Diversion Requested; AAC:Coachella.Diversion Requested; GilaGravityMainCanal:WMIDD.Diversion Requested; GilaGravityMainCanal:YCWUA.Diversion Requested; GilaGravityMainCanal:YMIDD.Diversion Requested; LowerBasinDemandVariability.BlwParkerTriggerSet<br><br>";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 1.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) AND "IsMRM"(  ) AND NOT "Is24MonthStudy"(  );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200701: Added run constraint to not run in 24 MS mode";
+    BEGIN
+
+      FOREACH (DATETIME date IN "DateMax"( @"24:00:00 January Max DayOfMonth, Current Year", @"Start Timestep" ) TO @"24:00:00 December Max DayOfMonth, Current Year") DO
+            $ "PaloVerde.Total Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.PaloVerde" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "PVID" );
+
+            $ "CRIR:CRIRAz.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.CRIRAz" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "CRIRaz" );
+
+            $ "AAC:IID.Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.IID" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "IID" );
+
+            $ "AAC:Coachella.Diversion Requested" [date] := "VolumeToFlow"( $ "California_CU_Schedules.Coachella" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "CVWD" );
+
+            $ "GilaGravityMainCanal:WMIDD.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.WMIDD" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "WMIDD" );
+
+            $ "GilaGravityMainCanal:YCWUA.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.YCWUA" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "YCWUA" );
+
+            $ "GilaGravityMainCanal:YMIDD.Diversion Requested" [date] := "VolumeToFlow"( $ "Arizona_CU_Schedules.YMIDD" [date], date ) * "AgUsersBelowParkerDemandVariabilityFactor"( date, "YMIDD" );
+
+            $ "LowerBasinDemandVariability.BlwParkerTriggerSet" ["Dec31ofYear"( date )] := IF ( "AgUsersBelowParkerDemandVariabilityFactor"( date, "PVID" ) == 1.00000000 )
+ THEN
+  0.00000000
+ ELSE
+  IF ( "AgUsersBelowParkerDemandVariabilityFactor"( date, "PVID" ) == 0.90000000 )
+  THEN
+   1.00000000
+  ELSE
+   - 1.00000000
+  ENDIF
+ ENDIF;
+
+      ENDFOREACH;
+
+    END
+    UUID "{4a2b56f7-5971-4b70-9d9b-c299bd8286dc}";;
 
     RULE                 "Set Schedules Volume to Flow";
     DESCRIPTION          "DESCRIPTION: For Each user in California, Arizona and Nevada, set the Reach Simulation Diversion request as this will allow the simulation of the Basin for the RiverWare model.  Setting these diversion requests so early in the ruleset allows for this initial setting of Lower Basin Demands that will ultimately sum to be the outflow from Lake Mead.  This step and the following rules will allow for the MTOM model to simulate in a somewhat realistic way and help in the Lake Powell Tier determination that occurs later in the policy. This rule sets the monthly diversion requests for lower basin diversion for each timestep in the run period. - CE 9/17/13<br><br>SLOTS SET:<br><br>";
@@ -5912,7 +5879,7 @@ BEGIN
     UUID "{581b1aba-ee47-4881-8442-d91bc7410d1d}";;
 
     RULE                 "Set Actuals to Zero In Future";
-    DESCRIPTION          "DESCRIPTION: This rule sets the actual water use to zero over the run period for the each user in the lower basin. This rule fires at the start timestep of the first runcycle. -CE 9/17/13<br><br>SLOTS SET: AnnualWaterUse.AzNoCAPTotalMonthlyActual; AnnualWaterUse.CaNoPVYPIIDTotalMonthlyActual; AnnualWaterUse.NvTotalMonthlyActual; AnnualWaterUse.P123bTotalMonthlyActual; <state>_CU_Actual.<user><br><br>";
+    DESCRIPTION          "DESCRIPTION: This rule sets the actual water use to zero over the run period for the each user in the lower basin. This rule fires at the start timestep of the first runcycle. -CE 9/17/13<br><br>SLOTS SET: <state>_CU_Actual.<user><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
@@ -5962,17 +5929,12 @@ BEGIN
     RULE                 "Set LC Annual Schedules";
     DESCRIPTION          "DESCRIPTION: This rule calculates the annual consumptive use (CU) schedules for Nevada and California. This rule fires for all run cycles. -CE 9/17/13<br><br>SLOTS SET: Nevada_CU_AnnualApproval.SNWP; California_CU_AnnualApproval.MWDReturns; California_CU_AnnualApproval.MWD<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200630: Addded if statement for AnnualApprovalMWD Returns slot assignment<br>";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 1.00000000 AND @"t" == @"Start Timestep";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>APivarnik, 20200630: Addded if statement for AnnualApprovalMWD Returns slot assignment<br>APivarnik, 20200730: Deleted slot assignment for MWD returns. Adjusted execution constriant to only fire in start timestep in RC 1";
     BEGIN
 
     DESCRIPTION          "Thist rule sets the data slots for Annual Consumptive Use Approval for SNWP and MWD<br><br>The Nevada Annual Approval slot assignment covers the &quot;Set SNWP CU Schedule - annual&quot; rule <br>from the 24 MS <br>";
       $ "Nevada_CU_AnnualApproval.SNWP" [@"24:00:00 December 31, Current Year"] := "AnnualVolumeSlot"( $ "Nevada_CU_Schedules.SNWP" );
-
-      IF_STATEMENT (NOT "Is24MonthStudy"(  )) THEN
-            $ "California_CU_AnnualApproval.MWDReturns" [@"24:00:00 December 31, Current Year"] := "AnnualVolumeSlot"( $ "California_CU_Schedules.MWDReturns" );
-
-      END_IF_STATEMENT;
 
     DESCRIPTION          "This slot assignment covers the &quot;Set MWD CU Schedule - annual&quot; rule in the 24 MS Ruleset<br>";
       $ "California_CU_AnnualApproval.MWD" [@"24:00:00 December 31, Current Year"] := "AnnualVolumeSlot"( $ "California_CU_Schedules.MWD" );
@@ -5983,11 +5945,10 @@ BEGIN
     RULE                 "Set LC Monthly Schedules";
     DESCRIPTION          "DESCRIPTION: This rule sets the consumptive use schedules for Nevada and California. -CE 9/17/13. Set the SNWP and MWD schedules based on the input consumptive use schedules for the various entities listed.  For SNWP this includes all groups with schedules for which the SNWP diversion delivers water.  For MWD, the return flow schedule is assumed to be constant at 8.5 acre-feet per day.  The MWDDiversion slot is input and so the returns schedule and the MWD (consumptive use portion) is set by this rule. <br><br>SLOTS SET: Nevada_CU_Schedules.SNWP; California_CU_Schedules.MWDReturns; California_CU_Schedules.MWD<br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 1.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed statement solving for California_CU_Schedules.MWDReturns and removed the part of the statement solving for MWDReturns from the California_CU_Schedules.MWD calculation.<br><br>APivarnik, 20200630: No changes to this rule in the integration effort";
+    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed statement solving for California_CU_Schedules.MWDReturns and removed the part of the statement solving for MWDReturns from the California_CU_Schedules.MWD calculation.<br><br>APivarnik, 20200630: No changes to this rule in the integration effort<br>APivarnik, 20200730: Changed run constraint to RC = 1";
     BEGIN
 
-    DESCRIPTION          "LC CHECK<br><br>MWD returns rule? <br>";
       FOREACH (DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO "Dec31ofYear"( @"Finish Timestep" ) COMMENTED_BY "This is for testing purposes, this should be Finish timestep<br>when the model is actually moved forward and all input<br>is taken care of") DO
           DESCRIPTION          "This slot assignment covers the &quot;Set SNWP CU schedule - monthly&quot; rule in the 24 MS  <br>";
       $ "Nevada_CU_Schedules.SNWP" [date] := $ "Nevada_CU_Schedules.SNWADiversion" [date] + $ "Nevada_CU_Schedules.BasicManagement" [date] + $ "Nevada_CU_Schedules.LMNRA Mead" [date] + $ "Nevada_CU_Schedules.BoulderCanyonProject" [date] + $ "Nevada_CU_Schedules.NvDeptFishGame" [date] + $ "Nevada_CU_Schedules.PacificCoastBuilding" [date] + $ "Nevada_CU_Schedules.City of Henderson" [date] - $ "Nevada_CU_Schedules.LVWashReturns" [date];
@@ -6199,6 +6160,7 @@ BEGIN
     NOTES                "APivarnik, 20200630: Rule copied from 24 MS ruleset during integration effort";
     BEGIN
 
+    DESCRIPTION          "UC CHECK<br><br>Is this needed? <br>";
       PRINT "AcreFeetPerMonthPrint"( $ "BlueMesaInflow.Unregulated" [] - $ "TaylorPark.Inflow" [] );
 
     END
@@ -6211,7 +6173,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>SC, 20111201: This rule set the inflows above Fontenelle, the unregulated inflow to Flaming Gorge, and the Yampa River Inflow for the 12 months beyond the run end date.  These values are needed by the operations rules for Flaming Gorge and Fontenelle as written by CADSWES.  Would be nice to review these rules and see if this is absolutely necessary. - sc 12/1/11<br><br>MC, 20160913: The comment in the body suggests the forecasts will be extended beyond the Finish Timestep by historic values, but actually all timesteps are being set with those values. Are the values being used?<br><br>APivarnik, 20200630: Added Not IS24MonthStudy to execution constraint to prevent the rule from firing in 24 MS mode";
     BEGIN
 
-    DESCRIPTION          "This rule will extend the forecasts for the locations specified beyond the RFC forecast period.  <br>The values in the extended forecast are set to historic input values for the specific location.";
+    DESCRIPTION          "This rule will extend the forecasts for the locations specified beyond the RFC forecast period.  <br>The values in the extended forecast are set to historic input values for the specific location.<br><br>UC CHECK<br><br>Is this rule needed? Similar rule in 24 MS with diff reservoirs is turned off <br>";
       FOREACH (DATETIME index IN @"Start Timestep" TO @"Finish Timestep + 12") DO
             $ "Fontenelle.Inflow" [index] := IF ( IsNaN $ "Fontenelle.Inflow" [index] )
  THEN
@@ -14134,32 +14096,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{40f3fad1-5f22-4b7c-b885-38a02e9ff84a}";
+    UUID "{42e2ba7b-7971-43e0-b1c6-db09cabf3fca}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d50a05f2-ba40-4631-b6cc-bbc7e42a38a0}";
+    UUID "{e0dedbc2-8421-40c3-a99a-9d5ff06bf60b}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b391bc46-fe01-4dca-bf27-7d1114df45b0}";
+    UUID "{31b5b026-0c24-402c-bcdb-aef268a3a06d}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c97d7d5d-6626-4078-b1a5-d857537d150f}";
+    UUID "{de5c4084-4089-479a-9ed4-187e2051e247}";
 ;
 
   END
-  UUID "{c817a119-25b3-446c-a1d5-8a5e6b412530}";;
+  UUID "{4d981dfe-7811-45b4-bc72-7997249572bd}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14170,11 +14132,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c4c5573a-27e0-4bd2-8fa6-591fe33e7323}";
+    UUID "{f3429023-2eda-41c0-8a3d-2d2764f0c2af}";
 ;
 
   END
-  UUID "{eea0ff4f-e98f-45ce-aead-aeb1db268a3b}";;
+  UUID "{e2936999-b97f-4a19-a7c6-96f864166768}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14185,11 +14147,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{849d9233-e12a-4a83-a9e2-567c3a1bfc49}";
+    UUID "{6629bce8-d5b3-4c07-8acc-cb3aa9fa624d}";
 ;
 
   END
-  UUID "{457d4589-05a7-44c2-98d2-662b4e558e8e}";;
+  UUID "{b5e54e9b-fadf-4b22-a4dc-f970132c086b}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14200,11 +14162,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a3a0ee5c-d879-49ed-97f1-bf25ce26278e}";
+    UUID "{12a498bd-e17e-4b7c-b941-6710f9e34529}";
 ;
 
   END
-  UUID "{5cba3483-796e-4e02-919b-8af8ab2f9662}";;
+  UUID "{079cb1a1-684c-4830-a289-bc9cc8006f6e}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
