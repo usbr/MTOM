@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 10:01 July 30, 2020
+# Created 15:02 July 31, 2020
 # 
 RULESET
 NAME "24month";
@@ -1433,7 +1433,7 @@ BEGIN
     END
     UUID "{d30f089a-fca1-4ff2-8a08-1fcc4cf73e1e}";;
 
-    RULE                 "?? - Compute Quantified Surplus Volume";
+    RULE                 "INT - Compute Quantified Surplus Volume";
     DESCRIPTION          "Computes the total volume of Quantified Surplus water for the year. This slot only computes once per year in January and is NOT recalculted if Lower Basin demands are revised.<br><br>If this value is postitive,  there is a Quantified Surplus determination and water use schedules are revised as appropriate. <br><br>Equation:   Surplus Volume = (Powell Storage + Mead Storage ? maxstorage - previous year ICS credits)*(1+avgBankStorcoef) + runoff ? UBDemand ? LBDemand <br>Variable Definitions:<br>  Powell Storage = Powell storage at beginning of the year (December month-end) <br>  Mead Storage = Mead storage at the beginning of the year (December month-end) <br>  Max Storage = 47.96 maf <br>  Previous year ICS credits ? cumulative ICS credits over entire Lower Basin over all years <br>  avgBankStorcoef = average of Powell and Mead bank storage coefficients <br>  Runoff = 17.4 maf (70th percentile non-exceedence flow) <br>  UBDemand = Upper Basin depletion scheduled for the year + average evaporation loss in the Upper Basin (same as in 602a calculation, 560 kaf) <br>  LBDemand = sum of depletions below Powell + evaporation losses in the Lower Basin (avg 900 kaf) ? avg gains below Powell (Powell to Mead and below Mead) <br><br>-HMG 8/2/11";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT IsNaN $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"];

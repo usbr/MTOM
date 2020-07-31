@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 10:00 July 30, 2020
+# Created 15:05 July 31, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1835,7 +1835,7 @@ BEGIN
     RULE                 "Set User Surplus  Schedule -  DS, QS, FC";
     DESCRIPTION          "";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) COMMENTED_BY "LC CHECK: should this be projected pool elevation function or direct refernce to the pool <br>elevation of Mead<br>" >= $ "Surplus.Domestic Surplus Trigger Elevation" [] OR $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" ) AND "IsJANofOutyear"(  ) ) OR "IsFloodControl"(  ) ) AND "GetRunCycleIndex"(  ) >= 3.00000000 ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsJANofOutyear"(  ) AND $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] );
+    RULE_EXEC_CONSTRAINT ( ( ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) COMMENTED_BY "LC CHECK: should this be projected pool elevation function or direct refernce to the pool <br>elevation of Mead<br>" >= $ "Surplus.Domestic Surplus Trigger Elevation" [] OR $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" ) AND "IsJANofOutyear"(  ) ) OR "IsFloodControl"(  ) ) AND "GetRunCycleIndex"(  ) >= 3.00000000 ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsJANofOutyear"(  ) AND NaNToZero ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] ) != NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) );
     NOTES                "";
     BEGIN
 
@@ -2296,8 +2296,8 @@ BEGIN
     RULE                 "Set Quantified Surplus Flags";
     DESCRIPTION          "DESCRIPTION: This rule sets the flags that indicate a Quantified Surplus condition<br><br>SLOTS SET: Surplus.Surplus Flag; Surplus.Quantified Surplus Flag; LowerBasinDemandVariability.AbvHooverTriggerSet<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND @"t" == @"24:00:00 January 31, Current Year" AND IsNaN $ "Surplus.Surplus Flag" [] AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Quantified Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition. Note that the Execution Constraints for this rule depend on the Surplus.Quantified Surplus Volume slot, which isn't set until Rule 39-Copute Quantified Surplus Volume - Minute 323; so, this rule will not fire successfully until after that rule<br><br>A. Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br><br>A. Pivarnik, 20200709: Integration effort. Deleted disabled slot assignment. These slot assignments are imbedded within a different rule in the 24 MS ruleset. This rule is unchanged";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND @"t" == @"24:00:00 January 31, Current Year" AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: MC, 20170706<br><br>MC, 20170706: The setting of these flags was moved from the rule Quantified Surplus Schedules Data Volume to Simulation Flow at the suggestion of Shana T. to consolidate setting of flags related to Mead condition. Note that the Execution Constraints for this rule depend on the Surplus.Quantified Surplus Volume slot, which isn't set until Rule 39-Copute Quantified Surplus Volume - Minute 323; so, this rule will not fire successfully until after that rule<br><br>A. Pivarnik, 20180921: Disabled statement setting LowerBasinDemandVariability.AbvHooverTriggerSet. Was causing MTOM to fail in August run when trying to set Mead operations. <br><br>A. Pivarnik, 20200709: Integration effort. Deleted disabled slot assignment. These slot assignments are imbedded within a different rule in the 24 MS ruleset. This rule is unchanged<br><br>A. Pivarnik, 20200731: Removed execution constraint requiring surplus flag to be empty";
     BEGIN
 
       FOREACH (DATETIME date IN @"t" TO @"24:00:00 December 31, Current Year") DO
@@ -2327,14 +2327,13 @@ BEGIN
     END
     UUID "{80df0f7b-b6ae-4c02-86da-f2fcd9a0bff8}";;
 
-    RULE                 "?? - Compute Quantified Surplus Volume";
+    RULE                 "Compute Quantified Surplus Volume";
     DESCRIPTION          "DESCRIPTION: This rule computes the total volume of Quantified Surplus water for the year. This slot only computes once per year in January and is NOT recalculated if Lower Basin demands are revised. If this value is postitive, there is a Quantified Surplus determination and water use schedules are revised as appropriate. <br>Equation:   Surplus Volume = (Powell Storage + Mead Storage - maxstorage - previous year ICS credits)*(1+avgBankStorcoef) + runoff - UBDemand - LBDemand <br>Variable Definitions:<br>  Powell Storage = Powell storage at beginning of the year (December month-end) <br>  Mead Storage = Mead storage at the beginning of the year (December month-end) <br>  Max Storage = 47.96 maf <br>  Previous year ICS credits - cumulative ICS credits over entire Lower Basin over all years <br>  avgBankStorcoef = average of Powell and Mead bank storage coefficients <br>  Runoff = 17.4 maf (70th percentile non-exceedence flow) <br>  UBDemand = Upper Basin depletion scheduled for the year + average evaporation loss in the Upper Basin (same as in 602a calculation, 560 kaf) <br>  LBDemand = sum of depletions below Powell + evaporation losses in the Lower Basin (avg 900 kaf) ? avg gains below Powell (Powell to Mead and below Mead) <br><br>-HMG 8/2/11<br><br>SLOTS SET: Surplus.Quantified Surplus Volume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT IsNaN $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br>MC, 20160114: There is a function, QuantifiedSurplusVolume, with the same calculation in it.  Are both necessary?<br>MC, 20170512: Need to edit Execution Constraints to ensure execution in January?<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name";
+    RULE_EXEC_CONSTRAINT IsNaN $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) >= 3.00000000;
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/11<br>MC, 20160114: There is a function, QuantifiedSurplusVolume, with the same calculation in it.  Are both necessary?<br>MC, 20170512: Need to edit Execution Constraints to ensure execution in January?<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br>A.Pivarnik, 20200731: Added Run cycle index > 3 to execution constraint. No other changes needed for integration effort";
     BEGIN
 
-    DESCRIPTION          "LC CHECK<br><br>Rule and execution constriant<br>";
       $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] := "QuantifiedSurplusVolume"(  );
 
     END
@@ -4783,7 +4782,7 @@ BEGIN
   "FlowToVolume"( $ "HavasuOutflow.BHOPSParkerOutflow" [], @"t" )
  ELSE
   $ "HavasuOutflow.ParkerRequirement" [] COMMENTED_BY "Use in 24 MS mode <br>"
- ENDIF + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - ( "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + $ "California_CU_Schedules.MWDReturns" [@"t"] COMMENTED_BY "LC CHECK<br><br>In 24 MS, should be in MTOM? <br>" ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation" [] + $ "Havasu.Evaporation" [];
+ ENDIF + "SumAllDiversionsBelowVolume"( % "Mead", @"t", @"t" ) - ( "SumAllGainsBelowVolume"( % "Mead", @"t", @"t" ) + $ "California_CU_Schedules.MWDReturns" [@"t"] ) + "ComputeDeltaTargetStorage"( % "Mohave" ) + "ComputeDeltaTargetStorage"( % "Havasu" ) + $ "Mohave.Evaporation" [] + $ "Havasu.Evaporation" [];
 
     END
     UUID "{3e563966-f875-4a72-9b74-d19d15d4a098}";;
@@ -4808,8 +4807,8 @@ BEGIN
     RULE                 "Havasu Rule Curve";
     DESCRIPTION          "DESCRIPTION: In any month except the Start Timestep, set the Havasu outflow such that the reservoir pool elevation target is met. For testbed hindcasts, this rule executes in the Start Timestep to solve for outflow which is not input using the slot HavasuOutflow.BHOPSParkerOutflow.<br><br>SLOTS SET: Havasu.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( @"t" >= @"Start Timestep" AND ( $ "MTOMRunType.RunType" [] != 0.00000000 OR "Is24MonthStudy"(  ) ) ) COMMENTED_BY "For testbed hindcasts, this rule solves for Havasu.Outflow in Start Timestep <br>" );
-    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 0 (allows for no dependence on BHOPS during development testing). <br>A. Pivarnik 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same. Added execution constraing to fire in 24 MS mode";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( ( $ "MTOMRunType.RunType" [] == 1.00000000 AND @"t" >= @"Start Timestep" ) OR ( "Is24MonthStudy"(  ) AND @"t" > @"Start Timestep + 1" ) ) COMMENTED_BY "For testbed hindcasts, this rule solves for Havasu.Outflow in Start Timestep <br>" );
+    NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 0 (allows for no dependence on BHOPS during development testing). <br>A. Pivarnik, 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same. Added execution constraing to fire in 24 MS mode<br>A. Pivarnik, 20200731: Adjusted eecution constraints to fire correctly depending on model run type";
     BEGIN
 
       $ "Havasu.Outflow" [] := "SolveOutflow"( % "Havasu", $ "Havasu.Inflow" [], "GetTargetStorage"( % "Havasu", @"t" ), $ "Havasu.Storage" [@"t - 1"], @"t" );
@@ -4820,8 +4819,8 @@ BEGIN
     RULE                 "Set Havasu Outflow Exp";
     DESCRIPTION          "DESCRIPTION: If the Havasu outflow is not set at the Start Timestep, set it to the BHOPS Parker Outflow, which is a user input value and comes from the 24 MS. <br><br>SLOTS SET: Havasu.Outflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT IsNaN $ "Havasu.Outflow" [] AND @"t" <= @"Start Timestep" AND "GetRunCycleIndex"(  ) >= 1.00000000 AND ( $ "MTOMRunType.RunType" [] == 0.00000000 OR "Is24MonthStudy"(  ) ) COMMENTED_BY "For operational MTOM and 24 MS only  <br>";
-    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160426: LC changed this from setting the first 2 months of the run to just the first month<br><br>S.Baker 06/20/2018: Added execution constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>A. Pivarnik 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same. Added execution constraing to fire in 24 MS mode";
+    RULE_EXEC_CONSTRAINT IsNaN $ "Havasu.Outflow" [] AND ( ( $ "MTOMRunType.RunType" [] == 0.00000000 AND @"t" <= @"Start Timestep" ) OR ( "Is24MonthStudy"(  ) AND @"t" <= @"Start Timestep + 1" ) ) COMMENTED_BY "For operational MTOM and 24 MS only  <br>" AND "GetRunCycleIndex"(  ) >= 1.00000000;
+    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20160426: LC changed this from setting the first 2 months of the run to just the first month<br><br>S.Baker 06/20/2018: Added execution constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>A. Pivarnik 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same. Added execution constraint to fire in 24 MS mode";
     BEGIN
 
       $ "Havasu.Outflow" [] := $ "HavasuOutflow.BHOPSParkerOutflow" [];
@@ -4876,7 +4875,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Reset the CAP Diversion requests based on the estimated available to CAP from the state apportionment and the other user diversion requests and the forecast scheduled volume for CAP.  This rule will only execute in the start timestep and set values for November and December.  This is so that if CAP sets a schedule in a timestep prior to November, the schedule can be adjusted in the last two months of the year such that there are no Arizona overruns. <br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT IsNaN $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND "GetMonth"( @"t" ) < 11.00000000 AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>APivarnik, 20200702: Added assignment for te CAP Depeletion requested to match the 24 MS. Rewrote rule using with statment and used temporary variable to set both CAP depletion and diversion since the values are the same. Made call to December of current year consistant throughout the rule";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>APivarnik, 20200702: Added assignment for CAP Depeletion requested to match the 24 MS. Rewrote rule using with statment and used temporary variable to set both CAP depletion and diversion since the values are the same. Made call to December of current year consistant throughout the rule";
     BEGIN
 
     DESCRIPTION          "reset the CAP Diversion requests based on the estimated available to CAP from the state apportionment and the other user diversion requests and the forecast scheduled volume for CAP.  This <br><br>rule will only execute in the start timestep and set values for November and December.  This is so that if CAP sets a schedule in a timestep prior to November, the schedule can be adjusted in <br><br>the last two months of the year such that there are no Arizona overruns. ";
@@ -4897,7 +4896,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Reset the CAP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests). <br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" != @"Start Timestep" AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>AP, 9/18/2018: Moved CAP logic to function called CAP_Outyear_Schedules. Referenced function in rule.<br>APivarnik, 20200702: his rule is written differently than in the 24 MS ruleset ut accomplishes the same goal. Added assignment for CAP total depletion to match 24 MS rule";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>AP, 9/18/2018: Moved CAP logic to function called CAP_Outyear_Schedules. Referenced function in rule.<br>APivarnik, 20200702: This rule is written differently than in the 24 MS ruleset but accomplishes the same goal. Added assignment for CAP total depletion to match 24 MS rule";
     BEGIN
 
     DESCRIPTION          "Reset the CAP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests). ";
@@ -4915,7 +4914,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Reset the SNWP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests).  Sets LBDV.ScehduleCheck value to 0 (normal operating condition)<br><br>SLOTS SET: PumpingFromLakeMead:SNWP.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT NOT IsNaN $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"] AND ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 1.00000000;
-    NOTES                "AUTHOR, DATE: Unknown<br><br>AP, 9/18/2018: Moved SNWP logic to function called SNWP_Schedules. Referenced function in rule. Changed logic in SNWP Schedules function to refernce Nevada_CU_Schedules instead of PumpingfromMead. Added LBDV.Schedule check inital set up value<br><br>APivarnik, 20200702: Added if conditional to not set the LBDV schedule check if running in 24 MS mode.While written slightly different than the rule by the same name in the 24 MS, this rule accomplishes the same goal with different logic. No changes to the logic made which sets PumpingfromMead values";
+    NOTES                "AUTHOR, DATE: Unknown<br><br>AP, 9/18/2018: Moved SNWP logic to function called SNWP_Schedules. Referenced function in rule. Changed logic in SNWP Schedules function to refernce Nevada_CU_Schedules instead of PumpingfromMead. Added LBDV.Schedule check inital set up value<br><br>APivarnik, 20200702: Added if conditional to set the LBDV schedule check if running in MTOM mode only.While written slightly different than the rule by the same name in the 24 MS, this rule accomplishes the same goal with different logic. No changes to the logic made which sets PumpingfromMead values";
     BEGIN
 
     DESCRIPTION          "Reset the SNWP Diversion request based on the reset annual forecast use (difference in state apportionment and the other diversion requests).  ";
@@ -5213,13 +5212,12 @@ BEGIN
     RULE                 "Set Operational GainLoss";
     DESCRIPTION          "DESCRIPTION: Set the Operational Gain loss on the Havasu to Imperial Reach object by taking the difference between what is scheduled on the reach objects and what is input to the model as the Scheduled outflow from Havasu. <br><br>SLOTS SET: HavasuToImperial:DailyOperationalGainLoss.LocalInflow<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>APivarnik, 20200701: Added constraint to fire the rule in 24 MS mode for integration effort. The date constraint is different for MTOM and 24 MS in the if statement.";
+    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not use HavasuOutflow.BHOPSParkerOutflow slot prior during Testbed simulations.<br>APivarnik, 20200701: Added constraint to fire the rule in 24 MS mode for integration effort. The date constraint is different for MTOM and 24 MS in the if statement.<br>APivarnik, 20200731: Changed if conditional statement to only calculate in 24 MS mode else 0. Added RC = 1 in execution constraint";
     BEGIN
 
-    DESCRIPTION          "LC CHECK<br><br>Is this needed for MTOM? Talk to Sarah about testbed <br>";
       FOREACH (DATETIME date IN @"Start Timestep" TO @"Finish Timestep") DO
-            $ "HavasuToImperial:DailyOperationalGainLoss.Local Inflow" [date] := IF ( ( ( date <= @"Start Timestep + 1" AND $ "MTOMRunType.RunType" [] == 0.00000000 ) COMMENTED_BY "For operational MTOM <br>" ) OR ( date <= @"24:00:00 December Max DayOfMonth, Current Year" AND "Is24MonthStudy"(  ) ) COMMENTED_BY "For 24 MS <br>" )
+            $ "HavasuToImperial:DailyOperationalGainLoss.Local Inflow" [date] := IF ( ( date <= @"24:00:00 December Max DayOfMonth, Current Year" AND "Is24MonthStudy"(  ) ) COMMENTED_BY "For 24 MS <br>" )
  THEN
   ( "VolumeToFlow"( $ "HavasuOutflow.ParkerScheduleRequirement" [date], date ) - $ "HavasuOutflow.BHOPSParkerOutflow" [date] )
  ELSE
@@ -7113,10 +7111,10 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "Author, S.Baker 20200311";
+    NOTES          "Author, S.Baker 20200311<br><br>A.Pivarnik, 20200731: Added NantoZero for the ScheduleCheck slots in the LBDV data object";
     BEGIN
 
-      IF ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] != $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] OR $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] )
+      IF ( NaNToZero ( $ "LowerBasinDemandVariability.ScheduleCheck" ["Dec31ofYear"( @"t" )] ) != NaNToZero ( $ "LowerBasinDemandVariability.LowerBasinCondition" ["Dec31ofYear"( @"t" )] ) OR $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] )
  THEN
   TRUE
  ELSE
@@ -10905,7 +10903,7 @@ BEGIN
 
       IF ( "GetYear"( @"t" ) == "GetYear"( @"Start Timestep" ) )
  THEN
-  ( "VolumeToFlow"( $ "Nevada_CU_Schedules.SNWP" [date], date ) COMMENTED_BY "LC CHECK<br><br>This is a refernce to the diversion requested slot in 24 MS. Should this matter? ( I would assume <br>no) <br>" + ( "VolumeToFlow"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"], date ) ) / ( 12.00000000 - "GetMonth"( @"Start Timestep" ) + 1.00000000 ) )
+  ( "VolumeToFlow"( $ "Nevada_CU_Schedules.SNWP" [date], date ) + ( "VolumeToFlow"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "Nevada_CU_Forecast1.SNWP" [@"24:00:00 December 31, Current Year"], date ) ) / ( 12.00000000 - "GetMonth"( @"Start Timestep" ) + 1.00000000 ) )
  ELSE
   "VolumeToFlow"( $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) * ( "FlowToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date], date ) / "SumFlowsToVolume"( $ "PumpingFromLakeMead:SNWP.Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" ) )
  ENDIF;
@@ -14096,32 +14094,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{42e2ba7b-7971-43e0-b1c6-db09cabf3fca}";
+    UUID "{b0b596d3-8eb1-465c-8ea2-e3d6345ed62a}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e0dedbc2-8421-40c3-a99a-9d5ff06bf60b}";
+    UUID "{b5f09d40-1de4-4d28-b745-865b629b68a1}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{31b5b026-0c24-402c-bcdb-aef268a3a06d}";
+    UUID "{2e6ba432-881b-41dc-aeb6-d480800383d6}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{de5c4084-4089-479a-9ed4-187e2051e247}";
+    UUID "{ef129b06-5d47-4226-8df0-4d7f4152bffd}";
 ;
 
   END
-  UUID "{4d981dfe-7811-45b4-bc72-7997249572bd}";;
+  UUID "{a7a68809-ac1e-496d-92f5-a77fa7c735f9}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14132,11 +14130,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f3429023-2eda-41c0-8a3d-2d2764f0c2af}";
+    UUID "{572996cf-6455-4338-b2cd-40ebddae32b8}";
 ;
 
   END
-  UUID "{e2936999-b97f-4a19-a7c6-96f864166768}";;
+  UUID "{e59f48b4-25ac-4320-a23f-86ddabff5261}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14147,11 +14145,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6629bce8-d5b3-4c07-8acc-cb3aa9fa624d}";
+    UUID "{ef3d0049-105e-46e3-bb2f-6fb16879b606}";
 ;
 
   END
-  UUID "{b5e54e9b-fadf-4b22-a4dc-f970132c086b}";;
+  UUID "{cf05f87a-0ae3-4a7e-9bd3-2f5427069396}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14162,11 +14160,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{12a498bd-e17e-4b7c-b941-6710f9e34529}";
+    UUID "{4873d1a9-8826-49fa-b843-05a46cb16c39}";
 ;
 
   END
-  UUID "{079cb1a1-684c-4830-a289-bc9cc8006f6e}";;
+  UUID "{ab9bc97b-f534-41ba-8c4b-3ec54eac9cda}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
