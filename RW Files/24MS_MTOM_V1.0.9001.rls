@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:05 July 31, 2020
+# Created 11:12 August 3, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4983,9 +4983,9 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20160623: Added the Execution Constraint to allow the rule to refire if in Run Cycle 3 and Shortage is in effect.  This is required because the slot AnnualWaterUse.California_PreliminaryAdjustedApportionment will have changed, also changing ForecastUse.MWDResetAnnualFC, because creation of EC ICS (an Input value) is not allowed in that case.<br><br>MC, 20180125: Removed Shortage as condition for Execution Constraint based on USBR changes to rules<br><br>CH, 3/18: Removed run cycle == 3.0 constraint since rule only fires in start year (therefore should not refire in run cycle 3 for any reason, even in shortage conditions - causes the rule to add twice the amount of water available)<br><br>APivarnik, 20200702: While written slightly different than the rule by the same name in the 24 MS, this rule accomplishes the same goal with different logic. No changes to the rule made in the integration effort <br><br>APivarnik, 07302020: Changed slot reference from MWD Depletion requested to CU schedule.MWD";
     BEGIN
 
-    DESCRIPTION          "reset the MWD DIversion and depletion requests based on the estimated <br>available to MWD from the state apportionment and the other user diversion <br>requests and the forecast scheduled volume for MWD.  <br><br>This rule will only execute in the start timestep and set values for November and December.  This is so that if MWD sets a schedule in a timestep prior to November, the schedule can be adjusted in the last two months of the year such that there are no California overruns. ";
+    DESCRIPTION          "reset the MWD Diversion and depletion requests based on the estimated available to MWD from <br>the state apportionment and the other user diversion requests and the forecast scheduled <br>volume for MWD.  <br><br>This rule will only execute in the start timestep and set values for November and December.  This <br>is so that if MWD sets a schedule in a timestep prior to November, the schedule can be adjusted <br>in the last two months of the year such that there are no California overruns.  <br>";
       FOREACH (DATETIME date IN @"24:00:00 November Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC mwdDepletionAmount = "Max"( 0.00000000 "acre-ft/month", ( "VolumeToFlow"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "California_CU_Forecast1.MWD" ["Dec31ofYear"( date )], date ) ) / 2.00000000 + $ "California_CU_Schedules.MWD" [date] )) DO
+            WITH_STATEMENT (NUMERIC mwdDepletionAmount = "Max"( 0.00000000 "acre-ft/month", ( "VolumeToFlow"( $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"], date ) - "VolumeToFlow"( $ "California_CU_Forecast1.MWD" ["Dec31ofYear"( date )], date ) ) / 2.00000000 + "VolumeToFlow"( $ "California_CU_Schedules.MWD" [date], date ) )) DO
             $ "MWDDiversion:MWD.Depletion Requested" [date] := mwdDepletionAmount;
 
             $ "MWDDiversion:MWD.Diversion Requested" [date] := mwdDepletionAmount + "VolumeToFlow"( $ "California_CU_Schedules.MWDReturns" [date], date );
@@ -5059,9 +5059,9 @@ BEGIN
     END
     UUID "{7764ff99-7df7-485a-b1de-8bf3e55a4fab}";;
 
-    RULE                 "Set Normal Schedules MWD & SNWP - AI";
+    RULE                 "Set Normal Schedules MWD & SNWP - AI - TBD";
     DESCRIPTION          "DESCRIPTION: Set the MWD Diversion Request and Depletion Request and the SNWP Diversion request to the normal schedules input to the MTOM model.<br><br>SLOTS SET: MWDDiversion:MWD.Diversion Requested; MWDDiversion:MWD.Depletion Requested; PumpingFromLakeMead:SNWP.Diversion Requested";
-    ACTIVE               TRUE;
+    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
     NOTES                "AUTHOR, DATE: Unknown<br><br>Need to separate CAP & CVWD from MWD & SNWP for full surplus<br><br>APivarnik, 20200701: Added slot assignments for SNWP Depletion and TJ Depletion to match the 24 MS rule (integration effort). This rule was lower in the ruleset in the 24 MS, but the change win order shouldn't matter.";
     BEGIN
@@ -5082,7 +5082,8 @@ BEGIN
   "VolumeToFlow"( $ "California_CU_Schedules.MWD" [date], date )
  ENDIF;
 
-            $ "MWDDiversion:Tijuana.Depletion Requested" [date] := IF ( date < @"Start Timestep" )
+          DESCRIPTION          "Already being set in the set schedules volume ot flow rule<br>";
+      $ "MWDDiversion:Tijuana.Depletion Requested" [date] := IF ( date < @"Start Timestep" )
  THEN
   "VolumeToFlow"( $ "Mexico_CU_Actual.MexicoTJ" [date], date )
  ELSE
@@ -5108,9 +5109,9 @@ BEGIN
     END
     UUID "{768e94db-8bd9-47ef-9543-f7c6fe069ced}";;
 
-    RULE                 "Set Normal Schedules CAP - AI";
+    RULE                 "Set Normal Schedules CAP - AI - TBD";
     DESCRIPTION          "DESCRIPTION: Set the CAP Diversion Request to the Normal input schedule for CAP<br><br>SLOTS SET: CAPDiversion.Total Diversion Requested";
-    ACTIVE               TRUE;
+    ACTIVE               FALSE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
     NOTES                "AUTHOR, DATE: Unknown<br><br>May need 2nd condition (@t = Jan, current year) for full surplus<br>Need to separate CAP from MWD & SNWP for full surplus<br><br>APivarnik, 20200701: Integration effort. Added slot assignment for CAP depletion to match 24 MS. <br>";
     BEGIN
@@ -5405,6 +5406,20 @@ BEGIN
   "VolumeToFlow"( $ "California_CU_Schedules.PaloVerde" [date], date )
  ENDIF;
 
+            $ "CAPDiversion.Total Diversion Requested" [date] := IF ( date < @"Start Timestep" )
+ THEN
+  "VolumeToFlow"( $ "Arizona_CU_Actual.CAP" [date], date )
+ ELSE
+  "VolumeToFlow"( $ "Arizona_CU_Schedules.CAP" [date], date )
+ ENDIF;
+
+            $ "CAPDiversion.Total Depletion Requested" [date] := IF ( date < @"Start Timestep" )
+ THEN
+  "VolumeToFlow"( $ "Arizona_CU_Actual.CAP" [date], date )
+ ELSE
+  "VolumeToFlow"( $ "Arizona_CU_Schedules.CAP" [date], date )
+ ENDIF;
+
             $ "CRIR:CRIRAz.Diversion Requested" [date] := IF ( date < @"Start Timestep" )
  THEN
   "VolumeToFlow"( $ "Arizona_CU_Actual.CRIRAz" [date], date )
@@ -5664,6 +5679,20 @@ BEGIN
   "VolumeToFlow"( $ "Arizona_CU_Schedules.YumaUnionHighScl" [date], date )
  ENDIF;
 
+            $ "MWDDiversion:MWD.Diversion Requested" [date] := IF ( date < @"Start Timestep" )
+ THEN
+  "VolumeToFlow"( $ "California_CU_Actual.MWDDiversion" [date], date )
+ ELSE
+  "VolumeToFlow"( $ "California_CU_Schedules.MWDDiversion" [date], date )
+ ENDIF;
+
+            $ "MWDDiversion:MWD.Depletion Requested" [date] := IF ( date < @"Start Timestep" )
+ THEN
+  "VolumeToFlow"( $ "California_CU_Actual.MWD" [date], date )
+ ELSE
+  "VolumeToFlow"( $ "California_CU_Schedules.MWD" [date], date )
+ ENDIF;
+
             $ "MWDDiversion:Tijuana.Diversion Requested" [date] := IF ( date < @"Start Timestep" )
  THEN
   "VolumeToFlow"( $ "Mexico_CU_Actual.MexicoTJ" [date], date )
@@ -5837,6 +5866,20 @@ BEGIN
   "VolumeToFlow"( $ "Arizona_CU_Actual.LMNRA Az Mead" [date], date )
  ELSE
   "VolumeToFlow"( $ "Arizona_CU_Schedules.LMNRA Az Mead" [date], date )
+ ENDIF;
+
+            $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] := IF ( date < @"Start Timestep" )
+ THEN
+  "VolumeToFlow"( $ "Nevada_CU_Actual.SNWP" [date], date )
+ ELSE
+  "VolumeToFlow"( $ "Nevada_CU_Schedules.SNWP" [date], date )
+ ENDIF;
+
+            $ "PumpingFromLakeMead:SNWP.Depletion Requested" [date] := IF ( date < @"Start Timestep" )
+ THEN
+  "VolumeToFlow"( $ "Nevada_CU_Actual.SNWP" [date], date )
+ ELSE
+  "VolumeToFlow"( $ "Nevada_CU_Schedules.SNWP" [date], date )
  ENDIF;
 
             $ "OthersMeadToMohave:LMNRA Az Mohave.Diversion Requested" [date] := IF ( date < @"Start Timestep" )
@@ -14094,32 +14137,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b0b596d3-8eb1-465c-8ea2-e3d6345ed62a}";
+    UUID "{abb1f7e1-b384-4fdb-bf2b-8ed7bd2412e5}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b5f09d40-1de4-4d28-b745-865b629b68a1}";
+    UUID "{1cba72f1-c83e-46bf-90b5-29e0733719f8}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2e6ba432-881b-41dc-aeb6-d480800383d6}";
+    UUID "{a8743e63-0a26-4447-b551-8da1513438c9}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ef129b06-5d47-4226-8df0-4d7f4152bffd}";
+    UUID "{2b8fbb1d-e331-4f3e-912e-c1b08851cc9c}";
 ;
 
   END
-  UUID "{a7a68809-ac1e-496d-92f5-a77fa7c735f9}";;
+  UUID "{1dc0cbb2-4c87-4f8b-a923-e88e77809869}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14130,11 +14173,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{572996cf-6455-4338-b2cd-40ebddae32b8}";
+    UUID "{f0114468-fba2-4fd3-90e8-10ad1942c275}";
 ;
 
   END
-  UUID "{e59f48b4-25ac-4320-a23f-86ddabff5261}";;
+  UUID "{2421d4ca-9bb2-4992-abab-8fc50bc6b8a4}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14145,11 +14188,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ef3d0049-105e-46e3-bb2f-6fb16879b606}";
+    UUID "{edf3e7d5-a329-4e5a-9730-034e92944146}";
 ;
 
   END
-  UUID "{cf05f87a-0ae3-4a7e-9bd3-2f5427069396}";;
+  UUID "{0cc33e02-c1a8-4958-a939-ed6270751cda}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14160,11 +14203,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4873d1a9-8826-49fa-b843-05a46cb16c39}";
+    UUID "{456cf498-1a5f-48fb-aed9-ff898d3d22e3}";
 ;
 
   END
-  UUID "{ab9bc97b-f534-41ba-8c4b-3ec54eac9cda}";;
+  UUID "{838164b0-3fee-4943-9c55-165efd7f1f86}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
