@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:12 August 4, 2020
+# Created 11:52 August 7, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -228,12 +228,12 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule sets the power slots for the LC dams based on their power capacity values and power plant capacity fractions<br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 4. <br><br>SLOTS SET: Mead.Power; Mohave.Power; Havasu.Power";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 4.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: LC Check then write note";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200807: Integration effort. Changed slot from Mohave.Power Plant Cap Fraction to LowerBasin Energy. Davis Plant Cap fraction to match the 24 MS. The Mohave Plant Cap Fraction is not used in the new power method for the Mohave reservoir";
     BEGIN
 
       $ "Mead.Power" [] := $ "EnergyInfo.EffectiveHooverCapacity" [] * $ "Mead.Power Plant Cap Fraction" [];
 
-      $ "Mohave.Power" [] := $ "Lower Basin Energy.Davis_Power_Capacity" [] * $ "Mohave.Power Plant Cap Fraction" [] COMMENTED_BY "LC CHECK<br><br>Named differently in the 24MS. Is this the same slot??? <br>";
+      $ "Mohave.Power" [] := $ "Lower Basin Energy.Davis_Power_Capacity" [] * $ "Lower Basin Energy.Davis Plant Cap Fraction" [];
 
       $ "Havasu.Power" [] := $ "Lower Basin Energy.Parker_Power_Capacity" [] * $ "Havasu.Power Plant Cap Fraction" [];
 
@@ -278,8 +278,7 @@ BEGIN
 
             $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule- FC"( date, "Mexico" ), date );
 
-          DESCRIPTION          "LC CHECK<br><br>Left out if statement, seemed unneccesary  <br>";
-      $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "SNWA" ), date );
+            $ "PumpingFromLakeMead:SNWP.Diversion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "SNWA" ), date );
 
             $ "PumpingFromLakeMead:SNWP.Depletion Requested" [date] := "VolumeToFlow"( "Set Monthly Surplus Schedule"( date, "SNWA" ), date );
 
@@ -292,7 +291,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This Rule is used to set the EnergyInfo.EffectiveHooverCapacity so that it can go out to 60 weeks.  The regression equation provided is from the LC BoR office and can be adjusted using this rule. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 3 or 4. <br><br>SLOTS SET: EnergyInfo.EffectiveHooverCapacity; Mead.Power Plant Cap Fraction";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This logic is structured differently than the 24 MS but solves for the same thing. Add Is24MS to the top if statement which runs the portion the portion of the ruleset which is meant for the MTOM determinstic run/equivalent rule in the 24MS. The second part of the else statement is for MTOM's MRM mode";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. This logic is structured differently than the 24 MS but solves for the same thing. Add Is24MS to the top if statement which runs the portion of the ruleset which is meant for the MTOM determinstic run (equivalent rule in the 24MS). The second part of the else statement is for MTOM's MRM mode";
     BEGIN
 
       IF_STATEMENT (( NOT "IsMRM"(  ) OR "Is24MonthStudy"(  ) ) COMMENTED_BY "This check determines if a run is a deterministic run or an MRM run and the data comes<br>out of the Ensemble Forecast Sheet. TP 3/28/2013") THEN
@@ -339,7 +338,7 @@ BEGIN
     RULE                 "Mead Space Building";
     DESCRIPTION          "DESCRIPTION: If the storage in Mead is greater than the target storage (based on the minimum system space that must be available), this rule resets the outflow to achieve the target storage during space building months (August 1 - December 31); if the Flood Control Flag is not already set, this rule also sets it based on whether the outflow was reset by the rule<br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 3 or 4 from Aug-Dec if Mead.Outflow contains a value and the FloodControlOutput.Flood Control Flag is NaN. <br><br>SLOTS SET: Mead.Outflow; FloodControlOutput.Flood Control Flag";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND NOT IsNaN $ "Mead.Storage" [] AND @"t" > @"24:00:00 July Max DayOfMonth, Current Year" AND ( IsNaN $ "FloodControlOutput.Flood Control Flag" [] ) COMMENTED_BY "LC CHECK<br><br>Not a exec constraint in 24 MS, should it be removed... <br>";
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND NOT IsNaN $ "Mead.Storage" [] AND @"t" > @"24:00:00 July Max DayOfMonth, Current Year" AND IsNaN $ "FloodControlOutput.Flood Control Flag" [];
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>CH, 4/18/18: Added execution constraint: AND IsNaN FloodControlOutput.Flood Control Flag to so that in the case the Flood Control Flag is set in run cycle 3, it is not reset in run cycle 4. Once a flood control flag is set, it should not be reset (even in run cycle 4).<br>A.Pivarnik, 20200715: Integration effort. This rule is the same as the equivalent rule in the 24 MS";
     BEGIN
 
@@ -364,7 +363,7 @@ BEGIN
     RULE                 "Mead Flood Control Release";
     DESCRIPTION          "DESCRIPTION: This rule checks that the release from Mead computed for downstream demands is large enough to satisfy flood control during the runoff season. If not, Mead Outflow is reset to the required flood control release which was previously calculated in the <Set Flood Control Release> rule and stored as FloodControlOutput.FCrelease. The flood control flag is also set to 1, which will cause the system to solve downstream and eventually force more water out of Havasu and Mohave.<br><br>EXECUTION CONSTRAINT: This rule fires in run cycle 3 or 4 from Jan-July if Mead.Outflow and the FloodControlOutput.Flood Control Flag contain values. <br><br>SLOTS SET: Mead.Outflow; FloodControlOutput.Flood Control Flag";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND NOT IsNaN $ "Mead.Outflow" [] AND "GetRunCycleIndex"(  ) >= 3.00000000 AND IsNaN $ "FloodControlOutput.Flood Control Flag" [] COMMENTED_BY "LC CHECK<br><br>This is not an execution constraint in the 24 MS, should it be removed <br>";
+    RULE_EXEC_CONSTRAINT @"t" <= @"24:00:00 July Max DayOfMonth, Current Year" AND NOT IsNaN $ "Mead.Outflow" [] AND "GetRunCycleIndex"(  ) >= 3.00000000 AND IsNaN $ "FloodControlOutput.Flood Control Flag" [];
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br>MC, 20170518: Rule modified to only use 1 IF statement <br>CH, 4/18/18: Added execution constraint: AND IsNaN FloodControlOutput.Flood Control Flag to so that in the case the Flood Control Flag is set in run cycle 3, it is not reset in run cycle 4. Once a flood control flag is set, it should not be reset (even in run cycle 4).<br>A.Pivarnik, 20200715: Integration effort. This rule is the same as the rule in the 24 MS";
     BEGIN
 
@@ -544,8 +543,8 @@ BEGIN
     RULE                 "Set Schedule Release";
     DESCRIPTION          "DESCRIPTION: This rule copies the initial Mead release needed to meet downstream demands to the FloodControlOutput data object in slot MeadSchedRel. The value should only be reported the first time Mead calculates its outflow based on downstream demands.<br><br>EXECUTION CONSTRAINTS: This rule executes in run cycle 3 when the slot set in this rule (Lower Basin Output.MeadSchedRel) is NaN and Mead Outflow is not NaN. <br><br>SLOTS SET: Lower Basin Output.MeadSchedRel";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT IsNaN $ "Lower Basin Output.MeadSchedRel" [] AND NOT IsNaN $ "Mead.Outflow" [] AND "GetRunCycleIndex"(  ) == 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200714: Integration effort. This rule matches the 24 MS rule. No changes need";
+    RULE_EXEC_CONSTRAINT IsNaN $ "Lower Basin Output.MeadSchedRel" [] AND NOT IsNaN $ "Mead.Outflow" [] AND "GetRunCycleIndex"(  ) >= 3.00000000;
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200714: Integration effort. This rule matches the 24 MS rule. Changed run constraint to be RC >= 3";
     BEGIN
 
       $ "Lower Basin Output.MeadSchedRel" [] := $ "Mead.Outflow" [];
@@ -566,15 +565,15 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule adjusts Mexico's diversion. The diversion requested is calculated as an annual value based on the diversion requested and Mexico Recoverable Water Savings contribution. The annual volume is split to monthly values using the monthly percentage currently in the diversion requested slot. <br><br>EXECUTION CONSTRAINTS: This rule fires if not a hindcast run and not Domestic Surplus, Quantified Surplus, and Flood Control. In run cycle 3, this rule executes in January or the start timestep and if the rule has not fired successfully yet. In run cycle 4, the rule executes in January and if the LB or DCP condition has changed since run cycle 3. <br><br>SLOTS SET: <br>MexicoTreatyDelivery:MexicoSched.Diversion Requested";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT ( ( "IsJANofOutyear"(  ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule does not need to fire in the start year because MX does not have demand variability in <br>the first year. All adjustments are assumed to be included in the start year schedule.  <br>";
-    NOTES                "GCAA, 20200330: Updated rule to include SetOutYearSchedules logic and to only fire in outyears.<br>S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200506: Added temporary variable for surplus volume to be used in calculation of MX diversion. Refernced Annual Shortage volume slot instead of calculating shortage via table<br>A.Pivarnik, 20200715: Integration effort. This rule is written differently than the 24 MS equaivalent but accomplishes the same thing within the MTOM/Integration ruleset framework";
+    NOTES                "GCAA, 20200330: Updated rule to include SetOutYearSchedules logic and to only fire in outyears.<br>S. Baker, 20200311: Add description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200506: Added temporary variable for surplus volume to be used in calculation of MX diversion. Refernced Annual Shortage volume slot instead of calculating shortage via table<br>A.Pivarnik, 20200715: Integration effort. This rule is written differently than the 24 MS equaivalent but accomplishes the same thing within the MTOM/Integration ruleset framework. Changed MXdivrequested to use CU_Forecast values and the month percent to calculate using the CU_schedules ";
     BEGIN
 
-      WITH_STATEMENT (NUMERIC MXSurplusVol = NaNToZero ( $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"] )) DO
+      WITH_STATEMENT (NUMERIC MXSurplusVol = NaNToZero ( $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December Max DayOfMonth, Current Year"] )) DO
             WITH_STATEMENT (NUMERIC MxShortageVolume = $ "Mexico Shortage and Surplus.Mexico Annual Shortage" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             WITH_STATEMENT (NUMERIC BNWSCPreduction = $ "Mexico Shortage and Surplus.Mexico Recoverable Water Savings_AnnualContribution" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
-            WITH_STATEMENT (NUMERIC MXdivRequested = "SumFlowsToVolume"( $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested", @"t", @"24:00:00 December Max DayOfMonth, Current Year" ) COMMENTED_BY "LC CHECK:<br><br>In other rules for LB stakeholders we use the reset annual value just incase this changes <br>between run cycles. Is there a similar slot for MX??<br>") DO
+            WITH_STATEMENT (NUMERIC MXdivRequested = $ "Mexico_CU_Forecast1.MexicoSched" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "Mexico_CU_Forecast1.MexicoTJ" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
-            WITH_STATEMENT (NUMERIC MonthPercent = "FlowToVolume"( $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date], date ) / "SumFlowsToVolume"( $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested", @"24:00:00 January Max DayOfMonth, Current Year", @"24:00:00 December Max DayOfMonth, Current Year" )) DO
+            WITH_STATEMENT (NUMERIC MonthPercent = ( $ "Mexico_CU_Schedules.MexicoSched" [date] - $ "Mexico_CU_Schedules.MexicoTJ" [date] ) / MXdivRequested) DO
             $ "MexicanTreatyDelivery:MexicoSched.Diversion Requested" [date] := "VolumeToFlow"( ( MXdivRequested + MXSurplusVol - BNWSCPreduction - MxShortageVolume ) * MonthPercent, date );
 
       END_WITH_STATEMENT;
@@ -652,7 +651,7 @@ BEGIN
  ELSE
   ( ( NOT "IsAPRtoDECofStartYear"(  ) AND @"t" == @"Start Timestep" ) OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" )
  ENDIF AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "IsLBorDCPconditionChanged"(  ) ) AND NOT "IsFloodControl"(  ) ) COMMENTED_BY "This rule needs to run in months prior to April in the start year to apply demand variability to <br>MWD <br>";
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation. Added If statment to MWDDivRequested to set domestic surplus schedules within this rule. Changed run constraint to fire if we are in domestic surplus scenario<br>A. Pivarnik, 20200505: Adjusted logic and run constriant to allow for rule to solve in quantified surplus scenario<br>A. Pivarnik, 20200511: removed references to TJ diversion in rule to prevent double counting <br>A. Pivarnik, 20200713: Integration effort. Removed IsQuantified from if statement to enter Coachella/IID diversion adjustments. No need for the reference because it is already in the monthlyDiv calculation for each user. This also allows the water users to be adjusted correcty if there is a switch in surplus condition<br>A. Pivarnik, 20200714: Integration effort. Added execution constraint to not fire in start timestep of RC3 in 24MS mode. This rule is different than the 24 MS rule due to MTOM's ruleset structure but accomplishes that same thing. ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: unknown<br><br>TP, 20171222 : Increase the MWD depletion amount by the total delivery less any over delivery that might be occuring in a given scenario, or decrease the delivery if any creation of water for a given scenario. <br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated rule so that PreviousMonthlySublistforAdditionalWaterDelivered does not evaluate to negative and fail in January.<br>S. Baker, 20200311: Updated description. Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200501: Updated the month percent calculation to be based off volume and not flow. Made refernce to monthly percents table the same for IID and CVWD. Changed IID for statement time contraints to match CVWD. Added if statement to not include DCP in first year of run for CVWD since it will be incorporated into the schedules. Moved MWD logic under CVWD temp variable and used temp variable within MWD DCP calculation. Added If statment to MWDDivRequested to set domestic surplus schedules within this rule. Changed run constraint to fire if we are in domestic surplus scenario<br>A. Pivarnik, 20200505: Adjusted logic and run constriant to allow for rule to solve in quantified surplus scenario<br>A. Pivarnik, 20200511: removed references to TJ diversion in rule to prevent double counting <br>A. Pivarnik, 20200713: Integration effort. Removed IsQuantified from if statement to enter Coachella/IID diversion adjustments. No need for the reference because it is already in the monthlyDiv calculation for each user. This also allows the water users to be adjusted correcty if there is a switch in surplus condition<br>A. Pivarnik, 20200714: Integration effort. Added execution constraint to not fire in start timestep of RC3 in 24MS mode. This rule is different than the 24 MS rule due to MTOM's ruleset structure but accomplishes that same thing. <br>A. Pivarnik, 20200807: Changed if conditional for CVWD and IID schedule adjustments to adjust schedules in January only";
     BEGIN
 
     DESCRIPTION          "MWD Diversion adjustment logic <br>";
@@ -765,18 +764,13 @@ BEGIN
       END_WITH_STATEMENT;
 
     DESCRIPTION          "Adjust Coachella Valley Water District Diverison (CVWD) in quantified surplus or DCP scenarios. <br>Adjust CVWD only if its january to apply DV or if there is a DCP contribution <br>";
-      IF_STATEMENT ("GetMonth"( @"t" ) == 1.00000000 OR "CVWD DCP Contribution"(  ) != 0.00000000 "acre-ft") THEN
+      IF_STATEMENT ("GetMonth"( @"t" ) == 1.00000000) THEN
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AAC:Coachella.Diversion Requested" [date] := WITH NUMERIC CVWDMonthlyDiv = IF ( "IsQuantifiedSurplus"(  ) )
  THEN
   "Set Monthly Surplus Schedule"( date, "Coachella" )
  ELSE
-  $ "California_CU_Schedules.Coachella" [date] * IF ( "GetMonth"( @"t" ) == 1.00000000 )
-  THEN
-   "AgUsersBelowParkerDemandVariabilityFactor"( date, "CVWD" )
-  ELSE
-   1.00000000
-  ENDIF - "CVWD DCP Contribution"(  ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"]
+  $ "California_CU_Schedules.Coachella" [date] * "AgUsersBelowParkerDemandVariabilityFactor"( date, "CVWD" ) - "CVWD DCP Contribution"(  ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"]
  ENDIF DO
   "VolumeToFlow"( CVWDMonthlyDiv, date )
  ENDWITH;
@@ -786,18 +780,13 @@ BEGIN
       END_IF_STATEMENT;
 
     DESCRIPTION          "Adjust IID Diversion Requested if there is an IID ICS Diversion adjustment or quantified surplus <br>scenario <br>";
-      IF_STATEMENT ("RoundToFactor"( "IID ICS Diversion Adjustment"(  ), 1.00000000 "acre-ft" ) != 0.00000000 "acre-ft" OR "GetMonth"( @"t" ) == 1.00000000) THEN
+      IF_STATEMENT ("GetMonth"( @"t" ) == 1.00000000) THEN
             FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AAC:IID.Diversion Requested" [date] := WITH NUMERIC IIDMonthlyDiv = IF ( "IsQuantifiedSurplus"(  ) )
  THEN
   "Set Monthly Surplus Schedule"( date, "IID" )
  ELSE
-  $ "California_CU_Schedules.IID" [date] * IF ( "GetMonth"( @"t" ) == 1.00000000 )
-  THEN
-   "AgUsersBelowParkerDemandVariabilityFactor"( date, "IID" )
-  ELSE
-   1.00000000
-  ENDIF + "IID ICS Diversion Adjustment"(  ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"]
+  $ "California_CU_Schedules.IID" [date] * "AgUsersBelowParkerDemandVariabilityFactor"( date, "IID" ) + "IID ICS Diversion Adjustment"(  ) * $ "Shortage.MonthlyPercents" ["GetMonthAsString"( date ), "Equal"]
  ENDIF DO
   "VolumeToFlow"( IIDMonthlyDiv, date )
  ENDWITH;
@@ -869,9 +858,6 @@ BEGIN
   "VolumeToFlow"( MonthlyDiv, date )
  ENDWITH;
 
-      ENDFOREACH;
-
-      FOREACH (DATETIME date IN @"t" TO @"24:00:00 December Max DayOfMonth, Current Year") DO
             $ "AzPkrToImp:CibolaValleyIID.Diversion Requested" [date] := WITH NUMERIC MonthlyDiv = IF ( "IsQuantifiedSurplus"(  ) )
  THEN
   "Set Monthly Surplus Schedule"( date, "CibolaValleyIID" )
@@ -1246,7 +1232,7 @@ BEGIN
  ELSE
   0.00000000 "acre-ft"
  ENDIF COMMENTED_BY "Take delivery of Imported ICS if in QS or FC <br>") DO
-            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "If there is an ICS deivery amount, take out of accounts in the following order. <br>" , ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) COMMENTED_BY "ECICS balance <br><br>LC CHECK<br><br>The calculation for what is available for LC JP  users is somewhat different between MWD, SNWA <br>and CAP... should there be adjustments to make them similar where appropriate?   <br>" , ( $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Current Year trib <br>" , $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "SysEff <br>" , $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "BiNat <br>" , ( $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Imported <br>" } ) WITH LIST result = {  } DO
+            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "If there is an ICS deivery amount, take out of accounts in the following order. <br>" , ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) COMMENTED_BY "ECICS balance  <br>" , ( $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Current Year trib <br>" , $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "SysEff <br>" , $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "BiNat <br>" , ( $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "Imported <br>" } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
    AnnualDelivery
@@ -1301,8 +1287,8 @@ BEGIN
     BEGIN
 
       WITH_STATEMENT (NUMERIC ECICStoDCP = "SetNegativeToZero"( "Min"( $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + ( $ "ICS Credits.MeadBankParameters" ["California", "Max Capacity"] - $ "ICS Credits.Bank_CA" [@"24:00:00 December Max DayOfMonth, Previous Year"] ), $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "EC ICS converted to DCP ICS during the current year, constrained by bank capacity <br>") DO
-            WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "California", "Max Delivery", ECICStoDCP ) COMMENTED_BY "Checks desired ICS delivery amount against DCP policy restrictions  <br>") DO
-            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { ( $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryDCP_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] ) COMMENTED_BY "If there is an ICS delivery amount, take out of accounts in the following order.  <br>" , "Min"( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ICS Credits.MeadBankParameters" ["California", "Max Delivery"] ) COMMENTED_BY "EC ICS: previous year's balance less any conversion for DCP ICS    <br><br>LC CHECK<br><br>The calculation for what is available for LC JP  users is somewhat different between MWD, SNWA <br>and CAP... should there be adjustments to make them similar where appropriate?   <br>" , $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] } ) WITH LIST result = {  } DO
+            WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "California", "Max Delivery", ECICStoDCP ) COMMENTED_BY "Checks desired ICS delivery amount against DCP policy restrictions . This also checks against Max <br>delivery constraint as set by guidelines <br>") DO
+            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { ( $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryDCP_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] ) COMMENTED_BY "If there is an ICS delivery amount, take out of accounts in the following order.  <br>" , ( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) COMMENTED_BY "EC ICS: previous year's balance less any conversion for DCP ICS     <br>" , $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] } ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
    AnnualDelivery
@@ -1348,7 +1334,7 @@ BEGIN
 
       WITH_STATEMENT (NUMERIC ECICStoDCP = "SetNegativeToZero"( "Min"( $ "ICS Credits.MeadBankParameters" ["Arizona", "Max Capacity"] - ( $ "ICS Credits.Bank_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ExtraordinaryConservationICS_GRIC" [@"24:00:00 December Max DayOfMonth, Current Year"] COMMENTED_BY "Non cap water user bank is equal to the EC ICS balance of the current year <br>" + $ "ICS Credits.ExtraordinaryConservationICS_CRIT" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.ExtraordinaryConservationICS_MVIDD" [@"24:00:00 December Max DayOfMonth, Current Year"] + $ "ICS Credits.ExtraordinaryConservationICS_WM" [@"24:00:00 December Max DayOfMonth, Current Year"] ), $ "ICSProjectionData.AnnualCreationEC_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) ) ) COMMENTED_BY "EC ICS converted to DCP ICS during the current year, constrained by bank capacity.<br><br>Since CAWCD is not converting from previous ICS balance, its the minimum between the bank <br>space and the amount of ICS created during the year.   <br>") DO
             WITH_STATEMENT (NUMERIC AnnualDelivery = "ICSDeliveryReduction_DCP"( $ "ICSProjectionData.AnnualICSDelivery_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], "Arizona", "Max Delivery", ECICStoDCP ) COMMENTED_BY "Checks desired ICS delivery amount against DCP policy restrictions   <br>") DO
-            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.ExtraordinaryConservationICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] COMMENTED_BY "LC CHECK<br><br>Check 24 MS rule. The calculation for what is available for LC JP  users is somewhat different <br>between MWD, SNWA and CAP... should there be adjustments to make them similar where <br>appropriate?   <br>" , $ "ICS Credits.BiNationalICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.SystemEfficiencyICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] } COMMENTED_BY "Accounts for ICS delivery (in order) <br>" ) WITH LIST result = {  } DO
+            WITH_STATEMENT (LIST DeliveryChargedList = FOR ( NUMERIC CategoryBalance IN { $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.ExtraordinaryConservationICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.BiNationalICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] , $ "ICS Credits.SystemEfficiencyICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] } COMMENTED_BY "Accounts for ICS delivery (in order) <br>" ) WITH LIST result = {  } DO
   WITH NUMERIC RemainingBalance = IF ( ( LENGTH result ) == 0.00000000 )
   THEN
    AnnualDelivery
@@ -11318,7 +11304,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 11/29/18: Updated deliveryofImpICS/deliveryofTribICS logic. Changed all system tax references  from *0.95 to the SystemTaxAdjustment function<br><br>AP, 11/30/18: Changed all evap tax references  from *0.97 to the EvapTaxAdjustment function<br><br>A. Pivarnik, 20200713: Integration effort. Added if statement to replace the AnnualDCPContribution slot call in the system water variable. If conditional uses the StartYEarDCP contribution function to solve for the DCP contribution needed in YR1 if Lake Mead ends the previous calendar year at a different (lower) DCP elevation. Removed Mead bank check logic at end of rule since it is not needed. EC ICS creation and simultaneous conversion both checked against the bank capacity at different points.";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 11/29/18: Updated deliveryofImpICS/deliveryofTribICS logic. Changed all system tax references  from *0.95 to the SystemTaxAdjustment function<br><br>AP, 11/30/18: Changed all evap tax references  from *0.97 to the EvapTaxAdjustment function<br><br>A. Pivarnik, 20200713: Integration effort. Added if statement to replace the AnnualDCPContribution slot call in the system water variable. If conditional uses the StartYearDCP contribution function to solve for the DCP contribution needed in YR1 if Lake Mead ends the previous calendar year at a different (lower) DCP elevation. Removed Mead bank check logic at end of rule since it is not needed. EC ICS creation and simultaneous conversion both checked against the bank capacity at different points.";
     BEGIN
 
       WITH NUMERIC SysEff = $ "ICS Credits.SystemEfficiencyICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationSysEff_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliverySysEff_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
@@ -14038,32 +14024,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{28cb41f7-c25e-4778-b4e8-83c105143880}";
+    UUID "{b2d51d47-d723-48ea-8ba2-a04dc8730581}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{37299369-cddc-4141-b4b2-9e39558dc83d}";
+    UUID "{1d63a2d1-18bd-46ad-bdf3-aa6ce05fb7cb}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{42cc76b1-177a-4d16-b330-36749deb3746}";
+    UUID "{50e5f71d-4167-4828-9593-33e4dd8cf69f}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{987c753e-f9e4-4376-85e6-6d6c914446a9}";
+    UUID "{d5f838fb-6f2b-4250-a8a6-d0effa95357d}";
 ;
 
   END
-  UUID "{2f3648a2-e2ab-4282-8d5c-aae9587e8772}";;
+  UUID "{17eb02d7-cee5-4803-999c-2d6c2362670f}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14074,11 +14060,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{be5d15ae-62b7-4eb8-b1a2-cfa883c733d9}";
+    UUID "{ef8eee87-268f-4274-9402-02c836a06e2f}";
 ;
 
   END
-  UUID "{68b97074-ee2d-43f2-abf3-858883c5c975}";;
+  UUID "{58caef5e-6d4d-4462-b8f7-fabbd1dd9e7d}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14089,11 +14075,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a173b514-08ac-4d29-abb1-75768fc9504f}";
+    UUID "{6d2b315e-853a-4963-8cdc-90820457831c}";
 ;
 
   END
-  UUID "{52e872bf-25cd-419c-920e-f0d72ea4746c}";;
+  UUID "{b026c1f7-9904-4985-8ccc-d5162d8ddf85}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14104,11 +14090,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4347cd7b-bb7d-49c2-b993-aeda818d562b}";
+    UUID "{65ef29c7-0c26-4907-aef1-4816987e19aa}";
 ;
 
   END
-  UUID "{0c8c42e1-5b48-4a90-97ba-0b5f84044579}";;
+  UUID "{a9925b98-8682-4fee-9126-2b4b77778a79}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
