@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 15:01 August 4, 2020
+# Created 15:12 August 4, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1421,7 +1421,7 @@ BEGIN
     ELSE
      0.00000000 "acre-ft" COMMENTED_BY "#3 in note above <br>"
     ENDIF COMMENTED_BY "If creating ICS, this is the adjustment to cover the required DCP contribution if the ICS created <br>does not cover the full amount (adjustment value for number 2 in note above) <br>" }
-   ENDWITH COMMENTED_BY "3 scenarios in start year that need to be taken into consideration.<br><br>1) If already taking delivery of ICS, SNWA has to take additional ICS delivery equal to the <br>required system water contribution to meet the DCP requirement and meet the water <br>demands<br><br>2) If SNWA is creating ICS but not enough to cover the DCP requirement, SNWA will have to <br>take additional ICS delivery equal to the amount of system water needed to meet the dcp <br>contribution not met by the ICS delivery and to still meet their demand<br><br>3) SNWA does not need to take any additional ICS delivery because the DCP contribution is <br>already being met by the ICS creation for the current year (demands are sufficiently low) <br>"
+   ENDWITH COMMENTED_BY "3 scenarios in start year that need to be taken into consideration.<br><br>1) If already taking delivery of ICS, SNWA has to take additional ICS delivery equal to the <br>required system water contribution to meet the DCP requirement and meet the water <br>demands<br><br>2) If SNWA is creating ICS but not enough to cover the DCP requirement, SNWA will have to <br>take additional ICS delivery equal to the amount of system water needed to meet the dcp <br>contribution not met by the ICS creation and to still meet their demand<br><br>3) SNWA does not need to take any additional ICS delivery because the DCP contribution is <br>already being met by the ICS creation for the current year (demands are sufficiently low)  <br>"
   ELSE
    { PotentialICS , 0.00000000 "acre-ft" } COMMENTED_BY "Second element is the adjustment value, and in an outyear that adjustment is 0. <br>"
   ENDIF
@@ -14038,32 +14038,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{def7fa45-37e4-49ba-857b-f997b4e12089}";
+    UUID "{28cb41f7-c25e-4778-b4e8-83c105143880}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a3ba220e-5491-4de3-bcac-eda88d2c36b4}";
+    UUID "{37299369-cddc-4141-b4b2-9e39558dc83d}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e1da126b-77df-4ba2-aafd-eda76abd0f4b}";
+    UUID "{42cc76b1-177a-4d16-b330-36749deb3746}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e0c90384-2f9e-4d7f-ae83-c3cd08252c3d}";
+    UUID "{987c753e-f9e4-4376-85e6-6d6c914446a9}";
 ;
 
   END
-  UUID "{be73576f-20df-4ee5-857c-5db26ecd2b8a}";;
+  UUID "{2f3648a2-e2ab-4282-8d5c-aae9587e8772}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14074,11 +14074,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0efd87db-62ae-4f39-87fb-f0b8f4999a16}";
+    UUID "{be5d15ae-62b7-4eb8-b1a2-cfa883c733d9}";
 ;
 
   END
-  UUID "{32ab9c8e-06ca-43c6-9e6e-db7e7df5425f}";;
+  UUID "{68b97074-ee2d-43f2-abf3-858883c5c975}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14089,11 +14089,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{db19b491-390b-483a-8528-ce98acfbda1d}";
+    UUID "{a173b514-08ac-4d29-abb1-75768fc9504f}";
 ;
 
   END
-  UUID "{5f9c3193-e3e8-4b50-b4ca-028a3471bef2}";;
+  UUID "{52e872bf-25cd-419c-920e-f0d72ea4746c}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14104,11 +14104,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0eb8fb9a-7aab-4b8a-80ce-9f694fc60ee1}";
+    UUID "{4347cd7b-bb7d-49c2-b993-aeda818d562b}";
 ;
 
   END
-  UUID "{69080a6a-177c-48da-b4bb-db70f2b3bb0f}";;
+  UUID "{0c8c42e1-5b48-4a90-97ba-0b5f84044579}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
