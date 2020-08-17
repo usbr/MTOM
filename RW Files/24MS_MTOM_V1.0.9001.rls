@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.0.5
-# Created 11:52 August 7, 2020
+# Created 14:25 August 14, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -129,10 +129,14 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for Arizona after all schedule adjustments by summing the CAP and non-CAP annual diversion requests for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.AzTotalAnnual";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A. Pivarnik, 2020.715: Integration effort. The 24 MS ruleset references the CAPAnnualFC slot while the MTOM ruleset uses the SumAnnualCAPDivRequest function. There is no difference in that value and the rule evaluates the same. No changes";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A. Pivarnik, 20200814: Integration effort. Changed slot refernce from the AZTotalWaterUseNonCAP slot to a for statement summing non CAP water use using a subbasin (matches logic previously found in model)";
     BEGIN
 
-      $ "AnnualWaterUse.AzTotalAnnual" [@"24:00:00 December 31, Current Year"] := "SumAnnualCAPDivRequest"(  ) + $ "AnnualWaterUse.AzNoCAPTotalAnnual" [@"24:00:00 December 31, Current Year"];
+      $ "AnnualWaterUse.AzTotalAnnual" [@"24:00:00 December 31, Current Year"] := "SumAnnualCAPDivRequest"(  ) + FOR ( DATETIME date IN @"24:00:00 January 31, Current Year" TO @"24:00:00 December 31, Current Year" ) STAT_SUM
+  FOR ( OBJECT nonCAPUser IN "ListSubbasin"( "ArizonaNonCAPWaterUsers" ) ) STAT_SUM
+   "FlowToVolume"( nonCAPUser & "Diversion Requested" [date], date )
+  ENDFOR
+ ENDFOR COMMENTED_BY "Sum all Non CAP Diversion Requests";
 
     END
     UUID "{3181491d-33cb-496a-8c83-de6f7c0e3c69}";;
@@ -149,11 +153,11 @@ BEGIN
     END
     UUID "{572e18ce-04c0-4998-86a9-dc6292768c02}";;
 
-    RULE                 "??????? Final NV Annual Use - Div Req";
+    RULE                 "Final NV Annual Use - Div Req";
     DESCRIPTION          "DESCRIPTION: Calculates projected annual water use for Nevada after all schedule adjustments by summing the diversion requests of Nevada water users for the current calendar year. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: AnnualWaterUse.NvTotalAnnual";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: This";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: ";
     BEGIN
 
       $ "AnnualWaterUse.NvTotalAnnual" [@"24:00:00 December 31, Current Year"] := FOR ( DATETIME date IN @"24:00:00 January Max DayOfMonth, Current Year" TO @"24:00:00 December Max DayOfMonth, Current Year" ) STAT_SUM
@@ -165,7 +169,7 @@ BEGIN
     "FlowToVolume"( diversionSite & "Diversion Requested" [date], date )
    ENDIF
   ENDFOR
- ENDFOR COMMENTED_BY "This is calculated in rule 70 of the 24 MS only. Rule 70 in 24 MS is SumAnnualStateUse - Div Req. <br>Do we want this to recalculate in  both modes? There are no execution constraints on the rule in <br>either MTOM or 24 MS, so shouldnt it theoretically refire if a diversion has changed? <br>";
+ ENDFOR;
 
     END
     UUID "{3ce4aca2-e79b-4b7a-b7e7-7d0031d658f2}";;
@@ -174,7 +178,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: The rule calculates Lower Basin energy. This rule must fire after all schedule adjustments have been made, which is why it is in the highest priority policy group. <br><br>EXECUTION CONSTRAINT: This rule fires in run cycles 3 and 4. <br><br>SLOTS SET: Lower Basin Energy.Computed Davis Energy Using Input Eff; Lower Basin Energy.Computed Davis Head using Turbine Release; Lower Basin Energy.Davis KWH per AF; Lower Basin Energy.Computed Parker Energy Using Input Eff; Lower Basin Energy.Computed PD Project Energy Using Peak Base Power Calc; Lower Basin Energy.Computed PD Project Energy Using Input Eff";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. The MTOM rule is the saem as 24 MS. No changes needed";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>A.Pivarnik, 20200715: Integration effort. The MTOM rule is the same as 24 MS. No changes needed";
     BEGIN
 
       $ "Lower Basin Energy.Computed Davis Energy Using Input Eff" [] := $ "Lower Basin Energy.Input Davis Efficiency" [] * "FlowToVolume"( $ "Mohave.Turbine Release" [], @"t" ) * "Compute Head as a Function of Turbine Release"( $ "Mohave.Turbine Release" [] ) * 9789.00000000 "newton" / ( ( 1.00000000 "m" * 1.00000000 "m" ) * 1.00000000 "m" );
@@ -14024,32 +14028,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b2d51d47-d723-48ea-8ba2-a04dc8730581}";
+    UUID "{a8c7f203-3a84-4227-bd9e-135001892d50}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1d63a2d1-18bd-46ad-bdf3-aa6ce05fb7cb}";
+    UUID "{b25bdaef-9cf7-44be-b6c8-a7a19803a0c9}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{50e5f71d-4167-4828-9593-33e4dd8cf69f}";
+    UUID "{97b8b383-2f9e-44e2-97f8-86e7f51e8fc3}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d5f838fb-6f2b-4250-a8a6-d0effa95357d}";
+    UUID "{ef9ae17e-8b64-48b6-965c-4638d8317f97}";
 ;
 
   END
-  UUID "{17eb02d7-cee5-4803-999c-2d6c2362670f}";;
+  UUID "{70222abd-9278-4cf1-9873-4b9a6781e879}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14060,11 +14064,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ef8eee87-268f-4274-9402-02c836a06e2f}";
+    UUID "{b68d34e9-cc9c-47dd-bb65-4ec3738bb45b}";
 ;
 
   END
-  UUID "{58caef5e-6d4d-4462-b8f7-fabbd1dd9e7d}";;
+  UUID "{1a67995e-e85e-4d97-9824-0c74cc8226f4}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14075,11 +14079,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6d2b315e-853a-4963-8cdc-90820457831c}";
+    UUID "{44915665-55be-4638-81db-e7a0ebcdacdb}";
 ;
 
   END
-  UUID "{b026c1f7-9904-4985-8ccc-d5162d8ddf85}";;
+  UUID "{079afc44-1e95-414b-944a-9204f0d7aa60}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14090,11 +14094,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{65ef29c7-0c26-4907-aef1-4816987e19aa}";
+    UUID "{3667c502-9bc7-4c1c-ba19-29578cb5c7ba}";
 ;
 
   END
-  UUID "{a9925b98-8682-4fee-9126-2b4b77778a79}";;
+  UUID "{86f301f2-7590-4211-89c7-848fa6b5e3ba}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
