@@ -11,6 +11,8 @@ MTOM_Stakeholder_User_Manual.pdf
 *.bak.gz
 *.bak
 *.bak.rsm
+!DevTesting_StudyManager*.rsm
+DevTesting_StudyManager*.bak.rsm
 
 # ignore testbed study, but not dev testing tool
 MTOM_Testbed_*.rsm
