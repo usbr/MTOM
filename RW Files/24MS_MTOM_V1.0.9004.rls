@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 16:46 September 9, 2020
+# Created 16:39 September 14, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2396,8 +2396,8 @@ BEGIN
     RULE                 "Set Lower Balancing Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Lower Elevation Balancing Tier. This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Lower", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
     DESCRIPTION          "For August timestep with Lower Balancing Release Tier in next outyear";
@@ -2411,8 +2411,8 @@ BEGIN
     RULE                 "Set Mid-Elevation Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Mid-Elevation Tier. This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).<br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( "GetRunCycleIndex"(  ) == 4.00000000 AND ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND "TierIs"( "Mid", @"t", FALSE ) AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation).<br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
     DESCRIPTION          "In August with Mid-elevation tier for the next outyear";
@@ -2438,8 +2438,8 @@ BEGIN
   "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )
  ENDIF DO
   "HasRuleFiredSuccessfully"( "Set Equalization Release Volume post-LBDV" ) OR ( "HasRuleFiredSuccessfully"( "Set Upper Balancing Release Volume post-LBDV" ) AND $ "PowellData.UpperElevBalBranch" [eoyDate] == 1.30000000 ) AND ( @"t" == @"Start Timestep" OR "MonthIs"( { "August" } ) OR "StartMonthIsSeptember"(  ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND ( "TierIs"( "Upper", @"t", TRUE ) OR "TierIs"( "Equalization", @"t", TRUE ) )
- ENDWITH ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "S.Baker, 2018/10/17: Copied from normal Powell policy set and changed execution constraints for Run Cycle 4 and LBDV. Go to original rule for development details prior to this date. <br>S.Baker, 2018/11/26: [edited to match normal Powell rule for RC #3] Added WITH statement to store TARV and use in IF statement to look if solved TARV was equal to previous TARV. Then, allow for setting of the PowellData.ReleaseVolumeSetFlag when TARV solved in the current iteration is equal to the previously set TARV. This is necessary for solving for the carryover release pattern from Powell. This occurs normally when TARV is not changed from 8.23 MAF. <br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+ ENDWITH );
+    NOTES                "S.Baker, 2018/10/17: Copied from normal Powell policy set and changed execution constraints for Run Cycle 4 and LBDV. Go to original rule for development details prior to this date. <br>S.Baker, 2018/11/26: [edited to match normal Powell rule for RC #3] Added WITH statement to store TARV and use in IF statement to look if solved TARV was equal to previous TARV. Then, allow for setting of the PowellData.ReleaseVolumeSetFlag when TARV solved in the current iteration is equal to the previously set TARV. This is necessary for solving for the carryover release pattern from Powell. This occurs normally when TARV is not changed from 8.23 MAF. <br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
       IF_STATEMENT (( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) COMMENTED_BY "At Start Timestep for initial water year when release tier is either Upper Elevation Balancing or Equalization") THEN
@@ -2544,8 +2544,8 @@ BEGIN
     RULE                 "Set Upper Balancing Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) when the Release Tier is set to Upper Elevation Balancing Tier. It also sets the Upper Elevation Balancing Branch, which indicates the conditions controlling the release volume, and resets the Release Tier and the Controlling Equalization Condition if necessary (UEB Branch = 1.3). This version of the rule executes in Run Cycle 4.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.UpperElevBalBranch; PowellData.ReleaseTier; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The GetRunCycleIndex()==3 condition will never be satisfied due to the Execution Constraints. Compare with initial version of rule for Run Cycle 4 and correct<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead Pool Elevation. This will allow MTOM to determine which PE projection to use (ie. AugEOYProjectedMeadPE).<br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Upper", @"t", FALSE ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) );
+    NOTES                "AUTHOR, DATE: Unknown<br>MC, 20161215: In the conditional statement checking for EqualizationTeirCalculationForRelease, changed PowellToMeadData.AugEOYPowellPEProjection[meadProjectionDate] to Powell.Pool Elevation[DateToCheckEOWYElevation(@&quot;t&quot;,TRUE)]. The check needs to be on the EOWY pool elevation, not the previous year's projected EOY pool elevation, because this is checking to see if the decision tree should follow the branch from Upper Elevation Balancing to Equalization. I had incorrectly changed the date used when adding the carryover functionality.<br><br>MC, 20170511: The GetRunCycleIndex()==3 condition will never be satisfied due to the Execution Constraints. Compare with initial version of rule for Run Cycle 4 and correct<br><br>S.Baker, 20180829: Edited the function 'UpperEleavationBalancingBranchCalculation' to have the correct number of inputs. <br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint.<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead Pool Elevation. This will allow MTOM to determine which PE projection to use (ie. AugEOYProjectedMeadPE).<br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
     DESCRIPTION          "In August or September start month with UEBT for outyear";
@@ -2585,8 +2585,8 @@ BEGIN
     RULE                 "Set Equalization Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for years when the Release Tier is Equalization. It also calculates and sets the Controlling Equalization Condition slot, which indicates the equalization condition that dictated the volume to be released. This version executes in Run Cycle 4 if Lower Basin Demand Variability is in effect.<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only fires in Run Cycle 4 with demand variability in effect, it is August, and the model has selected the Equalization teir for the current year. - sc 02/02/11; TP 08/20/2014; MC, 20170511" ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint. Disabled PowellData.ReleaseVolumeSetFlag since this flag should be set in the Refine Equalization rule. <br>S.Baker, 2018/10/17: updated run cycle execution constraint to RC == 4 (was 3 which was incorrect).<br>S.Baker, 20200417: Updated rule to match the RC 3 rule and make sure release isnt less than 8.23 maf. Before fix, TARV was being set to less than 8.23 maf during equalization.<br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "TierIs"( "Equalization", @"t", FALSE ) AND $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) )] == 0.00000000 AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only fires in Run Cycle 4 with demand variability in effect, it is August, and the model has selected the Equalization teir for the current year. - sc 02/02/11; TP 08/20/2014; MC, 20170511" );
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker, 20180925: Rule should not fire in the start timestep (execution constraint removed and IF statement removed). This is done in a separate rule. Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. Added TierIs() to execution constraint. Disabled PowellData.ReleaseVolumeSetFlag since this flag should be set in the Refine Equalization rule. <br>S.Baker, 2018/10/17: updated run cycle execution constraint to RC == 4 (was 3 which was incorrect).<br>S.Baker, 20200417: Updated rule to match the RC 3 rule and make sure release isnt less than 8.23 maf. Before fix, TARV was being set to less than 8.23 maf during equalization.<br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
     DESCRIPTION          "Outyear with Equalization";
@@ -2602,8 +2602,8 @@ BEGIN
     RULE                 "Set Release Tier post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule fires at the Start Timestep and in August timesteps to set the Powell Release tier, as well as preliminarily setting the Upper Elevation Balancing Branch and Controlling Equalization Condition values to 999<br><br>SLOTS SET: PowellData.ReleaseTier; PowellData.UpperElevBalBranch; PowellData.ControllingEqualizationCondition<br><br>DEVELOPMENT NOTES:<br>AUTHOR, DATE: SC, 02/02/2011<br>MC, 20160802: Added EffectivePoolElevation variable for incorporating unreleased carryover volume into the release tier determination";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "AUTHOR, DATE: SC, 02/02/2011 (copied to LBDV from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint. <br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier post-LBDV&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. The priority issue was causing incorrectly calculated Release Tiers in the post-LBDV rules. When the ruleset got to the rule &quot;Set Release Tier post-LBDV&quot; the release for the water year was still set to a higher TARV (9.0MAF). This caused the rules to calculate the wrong release. MTOM then reset the TARV to 8.23MAF in &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. Switching the order of the rules allows for the TARV to be reset to 8.23MAF before calculating the release tier. <br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND NOT "IsInput"( $ "PowellData.ReleaseTier", "Dec31ofYear"( "RelativeEOWYDate"( @"t + 2" ) ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) );
+    NOTES                "AUTHOR, DATE: SC, 02/02/2011 (copied to LBDV from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint. <br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier post-LBDV&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. The priority issue was causing incorrectly calculated Release Tiers in the post-LBDV rules. When the ruleset got to the rule &quot;Set Release Tier post-LBDV&quot; the release for the water year was still set to a higher TARV (9.0MAF). This caused the rules to calculate the wrong release. MTOM then reset the TARV to 8.23MAF in &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. Switching the order of the rules allows for the TARV to be reset to 8.23MAF before calculating the release tier. <br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
     DESCRIPTION          "Model needs to set the teir for the following water year if current timestep is August. <br>";
@@ -2685,8 +2685,8 @@ BEGIN
     RULE                 "Preliminary Set Out Year Release Volume To 8.23MAF post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20190710: Edited the Max() statement to match the normal rule. The rule was using a function used in the Equalization rule instead of setting initial TARV to 8.23 (or close). <br>S.Baker, 20180925: Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. <br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier post-LBDV&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. The priority issue was causing incorrectly calculated Release Tiers in the post-LBDV rules. When the ruleset got to the rule &quot;Set Release Tier post-LBDV&quot; the release for the water year was still set to a higher TARV (9.0MAF). This caused the rules to calculate the wrong release. MTOM then reset the TARV to 8.23MAF in &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. Switching the order of the rules allows for the TARV to be reset to 8.23MAF before calculating the release tier. <br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( ( "StartMonthIsSeptember"(  ) OR "MonthIs"( { "August" } ) ) AND @"t + 2" <= @"Finish Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) );
+    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20190710: Edited the Max() statement to match the normal rule. The rule was using a function used in the Equalization rule instead of setting initial TARV to 8.23 (or close). <br>S.Baker, 20180925: Removed IsYearDemandVariabilityandRunCycle4() since rule should always execute in Run Cycle 4. <br>S.Baker, 20180925: Changed order of rules. Moved &quot;Set Release Tier post-LBDV&quot; to a higher priority than &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. The priority issue was causing incorrectly calculated Release Tiers in the post-LBDV rules. When the ruleset got to the rule &quot;Set Release Tier post-LBDV&quot; the release for the water year was still set to a higher TARV (9.0MAF). This caused the rules to calculate the wrong release. MTOM then reset the TARV to 8.23MAF in &quot;Preliminary Set Out Year Release Volume to 8.23MAF post-LBDV&quot;. Switching the order of the rules allows for the TARV to be reset to 8.23MAF before calculating the release tier. <br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
       WITH_STATEMENT (NUMERIC waterYearNumber = "GetYear"( @"t" ) - "GetYear"( @"Start Timestep" ) + IF ( "GetMonth"( @"Start Timestep" ) > 9.00000000 )
@@ -2736,8 +2736,8 @@ BEGIN
     RULE                 "Set WY1 Release Volume post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule sets the Target Annual Release Volume (TARV) for the first WY for any release Tier designation. It also calculates and sets the Controlling Equalization Condition slot, which indicates the condition that dictated the volume to be released based on which Tier has been set. <br><br>SLOTS SET: Some combination of the following - PowellData.TargetAnnualReleaseVolume; PowellData.ControllingEqualizationCondition; PowellData.UpperElevBalBranch<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 4; at the Start Timestep for only the first <br>WY;  and if the rule has not already fired successfully for the timestep   <br>" ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "AUTHOR, DATE: Unknown (copied rule from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint. <br>AP, 2019/04/11: Added contstraint where it sets TARV to make sure the model won't equalize when the upper elevation balan branch is an input<br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) COMMENTED_BY "This rule only executes in Run Cycle 4; at the Start Timestep for only the first <br>WY;  and if the rule has not already fired successfully for the timestep   <br>" );
+    NOTES                "AUTHOR, DATE: Unknown (copied rule from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint. <br>AP, 2019/04/11: Added contstraint where it sets TARV to make sure the model won't equalize when the upper elevation balancing branch is an input<br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
       IF_STATEMENT ("TierIs"( "Equalization", @"t", TRUE ) COMMENTED_BY "Initial water year, in an Equalization Condition in Start Year <br>") THEN
@@ -2818,8 +2818,8 @@ BEGIN
     RULE                 "Set WY1 Release Tier post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule fires at the Start Timestep and in August timesteps to set the Powell Release tier, as well as preliminarily setting the Upper Elevation Balancing Branch and Controlling Equalization Condition values to 999, for the First Water Year<br><br>SLOTS SET: PowellData.ReleaseTier; PowellData.UpperElevBalBranch; PowellData.ControllingEqualizationCondition";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND IsNaN $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "AUTHOR, DATE: SC, 02/02/2011 (copied rule from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint<br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) ) AND IsNaN $ "PowellData.ReleaseTier" ["Dec31ofYear"( "RelativeEOWYDate"( @"t" ) )] );
+    NOTES                "AUTHOR, DATE: SC, 02/02/2011 (copied rule from Powell policy group)<br><br>S.Baker, 20180925: Added rule to post-LBDV since rule in Powell policy set wont fire in Run Cycle 4 due to condiditon of HasRuleFiredSucessfully() constraint<br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
     DESCRIPTION          "Model needs to set the teir for the current year if at the start timestep, regardless of month. <br>";
@@ -2841,8 +2841,8 @@ BEGIN
     RULE                 "Preliminary Set WY1 Release Volume To 8.23MAF post-LBDV";
     DESCRIPTION          "DESCRIPTION: This rule preliminarily sets outflows from Powell in order to evaluate the projections of Powell and Mead elevations used for tierthe  selection calculation.  It sets the release volume to 8.23 MAF unless doing so will cause the model to fail by overfilling Powell.  In that case it sets the annual release volumes to the amount needed to just keep Powell below its max elevation.  The rule fires on the first timestep of run cycle 3 and should allow the whole model to solve for this preliminary condition.  Subsequent rules will then calculate the appropriate tier values for each water year in the run and then set the releases from Powell on a monthly basis. - sc 03/25/11<br><br>SLOTS SET: PowellData.TargetAnnualReleaseVolume<br><br>";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) ) AND NOT "Is24MonthStudy"(  );
-    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Edited execution constraints to match Powell policy group rule. Changed rule TARV calculation to match Powell policy set rule. <br><br>S.Baker, 2018/10/17: Changed column number in releaseTable[AnnualVolume, Ncol - 3]<br>MTOM was failing in testbed runs in this rule in high inflow years when Powell was trying to release a large volume. In the historical run of 1983-06, the model aborted since it sets the initial TARV to 30 MAF based on the condition releaseTable[AnnualVolume, Ncol ? 2].  This caused the model to look for too high of upper bound in the function ?CalculatePowellMonthlyRelease?.  The upper bound was being reset in function 'FindRemainingReleaseUpperBoundColumn' by adding + 1 index which cause model to look for table index that didn?t exist. When we use Ncol ? 3, the TARV is initially set to 20 MAF and MTOM runs successfully finding a realistic TARV (18 MAF). <br><br>APivarnik 20200706: Added execution contraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort";
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "HasRuleFiredSuccessfully"( "Current Rule" ) AND NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) ) );
+    NOTES                "AUTHOR, DATE: SC, 03/25/2011<br><br>S.Baker, 20180925: Edited execution constraints to match Powell policy group rule. Changed rule TARV calculation to match Powell policy set rule. <br><br>S.Baker, 2018/10/17: Changed column number in releaseTable[AnnualVolume, Ncol - 3]<br>MTOM was failing in testbed runs in this rule in high inflow years when Powell was trying to release a large volume. In the historical run of 1983-06, the model aborted since it sets the initial TARV to 30 MAF based on the condition releaseTable[AnnualVolume, Ncol ? 2].  This caused the model to look for too high of upper bound in the function ?CalculatePowellMonthlyRelease?.  The upper bound was being reset in function 'FindRemainingReleaseUpperBoundColumn' by adding + 1 index which cause model to look for table index that didn?t exist. When we use Ncol ? 3, the TARV is initially set to 20 MAF and MTOM runs successfully finding a realistic TARV (18 MAF). <br><br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200914: Removed execution constraint for rule to fire only in MTOM mode";
     BEGIN
 
       IF_STATEMENT (NOT "IsInput"( $ "PowellData.TargetAnnualReleaseVolume", "Dec31ofYear"( "RelativeEOWYDate"( @"t" ) ) )) THEN
@@ -14029,32 +14029,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7d0f3d3f-c109-4d03-a947-9eba641c00d5}";
+    UUID "{27eb82b5-85a4-4521-a3b3-b0f24065dbd0}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f68dfc19-020f-4360-80c2-8203b10a0bfd}";
+    UUID "{451bba2f-b48c-458f-90e8-d8a87d73fd4d}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b7a33f9c-0b7d-4647-a585-21cca8d42113}";
+    UUID "{a10a1f55-10d0-45d4-905e-51ad687f5103}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b822b68d-172d-4ca1-927a-8dc3996dbd09}";
+    UUID "{3d2e445f-7dca-4918-a66e-67687d5e57ba}";
 ;
 
   END
-  UUID "{2802fd11-8a0a-4f90-ba85-391c5ac30cf8}";;
+  UUID "{d3392d33-dcc9-4aca-a776-00e4666cbed2}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14065,11 +14065,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4c4f6819-775e-4675-9169-a2095ad20add}";
+    UUID "{ff428e90-9184-422a-89d7-f9d07bf94cf4}";
 ;
 
   END
-  UUID "{9d6b1313-798c-4372-831c-10a35fad5066}";;
+  UUID "{387dc611-75b5-4456-adca-4c46f1e3b767}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14080,11 +14080,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{90418b94-80f0-4bfd-834c-ef8d8e7c015e}";
+    UUID "{a03d5a40-3170-4f73-8c14-5150ad28a682}";
 ;
 
   END
-  UUID "{81ca2134-cea2-4df6-a48c-d29293a76c8f}";;
+  UUID "{ff10c31e-b88f-4dd3-ab68-090afd712a05}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14095,11 +14095,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{022870f9-1b45-4ded-8569-7b7bf9bf30a6}";
+    UUID "{0a37f08d-551d-4ee3-a1cf-e6766bb33e72}";
 ;
 
   END
-  UUID "{ae14c574-1fc6-4e80-9bc7-88796cd5bbfb}";;
+  UUID "{981676ba-5a14-4e4a-a220-a6b8ec96d2d4}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
