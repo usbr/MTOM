@@ -3,64 +3,73 @@
 rules:
 -
   expr: Fontenelle.Outflow >= 0
-  name: Fontenelle.Outflow
-  label: Fontenelle Outflow
-  description: |
-    Fontenelle outflow should never be negative.
+  name: Fontenelle.Outflow is greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: FlamingGorge.Outflow >= 0
   name: FlamingGorge.Outflow
-  label: FlamingGorge Outflow
-  description: |
-    Flaming Gorge outflow should never be negative.
   in_file: ReservoirOutput.csv
 -
   expr: BlueMesa.Outflow >= 0
-  name: BlueMesa.Outflow
-  label: Blue Mesa Outflow
-  description: |
-    Blue Mesa outflow should never be negative.
+  name: BlueMesa.Outflow is greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: TaylorPark.Outflow >= 0
-  name: TaylorPark.Outflow
-  label: TaylorPark Outflow
-  description: |
-    Taylor Park outflow should never be negative.
+  name: TaylorPark.Outflow is greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: MorrowPoint.Outflow >= 0
-  name: MorrowPoint.Outflow
-  label: Morrow Point Outflow
-  description: |
-    Morrow Point outflow should never be negative.
+  name: MorrowPoint.Outflow is greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Crystal.Outflow >= 0
-  name: Crystal.Outflow
-  label: Crystal Outflow
-  description: |
-    Crystal outflow should never be negative.
+  name: Crystal.Outflow is greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Vallecito.Outflow >= 0
-  name: Vallecito.Outflow
-  label: Vallecito Outflow
-  description: |
-    Vallecito outflow should never be negative.
+  name: Vallecito.Outflow is greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Navajo.Outflow >= 0
-  name: Navajo.Outflow
-  label: Navajo Outflow
-  description: |
-    Navajo outflow should never be negative.
+  name: Navajo.Outflow is greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Powell.Outflow >= 0
-  name: Powell.Outflow
-  label: Powell Outflow
-  description: |
-    Powell outflow should never be negative.
+  name: Powell.Outflow is greater than zero
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(Fontenelle.Outflow)'
+  name: Fontenelle.Outflow is not NaN
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(FlamingGorge.Outflow)'
+  name: FlamingGorge.Outflow is not NaN
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(BlueMesa.Outflow)'
+  name: BlueMesa.Outflow is not NaN
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(TaylorPark.Outflow)'
+  name: TaylorPark.Outflow is not NaN
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(MorrowPoint.Outflow)'
+  name: MorrowPoint.Outflow is not NaN
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(Crystal.Outflow)'
+  name: Crystal.Outflow is not NaN
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(Vallecito.Outflow)'
+  name: Vallecito.Outflow is not NaN
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(Navajo.Outflow)'
+  name: Navajo.Outflow is not NaN
+  in_file: ReservoirOutput.csv
+-
+  expr: '!is.na(Powell.Outflow)'
+  name: Powell.Outflow is not NaN
   in_file: ReservoirOutput.csv

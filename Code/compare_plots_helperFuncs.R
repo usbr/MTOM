@@ -53,3 +53,81 @@ getScenarios <- function(slots,
   }
   return(df)
 }
+
+
+## timeperiod function
+processTimeperiodDF <- function(df_i,
+                                period_i) {
+  
+  if (period_i %in% c("EOWY", "EOCY")) {
+    
+    # EOWY or EOCY
+    df_plot <- df_i %>% 
+      filter(month == ifelse(period_i == 'EOWY', 10, 12))  %>%
+      mutate(time = year)
+    
+  } else if (period_i %in% c("annualWY", "annualCY")) {
+    
+    # annual WY or CY sum with 12 values
+    if (period_i == "annualWY") {
+      df_i <- df_i %>% mutate(year = year + ifelse(month < 10, 0, 1)) 
+    }
+    df_plot <- df_i %>% 
+      group_by(scenario_i, TraceNumber, ScenarioGroup, hydroGroup, year) %>% 
+      filter(n() == 12) %>% #check groups have 12 values
+      summarize(Value = sum(Value)) %>% ungroup() %>%
+      mutate(time = year)
+    
+  } else if (period_i %in% c("12monthWY", "12monthCY")) {
+    
+    ## monthly distribution arrange by cy or wy
+    if (period_i == "12monthWY") {
+      levels_in = c(10:12, 1:9)
+    } else {
+      levels_in = 1:12
+    }
+    
+    df_plot <- df_i %>% 
+      mutate(time = factor(month, levels = levels_in, 
+                           labels = month.abb[levels_in]))
+    
+  } else if (period_i == 'month') {
+    
+    # show all months in run period
+    df_plot <- df_i %>% 
+      mutate(time = Timestep)
+    
+  } else {
+    stop('timeperiod must be one of the following: EOWY,EOCY,month,annualWY,annualCY,12monthWY,12monthCY.')
+  }
+  return(df_plot)
+}
+
+
+## Get units 
+unit_processing <- function(df_in, units, period_i) {
+  # units = unique(df_in$Unit)
+  
+  # convert to MAF
+  if (units %in% c("acre-ft", "acre-ft/month") &
+      median(df_in$Value, na.rm = T) > 2*10^6) {
+    df_in$Value = df_in$Value / 10^6
+    units = gsub("acre-ft", "maf ", units)
+  }
+  
+  ## kaf/mon to maf/yr or kaf/yr
+  if (units %in% c("1000 acre-ft/month") & 
+      period_i %in% c("annualWY", "annualCY")) {
+    ## kaf/mon to maf/yr
+    if (median(df_in$Value, na.rm = T) > 2*10^3) {
+      df_in$Value = df_in$Value / 10^3
+      units = "maf / yr"
+    } else {
+      units = "kaf / yr"
+    }
+  }
+  
+  return(list(df = df_in, units = units))
+}
+
+

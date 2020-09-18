@@ -2,7 +2,7 @@
 <!--
 CADSWES, University of Colorado, http://cadswes.colorado.edu/
 RiverSMART 1.10
-Document created on Fri Sep 18 11:57:55 2020
+Document created on Fri Sep 18 12:51:39 2020
 Document created by sabaker
 -->
 <Study mode="fullstudy" uuid="{bda74d28-1af6-4629-9a9b-62759cc4a597}">
@@ -39,7 +39,7 @@ Document created by sabaker
 <plugin minor="1" patch="0" major="1"><type>Temporal Disagg</type>
 </plugin>
 </pluginList>
-<fileInfo><createdOn>Fri Sep 18 11:57:55 2020</createdOn>
+<fileInfo><createdOn>Fri Sep 18 12:51:39 2020</createdOn>
 <createdBy>sabaker</createdBy>
 </fileInfo>
 <name></name>
@@ -108,7 +108,7 @@ test a large range of model operations. </text>
 <fontSize>8</fontSize>
 <fontColor>#808080</fontColor>
 </textNode>
-<eventNode type="R Plugin" nodeNum="10"><scenePos x="2666.5" y="2675.5"></scenePos>
+<eventNode type="R Plugin" nodeNum="10"><scenePos x="2666.5" y="2674.5"></scenePos>
 <eventConfig><uuid>{b66ea2d5-1812-491c-b1d3-a227a96b5f14}</uuid>
 <name>Ops_Use</name>
 <placeholder>0</placeholder>
@@ -140,7 +140,7 @@ test a large range of model operations. </text>
 <value>"CAPDiversion.Total Diversion Requested;annualCY;boxplot",
 "MWDDiversion.Total Diversion Requested;annualCY;boxplot",
 "PumpingFromLakeMead:SNWP.Diversion Requested;annualCY;boxplot",
-"PowellData.ActualAnnualRelease;EOCY;boxplot", 
+"PowellData.ActualAnnualReleaseVolume;annualCY;boxplot", 
 "PowellData.ReleaseTier;EOCY;boxplot", 
 "Shortage.Shortage Flag;EOCY;boxplot", 
 "Surplus.AnnualSurplusTypeFlag;EOCY;boxplot"</value>
