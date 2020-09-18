@@ -4,34 +4,33 @@ library(tidyverse)
 library(lubridate)
 
 # # TEST - function inputs - how to do this with RiverSMART ?
-# scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
-# base_scen_nm <- c("ModelBase_RulesBase", "Base")
-# dev_scen_nm <- c("ModelDev_RulesDev", "Dev")
-# slots <- c("Mead.Pool Elevation", "Powell.Pool Elevation")
-# slot_period <- c("eocy", "eocy")
-# data_files <- "ReservoirOutput.csv"
+scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
+base_scen_nm <- c("ModelBase,RulesBase", "Base")
+dev_scen_nm <- c("ModelDev,RulesDev", "Dev")
+slot_period_plot = c("Powell.Pool Elevation;EOCY;boxplot",
+                     "Mead.Pool Elevation;EOCY;boxplot")
+data_files <- "ReservoirOutput.csv"
+out_fl_nm = "test"
 
 
 compare_modelDev <- function(scenario_dir,
                              output_dir,
-                             base_scen_nm = c("ModelBase_RulesBase", "Base"),
-                             dev_scen_nm = c("ModelDev_RulesDev", "Dev"),
-                             # slots = c("Mead.Pool Elevation"),
-                             slot_period_plot = c("Powell.Pool Elevation;EOCY;boxplot",
-                                                  "Mead.Pool Elevation;EOCY;boxplot"),
+                             base_scen_nm, #= c("ModelBase,RulesBase", "Base"),
+                             dev_scen_nm, #= c("ModelDev,RulesDev", "Dev"),
+                             slot_period_plot,
                              data_files = "ReservoirOutput.csv",
                              out_fl_nm = "model_comparision") {
   hydroIC <- c("Wet", "Avg", "Dry")
   
-  # only geg scenarios for desired groups
+  # get scenarios for desired groups
   scenarios <- list.files(scenario_dir)
   base_scenarios <- scenarios[grep(base_scen_nm[1], scenarios)]
   dev_scenarios <- scenarios[grep(dev_scen_nm[1], scenarios)]
   all_scenarios <- c(base_scenarios, dev_scenarios)
   
   # extract slot_period_plot
-  slot_mat = matrix(unlist(strsplit(slot_period_plot, ";")), ncol = 3, byrow = T)
-  slots = unique(slot_mat[,1])
+  slot_mat <- process_PerSlotPlot_Input(slot_period_plot)
+  slots <- unique(slot_mat[,1])
   
   # loop through scenarios
   df <- getScenarios(slots, all_scenarios, data_files, scenario_dir)
@@ -152,30 +151,7 @@ compare_modelDev <- function(scenario_dir,
 
 ### HELPER FUNCTIONS
 
-# get scenarios with only slots input
-getScenarios <- function(slots, 
-                         all_scenarios, 
-                         data_files, 
-                         scenario_dir) {
-  df <- NULL
-  for (scenario_i in all_scenarios) {
-    # read and append all data_files based on file type
-    for (data_j in unique(data_files)) {
-      fl_type_j <- last(unlist(strsplit(data_j, ".", fixed = TRUE)))
-      fl_nm_j <- paste0(scenario_dir, "\\", scenario_i, "\\", data_j)
-      if (fl_type_j == "rdf") {
-        df_j <- rdf_to_rwtbl2(fl_nm_j)
-      } else {
-        df_j <- read_rw_csv(fl_nm_j)
-      }
-      # filter for slots and add scenario name
-      df_j <- df_j %>%
-        filter(ObjectSlot %in% slots | ObjectSlot %in% gsub(" ", "", slots))
-      df <- rbind(df, cbind(scenario_i, df_j))
-    }
-  }
-  return(df)
-}
+
 
 
 ## timeperiod function
