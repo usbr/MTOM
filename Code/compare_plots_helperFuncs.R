@@ -108,16 +108,23 @@ processTimeperiodDF <- function(df_i,
 unit_processing <- function(df_in, units, period_i) {
   # units = unique(df_in$Unit)
   
-  # convert to MAF
+  # convert flow/volume in acre-ft to MAF
   if (units %in% c("acre-ft", "acre-ft/month") &
       median(df_in$Value, na.rm = T) > 2*10^6) {
     df_in$Value = df_in$Value / 10^6
-    units = gsub("acre-ft", "maf ", units)
+
+    if (period_i %in% c("annualWY", "annualCY")) {
+      units = "maf / yr"
+    } else {
+      units = gsub("acre-ft", "maf ", units)
+    }
+    
   }
   
   ## kaf/mon to maf/yr or kaf/yr
   if (units %in% c("1000 acre-ft/month") & 
       period_i %in% c("annualWY", "annualCY")) {
+    
     ## kaf/mon to maf/yr
     if (median(df_in$Value, na.rm = T) > 2*10^3) {
       df_in$Value = df_in$Value / 10^3
