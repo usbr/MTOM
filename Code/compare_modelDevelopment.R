@@ -10,7 +10,7 @@ source(paste0(Sys.getenv("MTOM_DIR"), "\\Code\\compare_plots_helperFuncs.R"))
 scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
 base_scen_nm <- c("ModelBase,RulesBase", "Base")
 dev_scen_nm <- c("ModelDev,RulesDev", "Dev")
-slot_period_plot = c("PowellData.ActualAnnualReleaseVolume;sumCY;boxplot",
+slot_period_plot = c("PowellData.ReleaseTier;annualSlot;barchart",
                      "Mead.Outflow;sumWY;boxplot")
   # c("Powell.Pool Elevation;EOCY;boxplot",
   #                    "Mead.Pool Elevation;EOCY;boxplot")
@@ -66,12 +66,9 @@ compare_modelDev <- function(scenario_dir,
     period_i = slot_mat[i,2]
     plot_i = slot_mat[i,3]
     
-    # changes plot type for plot type that doesnt work with exceedance
-    if (period_i %in% c("12monthWY", "12monthCY") & plot_i %in% c("exceedance0", "exceedance10")) {
-      plot_i = 'boxplot'
-      warning('Changing plot type exceednace to boxplot for 12monthWY time period!')
-    }
-    
+    # Check plotType is valid for timePeriod
+    plot_i = check_plotType(period_i, plot_i)
+
     # filter for slot
     df_i <- df %>%
       filter(ObjectSlot %in% slot_i | ObjectSlot %in% gsub(" ", "", slot_i))
@@ -91,6 +88,18 @@ compare_modelDev <- function(scenario_dir,
         geom_boxplot() +
         theme_bw() +
         labs(x = NULL, y = paste0(slot_i, " (", df_ls$units, ")")) +
+        facet_grid(hydroGroup ~ ., scales = "free_y")
+      
+    } else if(plot_i %in% c("barchart")) {
+      df_ploti <- df_ls$df %>% 
+        mutate(time = paste0(as.character(time), ' - ', as.character(ScenarioGroup))) %>%
+        mutate(time = factor(time))
+      
+      g <- ggplot(df_ploti, aes(time, fill = factor(Value))) +
+        geom_bar() +
+        theme_bw() +
+        theme(legend.title = element_blank()) +
+        labs(x = NULL, y = paste0(slot_i, " (trace count)")) +
         facet_grid(hydroGroup ~ ., scales = "free_y")
       
     } else if(plot_i %in% c("exceedance0", "exceedance10")) {

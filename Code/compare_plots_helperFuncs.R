@@ -91,6 +91,17 @@ processTimeperiodDF <- function(df_i,
       mutate(time = factor(month, levels = levels_in, 
                            labels = month.abb[levels_in]))
     
+  } else if (period_i == 'annualSlot') {
+    
+    if(length(unique(month(df_i$Timestep))) > 1) {
+      stop("timePeriod input 'annualSlot' - slot must have one output per year (i.e. Dec 31). 
+           Choose a different slot or timePeriod input.")
+    }
+    
+    # show all months in run period
+    df_plot <- df_i %>% 
+      mutate(time = year)
+    
   } else if (period_i == 'month') {
     
     # show all months in run period
@@ -98,7 +109,7 @@ processTimeperiodDF <- function(df_i,
       mutate(time = Timestep)
     
   } else {
-    stop('timeperiod must be one of the following: EOWY,EOCY,month,sumWY,sumCY,12monthWY,12monthCY.')
+    stop('timeperiod must be one of the following: EOWY,EOCY,month,sumWY,sumCY,annualSlot,12monthWY,12monthCY.')
   }
   return(df_plot)
 }
@@ -134,7 +145,25 @@ unit_processing <- function(df_in, units, period_i) {
     }
   }
   
+  if (units == "NONE") {
+    units = " - "
+  }
+  
   return(list(df = df_in, units = units))
 }
 
+## Check plotType is valid for timePeriod
+check_plotType <- function(period, plot) {
+  
+  # changes plot type for plot type that doesnt work with exceedance
+  if (period %in% c("12monthWY", "12monthCY") & plot %in% c("exceedance0", "exceedance10")) {
+    plot = 'boxplot'
+    warning('Changing plotType of exceedance to boxplot for 12monthWY time period!')
+  }
+  
+  if(plot == 'barchart' & period != 'annualSlot'){
+    warning("barchart plot type should only be used with 'annualSlot' timePeriod.")
+  }
+  return(plot)
+}
 
