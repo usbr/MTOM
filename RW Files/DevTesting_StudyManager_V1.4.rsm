@@ -2,7 +2,7 @@
 <!--
 CADSWES, University of Colorado, http://cadswes.colorado.edu/
 RiverSMART 1.10
-Document created on Mon Sep 21 17:10:55 2020
+Document created on Mon Sep 21 17:18:24 2020
 Document created by sabaker
 -->
 <Study mode="fullstudy" uuid="{f1c0df1c-f943-4bd8-8dd8-905c8573f58d}">
@@ -39,7 +39,7 @@ Document created by sabaker
 <plugin major="1" minor="1" patch="0"><type>Temporal Disagg</type>
 </plugin>
 </pluginList>
-<fileInfo><createdOn>Mon Sep 21 17:10:55 2020</createdOn>
+<fileInfo><createdOn>Mon Sep 21 17:18:24 2020</createdOn>
 <createdBy>sabaker</createdBy>
 </fileInfo>
 <name></name>
@@ -637,7 +637,79 @@ model slots.</text>
 <type>Policy</type>
 <type>RunRange</type>
 </typeList>
-<hiddenList></hiddenList>
+<hiddenList><uuid>{61c7d18c-06b2-4442-ba7b-4eb332d6705e}</uuid>
+<uuid>{2c03c031-3f13-4e47-a3cc-5e756e9aa5c4}</uuid>
+<uuid>{fb945f3c-16c9-446d-83b4-b375b62c4855}</uuid>
+<uuid>{2711e871-d73c-413d-8979-3a219c709474}</uuid>
+<uuid>{62bb18f0-25f7-4120-ad8f-9848bf7ee7fe}</uuid>
+<uuid>{5964632c-da3d-4821-9d50-315c99ca56c1}</uuid>
+<uuid>{673df426-19fe-496d-9b27-ceb30f7488f9}</uuid>
+<uuid>{6d9ee386-a9cc-46a5-9868-34867e26146d}</uuid>
+<uuid>{31a1677b-7ce1-40de-897e-99d5a94e4690}</uuid>
+<uuid>{104908fe-5ad8-4b79-8832-2569d2e4ce96}</uuid>
+<uuid>{3d1700a1-6f3e-458a-b4bc-f897ba774648}</uuid>
+<uuid>{b06a78c1-a8d4-4dca-8c89-fff3debf5c97}</uuid>
+<uuid>{57e2ac38-09fa-4966-959b-3363cf4b67c5}</uuid>
+<uuid>{0a8be72b-379c-4f7e-9063-f890694fc92a}</uuid>
+<uuid>{59ca1655-7709-4fac-8539-19d25a7ec06f}</uuid>
+<uuid>{26eeba84-1cb1-463f-8832-a111ed2af8a7}</uuid>
+<uuid>{23abdc79-0e04-445d-b15c-628afb00d45a}</uuid>
+<uuid>{7f696b32-87f5-45f2-8570-8a95a8c67c1a}</uuid>
+<uuid>{c38375ff-c1b3-4f58-8583-dadc530ae43a}</uuid>
+<uuid>{9c47f33f-d1d9-492c-8b0b-a726a6186377}</uuid>
+<uuid>{9db297f0-797d-403f-a922-98aeaf05f7d8}</uuid>
+<uuid>{57b06500-31e5-436c-bea5-88380ff49c94}</uuid>
+<uuid>{f37f666c-2322-4dd4-aef9-4a16f78ab77c}</uuid>
+<uuid>{865f2d2e-c0d0-44b0-8054-d0f811446d93}</uuid>
+<uuid>{35a23122-fb5e-4186-9e27-654d017c2f2e}</uuid>
+<uuid>{1d5dbb89-701d-43d7-9581-2c082c701f1a}</uuid>
+<uuid>{3a971a30-8bec-4ec6-b001-3a68412b336d}</uuid>
+<uuid>{bf45c987-8b04-42d2-b241-ff44e6525064}</uuid>
+<uuid>{3f8f7be1-a983-4b13-9c70-0fcd08d60500}</uuid>
+<uuid>{a4ebdde8-696c-4972-a6d7-f2fc65f55f61}</uuid>
+<uuid>{f1c1ba45-5872-4f6c-a8d5-da78745e9c45}</uuid>
+<uuid>{cefc1067-1bc8-4916-991b-213e060f3163}</uuid>
+<uuid>{770280e3-13f8-4a62-9061-4f374bdc124e}</uuid>
+<uuid>{16dd799a-8b30-4291-a300-d964f74f30ef}</uuid>
+<uuid>{d89c5d85-b522-4150-9d25-9292a976324f}</uuid>
+<uuid>{4abe303a-06a5-4248-b57f-eb4b8355b121}</uuid>
+<uuid>{44bcbf11-135c-4980-962c-14361d7002a9}</uuid>
+<uuid>{37de3ba0-5380-42be-b009-09fef6d55ae9}</uuid>
+<uuid>{76f87318-378a-4c32-9474-1d0033afda13}</uuid>
+<uuid>{928f9690-b665-468e-a150-7bc3b194ae98}</uuid>
+<uuid>{aadfe613-aa97-4af4-86f7-902bb5c3e31d}</uuid>
+<uuid>{36a44c00-55a1-4262-b40d-13592586fcc4}</uuid>
+<uuid>{2f63f265-a8a4-4b32-8f55-909a62980dcf}</uuid>
+<uuid>{0e026081-8289-47a5-aa8e-1533e9d75c64}</uuid>
+<uuid>{701215bc-170b-4828-9cd3-0336efd2e650}</uuid>
+<uuid>{8761846e-9426-442b-8d44-1fc7e8eecb67}</uuid>
+<uuid>{7b2adfda-44c1-4fa5-a4aa-ecbc9a015a83}</uuid>
+<uuid>{e733079f-3fe4-47f6-a33b-4803795c16f6}</uuid>
+<uuid>{67e2f0cd-6158-4878-9b21-322bebc6ee02}</uuid>
+<uuid>{a57153d8-5023-4388-a38e-0ecf39b40368}</uuid>
+<uuid>{e4c54afd-0f8d-485d-acf8-2f830a71f8ac}</uuid>
+<uuid>{770b270f-09e2-4565-90b9-61786de9fe8c}</uuid>
+<uuid>{278fb51e-1465-4687-b258-941c06a2f4ed}</uuid>
+<uuid>{396a82d6-4148-4ce5-b79c-113f49921836}</uuid>
+<uuid>{b2ed59d5-9e33-4543-9c3d-b626b3ace06a}</uuid>
+<uuid>{71291238-9389-41dc-96f5-f1291d674305}</uuid>
+<uuid>{dd405470-1925-4538-b10f-360ae7f33b1c}</uuid>
+<uuid>{d4ac013e-0a7b-4bf4-b37a-dcd575efb4db}</uuid>
+<uuid>{57a7a00d-40d9-42cb-9e64-6182cf27a8d8}</uuid>
+<uuid>{92358fc2-1607-48a9-9b7c-f53abc8f533f}</uuid>
+<uuid>{4730f318-aeb2-443a-aa99-67ea1a119615}</uuid>
+<uuid>{3065f09c-eeed-4849-8264-bc1eb0c8f541}</uuid>
+<uuid>{259bf080-3bba-4eeb-ac6d-e081ce5727a6}</uuid>
+<uuid>{c85378ce-9bd7-4ebb-87e7-0289f14a18c3}</uuid>
+<uuid>{be4f71ea-c495-4fae-b1d1-c7ef3c4defc7}</uuid>
+<uuid>{5d65ff40-7083-456c-b34d-e949ad381f7e}</uuid>
+<uuid>{104a127d-802f-4dc8-95c9-b07cccadc23b}</uuid>
+<uuid>{20d2ce26-15b8-437e-a372-ec798ac0ee97}</uuid>
+<uuid>{1f0c911f-3a3c-4e3a-b73f-a9c7b6bc499a}</uuid>
+<uuid>{3c3c92ad-d840-490d-ad81-a0a77e7466b0}</uuid>
+<uuid>{6c583251-3abd-4b88-9ec8-981c57c639fd}</uuid>
+<uuid>{5c488c2b-68ae-49b3-889d-dde38b689597}</uuid>
+</hiddenList>
 </simulateView>
 <postProcView><typeList><type>MRM Config</type>
 <type>Model</type>
@@ -718,7 +790,38 @@ model slots.</text>
 <rulesetPath>$MTOM_DIR/RW Files/MTOM_Rules_V3.7_8.1.1.rls</rulesetPath>
 </input>
 </config>
-<simState><state>notRun</state>
+<simState><state>runOk</state>
+<dateTime>Mon Sep 21 17:16:02 2020</dateTime>
+<activityList><activity name="Simulate Scenario"><state>perfOk</state>
+<dateTime>Mon Sep 21 17:15:30 2020</dateTime>
+<logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2020-11/rw__RwProcess_sabaker.log</logFile>
+<sortKey>0</sortKey>
+</activity>
+<activity name="Execute RiverWare"><state>perfOk</state>
+<dateTime>Mon Sep 21 17:15:30 2020</dateTime>
+<logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2020-11/RwBatch.log</logFile>
+<sortKey>0</sortKey>
+</activity>
+<activity name="Execute Distrib MRM Controller"><state>perfOk</state>
+<dateTime>Mon Sep 21 17:15:33 2020</dateTime>
+<sortKey>0</sortKey>
+</activity>
+<activity name="Init Distrib MRM Controller"><state>perfOk</state>
+<dateTime>Mon Sep 21 17:15:34 2020</dateTime>
+<logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2020-11/rw__RemoteMgr_sabaker.log</logFile>
+<sortKey>0</sortKey>
+</activity>
+<activity name="Traces 1 - 3"><state>perfOk</state>
+<dateTime>Mon Sep 21 17:15:58 2020</dateTime>
+<logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2020-11/rw__000_sabaker.log</logFile>
+<sortKey>0</sortKey>
+</activity>
+<activity name="Traces 4 - 6"><state>perfOk</state>
+<dateTime>Mon Sep 21 17:15:57 2020</dateTime>
+<logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2020-11/rw__001_sabaker.log</logFile>
+<sortKey>1</sortKey>
+</activity>
+</activityList>
 </simState>
 <postProcState></postProcState>
 </scenario>
