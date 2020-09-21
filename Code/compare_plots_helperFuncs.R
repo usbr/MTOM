@@ -66,10 +66,10 @@ processTimeperiodDF <- function(df_i,
       filter(month == ifelse(period_i == 'EOWY', 10, 12))  %>%
       mutate(time = year)
     
-  } else if (period_i %in% c("annualWY", "annualCY")) {
+  } else if (period_i %in% c("sumWY", "sumCY")) {
     
     # annual WY or CY sum with 12 values
-    if (period_i == "annualWY") {
+    if (period_i == "sumWY") {
       df_i <- df_i %>% mutate(year = year + ifelse(month < 10, 0, 1)) 
     }
     df_plot <- df_i %>% 
@@ -98,7 +98,7 @@ processTimeperiodDF <- function(df_i,
       mutate(time = Timestep)
     
   } else {
-    stop('timeperiod must be one of the following: EOWY,EOCY,month,annualWY,annualCY,12monthWY,12monthCY.')
+    stop('timeperiod must be one of the following: EOWY,EOCY,month,sumWY,sumCY,12monthWY,12monthCY.')
   }
   return(df_plot)
 }
@@ -113,7 +113,7 @@ unit_processing <- function(df_in, units, period_i) {
       median(df_in$Value, na.rm = T) > 2*10^6) {
     df_in$Value = df_in$Value / 10^6
 
-    if (period_i %in% c("annualWY", "annualCY")) {
+    if (period_i %in% c("sumWY", "sumCY")) {
       units = "maf / yr"
     } else {
       units = gsub("acre-ft", "maf ", units)
@@ -123,7 +123,7 @@ unit_processing <- function(df_in, units, period_i) {
   
   ## kaf/mon to maf/yr or kaf/yr
   if (units %in% c("1000 acre-ft/month") & 
-      period_i %in% c("annualWY", "annualCY")) {
+      period_i %in% c("sumWY", "sumCY")) {
     
     ## kaf/mon to maf/yr
     if (median(df_in$Value, na.rm = T) > 2*10^3) {

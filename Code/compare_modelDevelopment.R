@@ -7,15 +7,16 @@ library(lubridate)
 source(paste0(Sys.getenv("MTOM_DIR"), "\\Code\\compare_plots_helperFuncs.R"))
 
 # # # TEST - function inputs - how to do this with RiverSMART ?
-# scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
-# base_scen_nm <- c("ModelBase,RulesBase", "Base")
-# dev_scen_nm <- c("ModelDev,RulesDev", "Dev")
-# slot_period_plot = c("PowellData.ActualAnnualReleaseVolume;annualCY;boxplot",
-#                      "Powell.Outflow;annualWY;boxplot")
-#   # c("Powell.Pool Elevation;EOCY;boxplot",
-#   #                    "Mead.Pool Elevation;EOCY;boxplot")
-# data_files <- c("OpsUse.csv", "ReservoirOutput.csv")
-# out_fl_nm = "test"
+scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
+base_scen_nm <- c("ModelBase,RulesBase", "Base")
+dev_scen_nm <- c("ModelDev,RulesDev", "Dev")
+slot_period_plot = c("PowellData.ActualAnnualReleaseVolume;sumCY;boxplot",
+                     "Mead.Outflow;sumWY;boxplot")
+  # c("Powell.Pool Elevation;EOCY;boxplot",
+  #                    "Mead.Pool Elevation;EOCY;boxplot")
+# data_files <- "ReservoirOutput.csv" 
+data_files <- c("OpsUse.csv", "ReservoirOutput.csv")
+out_fl_nm = "test"
 
 
 compare_modelDev <- function(scenario_dir,
@@ -54,7 +55,7 @@ compare_modelDev <- function(scenario_dir,
     year = year(Timestep),
     month = month(Timestep),
     ScenarioGroup = factor(ScenarioGroup),
-    hydroGroup = factor(hydroGroup),
+    hydroGroup = factor(hydroGroup, levels = hydroIC),
     Timestep = as.Date(Timestep)
   ) 
   
