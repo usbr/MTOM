@@ -2,7 +2,7 @@
 <!--
 CADSWES, University of Colorado, http://cadswes.colorado.edu/
 RiverSMART 1.10
-Document created on Tue Sep 22 09:54:00 2020
+Document created on Tue Sep 22 13:44:10 2020
 Document created by sabaker
 -->
 <Study mode="fullstudy" uuid="{f1c0df1c-f943-4bd8-8dd8-905c8573f58d}">
@@ -39,7 +39,7 @@ Document created by sabaker
 <plugin major="1" minor="1" patch="0"><type>Temporal Disagg</type>
 </plugin>
 </pluginList>
-<fileInfo><createdOn>Tue Sep 22 09:54:00 2020</createdOn>
+<fileInfo><createdOn>Tue Sep 22 13:44:10 2020</createdOn>
 <createdBy>sabaker</createdBy>
 </fileInfo>
 <name></name>
@@ -137,21 +137,22 @@ model slots.</text>
 <predefarg>scenarionames</predefarg>
 <name>slot_period_plot</name>
 <desc>Specify plots with string of inputs seperated by semicolons: slot;timePeriod;plotType. Each plot is anew string. OPTIONS: timePeriod-EOWY,EOCY,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values may be unrealistic for first year of simulation since script is not using obs data.</desc>
-<value>"Fontenelle.Pool Elevation;month;exceedance10", &#xd;&#xd;
-"Fontenelle.Outflow;12monthWY;boxplot",&#xd;&#xd;
-"FlamingGorge.Pool Elevation;month;exceedance10", &#xd;&#xd;
-"FlamingGorge.Outflow;12monthWY;boxplot",&#xd;&#xd;
-"TaylorPark.Pool Elevation;month;exceedance0", &#xd;&#xd;
-"TaylorPark.Outflow;12monthWY;boxplot",&#xd;&#xd;
-"BlueMesa.Pool Elevation;month;exceedance10", &#xd;&#xd;
-"BlueMesa.Outflow;12monthWY;boxplot",&#xd;&#xd;
-"Crystal.Pool Elevation;month;exceedance10", &#xd;&#xd;
-"Crystal.Outflow;12monthWY;boxplot",&#xd;&#xd;
-"MorrowPoint.Pool Elevation;month;exceedance10", &#xd;&#xd;
-"MorrowPoint.Outflow;12monthWY;boxplot",&#xd;&#xd;
-"Vallecito.Pool Elevation;month;exceedance10", &#xd;&#xd;
-"Vallecito.Outflow;12monthWY;boxplot",&#xd;&#xd;
-"Navajo.Pool Elevation;month;exceedance10", &#xd;&#xd;
+<value>"Fontenelle.Pool Elevation;month;exceedance10", 
+"Fontenelle.Outflow;12monthWY;boxplot",
+"FlamingGorge.Pool Elevation;month;exceedance10", 
+"FlamingGorge.Outflow;12monthWY;boxplot",
+"TaylorPark.Pool Elevation;month;exceedance0", 
+"TaylorPark.Outflow;12monthWY;boxplot",
+"BlueMesa.Pool Elevation;month;exceedance10", 
+"BlueMesa.Outflow;12monthWY;boxplot",
+"Crystal.Pool Elevation;month;exceedance10", 
+"Crystal.Outflow;12monthWY;boxplot",
+"MorrowPoint.Pool Elevation;month;exceedance10", 
+"MorrowPoint.Outflow;12monthWY;boxplot",
+
+"Vallecito.Pool Elevation;month;exceedance10", 
+"Vallecito.Outflow;12monthWY;boxplot",
+"Navajo.Pool Elevation;month;exceedance10", 
 "Navajo.Outflow;12monthWY;boxplot"</value>
 <logical>false</logical>
 </funcArg>
@@ -221,12 +222,12 @@ model slots.</text>
 <predefarg>scenarionames</predefarg>
 <name>slot_period_plot</name>
 <desc>Specify plots with string of inputs seperated by semicolons: slot;timePeriod;plotType. Each plot is anew string. OPTIONS: timePeriod-EOWY,EOCY,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values may be unrealistic for first year of simulation since script is not using obs data.</desc>
-<value>"CAPDiversion.Total Diversion Requested;sumCY;boxplot",&#xd;&#xd;
-"MWDDiversion.Total Diversion Requested;sumCY;boxplot",&#xd;&#xd;
-"PumpingFromLakeMead:SNWP.Diversion Requested;sumCY;boxplot",&#xd;&#xd;
-"PowellData.ActualAnnualReleaseVolume;annualSlot;boxplot", &#xd;&#xd;
-"PowellData.ReleaseTier;annualSlot;barchart", &#xd;&#xd;
-"Shortage.Shortage Flag;annualSlot;barchart", &#xd;&#xd;
+<value>"CAPDiversion.Total Diversion Requested;sumCY;boxplot",
+"MWDDiversion.Total Diversion Requested;sumCY;boxplot",
+"PumpingFromLakeMead:SNWP.Diversion Requested;sumCY;boxplot",
+"PowellData.ActualAnnualReleaseVolume;annualSlot;boxplot", 
+"PowellData.ReleaseTier;annualSlot;barchart", 
+"Shortage.Shortage Flag;annualSlot;barchart", 
 "Surplus.AnnualSurplusTypeFlag;annualSlot;barchart"</value>
 <logical>false</logical>
 </funcArg>
@@ -309,9 +310,9 @@ model slots.</text>
 <predefarg>scenarionames</predefarg>
 <name>slot_period_plot</name>
 <desc>Specify plots with string of inputs seperated by semicolons: slot;timePeriod;plotType. Each plot is anew string. OPTIONS: timePeriod-EOWY,EOCY,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values may be unrealistic for first year of simulation since script is not using obs data.</desc>
-<value>"Mohave.Pool Elevation;month;exceedance10", &#xd;&#xd;
-"Mohave.Outflow;12monthWY;boxplot",&#xd;&#xd;
-"Havasu.Pool Elevation;month;exceedance10", &#xd;&#xd;
+<value>"Mohave.Pool Elevation;month;exceedance10", 
+"Mohave.Outflow;12monthWY;boxplot",
+"Havasu.Pool Elevation;month;exceedance10", 
 "Havasu.Outflow;12monthWY;boxplot"</value>
 <logical>false</logical>
 </funcArg>
@@ -381,11 +382,11 @@ model slots.</text>
 <predefarg>scenarionames</predefarg>
 <name>slot_period_plot</name>
 <desc>Specify plots with string of inputs separated by semicolons: slot;timePeriod;plotType. Each plot is a new string. OPTIONS: timePeriod-EOWY,EOCY,month,annualWY,annualCY,12monthWY,12monthCY. plotType-boxplot,exceedance0,exceedance10. NOTE: annual values only show the scenarios with 12 months of data.</desc>
-<value>"Powell.Pool Elevation;EOCY;boxplot",&#xd;&#xd;
-"Powell.Pool Elevation;month;exceedance10", &#xd;&#xd;
-"Powell.Outflow;sumWY;boxplot", &#xd;&#xd;
-"Mead.Pool Elevation;EOCY;boxplot", &#xd;&#xd;
-"Mead.Pool Elevation;month;exceedance10", &#xd;&#xd;
+<value>"Powell.Pool Elevation;EOCY;boxplot",
+"Powell.Pool Elevation;month;exceedance10", 
+"Powell.Outflow;sumWY;boxplot", 
+"Mead.Pool Elevation;EOCY;boxplot", 
+"Mead.Pool Elevation;month;exceedance10", 
 "Mead.Outflow;sumCY;boxplot"</value>
 <logical>false</logical>
 </funcArg>
@@ -522,7 +523,7 @@ model slots.</text>
 <scope>event</scope>
 <config><ParamDat>
 <ModelParams>
-<ModelFile>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</ModelFile>
+<ModelFile>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</ModelFile>
 </ModelParams>
 </ParamDat>
 </config>
@@ -616,7 +617,7 @@ model slots.</text>
 <eventPlaceMod></eventPlaceMod>
 <eventIntMod></eventIntMod>
 <eventExtMod></eventExtMod>
-<scenarioMgr><scenarioList timestamp="1600788206"><nameList sepChar=","><type>MRM Config</type>
+<scenarioMgr><scenarioList timestamp="1600800331"><nameList sepChar=","><type>MRM Config</type>
 <type>Model</type>
 <type>Policy</type>
 <type>RunRange</type>
@@ -941,33 +942,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:32:38 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:18 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:31:58 2020</dateTime>
+<dateTime>Tue Sep 22 12:46:43 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-02/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:31:58 2020</dateTime>
+<dateTime>Tue Sep 22 12:46:43 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-02/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:04 2020</dateTime>
+<dateTime>Tue Sep 22 12:46:46 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:04 2020</dateTime>
+<dateTime>Tue Sep 22 12:46:47 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-02/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:34 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:14 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-02/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:34 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:14 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-02/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -991,33 +992,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:33:04 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:56 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:38 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:18 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-03/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:38 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:18 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-03/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:42 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:22 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:42 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:22 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-03/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:00 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:52 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-03/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:32:59 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:52 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-03/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -1041,33 +1042,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:33:41 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:26 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:04 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:56 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-04/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:04 2020</dateTime>
+<dateTime>Tue Sep 22 12:47:56 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-04/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:14 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:00 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:14 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:00 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-04/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:37 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:22 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-04/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:37 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:22 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-04/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -1091,33 +1092,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:34:12 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:55 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:41 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:27 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-05/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:41 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:27 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-05/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:45 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:30 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:33:46 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:30 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-05/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:08 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:51 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-05/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:08 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:51 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-05/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -1141,33 +1142,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:34:50 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:24 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:12 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:56 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-06/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:12 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:56 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-06/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:28 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:59 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:28 2020</dateTime>
+<dateTime>Tue Sep 22 12:48:59 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-06/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:46 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:20 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-06/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:46 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:19 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-06/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -1191,33 +1192,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:35:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:52 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:51 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:24 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-07/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:51 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:24 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-07/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:55 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:27 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:34:55 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:27 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-07/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:15 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:48 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-07/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:15 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:48 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-07/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -1241,33 +1242,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:35:52 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:17 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:52 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-08/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:52 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-08/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:31 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:56 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:31 2020</dateTime>
+<dateTime>Tue Sep 22 12:49:56 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-08/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:48 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:13 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-08/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:48 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:12 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-08/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -1291,33 +1292,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:36:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:40 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:52 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:17 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-09/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:52 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:17 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-09/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:56 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:20 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:35:57 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:20 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-09/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:36:16 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:36 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-09/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:36:16 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:35 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelBase_RulesBase_Run-2021-09/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -1556,7 +1557,7 @@ model slots.</text>
 <scenario><uuid>{57e2ac38-09fa-4966-959b-3363cf4b67c5}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2020-10</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1575,7 +1576,7 @@ model slots.</text>
 <scenario><uuid>{0a8be72b-379c-4f7e-9063-f890694fc92a}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2020-11</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1594,7 +1595,7 @@ model slots.</text>
 <scenario><uuid>{59ca1655-7709-4fac-8539-19d25a7ec06f}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2020-12</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1613,7 +1614,7 @@ model slots.</text>
 <scenario><uuid>{26eeba84-1cb1-463f-8832-a111ed2af8a7}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-01</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1632,7 +1633,7 @@ model slots.</text>
 <scenario><uuid>{23abdc79-0e04-445d-b15c-628afb00d45a}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-02</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1651,7 +1652,7 @@ model slots.</text>
 <scenario><uuid>{7f696b32-87f5-45f2-8570-8a95a8c67c1a}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-03</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1670,7 +1671,7 @@ model slots.</text>
 <scenario><uuid>{c38375ff-c1b3-4f58-8583-dadc530ae43a}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-04</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1689,7 +1690,7 @@ model slots.</text>
 <scenario><uuid>{9c47f33f-d1d9-492c-8b0b-a726a6186377}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-05</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1708,7 +1709,7 @@ model slots.</text>
 <scenario><uuid>{9db297f0-797d-403f-a922-98aeaf05f7d8}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-06</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1727,7 +1728,7 @@ model slots.</text>
 <scenario><uuid>{57b06500-31e5-436c-bea5-88380ff49c94}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-07</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1746,7 +1747,7 @@ model slots.</text>
 <scenario><uuid>{f37f666c-2322-4dd4-aef9-4a16f78ab77c}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-08</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1765,7 +1766,7 @@ model slots.</text>
 <scenario><uuid>{865f2d2e-c0d0-44b0-8054-d0f811446d93}</uuid>
 <name>MRM_Avg,ModelDev,RulesBase,Run-2021-09</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1784,7 +1785,7 @@ model slots.</text>
 <scenario><uuid>{dd605aaf-faf2-405a-a923-ddb2cf37d0d5}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2020-10</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1834,7 +1835,7 @@ model slots.</text>
 <scenario><uuid>{681e7223-7b6f-4016-96ea-ddf76aa64857}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2020-11</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1884,7 +1885,7 @@ model slots.</text>
 <scenario><uuid>{7df01890-53f6-4c6f-b6ea-223ce4b813a8}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2020-12</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1934,7 +1935,7 @@ model slots.</text>
 <scenario><uuid>{2afae30d-d886-473e-9f4a-72d6f473f1cd}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-01</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1984,7 +1985,7 @@ model slots.</text>
 <scenario><uuid>{6ebe86ac-5049-4a37-8bdf-63d4f74ffdb0}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-02</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -1997,33 +1998,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:40:11 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:14 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:39:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:40 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-02/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:39:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:40 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-02/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:39:24 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:44 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:39:24 2020</dateTime>
+<dateTime>Tue Sep 22 12:50:44 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-02/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:07 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:10 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-02/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:07 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:10 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-02/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2034,7 +2035,7 @@ model slots.</text>
 <scenario><uuid>{4c9ab161-c6e9-4dea-8c34-c3ae65f2e81b}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-03</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -2047,33 +2048,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:40:43 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:57 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:11 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-03/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:11 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-03/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:15 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:19 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:15 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:19 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-03/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:39 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:53 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-03/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:39 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:53 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-03/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2084,7 +2085,7 @@ model slots.</text>
 <scenario><uuid>{263ae3b5-f0dc-4e57-9d3b-482d678cd778}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-04</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -2097,33 +2098,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:41:24 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:26 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:44 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:58 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-04/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:44 2020</dateTime>
+<dateTime>Tue Sep 22 12:51:58 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-04/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:54 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:01 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:40:54 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:01 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-04/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:41:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:22 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-04/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:41:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:21 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-04/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2134,7 +2135,7 @@ model slots.</text>
 <scenario><uuid>{c7f006e1-aebb-4586-a543-34abb7b3e013}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-05</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -2147,33 +2148,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:42:15 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:59 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:41:24 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:26 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-05/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:41:24 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:26 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-05/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:41:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:30 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:41:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:30 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-05/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:11 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:55 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-05/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:11 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:55 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-05/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2184,7 +2185,7 @@ model slots.</text>
 <scenario><uuid>{c808c2a2-cc9e-4c62-a69e-a3f97d9dd563}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-06</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -2197,33 +2198,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:42:47 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:31 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:15 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:59 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-06/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:15 2020</dateTime>
+<dateTime>Tue Sep 22 12:52:59 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-06/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:03 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:20 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:03 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-06/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:43 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:27 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-06/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:43 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:27 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-06/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2234,7 +2235,7 @@ model slots.</text>
 <scenario><uuid>{52582bb9-dbfd-4661-9baa-5541da0c7983}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-07</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -2247,33 +2248,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:43:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:06 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:48 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:31 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-07/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:48 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:31 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-07/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:56 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:37 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:42:56 2020</dateTime>
+<dateTime>Tue Sep 22 12:53:37 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-07/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:43:25 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:02 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-07/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:43:25 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:01 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-07/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2284,7 +2285,7 @@ model slots.</text>
 <scenario><uuid>{ff83d9b0-d4ef-42d3-8a76-6fd868dbbaf7}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-08</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -2297,33 +2298,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:44:17 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:37 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:43:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:06 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-08/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:43:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:06 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-08/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:43:33 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:09 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:43:34 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-08/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:44:13 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:33 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-08/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:44:13 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:33 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-08/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2334,7 +2335,7 @@ model slots.</text>
 <scenario><uuid>{2bedd9a8-34e9-480a-bd08-f6cb04029a1f}</uuid>
 <name>MRM_Avg,ModelDev,RulesDev,Run-2021-09</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d159de63-8c48-4d65-9b81-5cf2da139a73}" name="MRM_Avg" type="MRM Config">
 <configName>DevTesting_Avg</configName>
@@ -2347,33 +2348,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:44:47 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:15 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:44:18 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:37 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-09/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:44:18 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:37 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-09/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:44:22 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:41 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:44:22 2020</dateTime>
+<dateTime>Tue Sep 22 12:54:41 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-09/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:44:43 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:11 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-09/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:44:43 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:10 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Avg_ModelDev_RulesDev_Run-2021-09/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2597,33 +2598,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:47:55 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:46 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:47:27 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-02/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:47:27 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-02/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:47:31 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:18 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:47:31 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:18 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-02/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:47:51 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:42 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-02/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:47:51 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:42 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-02/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2647,33 +2648,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:48:28 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:15 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:47:55 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:47 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-03/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:47:55 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:47 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-03/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:48:03 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:50 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:48:03 2020</dateTime>
+<dateTime>Tue Sep 22 12:55:50 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-03/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:48:24 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:11 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-03/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:48:24 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:10 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-03/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2697,33 +2698,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:49:05 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:00 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:48:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:16 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-04/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:48:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:16 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-04/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:48:33 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:28 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:48:33 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:28 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-04/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:01 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:56 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-04/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:00 2020</dateTime>
+<dateTime>Tue Sep 22 12:56:56 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-04/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2747,33 +2748,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:49:33 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:32 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:05 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:01 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-05/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:05 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:01 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-05/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:09 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:04 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:09 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:04 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-05/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:28 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-05/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:29 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:27 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-05/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2797,33 +2798,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:50:03 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:01 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:33 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:32 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-06/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:33 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:32 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-06/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:41 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:36 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:41 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:36 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-06/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:59 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:57 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-06/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:49:59 2020</dateTime>
+<dateTime>Tue Sep 22 12:57:57 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-06/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2847,33 +2848,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:50:40 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:29 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:04 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:01 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-07/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:04 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:01 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-07/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:08 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:05 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:08 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:05 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-07/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:36 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:25 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-07/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:36 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:25 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-07/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2897,33 +2898,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:51:08 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:58 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:40 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:29 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-08/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:40 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:29 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-08/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:45 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:32 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:50:45 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:32 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-08/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:51:04 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:54 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-08/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:51:03 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:54 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-08/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -2947,33 +2948,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:51:42 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:29 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:51:08 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:58 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-09/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:51:08 2020</dateTime>
+<dateTime>Tue Sep 22 12:58:58 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-09/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:51:18 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:04 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:51:18 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:04 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-09/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:51:37 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:24 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-09/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:51:37 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:25 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelBase_RulesBase_Run-2021-09/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3212,7 +3213,7 @@ model slots.</text>
 <scenario><uuid>{44bcbf11-135c-4980-962c-14361d7002a9}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2020-10</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3231,7 +3232,7 @@ model slots.</text>
 <scenario><uuid>{37de3ba0-5380-42be-b009-09fef6d55ae9}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2020-11</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3250,7 +3251,7 @@ model slots.</text>
 <scenario><uuid>{76f87318-378a-4c32-9474-1d0033afda13}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2020-12</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3269,7 +3270,7 @@ model slots.</text>
 <scenario><uuid>{928f9690-b665-468e-a150-7bc3b194ae98}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-01</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3288,7 +3289,7 @@ model slots.</text>
 <scenario><uuid>{aadfe613-aa97-4af4-86f7-902bb5c3e31d}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-02</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3307,7 +3308,7 @@ model slots.</text>
 <scenario><uuid>{36a44c00-55a1-4262-b40d-13592586fcc4}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-03</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3326,7 +3327,7 @@ model slots.</text>
 <scenario><uuid>{2f63f265-a8a4-4b32-8f55-909a62980dcf}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-04</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3345,7 +3346,7 @@ model slots.</text>
 <scenario><uuid>{0e026081-8289-47a5-aa8e-1533e9d75c64}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-05</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3364,7 +3365,7 @@ model slots.</text>
 <scenario><uuid>{701215bc-170b-4828-9cd3-0336efd2e650}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-06</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3383,7 +3384,7 @@ model slots.</text>
 <scenario><uuid>{8761846e-9426-442b-8d44-1fc7e8eecb67}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-07</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3402,7 +3403,7 @@ model slots.</text>
 <scenario><uuid>{7b2adfda-44c1-4fa5-a4aa-ecbc9a015a83}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-08</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3421,7 +3422,7 @@ model slots.</text>
 <scenario><uuid>{e733079f-3fe4-47f6-a33b-4803795c16f6}</uuid>
 <name>MRM_Dry,ModelDev,RulesBase,Run-2021-09</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3440,7 +3441,7 @@ model slots.</text>
 <scenario><uuid>{4cde9281-1a20-4d67-ac2a-61d37fbe1968}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2020-10</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3490,7 +3491,7 @@ model slots.</text>
 <scenario><uuid>{27c62200-2067-44d2-892e-f8fefec4a3ab}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2020-11</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3540,7 +3541,7 @@ model slots.</text>
 <scenario><uuid>{8d850569-2797-47a5-8915-8644ba913eae}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2020-12</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3590,7 +3591,7 @@ model slots.</text>
 <scenario><uuid>{fdeb6804-c93c-4459-a8c7-a9328a0fa4ee}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-01</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3603,33 +3604,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:54:48 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:04 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:05 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:29 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-01/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:05 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:29 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-01/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:09 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:33 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:10 2020</dateTime>
+<dateTime>Tue Sep 22 12:59:33 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-01/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:44 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:00 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-01/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:44 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:00 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-01/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3640,7 +3641,7 @@ model slots.</text>
 <scenario><uuid>{58db9d3e-45f6-4d03-a9a2-3b61dd46e4b7}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-02</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3653,33 +3654,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:55:40 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:54 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:49 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:04 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-02/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:49 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:04 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-02/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:53 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:11 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:54:54 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:11 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-02/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:55:36 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:50 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-02/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:55:36 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:50 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-02/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3690,7 +3691,7 @@ model slots.</text>
 <scenario><uuid>{212ee2be-ce4c-4a6a-9952-5c85273869cc}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-03</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3703,33 +3704,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:56:39 2020</dateTime>
+<dateTime>Tue Sep 22 13:01:53 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:55:41 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:54 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-03/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:55:41 2020</dateTime>
+<dateTime>Tue Sep 22 13:00:55 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-03/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:55:45 2020</dateTime>
+<dateTime>Tue Sep 22 13:01:02 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:55:45 2020</dateTime>
+<dateTime>Tue Sep 22 13:01:02 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-03/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:56:35 2020</dateTime>
+<dateTime>Tue Sep 22 13:01:49 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-03/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:56:35 2020</dateTime>
+<dateTime>Tue Sep 22 13:01:49 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-03/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3740,7 +3741,7 @@ model slots.</text>
 <scenario><uuid>{7d3880ad-abdb-426a-9f59-7e2b44d695e2}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-04</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3753,33 +3754,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:57:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:03:03 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:56:40 2020</dateTime>
+<dateTime>Tue Sep 22 13:01:53 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-04/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:56:40 2020</dateTime>
+<dateTime>Tue Sep 22 13:01:53 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-04/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:56:45 2020</dateTime>
+<dateTime>Tue Sep 22 13:02:00 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:56:45 2020</dateTime>
+<dateTime>Tue Sep 22 13:02:00 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-04/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:57:19 2020</dateTime>
+<dateTime>Tue Sep 22 13:02:59 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-04/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:57:19 2020</dateTime>
+<dateTime>Tue Sep 22 13:02:58 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-04/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3790,7 +3791,7 @@ model slots.</text>
 <scenario><uuid>{a6bcb2f5-08ec-468d-bc65-a1a7bd6b1278}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-05</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3803,33 +3804,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:58:04 2020</dateTime>
+<dateTime>Tue Sep 22 13:04:09 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:57:24 2020</dateTime>
+<dateTime>Tue Sep 22 13:03:03 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-05/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:57:24 2020</dateTime>
+<dateTime>Tue Sep 22 13:03:03 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-05/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:57:36 2020</dateTime>
+<dateTime>Tue Sep 22 13:03:09 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:57:36 2020</dateTime>
+<dateTime>Tue Sep 22 13:03:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-05/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:00 2020</dateTime>
+<dateTime>Tue Sep 22 13:04:05 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-05/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:00 2020</dateTime>
+<dateTime>Tue Sep 22 13:04:03 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-05/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3840,7 +3841,7 @@ model slots.</text>
 <scenario><uuid>{822fa68b-ce32-41a3-bafa-e549eaa2eaf9}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-06</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3853,33 +3854,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:58:43 2020</dateTime>
+<dateTime>Tue Sep 22 13:05:13 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:05 2020</dateTime>
+<dateTime>Tue Sep 22 13:04:10 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-06/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:05 2020</dateTime>
+<dateTime>Tue Sep 22 13:04:10 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-06/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:10 2020</dateTime>
+<dateTime>Tue Sep 22 13:04:15 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:10 2020</dateTime>
+<dateTime>Tue Sep 22 13:04:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-06/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:39 2020</dateTime>
+<dateTime>Tue Sep 22 13:05:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-06/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:39 2020</dateTime>
+<dateTime>Tue Sep 22 13:05:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-06/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3890,7 +3891,7 @@ model slots.</text>
 <scenario><uuid>{d22a86eb-c12e-46b3-8808-fc14253d0737}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-07</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3903,33 +3904,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 17:59:34 2020</dateTime>
+<dateTime>Tue Sep 22 13:06:09 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:44 2020</dateTime>
+<dateTime>Tue Sep 22 13:05:14 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-07/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:44 2020</dateTime>
+<dateTime>Tue Sep 22 13:05:14 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-07/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:48 2020</dateTime>
+<dateTime>Tue Sep 22 13:05:18 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:58:48 2020</dateTime>
+<dateTime>Tue Sep 22 13:05:18 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-07/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:59:30 2020</dateTime>
+<dateTime>Tue Sep 22 13:06:05 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-07/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:59:30 2020</dateTime>
+<dateTime>Tue Sep 22 13:06:05 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-07/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3940,7 +3941,7 @@ model slots.</text>
 <scenario><uuid>{2b9bfe28-f971-48f2-aa25-ae9a5f34363b}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-08</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -3953,33 +3954,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:00:07 2020</dateTime>
+<dateTime>Tue Sep 22 13:07:09 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:59:35 2020</dateTime>
+<dateTime>Tue Sep 22 13:06:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-08/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:59:35 2020</dateTime>
+<dateTime>Tue Sep 22 13:06:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-08/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:59:40 2020</dateTime>
+<dateTime>Tue Sep 22 13:06:22 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 17:59:40 2020</dateTime>
+<dateTime>Tue Sep 22 13:06:22 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-08/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:00:03 2020</dateTime>
+<dateTime>Tue Sep 22 13:07:05 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-08/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:00:03 2020</dateTime>
+<dateTime>Tue Sep 22 13:07:03 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-08/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -3990,7 +3991,7 @@ model slots.</text>
 <scenario><uuid>{15b1e8bd-02ac-40cf-8515-fd4b52adc15e}</uuid>
 <name>MRM_Dry,ModelDev,RulesDev,Run-2021-09</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{d1680b5c-ed62-4bf2-8724-2b5ecccab7c3}" name="MRM_Dry" type="MRM Config">
 <configName>DevTesting_Dry</configName>
@@ -4003,33 +4004,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:01:08 2020</dateTime>
+<dateTime>Tue Sep 22 13:08:24 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:00:07 2020</dateTime>
+<dateTime>Tue Sep 22 13:07:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-09/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:00:07 2020</dateTime>
+<dateTime>Tue Sep 22 13:07:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-09/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:00:13 2020</dateTime>
+<dateTime>Tue Sep 22 13:07:33 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:00:13 2020</dateTime>
+<dateTime>Tue Sep 22 13:07:33 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-09/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:01:04 2020</dateTime>
+<dateTime>Tue Sep 22 13:08:19 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-09/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:01:04 2020</dateTime>
+<dateTime>Tue Sep 22 13:08:20 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Dry_ModelDev_RulesDev_Run-2021-09/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4253,33 +4254,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:06:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:09:15 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:05:24 2020</dateTime>
+<dateTime>Tue Sep 22 13:08:24 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-02/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:05:24 2020</dateTime>
+<dateTime>Tue Sep 22 13:08:24 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-02/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:05:30 2020</dateTime>
+<dateTime>Tue Sep 22 13:08:31 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:05:30 2020</dateTime>
+<dateTime>Tue Sep 22 13:08:31 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-02/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:06:19 2020</dateTime>
+<dateTime>Tue Sep 22 13:09:11 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-02/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:06:19 2020</dateTime>
+<dateTime>Tue Sep 22 13:09:04 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-02/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4303,33 +4304,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:07:22 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:07 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:06:24 2020</dateTime>
+<dateTime>Tue Sep 22 13:09:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-03/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:06:24 2020</dateTime>
+<dateTime>Tue Sep 22 13:09:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-03/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:06:29 2020</dateTime>
+<dateTime>Tue Sep 22 13:09:25 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:06:29 2020</dateTime>
+<dateTime>Tue Sep 22 13:09:25 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-03/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:07:18 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:03 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-03/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:07:18 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:00 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-03/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4353,33 +4354,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:08:25 2020</dateTime>
+<dateTime>Tue Sep 22 13:11:03 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:07:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:08 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-04/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:07:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:08 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-04/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:07:28 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:20 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:07:28 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:21 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-04/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:08:21 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:59 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-04/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:08:21 2020</dateTime>
+<dateTime>Tue Sep 22 13:10:57 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-04/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4403,33 +4404,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:09:02 2020</dateTime>
+<dateTime>Tue Sep 22 13:12:18 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:08:26 2020</dateTime>
+<dateTime>Tue Sep 22 13:11:03 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-05/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:08:26 2020</dateTime>
+<dateTime>Tue Sep 22 13:11:03 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-05/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:08:32 2020</dateTime>
+<dateTime>Tue Sep 22 13:11:22 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:08:32 2020</dateTime>
+<dateTime>Tue Sep 22 13:11:22 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-05/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:08:57 2020</dateTime>
+<dateTime>Tue Sep 22 13:12:14 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-05/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:08:57 2020</dateTime>
+<dateTime>Tue Sep 22 13:12:09 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-05/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4453,33 +4454,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:09:49 2020</dateTime>
+<dateTime>Tue Sep 22 13:13:27 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:09:02 2020</dateTime>
+<dateTime>Tue Sep 22 13:12:18 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-06/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:09:02 2020</dateTime>
+<dateTime>Tue Sep 22 13:12:18 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-06/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:09:18 2020</dateTime>
+<dateTime>Tue Sep 22 13:12:39 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:09:18 2020</dateTime>
+<dateTime>Tue Sep 22 13:12:39 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-06/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:09:45 2020</dateTime>
+<dateTime>Tue Sep 22 13:13:23 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-06/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:09:45 2020</dateTime>
+<dateTime>Tue Sep 22 13:13:21 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-06/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4503,33 +4504,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:10:37 2020</dateTime>
+<dateTime>Tue Sep 22 13:14:40 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:09:50 2020</dateTime>
+<dateTime>Tue Sep 22 13:13:28 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-07/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:09:50 2020</dateTime>
+<dateTime>Tue Sep 22 13:13:28 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-07/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:10:03 2020</dateTime>
+<dateTime>Tue Sep 22 13:13:40 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:10:03 2020</dateTime>
+<dateTime>Tue Sep 22 13:13:40 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-07/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:10:32 2020</dateTime>
+<dateTime>Tue Sep 22 13:14:36 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-07/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:10:32 2020</dateTime>
+<dateTime>Tue Sep 22 13:14:35 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-07/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4553,33 +4554,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:11:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:15:50 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:10:37 2020</dateTime>
+<dateTime>Tue Sep 22 13:14:40 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-08/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:10:37 2020</dateTime>
+<dateTime>Tue Sep 22 13:14:40 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-08/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:10:47 2020</dateTime>
+<dateTime>Tue Sep 22 13:14:45 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:10:47 2020</dateTime>
+<dateTime>Tue Sep 22 13:14:45 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-08/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:11:19 2020</dateTime>
+<dateTime>Tue Sep 22 13:15:46 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-08/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:11:18 2020</dateTime>
+<dateTime>Tue Sep 22 13:15:43 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-08/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4603,33 +4604,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:12:10 2020</dateTime>
+<dateTime>Tue Sep 22 13:17:11 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:11:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:15:50 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-09/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:11:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:15:50 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-09/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:11:29 2020</dateTime>
+<dateTime>Tue Sep 22 13:16:08 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:11:29 2020</dateTime>
+<dateTime>Tue Sep 22 13:16:08 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-09/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:12:06 2020</dateTime>
+<dateTime>Tue Sep 22 13:17:07 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-09/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:12:06 2020</dateTime>
+<dateTime>Tue Sep 22 13:17:05 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelBase_RulesBase_Run-2021-09/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -4868,7 +4869,7 @@ model slots.</text>
 <scenario><uuid>{4730f318-aeb2-443a-aa99-67ea1a119615}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2020-10</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -4887,7 +4888,7 @@ model slots.</text>
 <scenario><uuid>{3065f09c-eeed-4849-8264-bc1eb0c8f541}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2020-11</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -4906,7 +4907,7 @@ model slots.</text>
 <scenario><uuid>{259bf080-3bba-4eeb-ac6d-e081ce5727a6}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2020-12</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -4925,7 +4926,7 @@ model slots.</text>
 <scenario><uuid>{c85378ce-9bd7-4ebb-87e7-0289f14a18c3}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-01</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -4944,7 +4945,7 @@ model slots.</text>
 <scenario><uuid>{be4f71ea-c495-4fae-b1d1-c7ef3c4defc7}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-02</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -4963,7 +4964,7 @@ model slots.</text>
 <scenario><uuid>{5d65ff40-7083-456c-b34d-e949ad381f7e}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-03</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -4982,7 +4983,7 @@ model slots.</text>
 <scenario><uuid>{104a127d-802f-4dc8-95c9-b07cccadc23b}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-04</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5001,7 +5002,7 @@ model slots.</text>
 <scenario><uuid>{20d2ce26-15b8-437e-a372-ec798ac0ee97}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-05</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5020,7 +5021,7 @@ model slots.</text>
 <scenario><uuid>{1f0c911f-3a3c-4e3a-b73f-a9c7b6bc499a}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-06</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5039,7 +5040,7 @@ model slots.</text>
 <scenario><uuid>{3c3c92ad-d840-490d-ad81-a0a77e7466b0}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-07</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5058,7 +5059,7 @@ model slots.</text>
 <scenario><uuid>{6c583251-3abd-4b88-9ec8-981c57c639fd}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-08</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5077,7 +5078,7 @@ model slots.</text>
 <scenario><uuid>{5c488c2b-68ae-49b3-889d-dde38b689597}</uuid>
 <name>MRM_Wet,ModelDev,RulesBase,Run-2021-09</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5096,7 +5097,7 @@ model slots.</text>
 <scenario><uuid>{3bac0982-5bdb-4f79-812f-012a3918af70}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2020-10</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5146,7 +5147,7 @@ model slots.</text>
 <scenario><uuid>{ba5180f1-0f95-49e8-88dc-fcb4f2ce60f9}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2020-11</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5196,7 +5197,7 @@ model slots.</text>
 <scenario><uuid>{eaed500b-730a-411b-8fff-be3e4dd1c158}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2020-12</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5246,7 +5247,7 @@ model slots.</text>
 <scenario><uuid>{86b3a465-708d-4350-83d9-83665a1cac24}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-01</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5296,7 +5297,7 @@ model slots.</text>
 <scenario><uuid>{0c4a6e74-0519-44a8-994d-f99f86221d74}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-02</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5309,33 +5310,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:18:01 2020</dateTime>
+<dateTime>Tue Sep 22 13:18:31 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:16:54 2020</dateTime>
+<dateTime>Tue Sep 22 13:17:12 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-02/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:16:54 2020</dateTime>
+<dateTime>Tue Sep 22 13:17:12 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-02/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:17:01 2020</dateTime>
+<dateTime>Tue Sep 22 13:17:23 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:17:01 2020</dateTime>
+<dateTime>Tue Sep 22 13:17:23 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-02/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:17:57 2020</dateTime>
+<dateTime>Tue Sep 22 13:18:27 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-02/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:17:57 2020</dateTime>
+<dateTime>Tue Sep 22 13:18:25 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-02/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -5346,7 +5347,7 @@ model slots.</text>
 <scenario><uuid>{97656479-ca6b-49dc-b5fb-c1891df8f48e}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-03</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5359,33 +5360,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:19:16 2020</dateTime>
+<dateTime>Tue Sep 22 13:19:30 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:18:02 2020</dateTime>
+<dateTime>Tue Sep 22 13:18:32 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-03/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:18:02 2020</dateTime>
+<dateTime>Tue Sep 22 13:18:32 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-03/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:18:08 2020</dateTime>
+<dateTime>Tue Sep 22 13:18:42 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:18:08 2020</dateTime>
+<dateTime>Tue Sep 22 13:18:42 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-03/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:19:12 2020</dateTime>
+<dateTime>Tue Sep 22 13:19:26 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-03/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:19:12 2020</dateTime>
+<dateTime>Tue Sep 22 13:19:23 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-03/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -5396,7 +5397,7 @@ model slots.</text>
 <scenario><uuid>{ccfe0572-1b50-4e12-8534-37d14622b779}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-04</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5409,33 +5410,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:20:28 2020</dateTime>
+<dateTime>Tue Sep 22 13:20:21 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:19:16 2020</dateTime>
+<dateTime>Tue Sep 22 13:19:31 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-04/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:19:16 2020</dateTime>
+<dateTime>Tue Sep 22 13:19:31 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-04/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:19:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:19:39 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:19:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:19:39 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-04/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:20:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:20:17 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-04/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:20:23 2020</dateTime>
+<dateTime>Tue Sep 22 13:20:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-04/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -5446,7 +5447,7 @@ model slots.</text>
 <scenario><uuid>{c96859f2-cea6-43bb-9c49-c460ea3da0dd}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-05</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5459,33 +5460,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:21:25 2020</dateTime>
+<dateTime>Tue Sep 22 13:21:16 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:20:28 2020</dateTime>
+<dateTime>Tue Sep 22 13:20:22 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-05/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:20:28 2020</dateTime>
+<dateTime>Tue Sep 22 13:20:22 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-05/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:20:34 2020</dateTime>
+<dateTime>Tue Sep 22 13:20:37 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:20:34 2020</dateTime>
+<dateTime>Tue Sep 22 13:20:37 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-05/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:21:21 2020</dateTime>
+<dateTime>Tue Sep 22 13:21:12 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-05/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:21:20 2020</dateTime>
+<dateTime>Tue Sep 22 13:21:12 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-05/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -5496,7 +5497,7 @@ model slots.</text>
 <scenario><uuid>{aa723fe6-a04d-4468-b882-1ccaa50753d6}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-06</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5509,33 +5510,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:22:22 2020</dateTime>
+<dateTime>Tue Sep 22 13:22:16 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:21:25 2020</dateTime>
+<dateTime>Tue Sep 22 13:21:16 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-06/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:21:25 2020</dateTime>
+<dateTime>Tue Sep 22 13:21:16 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-06/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:21:38 2020</dateTime>
+<dateTime>Tue Sep 22 13:21:21 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:21:38 2020</dateTime>
+<dateTime>Tue Sep 22 13:21:21 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-06/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:22:18 2020</dateTime>
+<dateTime>Tue Sep 22 13:22:12 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-06/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:22:18 2020</dateTime>
+<dateTime>Tue Sep 22 13:22:11 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-06/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -5546,7 +5547,7 @@ model slots.</text>
 <scenario><uuid>{6958ed50-2c32-4a30-afae-e7d500527c85}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-07</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5559,33 +5560,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:23:16 2020</dateTime>
+<dateTime>Tue Sep 22 13:23:19 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:22:22 2020</dateTime>
+<dateTime>Tue Sep 22 13:22:16 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-07/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:22:22 2020</dateTime>
+<dateTime>Tue Sep 22 13:22:16 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-07/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:22:37 2020</dateTime>
+<dateTime>Tue Sep 22 13:22:20 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:22:37 2020</dateTime>
+<dateTime>Tue Sep 22 13:22:20 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-07/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:23:12 2020</dateTime>
+<dateTime>Tue Sep 22 13:23:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-07/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:23:12 2020</dateTime>
+<dateTime>Tue Sep 22 13:23:15 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-07/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -5596,7 +5597,7 @@ model slots.</text>
 <scenario><uuid>{387a4618-4d01-41a0-b704-6119ba37ac19}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-08</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5609,33 +5610,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:24:09 2020</dateTime>
+<dateTime>Tue Sep 22 13:24:28 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:23:16 2020</dateTime>
+<dateTime>Tue Sep 22 13:23:19 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-08/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:23:16 2020</dateTime>
+<dateTime>Tue Sep 22 13:23:19 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-08/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:23:32 2020</dateTime>
+<dateTime>Tue Sep 22 13:23:24 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:23:32 2020</dateTime>
+<dateTime>Tue Sep 22 13:23:24 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-08/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:24:04 2020</dateTime>
+<dateTime>Tue Sep 22 13:24:24 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-08/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:24:04 2020</dateTime>
+<dateTime>Tue Sep 22 13:24:23 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-08/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
@@ -5646,7 +5647,7 @@ model slots.</text>
 <scenario><uuid>{25fa61e2-04ec-4c3d-a6e6-05dbfc3d00df}</uuid>
 <name>MRM_Wet,ModelDev,RulesDev,Run-2021-09</name>
 <config><input uuid="{22853c04-b32a-4dee-b823-cbe5b00f1aad}" name="ModelDev" type="Model">
-<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007.mdl</modelPath>
+<modelPath>$MTOM_DIR/RW Files/24MS_MTOM_V1.0.202006.9007_SB.mdl</modelPath>
 </input>
 <input uuid="{b7eae1c6-9971-468c-92a9-0d822676ced5}" name="MRM_Wet" type="MRM Config">
 <configName>DevTesting_Wet</configName>
@@ -5659,33 +5660,33 @@ model slots.</text>
 </input>
 </config>
 <simState><state>runOk</state>
-<dateTime>Mon Sep 21 18:25:01 2020</dateTime>
+<dateTime>Tue Sep 22 13:25:23 2020</dateTime>
 <activityList><activity name="Simulate Scenario"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:24:09 2020</dateTime>
+<dateTime>Tue Sep 22 13:24:28 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-09/rw__RwProcess_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute RiverWare"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:24:09 2020</dateTime>
+<dateTime>Tue Sep 22 13:24:28 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-09/RwBatch.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Execute Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:24:25 2020</dateTime>
+<dateTime>Tue Sep 22 13:24:33 2020</dateTime>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Init Distrib MRM Controller"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:24:25 2020</dateTime>
+<dateTime>Tue Sep 22 13:24:33 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-09/rw__RemoteMgr_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 1 - 3"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:24:56 2020</dateTime>
+<dateTime>Tue Sep 22 13:25:19 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-09/rw__000_sabaker.log</logFile>
 <sortKey>0</sortKey>
 </activity>
 <activity name="Traces 4 - 6"><state>perfOk</state>
-<dateTime>Mon Sep 21 18:24:57 2020</dateTime>
+<dateTime>Tue Sep 22 13:25:17 2020</dateTime>
 <logFile>C:/Users/sabaker/Projects/Models/MTOM/MTOM_Dir/Working/RiverWare/MRM_Wet_ModelDev_RulesDev_Run-2021-09/rw__001_sabaker.log</logFile>
 <sortKey>1</sortKey>
 </activity>
