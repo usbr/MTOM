@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 09:07 September 21, 2020
+# Created 11:51 September 29, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -11066,15 +11066,15 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "LC, 20200416: adjust the second half of the statement.";
+    NOTES          "LC, 20200416: adjust the second half of the statement.<br>APivarnik, 20200929: Added CAWCD mitigation water and note to function.";
     BEGIN
 
-      $ "AnnualWaterUse.CAPCanal_AnnualCapacity" [] - IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] )
+      ( $ "AnnualWaterUse.CAPCanal_AnnualCapacity" [] + "CAWCD Mitigation Water"(  ) COMMENTED_BY "This ensures that CAP takes the full amount of mitigation water under a shortage condition when <br>LBDV makes excess water available to CAP. The ruleset will take out the neccessary shortage/D<br>CP water later in the ruleset. This was implemented because at this point in the ruleset, LBDV <br>reduced the canal space to less than the mitigation volume and it did not take into account that <br>the diversion would be reduced later on due to shortage/DCP (thus making more space <br>available).     <br>" ) - IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Surplus.Domestic Surplus Trigger Elevation" [] )
  THEN
   $ "Surplus Total Annual Schedules.CAP" [@"24:00:00 December 31, Current Year"]
  ELSE
   $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"]
- ENDIF COMMENTED_BY "Not looking at shortage situation because if LB is in shortage there will be plenty of canal space <br>for CAP to take ICS <br>";
+ ENDIF;
 
     END
     UUID "{7478f1a7-9e89-4d19-8daa-6825b3214a40}";;
@@ -14032,32 +14032,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{81715175-96ed-4728-a491-3007c4f71404}";
+    UUID "{14ded116-b734-4c11-81fb-3b4a9595fa2d}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{18862973-4dde-4670-bda8-b99ce4b25681}";
+    UUID "{9bf68ecf-8761-4006-b009-2d6095074414}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{19d7a502-cae0-4d1c-91b5-6034116170a7}";
+    UUID "{f89611a0-8b68-42b2-9509-8020202918e1}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2b5c2e82-3f52-4a31-bed8-9803966ce319}";
+    UUID "{31d1daa6-8dcd-445e-b850-47156cc1ed8a}";
 ;
 
   END
-  UUID "{6ec6b496-2770-4cd9-8320-5e3a0d68bbbe}";;
+  UUID "{9fe35365-92e3-4069-8548-2ecba82c1196}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14068,11 +14068,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0407c003-58ec-4377-bed8-ede313c27470}";
+    UUID "{21aaccfa-b047-4294-b21f-1e1dadc8823a}";
 ;
 
   END
-  UUID "{2398f04d-5e7c-4266-9f97-04cd06cb9f63}";;
+  UUID "{3b9f435f-d36d-4c67-b6d1-0c81ded6fd3b}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14083,11 +14083,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ccae5517-2e06-454d-949a-3aac26e388b0}";
+    UUID "{2c6f91f9-e1c6-4cf5-9fdc-21c18ebf5261}";
 ;
 
   END
-  UUID "{f1c84af9-f966-432a-af9d-e25a8bff460d}";;
+  UUID "{2982a87f-6953-4cf6-b788-46b688adf7f9}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14098,11 +14098,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{80da58df-4f7b-42e0-ae40-732c1bcd189b}";
+    UUID "{83325b31-208d-4a13-b90d-9a630fceb0d8}";
 ;
 
   END
-  UUID "{dbd0830d-5107-49e8-a482-2c8881cab622}";;
+  UUID "{f09a932c-b3f3-43d2-9f36-b5a0e3bfd343}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
