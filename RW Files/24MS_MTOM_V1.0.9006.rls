@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 13:55 October 6, 2020
+# Created 14:37 October 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -5832,7 +5832,7 @@ BEGIN
 
     RULE                 "Set Forbeared Return Flow";
     DESCRIPTION          "";
-    ACTIVE               FALSE;
+    ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND "GetRunCycleIndex"(  ) == 1.00000000;
     NOTES                "APivarnik 20200630: No change made to rule in integration effort";
     BEGIN
@@ -6003,12 +6003,12 @@ BEGIN
     RULE                 "Set Extended Forecasts to Historic Average Hydrology";
     DESCRIPTION          "DESCRIPTION: This rule sets the inflow above Fontenelle and the unregulated inflow to Flaming Gorge for the 12 months beyond the run end date. Note that the rule actually will set all unpopulated (NaN) timesteps from the run start to 12 months after the finish with historic average values. However, the DMI Excel_InputFrom24MS populates the run period values as Inputs. The DMI is set to import values until Finish Timestep + 12 timesteps, but only those values until the end of the run are currently provided by the spreadsheet.<br><br>SLOTS SET: Fontenelle.Inflow; FlamingGorgeInflow.Unregulated";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" AND NOT "Is24MonthStudy"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>SC, 20111201: This rule set the inflows above Fontenelle, the unregulated inflow to Flaming Gorge, and the Yampa River Inflow for the 12 months beyond the run end date.  These values are needed by the operations rules for Flaming Gorge and Fontenelle as written by CADSWES.  Would be nice to review these rules and see if this is absolutely necessary. - sc 12/1/11<br><br>MC, 20160913: The comment in the body suggests the forecasts will be extended beyond the Finish Timestep by historic values, but actually all timesteps are being set with those values. Are the values being used?<br><br>APivarnik, 20200630: Added Not IS24MonthStudy to execution constraint to prevent the rule from firing in 24 MS mode";
+    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>SC, 20111201: This rule set the inflows above Fontenelle, the unregulated inflow to Flaming Gorge, and the Yampa River Inflow for the 12 months beyond the run end date.  These values are needed by the operations rules for Flaming Gorge and Fontenelle as written by CADSWES.  Would be nice to review these rules and see if this is absolutely necessary. - sc 12/1/11<br><br>MC, 20160913: The comment in the body suggests the forecasts will be extended beyond the Finish Timestep by historic values, but actually all timesteps are being set with those values. Are the values being used?<br><br>APivarnik, 20200630: Added Not IS24MonthStudy to execution constraint to prevent the rule from firing in 24 MS mode<br><br>APivarnik, 20201006: Removed Not Is24MS execution constraint. After some changes were made in the Compute Upper Basin rule, this rule needed to fire in 24 MS mode. If this did not execute, the Compute Upper Basin Gains would fail. Changed For statement timeframe to only fill slots post finish timestep. This way the model will fail if the input is incorrect.";
     BEGIN
 
-    DESCRIPTION          "This rule will extend the forecasts for the locations specified beyond the RFC forecast period.  <br>The values in the extended forecast are set to historic input values for the specific location. <br><br>UC CHECK<br><br>For statement dates? Just post end timestep? Is this needed? <br>";
-      FOREACH (DATETIME index IN @"Start Timestep" TO @"Finish Timestep + 12") DO
+    DESCRIPTION          "This rule will extend the forecasts for the locations specified beyond the RFC forecast period.  <br>The values in the extended forecast are set to historic input values for the specific location.  <br>";
+      FOREACH (DATETIME index IN @"Finish Timestep + 1" TO @"Finish Timestep + 12") DO
             $ "Fontenelle.Inflow" [index] := IF ( IsNaN $ "Fontenelle.Inflow" [index] )
  THEN
   $ "HistoricData.HistoricAverageMonthlyInflows" [index, "FontenelleMonthlyAveInflow"]
@@ -13924,32 +13924,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5635c800-d054-4a6b-a697-1084af86fe40}";
+    UUID "{66d29953-871c-4933-b0dd-41a9170d4efe}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a9c870d0-9ac5-4b84-ab1a-84814023a83b}";
+    UUID "{7f64db17-2420-43c6-8adf-c1ed334f18e2}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fbb1ec21-5107-49ae-bc8b-d23c5b637993}";
+    UUID "{78b6ea8f-d72e-448c-8160-81e9074aa818}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2a49002e-31c1-4401-99b2-0d8de36dac72}";
+    UUID "{a19dc8f1-0af1-4548-a4d6-6a81b2b4bc79}";
 ;
 
   END
-  UUID "{0f2fcc97-6a3e-4519-9dcd-88be3834154c}";;
+  UUID "{3c586e4b-6689-40fb-a475-160172d1e95f}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13960,11 +13960,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5c2bd250-1d66-418b-ade5-ea410a806c9b}";
+    UUID "{3828bd8a-ee20-4692-9d47-ee250a8b405f}";
 ;
 
   END
-  UUID "{52eb900e-d38f-480d-a7c2-5883a7f80a52}";;
+  UUID "{ae2f1082-a61e-4c36-aff1-8857df103a09}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13975,11 +13975,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6e41f5da-9165-4761-95c1-605cfc1a4878}";
+    UUID "{5dfe8c98-cf9f-43b6-ab2b-42764ed929c0}";
 ;
 
   END
-  UUID "{b07b6c45-b615-401f-b16c-ea6e9e5f549d}";;
+  UUID "{c1f38715-3be6-40e8-8f25-dfd0d606e5d9}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13990,11 +13990,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{68d8153b-8c09-40aa-ba68-5c34e3e0b154}";
+    UUID "{c0583737-a369-4209-b578-9b7f7f56a8c5}";
 ;
 
   END
-  UUID "{b7a9fa70-80fd-430e-acd5-2ad1f0226917}";;
+  UUID "{b9c57678-bbe5-4286-93b1-01d5356b2ede}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
