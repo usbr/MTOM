@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 14:37 October 6, 2020
+# Created 14:54 October 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -5924,7 +5924,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule checks if the necessary RFC inflow information has been entered. This includes inflow information for all upper basin reserviors. -CE 9/17/13<br><br>SLOTS SET: <br><br><br>";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT TRUE;
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: CE, 9/17/13 ";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: CE, 9/17/13 <br><br>APivarnik, 20201006: Per UC instruction, removed Is24MS if conditional on setting NIIP slot";
     BEGIN
 
     DESCRIPTION          "This rule executes if there is missing input data and if this rule. If this rule does execute and <br>give an error, make sure the input data sheet is set up correctly (CBRFC_EnsembleForecast) <br>and that the run period is correct for the current model run.  ";
@@ -5973,14 +5973,10 @@ BEGIN
   STOP_RUN "Run Stopped, Gain Calculation Failed: PowellInflow.Unregulated Missing"
  ENDIF;
 
-    DESCRIPTION          "UC CHECK - This was disabled in MTOM but enabled in the 24 MS. Do we want it enabled in both <br>models?<br>";
-      IF_STATEMENT ("Is24MonthStudy"(  )) THEN
-            $ "DummyDataObject.DummyDataSlot" [] := IF ( IsNaN $ "NavajoIndianIrrigationProjectNIIP.Diversion Requested" [] )
+      $ "DummyDataObject.DummyDataSlot" [] := IF ( IsNaN $ "NavajoIndianIrrigationProjectNIIP.Diversion Requested" [] )
  THEN
   STOP_RUN "Run Stopped, Gain Calculation Failed: NavajoIndianIrrigationProjectNIIP.Diversion Requested Missing"
  ENDIF;
-
-      END_IF_STATEMENT;
 
       $ "DummyDataObject.DummyDataSlot" [] := IF ( IsNaN $ "Azotea Tunnel.Diversion Requested" [] )
  THEN
@@ -13924,32 +13920,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{66d29953-871c-4933-b0dd-41a9170d4efe}";
+    UUID "{aabfeee8-04ec-4132-b540-69ae3bdfbf83}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7f64db17-2420-43c6-8adf-c1ed334f18e2}";
+    UUID "{030ea36b-8227-42d8-9e5b-f46f0c55332c}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{78b6ea8f-d72e-448c-8160-81e9074aa818}";
+    UUID "{f403d58e-e187-4846-af50-b1e3dc25a788}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a19dc8f1-0af1-4548-a4d6-6a81b2b4bc79}";
+    UUID "{82752518-8245-46ce-bf70-655c2dc59ae0}";
 ;
 
   END
-  UUID "{3c586e4b-6689-40fb-a475-160172d1e95f}";;
+  UUID "{d178bae8-4274-4ad1-b1dc-f13cda1a9d4c}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13960,11 +13956,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3828bd8a-ee20-4692-9d47-ee250a8b405f}";
+    UUID "{4a8252d5-2182-48d0-aefa-bc60a42cb2b6}";
 ;
 
   END
-  UUID "{ae2f1082-a61e-4c36-aff1-8857df103a09}";;
+  UUID "{69c5cb83-4f91-4200-a37d-dcc1dd5422d8}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13975,11 +13971,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5dfe8c98-cf9f-43b6-ab2b-42764ed929c0}";
+    UUID "{0a341103-c685-44b2-a624-d9294cdb9004}";
 ;
 
   END
-  UUID "{c1f38715-3be6-40e8-8f25-dfd0d606e5d9}";;
+  UUID "{3dd2d5d1-8356-4bfd-a1fe-1e9d3f8d1a59}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13990,11 +13986,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c0583737-a369-4209-b578-9b7f7f56a8c5}";
+    UUID "{69d89300-4b3f-4649-9c90-f50970ebd7b8}";
 ;
 
   END
-  UUID "{b9c57678-bbe5-4286-93b1-01d5356b2ede}";;
+  UUID "{1ab842e5-0ce6-4848-bd03-3a9de0964473}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
