@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 14:54 October 6, 2020
+# Created 15:45 October 15, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2179,19 +2179,19 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 41 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 09/25/2018: Changed the Mead.Pool Elevation input to function GetProjectedPoolElevation() function instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow execution in start timestep.<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br><br>A. Pivarnik, 20200709: Integration effort.  This rule is essentially the same as the 24 MS rule except it uses te GetProjectedPoolElevation function. No other changes were made to the rule during the integration effort. ";
     BEGIN
 
-      $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [2.00000000, "Elevation"] )
+      $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] COMMENTED_BY "This rule sets the MX surplus flag for the model run. This flag will be used later to determine <br>surplus volumes for MX.   <br>" := IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [2.00000000, "Elevation"] ) COMMENTED_BY "Mead >= 1200 <br>" )
  THEN
   3.00000000
  ELSE
-  IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [1.00000000, "Elevation"] )
+  IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [1.00000000, "Elevation"] ) COMMENTED_BY "Mead >= 1170   <br>" )
   THEN
    2.00000000
   ELSE
-   IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [0.00000000, "Elevation"] )
+   IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) >= $ "Mexico Shortage and Surplus.Mexico Surplus Table" [0.00000000, "Elevation"] ) COMMENTED_BY "Mead >= 1145 <br>" )
    THEN
     1.00000000
    ELSE
-    0.00000000
+    0.00000000 COMMENTED_BY "No surplus <br>"
    ENDIF
   ENDIF
  ENDIF;
@@ -2206,19 +2206,20 @@ BEGIN
     NOTES                "AUTHOR, DATE: Unknown<br><br>MC, 20170706: Moved from Priority 46 while consolidating Mead conditions flag-setting per Shana T. suggestion<br>S.Baker, 20180925: Changed IF statements to use function 'GetProjectedPoolElevation' instead of looking at Mead.Pool Elevation. This will allow MTOM to determine which Mead PE projection to use (ie. AugEOYProjectedMeadPool elevation). Changed execution constraint to allow rule to execute in start timestep since 24MS projected Mead PE is known. Edited time in function to Dec Previous year. This will allow the rule to execute correctly in start timestep.<br><br>A. Pivarnik, 20200709: Integration effort. Deleted disabled slot assingment. This rule is essentially the same as the 24 MS rule except it uses te GetProjectedPoolElevation function. No other changes were made to the rule during the integration effort";
     BEGIN
 
-      $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] := IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [2.00000000, 0.00000000] )
+    DESCRIPTION          "This rule sets the shortage flag for the model run. This flag will be used later to determine <br>shortage reductions for AZ, NV, and MX. <br>";
+      $ "Shortage.Shortage Flag" [@"24:00:00 December 31, Current Year"] := IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [2.00000000, 0.00000000] ) COMMENTED_BY "Mead < 1025<br>" )
  THEN
   3.00000000
  ELSE
-  IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [1.00000000, 0.00000000] )
+  IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) < $ "Shortage.Mead Shortage Elevations" [1.00000000, 0.00000000] ) COMMENTED_BY "Mead < 1050 <br>" )
   THEN
    2.00000000
   ELSE
-   IF ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] )
+   IF ( ( "GetProjectedPoolElevation"( "Mead", @"24:00:00 December 31, Previous Year" ) <= $ "Shortage.Mead Shortage Elevations" [0.00000000, 0.00000000] ) COMMENTED_BY "Mead <= 1075 <br>" )
    THEN
     1.00000000
    ELSE
-    0.00000000
+    0.00000000 COMMENTED_BY "No shortage <br>"
    ENDIF
   ENDIF
  ENDIF;
@@ -13920,32 +13921,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{aabfeee8-04ec-4132-b540-69ae3bdfbf83}";
+    UUID "{1db203bd-6e6e-4e43-bf38-102f942116a3}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{030ea36b-8227-42d8-9e5b-f46f0c55332c}";
+    UUID "{d4ad74e7-6d24-4771-a86e-ccf50f838d7e}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f403d58e-e187-4846-af50-b1e3dc25a788}";
+    UUID "{e22302e7-5f38-42b6-ad96-d7ef7746ce0b}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{82752518-8245-46ce-bf70-655c2dc59ae0}";
+    UUID "{70de514a-91a2-4f6c-b5ca-bfd65281f91c}";
 ;
 
   END
-  UUID "{d178bae8-4274-4ad1-b1dc-f13cda1a9d4c}";;
+  UUID "{ae4e8c38-ed72-43c3-b57b-766b90489b1b}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13956,11 +13957,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4a8252d5-2182-48d0-aefa-bc60a42cb2b6}";
+    UUID "{6ae1d588-6570-485d-b5c2-d967cf884d3d}";
 ;
 
   END
-  UUID "{69c5cb83-4f91-4200-a37d-dcc1dd5422d8}";;
+  UUID "{5be60ffc-b26f-45c2-be5a-fa28d83ca7d5}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13971,11 +13972,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0a341103-c685-44b2-a624-d9294cdb9004}";
+    UUID "{4b7559b4-68b6-42f2-a4a2-f1eb261e2e47}";
 ;
 
   END
-  UUID "{3dd2d5d1-8356-4bfd-a1fe-1e9d3f8d1a59}";;
+  UUID "{f6f233fe-3a02-4352-b4dc-0c595c6ffe10}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13986,11 +13987,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{69d89300-4b3f-4649-9c90-f50970ebd7b8}";
+    UUID "{fed1c48c-3f7b-4e97-a296-0f8da9f14748}";
 ;
 
   END
-  UUID "{1ab842e5-0ce6-4848-bd03-3a9de0964473}";;
+  UUID "{b916a5bd-e1e8-4002-b75d-3b96a871fe00}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
