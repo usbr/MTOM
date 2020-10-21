@@ -2,7 +2,7 @@
 <!--
 CADSWES, University of Colorado, http://cadswes.colorado.edu/
 RiverSMART 1.10
-Document created on Tue Sep 22 13:44:10 2020
+Document created on Tue Sep 22 16:24:40 2020
 Document created by sabaker
 -->
 <Study mode="fullstudy" uuid="{f1c0df1c-f943-4bd8-8dd8-905c8573f58d}">
@@ -39,7 +39,7 @@ Document created by sabaker
 <plugin major="1" minor="1" patch="0"><type>Temporal Disagg</type>
 </plugin>
 </pluginList>
-<fileInfo><createdOn>Tue Sep 22 13:44:10 2020</createdOn>
+<fileInfo><createdOn>Tue Sep 22 16:24:40 2020</createdOn>
 <createdBy>sabaker</createdBy>
 </fileInfo>
 <name></name>
