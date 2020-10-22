@@ -3,73 +3,73 @@
 rules:
 -
   expr: Fontenelle.Outflow >= 0
-  name: Fontenelle.Outflow is greater than zero
+  name: Fontenelle.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: FlamingGorge.Outflow >= 0
-  name: FlamingGorge.Outflow
+  name: FlamingGorge.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: BlueMesa.Outflow >= 0
-  name: BlueMesa.Outflow is greater than zero
+  name: BlueMesa.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: TaylorPark.Outflow >= 0
-  name: TaylorPark.Outflow is greater than zero
+  name: TaylorPark.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: MorrowPoint.Outflow >= 0
-  name: MorrowPoint.Outflow is greater than zero
+  name: MorrowPoint.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Crystal.Outflow >= 0
-  name: Crystal.Outflow is greater than zero
+  name: Crystal.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Vallecito.Outflow >= 0
-  name: Vallecito.Outflow is greater than zero
+  name: Vallecito.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Navajo.Outflow >= 0
-  name: Navajo.Outflow is greater than zero
+  name: Navajo.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Powell.Outflow >= 0
-  name: Powell.Outflow is greater than zero
+  name: Powell.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(Fontenelle.Outflow)'
-  name: Fontenelle.Outflow is not NaN
+  name: Fontenelle.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(FlamingGorge.Outflow)'
-  name: FlamingGorge.Outflow is not NaN
+  name: FlamingGorge.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(BlueMesa.Outflow)'
-  name: BlueMesa.Outflow is not NaN
+  name: BlueMesa.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(TaylorPark.Outflow)'
-  name: TaylorPark.Outflow is not NaN
+  name: TaylorPark.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(MorrowPoint.Outflow)'
-  name: MorrowPoint.Outflow is not NaN
+  name: MorrowPoint.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(Crystal.Outflow)'
-  name: Crystal.Outflow is not NaN
+  name: Crystal.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(Vallecito.Outflow)'
-  name: Vallecito.Outflow is not NaN
+  name: Vallecito.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(Navajo.Outflow)'
-  name: Navajo.Outflow is not NaN
+  name: Navajo.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(Powell.Outflow)'
-  name: Powell.Outflow is not NaN
+  name: Powell.Outflow should not be NaN
   in_file: ReservoirOutput.csv

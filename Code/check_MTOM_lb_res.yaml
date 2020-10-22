@@ -3,37 +3,37 @@
 rules:
 -
   expr: Mead.Storage >= 0
-  name: Mead.Storage is greater than zero
+  name: Mead.Storage should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Mohave.Storage >= 0
-  name: Mohave.Storage is greater than zero
+  name: Mohave.Storage should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Havasu.Storage >= 0
-  name: Havasu.Storage is greater than zero
+  name: Havasu.Storage should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Mead.Outflow >= 0
-  name: Mead.Outflow is greater than zero
+  name: Mead.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Mohave.Outflow >= 0
-  name: Mohave.Outflow is greater than zero
+  name: Mohave.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: Havasu.Outflow >= 0
-  name: Havasu.Outflow is greater than zero
+  name: Havasu.Outflow should be greater than zero
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(Mead.Outflow)'
-  name: Mead.Outflow is not NaN
+  name: Mead.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(Mohave.Outflow)'
-  name: Mohave.Outflow is not NaN
+  name: Mohave.Outflow should not be NaN
   in_file: ReservoirOutput.csv
 -
   expr: '!is.na(Havasu.Outflow)'
-  name: Havasu.Outflow is not NaN
+  name: Havasu.Outflow should not be NaN
   in_file: ReservoirOutput.csv

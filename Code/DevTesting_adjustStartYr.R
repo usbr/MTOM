@@ -1,9 +1,13 @@
-## Roll Dev Testing Tool a year forward
-#  This script will read current input data and overwrite current excel files.
-#  It may be desirable to save a copy of the files incase this script doesnt 
-#  work as intended. There is a copy saved on GitHub so this is not completely necessary.
-#  Only necessary files are changed
-
+# ==============================================================================
+# Roll Dev Testing Tool a year forward 
+#
+#    This script will read current input data and overwrite current excel files.
+#    It may be desirable to save a copy of the files incase this script doesnt 
+#    work as intended. There is a copy saved on GitHub so this is not completely
+#    necessary. Only necessary files are changed
+#
+# S. Baker, Sept 2020
+# ==============================================================================
 rm(list=ls())
 library(openxlsx)
 library(tidyverse)
@@ -68,4 +72,3 @@ storeLines <- c(storeLines, addMessage)
 log_fl <- file("README.md", open = "w")
 writeLines(storeLines, con = log_fl)
 close(log_fl)
-
