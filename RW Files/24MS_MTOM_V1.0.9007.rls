@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 16:46 October 22, 2020
+# Created 15:31 November 4, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -955,7 +955,7 @@ BEGIN
     RULE                 "MX Accounting";
     DESCRIPTION          "DESCRIPTION: This rule calculates the value for Mexico's Bination Water Scarcity Contingency Plan. <br><br>EXECUTION CONSTRAINTS: This rule fires during run cycle 3 if it is December or the end date of the run.<br><br>SLOTS SET: <br>Mexico Shortage and Surplus.Mexico Water Reserve Balance<br>Mexico Shortage and Surplus.AnnualBWSCP_SysWater<br>Mexico Shortage and Surplus.AnnualCreationMXRecoverableWaterSavings<br>Mexico Shortage and Surplus.Mexico Recoverable Water Savings Balance<br>Mexico Shortage and Surplus.Total Combined MX Savings and Reserve";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "Is24MonthStudy"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE;<br>MC, 20160908: Moved slot Mexico Shortage and Surplus.AnnualCreationICMA inside parentheses so it is subject to 0.97 factor per Shana T. email on 20160831<br><br>GCAA, 20181030: Replaced references to ICMA slots to Mexico Water Reserve slots<br>AP, 20191130: Updated for DCP.<br>GCAA, 20200330: Updated execution constraint to be consistent with other ICS Accounting rules<br>S.Baker, 20200310: updated description. Removed duplicated setting of slot Mexico Shortage and Surplus.Mexico Water Reserve Balance. Added function SetNegativeToZero() which can replace all Max(0 &quot;acre-ft&quot;, xxx).<br>A.Pivarnik, 20200715: Integration effort. While written differently than the 24 MS rule, this accomplishes the same thing within the updated MTOM/Integration ruleset framework";
     BEGIN
 
@@ -1003,7 +1003,7 @@ BEGIN
     RULE                 "CA Accounting";
     DESCRIPTION          "DESCRIPTION: This rule assigns the values for the California ICS.  The function &quot;ICSAccountingForCA&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for California ICS.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.AnnualDeliveryBiNat_[IID, CA] ;  ICS Credits.AnnualDeliveryEC_[IID, CA] ;  ICS Credits.AnnualDeliverySysEff_CA ; ICS Credits.AnnualDeliveryDCP_CA<br>ICS Credits.AnnualCreationBiNat_CA ;  ICS Credits.AnnualCreationEC_[IID, MWD, CA] ;  ICS Credits.AnnualCreationSysEff_CA ;  ICS Credits.AnnualCreationDCP_[MWD, CA]<br>ICS Credits.BiNationalICS_[MWD, IID, CA] ;  ICS Credits.ExtraordinaryConservationICS_[MWD, IID, CA] ;  ICS Credits.SystemEfficiencyICS_[MWD, CA]<br>ICS Credits.AnnualSimultaneousCreationDCPICS_MWD ;  ICS Credits.DCPICS_[MWD, CA]; ICS Credits.AnnualSysWaterforDCP_[MWD, CA]<br>ICS Credits.TotalICS_[MWD, IID, CA] ; ICS Credits.Bank_[MWD, CA]";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "Is24MonthStudy"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP 9/10/2014<br><br>MC, 20180125: Made changes to newMWDDivAmount local variable and subsequent assignments based on changes USBR made in their ruleset<br>CH, 5/10/18: Added assignments for: IID EC ICS balance, IID Binat ICS balance, and total IID ICS (binat + EC) and edited total CA ICS assignment to include total MWD and total IID in order to distinguish MWD ICS creation/delivery/balance from IID ICS creation/delivery/balance <br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() to replace Or statement to improve readability. ";
     BEGIN
 
@@ -1095,7 +1095,7 @@ BEGIN
     RULE                 "AZ Accounting";
     DESCRIPTION          "DESCRIPTION: This rule assigns the values for the Arizona ICS.  The function &quot;ICSAccountingForAZ&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for Arizona ICS. The rule only sets informative values to data object slots and not any simulation object slots, the Lower Basin Demand Variability, Surplus and Shortage Logic will reference this data in later rules.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.AnnualCreation[SysEff_AZ, BiNat_AZ, DCP_CAWCD, DCP_AZ]<br>ICS Credits.AnnualCreationEC_[CRIT, GRIC, CAWCD, MVIDD, MW, AZ]<br>ICS Credits.AnnualDelivery[SysEff_AZ, EC_AZ, BiNat_AZ, DCP_AZ]<br>ICS Credits.ExtraordinaryConservationICS_[CRIT, GRIC, CAWCD, MVIDD, MW, AZ]<br>ICS Credits.BiNationalICS_[CAWCD, AZ]<br>ICS Credits.SystemEfficiencyICS_[CAWCD, AZ]<br>ICS Credits.AnnualSimultaneousCreatoinDCPICS_CAWCD<br>ICS Credits.AnnualSysWaterforDCP_[CAWCD, AZ]<br>ICS Credits.DCPICS_[CAWCD, AZ]<br>ICS Credits.Bank_[CAWCD, AZ]<br>ICS Credits.TotalICS_[CAWCD, AZ]<br>ICS Credits.FirmingAgreementBalance_[AZ, US]";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "Is24MonthStudy"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 9/18/2018: Added constraints to fire rule if the LB condition changed between RC 3 and RC 4.<br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A. Pivarnik, 20200713: Integration effort. Changed slot assignment calculations to align with CAP/AZ ICS accounting overhaul ";
     BEGIN
 
@@ -1176,7 +1176,7 @@ BEGIN
     RULE                 "NV Accounting";
     DESCRIPTION          "DESCRIPTION: This rule assigns the values for the Nevada ICS.  The function &quot;ICSAccountingForNV&quot; calculates the delivery and annual values based on input creation values, and assigns the appropriate slots for Nevada ICS.  <br><br>EXECUTION CONSTRAINTS: This rule fires under two different sets of conditions: (1) if it is the start timestep or January, it is run cycle 3, and this rule has not fired successfully; or (2) if it is January and run cycle 4, the model is run in MRM mode, and the Lower Basin condition or the Mexico Binational Water Scarcity Contingency Plan condition has changed between run cycle 3 and 4, it is domestic surplus, quantified surplus, or flood control.<br><br>SLOTS SET: <br>ICS Credits.[ BiNational, SystemEfficiency, Imported, Tributary, ExtraordinaryConservation, DCP  ]ICS_NV <br>ICS Credits.AnnualCreationEC_NV ;  ICS Credits.AnnualCreationDCP_NV<br>ICS Credits.AnnualSimultaneousCreationDCPICS_NV ;  ICS Credits.AnnualSysWaterforDCP_NV<br>ICS Credits.Bank_NV ;  ICS Credits.TotalICS_NV";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND "IsMRM"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
+    RULE_EXEC_CONSTRAINT ( ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND NOT "Is24MonthStudy"(  ) AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( "IsLBorDCPconditionChanged"(  ) OR "IsDomesticOrQuantifiedOrFloodControl"(  ) ) );
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 9/10/2014<br><br>AP, 20191130: Updated for DCP.<br>S.Baker, 20200310: updated description.<br>S. Baker, 20200311: Add function IsDomesticOrQuantifiedOrFloodControl() & IsLBorDCPconditionChanged() to replace Or statement to improve readability. <br>A.Pivarnik, 20200713: Integration effort. No changes to this rule. Changes to the ICS accounting function for NV";
     BEGIN
 
@@ -13921,32 +13921,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e59dd821-07d0-418d-a1c4-c03d483fc422}";
+    UUID "{9746cd18-ea85-4963-9076-7c07b2de2d73}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c27eaefb-a1b3-46dc-b6d8-c52eb5ba9bf5}";
+    UUID "{06c76b13-73db-4653-a616-8d511d233555}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9748afa5-62a5-4c46-89e0-a5125d4ca243}";
+    UUID "{0e2f8b73-20c4-4e42-9f6e-78ec06899253}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bbabc362-61bb-4420-9f8d-640031a4f4d6}";
+    UUID "{5b6f3846-24aa-4be3-96a2-2e70b8736397}";
 ;
 
   END
-  UUID "{ac73e76f-2fe1-4a2c-8d90-af0fe7b92cb2}";;
+  UUID "{4bf2565b-904c-4406-918b-4b1e3938dce7}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13957,11 +13957,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bfc8af26-0a01-42b4-8895-5b5946d95b92}";
+    UUID "{29d9ffa0-3708-401f-aaa6-3c2e6166e3ba}";
 ;
 
   END
-  UUID "{2178c8b1-25c1-458d-90f4-304f0bc79881}";;
+  UUID "{3654ba6d-2420-4f87-b794-86aef8ae1c6f}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13972,11 +13972,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3e0607cd-868c-4358-9c1a-77120593da29}";
+    UUID "{3f505ec2-bac9-47a5-bd88-86d0e4cc839a}";
 ;
 
   END
-  UUID "{9dba0dec-7073-4d3d-8f6e-013da01519ec}";;
+  UUID "{52e504a4-fd37-4e0e-ad6c-71f3f70de5ff}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13987,11 +13987,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{51855fe2-c204-43f4-bbc9-8cd034bd229b}";
+    UUID "{523d39ca-60a4-42f6-98c1-bbd61a4bf4f2}";
 ;
 
   END
-  UUID "{9c8db481-630b-4891-88c6-a588b9d3441b}";;
+  UUID "{812aff6f-841e-4348-be31-4940b5ab9838}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
