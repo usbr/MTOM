@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 12:07 November 5, 2020
+# Created 14:55 November 5, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1968,9 +1968,9 @@ BEGIN
     NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.<br><br>A. Pivarnik, 20200709: Integration effort. This rule was streamlined for the MTOM ruleset when created. It was written differently than the 24 MS rule but accomplishes the same thing. General structure for the rule did not change in the integration effort because the 24 MS ruleset is being merged into MTOM, and the MTOM structure is what solves correctly within this ruleset. Added a start year dcp creation function call to for solve the DCP creation volume in year 1 if we end in a DCP tier that is lower than the one projected by the 24 MS in August.";
     BEGIN
 
-    DESCRIPTION          "MWD will take on the full amount of DCP contribution for the state of California and all <br>accounting work under this assumption. Since MWD is taking the full DCP contribution for the <br>state, any DCP contribution required by Coachella Valley will be left on the system for MWD to <br>take as delivery. Any potential DCP ICS created by Coachella is considered an intrastate deal, <br>and thus is in the MWD balance.<br><br>Per MWD's instructions,  DCP will be handled the following way:<br><br>(A) If available, convert existing EC ICS to meet the DCP contribution (done in this rule). The <br>value is stored in the AnnualConversionPreviousECtoDCP_MWD slot.<br><br>(B) Reduce deliveries to simultaneously create DCP ICS until bank is filled. Since the model  <br>already has current year EC ICS creation, it attempts to use this first prior to reducing the <br>delivery further (accounting rule later on)<br><br>(C) Create system water if there is no bank space (accounting rule later on)                        <br>";
+    DESCRIPTION          "MWD will take on the full amount of DCP contribution for the state of California and all <br>accounting work under this assumption. Since MWD is taking the full DCP contribution for the <br>state, any DCP contribution required by Coachella Valley will be water left on the system for <br>MWD to take as delivery. Any potential DCP ICS created by Coachella is considered an <br>intrastate deal, and thus is in the MWD balance.<br><br>Per MWD's instructions,  DCP will be handled the following way:<br><br>(A) If available, convert existing EC ICS to meet the DCP contribution (done in this rule). The <br>value is stored in the AnnualConversionPreviousECtoDCP_MWD slot.<br><br>(B) Reduce deliveries to simultaneously create DCP ICS until bank is filled. Since the model  <br>already has current year EC ICS creation, it attempts to use this first prior to reducing the <br>delivery further (accounting rule later on)<br><br>(C) Create system water if there is no bank space (accounting rule later on)                         <br>";
       WITH_STATEMENT (NUMERIC AnnualDCPContribution = GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "CA" )) DO
-          DESCRIPTION          "If a DCP contribution is needed for the year, detemine how much can be covered by previously <br>created EC ICS. If there is any left over, store it in the AnnualRemainingDCPContribution_MWD <br>slot (Part A above).  <br>";
+          DESCRIPTION          "If a DCP contribution is needed for the year, detemine how much can be covered by previously <br>created EC ICS. If there is any left over, store it in the AnnualRemainingDCPContribution_MWD <br>slot (Part A above).   <br>";
       IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-ft") THEN
             WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( AnnualDCPContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
             WITH_STATEMENT (NUMERIC RemainingContribution = IF ( AnnualDCPContribution == PreviousECtoDCP )
@@ -2008,7 +2008,8 @@ BEGIN
 
     DESCRIPTION          "Per SNWA's instructions,  DCP will be handled the following way:<br><br>(A) If available, convert existing EC ICS to meet the DCP contribution (done in this rule). The <br>value is stored in the AnnualConversionPreviousECtoDCP_NV slot.<br><br>(B) Reduce deliveries to simultaneously create DCP ICS until bank is filled. Since the model  <br>already has current year EC ICS creation, it attempts to use this first prior to reducing the <br>delivery further (accounting rule later on)<br><br>(C) Create system water if there is no bank space (accounting rule later on)        <br>";
       WITH_STATEMENT (NUMERIC AnnualDCPContribution = GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "NV" )) DO
-            IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-feet") THEN
+          DESCRIPTION          "If a DCP contribution is needed for the year, detemine how much can be covered by previously <br>created EC ICS. If there is any left over, store it in the AnnualRemainingDCPContribution_NV slot <br>(Part A above).   <br>";
+      IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-feet") THEN
             WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( AnnualDCPContribution, $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December 31, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December 31, Previous Year"] ) COMMENTED_BY "Imported and Tributary from the previous year included in the calculation because the balance <br>will be converted to EC ICS at EOCY   <br>" )) DO
             WITH_STATEMENT (NUMERIC RemainingContribution = IF ( AnnualDCPContribution == PreviousECtoDCP )
  THEN
@@ -2039,10 +2040,11 @@ BEGIN
     RULE                 "Arizona DCP";
     DESCRIPTION          "DESCRIPTION:  This rule sets Arizona's DCP contribution if a DCP contribution is needed (solved for in previous rule). The DCP contribution is made by converting any EC ICS water created for the current year to DCP ICS by imposing a tax on the water. The annual creation of DCP ICS is input from the 24MS and is the desired DCP ICS creation [unsure how this is set for 24MS?]. The Arizona DCP ICS creation and DCP contribute is set here, but will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICSProjectedData.AnnualCreationECtoDCPICS_CAWCD_Preliminary";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] ) );
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] ) );
     NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. <br><br>A. Pivarnik, 20200714: Integration effort. This rule was streamlined for the MTOM ruleset when created.  Added a StartYearDCPCreation function call to for solve the DCP creation volume in year 1 if Mead ends in a DCP tier that is lower than the one projected by the 24 MS in August. This rule now sets a remaining DCP contribution slot for CAWCD (part of AZ ICS acocunting overhaul). This way the logic matches what is in both NV and CA.";
     BEGIN
 
+    DESCRIPTION          "Unlike CA and NV, AZ does not currently convert previous EC ICS to DCP ICS. Under the current <br>logic, AZ will only simultaneously create EC ICS, thus the full DCP amount will be passed through <br>the ruleset in the AnnualRemainingDCPContribution_CAWCD slot. Any simultaneous creation <br>based on current year EC ICS creation will happen in the AZ Accounting logic later on. <br>";
       WITH_STATEMENT (NUMERIC AnnualDCPContribution = GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "AZ" )) DO
           DESCRIPTION          "Set Arizona DCP contribution based off the desired DCP ICS creation input from the 24MS <br>";
       IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-ft") THEN
@@ -13929,32 +13931,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{78e44125-66ee-4e7a-9da0-1fdc44a5e428}";
+    UUID "{74a9e717-bf40-40a2-803f-95012cd7a792}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5d1a25c7-0ff0-4a18-9e17-3fb37efa5d96}";
+    UUID "{891d2cad-1b08-4912-acac-74f2f99612fb}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{3036f34a-2b75-4f14-be86-e5b40b02a102}";
+    UUID "{1d2d7b4a-123c-4233-922c-d4388f6b993d}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7974ecb1-4389-404a-8a16-6d9e041ce3fb}";
+    UUID "{c0d4a98a-ec14-4b32-be5a-e48bd4ca8b7d}";
 ;
 
   END
-  UUID "{bfd28dae-41ed-4a9f-a414-2df8899b87db}";;
+  UUID "{c47a4e25-4649-47c7-9c86-8a65dd1e7503}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13965,11 +13967,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c78b8ea6-9395-45ea-bf9e-ed2f3ba922f3}";
+    UUID "{9c826631-8dae-4691-b5c5-ad60f5d9a75d}";
 ;
 
   END
-  UUID "{297298bf-1ae0-4e34-b806-6f45b9347728}";;
+  UUID "{abb31d3d-045c-4f35-814f-6544ef294be6}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13980,11 +13982,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b64eb76e-9bb2-49e6-902b-2d0c6dfa2352}";
+    UUID "{0976268e-9fd2-4b4f-a44a-2e09fcb3fd38}";
 ;
 
   END
-  UUID "{1d3b9418-99e9-4ee0-9e71-aeb736569eaa}";;
+  UUID "{11cc5fcd-425b-48bd-b507-cf8e071f6620}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13995,11 +13997,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d1be19d2-fc0a-4ad3-95fc-30f4f07b0886}";
+    UUID "{63206de0-0c93-41e9-bcea-f1210a379815}";
 ;
 
   END
-  UUID "{e952411a-d016-445c-8991-67d0f339f230}";;
+  UUID "{7dddb614-c5d9-43cd-93cc-6bafe5f69035}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
