@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 14:00 November 6, 2020
+# Created 14:32 November 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -2044,7 +2044,7 @@ BEGIN
     RULE                 "Arizona DCP";
     DESCRIPTION          "DESCRIPTION:  This rule sets Arizona's DCP contribution if a DCP contribution is needed (solved for in previous rule). The DCP contribution is made by converting any EC ICS water created for the current year to DCP ICS by imposing a tax on the water. The annual creation of DCP ICS is input from the 24MS and is the desired DCP ICS creation [unsure how this is set for 24MS?]. The Arizona DCP ICS creation and DCP contribute is set here, but will be refined in later rules located in the ICS Accounting and Releases policy group.<br><br>CONSTRAINTS: The rule fires in run cycle 3 if it is January or the start timestep and the rule has not fired successfully. The rule fires in run cycle 4 if the DCP BWSCP flag has changed from run cycle 3 and only if it is January. <br><br>SLOTS SET: <br>ICSProjectedData.AnnualCreationECtoDCPICS_CAWCD_Preliminary";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" ) AND ( ( "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] ) );
+    RULE_EXEC_CONSTRAINT ( @"t" == @"Start Timestep" OR @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND "GetRunCycleIndex"(  ) == 3.00000000 AND NOT "HasRuleFiredSuccessfully"( "This Rule" ) ) OR ( "GetRunCycleIndex"(  ) == 4.00000000 AND @"t" == @"24:00:00 January Max DayOfMonth, Current Year" AND $ "DCP BWSCP Flags.LB DCP BWSCP Check" ["Dec31ofYear"( @"t" )] != $ "DCP BWSCP Flags.LB DCP BWSCP" ["Dec31ofYear"( @"t" )] );
     NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. <br><br>A. Pivarnik, 20200714: Integration effort. This rule was streamlined for the MTOM ruleset when created.  Added a StartYearDCPCreation function call to for solve the DCP creation volume in year 1 if Mead ends in a DCP tier that is lower than the one projected by the 24 MS in August. This rule now sets a remaining DCP contribution slot for CAWCD (part of AZ ICS acocunting overhaul). This way the logic matches what is in both NV and CA.";
     BEGIN
 
@@ -13935,32 +13935,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{963b947e-159d-4c6e-bff2-0e1d898a05e1}";
+    UUID "{9b178181-5976-45a7-a555-9eac23984012}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4fab6af4-06fb-4279-ba58-39a1b8616d0f}";
+    UUID "{0ef8f6b1-d7c4-4cec-9fe1-35e35b2e272f}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fa839685-e301-41e3-badc-e41a3e287e37}";
+    UUID "{7dbf5594-8314-4c33-a600-74c900c8dc01}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{11755009-b6f5-46dd-ac9f-bbe46ae93c78}";
+    UUID "{bba55301-3b43-42e0-a5fa-05970bc2a92d}";
 ;
 
   END
-  UUID "{6d436585-6775-4d4a-910d-94e969d1aaf3}";;
+  UUID "{b1634cc6-e201-4609-9517-8dae58bdfe44}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13971,11 +13971,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2686c071-ffdc-4f8b-92b4-936952974f4e}";
+    UUID "{38573449-89dc-47d9-99a6-4de2ff07b18a}";
 ;
 
   END
-  UUID "{48765c79-adec-4707-a165-a35487736178}";;
+  UUID "{8381d8dc-f800-475c-b743-9bd601baf717}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13986,11 +13986,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ba9843bc-b45b-4bc5-9ac3-55d1e50e536e}";
+    UUID "{19b1513a-db97-414d-ab1b-ccbc886beb48}";
 ;
 
   END
-  UUID "{594de579-754d-4647-bb7d-04164d187cdd}";;
+  UUID "{dce69c8f-2ae7-4531-8231-501e042d3790}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14001,11 +14001,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{89579189-a249-4cb6-bfbc-2af993597b97}";
+    UUID "{77181d8e-9493-428f-b05b-59c60cb4d320}";
 ;
 
   END
-  UUID "{c34acb08-e2ad-419b-86c2-dee72b58d98c}";;
+  UUID "{eb7708db-d5f9-4d9e-ad66-610ab4edd2c6}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
