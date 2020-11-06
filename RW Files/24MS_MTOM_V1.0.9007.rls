@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 14:55 November 5, 2020
+# Created 11:06 November 6, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1803,7 +1803,7 @@ BEGIN
     DESCRIPTION          "DESCRIPTION: This rule distributes the volume of Quantified Surplus available between MWD and CAP. If California's Quantified Surplus volume is greater than the MWD's Domestic Surplus volume, the MWD Quantified Surplus volume is equal to the canal capacity minus the current water diversion requested, allowing MWD to take full canal capacity, otherwise MWD receives only the water entitled from the Domestic Surplus. The Quantified Surplus volume for CAP after 1992 (canal finished) is set based on the remaining Quantified Surplus volume available. If there is any remaining Quantified Surplus volume after the Gila Monster Farmers, the Arizona pumpers below Imperial, and the CAP Domestic Surplus take thier entitlement, CAP receives the remaining volume up to thier canal capacity.  Otherwise, they receive their Domestic Surplus volume.<br><br>EXECUTION CONSTRAINTS: This rule fires if the rule has not fired successfully in run cycle 3 and 4 and if the Quantified Surplus Volume greater than zero.<br><br>SLOTS SET: <br>Surplus Volume Entitlements.MWD Quantified<br>Surplus Volume Entitlements.CAP Quantified<br>Surplus Volume Entitlements.SNWA Quantified";
     ACTIVE               TRUE;
     RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 3.00000000 AND $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > 0.00000000 "acre-feet" AND "IsJANofOutyear"(  );
-    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name. Replaced hardcoded MWD surplus entitlement values with reference to DefaultSurplusEntitlement slot<br>GCAA, 20200330: Added logic to determine SNWA's Quantified Surplus Entitlement.<br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. Added assignment/calculations for CVWD and IID quantified surplus schedules<br>A. Pivarnik,  20200803: Edited execution constraint to fire only in January of out years";
+    NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>S.Baker 06/20/2018: Added constraint to not allow Quantified surplus to be taken by CPAT prior to 1992.<br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name. Replaced hardcoded MWD surplus entitlement values with reference to DefaultSurplusEntitlement slot<br>GCAA, 20200330: Added logic to determine SNWA's Quantified Surplus Entitlement.<br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. Added assignment/calculations for CVWD and IID quantified surplus schedules<br>A. Pivarnik,  20200803: Edited execution constraint to fire only in January of out years<br>A. Pivarnik, 20201106: Added city of parker and cibolavalley IID to Remaining QS calculation";
     BEGIN
 
       WITH_STATEMENT (NUMERIC MWDQuantified = IF ( $ "Surplus.California Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] > $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] )
@@ -1831,7 +1831,7 @@ BEGIN
       $ "Surplus Volume Entitlements.CAP Quantified" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) > 1992.00000000 )
  THEN
   WITH NUMERIC RemainingCanalCapacity = $ "AnnualWaterUse.CAPCanal_AnnualCapacity" [] - $ "ForecastUse.CAPResetAnnualFC" [@"24:00:00 December 31, Current Year"] DO
-   WITH NUMERIC RemainingQS_AZ = $ "Surplus.Arizona Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] - ( $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] ) DO
+   WITH NUMERIC RemainingQS_AZ = $ "Surplus.Arizona Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] - ( $ "Surplus Volume Entitlements.AzPumpersBlwImp" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.Gila Monster Farms" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.City of Parker" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CibolaValleyIID" [@"24:00:00 December 31, Current Year"] + $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] ) DO
     IF ( RemainingQS_AZ > 0.00000000 "acre-feet" )
     THEN
      "Min"( RemainingQS_AZ, RemainingCanalCapacity )
@@ -1927,6 +1927,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: HMG, 8/2/2011<br><br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. This rule was not changed as it is the same in the 24MS and MTOM.<br>A. Pivarnik,  20200803: Edited execution constraint to fire only in January of out years";
     BEGIN
 
+    DESCRIPTION          "This rule sets the quantified surplus volumes for each state. This volume is used to calculate the <br>quantified surplus entitlments for water users in each state <br>";
       FOREACH (STRING state IN { "California" , "Arizona" , "Nevada" }) DO
             % "Surplus" & ( state CONCAT " Quantified Surplus Volume" ) [@"24:00:00 December 31, Current Year"] := $ "Surplus.Quantified Surplus Volume" [@"24:00:00 December 31, Current Year"] * $ "Surplus.Share of Quantified Surplus by State" [0.00000000, state];
 
@@ -1942,6 +1943,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from rule name<br>S.Baker, 20200306: Edited rule description. <br>A. Pivarnik, 20200506: removed Mexico Div requested slot asssignment. Moved slot assignment to MX div adjustment rule higher in ruleset. Placed IsJanofOutyear function in execution constraint<br><br>A. Pivarnik, 202020709: Integration effort. This rule was not changed. The equivalent rule in the 24 MS sets the volume (as in this rule) and adjusts the diversion. The diversion adjustment in the integrated ruleset happens in the Mexico Diversion Adjustment rule higher in the ruleset. Added execution constraint to only run in RC >=3";
     BEGIN
 
+    DESCRIPTION          "This rule sets the annual surplus volume for Mexico. The Mexico diversion adjustment to account <br>for this extra water available will occur in the Mexico Diversion Adjustment rule later on in the <br>ruleset.  <br>";
       $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December 31, Current Year"] := IF ( $ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] > 0.00000000 )
  THEN
   $ "Mexico Shortage and Surplus.Mexico Surplus Table" [$ "Mexico Shortage and Surplus.Mexico Surplus Flag" [@"24:00:00 December 31, Current Year"] - 1.00000000, "Volume"]
@@ -2044,7 +2046,7 @@ BEGIN
     NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description. Also, updated execution contraints to match the other DCP rules in this policy group. <br><br>A. Pivarnik, 20200714: Integration effort. This rule was streamlined for the MTOM ruleset when created.  Added a StartYearDCPCreation function call to for solve the DCP creation volume in year 1 if Mead ends in a DCP tier that is lower than the one projected by the 24 MS in August. This rule now sets a remaining DCP contribution slot for CAWCD (part of AZ ICS acocunting overhaul). This way the logic matches what is in both NV and CA.";
     BEGIN
 
-    DESCRIPTION          "Unlike CA and NV, AZ does not currently convert previous EC ICS to DCP ICS. Under the current <br>logic, AZ will only simultaneously create EC ICS, thus the full DCP amount will be passed through <br>the ruleset in the AnnualRemainingDCPContribution_CAWCD slot. Any simultaneous creation <br>based on current year EC ICS creation will happen in the AZ Accounting logic later on. <br>";
+    DESCRIPTION          "Unlike CA and NV, AZ does not currently convert previous EC ICS to DCP ICS. Under the current <br>logic, AZ will only simultaneously create EC ICS, thus the full DCP amount will be passed through <br>the ruleset in the AnnualRemainingDCPContribution_CAWCD slot. Any simultaneous creation <br>based on current year EC ICS creation will happen in the AZ Accounting logic later on.  <br>";
       WITH_STATEMENT (NUMERIC AnnualDCPContribution = GET @INDEX 1.00000000 FROM "StartYearDCPContribution"( "AZ" )) DO
           DESCRIPTION          "Set Arizona DCP contribution based off the desired DCP ICS creation input from the 24MS <br>";
       IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-ft") THEN
@@ -13931,32 +13933,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{74a9e717-bf40-40a2-803f-95012cd7a792}";
+    UUID "{d02005d9-1e18-4a3a-95c6-cd6ae1688a3c}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{891d2cad-1b08-4912-acac-74f2f99612fb}";
+    UUID "{20a12bd6-5072-4291-b7d5-454fbc516dc4}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1d2d7b4a-123c-4233-922c-d4388f6b993d}";
+    UUID "{d7deb951-f530-410d-9c1a-b25baf63a09a}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c0d4a98a-ec14-4b32-be5a-e48bd4ca8b7d}";
+    UUID "{4ca36e40-e73a-463e-92c1-1fda7d879303}";
 ;
 
   END
-  UUID "{c47a4e25-4649-47c7-9c86-8a65dd1e7503}";;
+  UUID "{cef69a70-f247-4555-bb58-153956832269}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13967,11 +13969,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9c826631-8dae-4691-b5c5-ad60f5d9a75d}";
+    UUID "{d6c68e37-e53c-4713-b5e2-cdf27de12201}";
 ;
 
   END
-  UUID "{abb31d3d-045c-4f35-814f-6544ef294be6}";;
+  UUID "{e6e5153a-5a03-462b-8552-74c7d952bee5}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13982,11 +13984,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0976268e-9fd2-4b4f-a44a-2e09fcb3fd38}";
+    UUID "{e035f34e-e0a4-4ff3-aa33-f922b0f586c6}";
 ;
 
   END
-  UUID "{11cc5fcd-425b-48bd-b507-cf8e071f6620}";;
+  UUID "{5a42be56-9c28-4d06-9ace-8d246acd76b4}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -13997,11 +13999,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{63206de0-0c93-41e9-bcea-f1210a379815}";
+    UUID "{6276cd80-8e5e-45d9-81e5-99595d005d18}";
 ;
 
   END
-  UUID "{7dddb614-c5d9-43cd-93cc-6bafe5f69035}";;
+  UUID "{ff222cf3-48cc-49e4-89ff-7107df346beb}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
