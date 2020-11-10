@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 14:32 November 6, 2020
+# Created 16:47 November 9, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -1861,11 +1861,12 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Removed &quot;- Minute 323&quot; from name, replaced hardcoded CAP surplus entitlement value with reference to Surplus Volume Entitlements.CAP Domestic slot, replaced hardcoded share of surplus by state value with ShareofMexicoSurplusbyState() function, and replaced CAP surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot.<br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. Added RC >=3 for execution constraint. See comments for other potential changes. Moved additional calculations of surplus volume water from the set domestic suprlus schedules/set flood control schedules rule to this rule<br><br>A.Pivarnik, 20200803: Changed if condition for surplus entitlements to &quot;OR&quot;. Changed for loop summing MWD div requested to referencing the reset values<br>A.Pivarnik, 20201001: Changed if condition for surplus entitlements to &quot;AND&quot;. Removed TJ flows from MWD FC surplus vol calc";
     BEGIN
 
+    DESCRIPTION          "Set CA domestic and flood control surplus entitlements. This rule sets the volume of extra water <br>available to MWD under flood control and domestic surplus, and  FC entitlements for Coachella <br>and IID. MWD's volume will be added to what they are currently taking in the Set User Surplus <br>Schedule - DS, QS, FC rule, whereas CVWD and IID will be adjusted under the QS, FC rule.     <br>";
       $ "Surplus Volume Entitlements.MWD Domestic" [@"24:00:00 December 31, Current Year"] := "Min"( ( IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) < 2017.00000000 )
  THEN
   $ "AnnualWaterUse.MWDCanal_AnnualCapacity" [] - $ "ForecastUse.MWDResetAnnualFC" [@"24:00:00 December 31, Current Year"] - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December Max DayOfMonth, Current Year"]
  ELSE
-  IF ( ( $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" AND $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" ) COMMENTED_BY "This conditional is an &quot;AND&quot; via the minute 323 implementation agreement <br>APivarnik 20201001 <br>" )
+  IF ( ( $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" AND $ "Surplus Volume Entitlements.SNWA Domestic" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft" ) COMMENTED_BY "This conditional is an &quot;AND&quot; via the minute 323 implementation agreement <br>APivarnik 20201001 <br><br>Minute 323 interim operating agreement section 6.1.1.4 <br>" )
   THEN
    $ "Surplus.Default Surplus Entitlements" [0.00000000, 1.00000000] - "ShareofMexicoSurplusbyState"(  ) * $ "Mexico Shortage and Surplus.Mexico Annual Surplus" [@"24:00:00 December Max DayOfMonth, Current Year"]
   ELSE
@@ -1909,7 +1910,7 @@ BEGIN
     NOTES                "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 7/28/2015<br><br>GCAA, 20181030: Replaced hardcoded CAP default surplus entitlement value with reference to Surplus.Default Surplus Entitlements slot, replaced share of Mexico surplus by state value with ShareofMexicoSurplusbyState() function, and removed &quot;-Minute 323&quot; from rule name.<br>S.Baker, 20200306: Edited rule description. <br><br>A. Pivarnik, 20200709: Integration effort. Added execution constraint of RC >=3 so the rule does not fire in every timestep. Moved additional logic from the &quot;Set Flood Control Schedules rule&quot; to this rule for surplus logic reconstruction effort<br><br>A. Pivarnik, 20200803: Changed logic to always limit CAP to canal capacity in FC. No difference between run types";
     BEGIN
 
-    DESCRIPTION          "Set CAP domestic and flood control surplus entitlements. This rule sets the volume of extra water <br>available to CAP under the two different surplus scenarios. This volume will be added to what <br>they are currently taking in the Set User Surplus Schedule - DS, QS, FC rule. Under domestic <br>surplus, CAP is allowed to take the AZ entitlement less other AZ users that also have domestic <br>surplus entitlements. Under flood control, CAP takes a full canal.      <br>";
+    DESCRIPTION          "Set CAP domestic and flood control surplus entitlements. This rule sets the volume of extra water <br>available to CAP under the two different surplus scenarios. This volume will be added to what <br>they are currently taking in the Set User Surplus Schedule - DS, QS, FC rule. Under domestic <br>surplus, CAP is allowed to take the AZ entitlement less other AZ users that also have domestic <br>surplus entitlements. Under flood control, CAP takes a full canal.       <br>";
       $ "Surplus Volume Entitlements.CAP Domestic" [@"24:00:00 December 31, Current Year"] := IF ( "GetYear"( @"24:00:00 January 31, Current Year" ) < 2017.00000000 )
  THEN
   0.00000000 "acre-ft"
@@ -13935,32 +13936,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{9b178181-5976-45a7-a555-9eac23984012}";
+    UUID "{482d9f1a-fdd5-40cb-96fe-8cd32454713f}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0ef8f6b1-d7c4-4cec-9fe1-35e35b2e272f}";
+    UUID "{99020200-dd5e-41fd-8019-04c466840f51}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7dbf5594-8314-4c33-a600-74c900c8dc01}";
+    UUID "{aac5b28a-c62d-4175-8be7-b6a404c1b885}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bba55301-3b43-42e0-a5fa-05970bc2a92d}";
+    UUID "{dc4fe24b-e6d3-47e8-96fc-47aae0b313e3}";
 ;
 
   END
-  UUID "{b1634cc6-e201-4609-9517-8dae58bdfe44}";;
+  UUID "{7d55280f-653a-473b-97cf-b1f865f0b362}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -13971,11 +13972,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{38573449-89dc-47d9-99a6-4de2ff07b18a}";
+    UUID "{9ec49a9a-ffe7-4063-b8ed-1dd8db802f5a}";
 ;
 
   END
-  UUID "{8381d8dc-f800-475c-b743-9bd601baf717}";;
+  UUID "{6a3b9197-d66f-4e8b-8073-66a26175917a}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -13986,11 +13987,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{19b1513a-db97-414d-ab1b-ccbc886beb48}";
+    UUID "{014311d3-2f0c-4c51-a5c5-e6bd623c097d}";
 ;
 
   END
-  UUID "{dce69c8f-2ae7-4531-8231-501e042d3790}";;
+  UUID "{91aa110f-da4e-49f3-b237-7b2eca535dce}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14001,11 +14002,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{77181d8e-9493-428f-b05b-59c60cb4d320}";
+    UUID "{d61b43f9-2b40-42b1-9f84-a7818850b370}";
 ;
 
   END
-  UUID "{eb7708db-d5f9-4d9e-ad66-610ab4edd2c6}";;
+  UUID "{a2a0f6c5-5931-4c42-8e6f-d1e2501aadb6}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
