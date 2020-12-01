@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 12:41 November 30, 2020
+# Created 07:36 December 1, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -616,7 +616,12 @@ BEGIN
  ELSE
   IF ( "IsDomesticOrQuantified"(  ) )
   THEN
-   ( "Max"( $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] ) + NVoffstream + NVICSDelivery ) COMMENTED_BY "SNWA diversion volume in surplus condition. ICS delivery is taken into consideration in the <br>calculation of the total annual schedule slot. SNWA demand variability does not occur in a surplus <br>scenario <br>"
+   ( "Max"( $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] ) + NVoffstream + IF ( "IsQuantifiedSurplus"(  ) )
+   THEN
+    0.00000000 "acre-ft"
+   ELSE
+    NVICSDelivery
+   ENDIF COMMENTED_BY "Potential delivery of Trib/Imp/DCP ICS is already included in the surplus total annual schedule <br>when in QS so it does not need to be taken into account a second time. <br>" ) COMMENTED_BY "SNWA diversion volume in surplus condition. ICS delivery is taken into consideration in the <br>calculation of the total annual schedule slot. SNWA demand variability does not occur in a surplus <br>scenario <br>"
   ELSE
    WITH NUMERIC AdditionalDCPReductionNV = ( $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) DO
     WITH NUMERIC shortageVolume = $ "Shortage.SNWP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
@@ -13989,32 +13994,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8aee885b-d9de-4dac-bd73-9449796c32c3}";
+    UUID "{6f7251cf-f0ab-4b86-b70d-73fafe392d45}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ca3592b5-4b3e-49a3-b1f5-5b6be47414bd}";
+    UUID "{3d238d8b-b772-4032-b496-983602190d70}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e3b422d6-9a6b-41cd-b832-c64b3a2ee8a2}";
+    UUID "{ba40860c-52ab-4cd6-af09-60b2d7f8b8ba}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c293ebb1-db19-4007-b3a8-d7c679b94de0}";
+    UUID "{55bd76a5-c9ab-40b2-8be2-00967b77b537}";
 ;
 
   END
-  UUID "{07f9f0fa-584a-443c-b087-891e0b306a65}";;
+  UUID "{b8353941-bfd4-4893-a6a5-def0175abc40}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14025,11 +14030,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bef1713d-0723-4b18-bd3c-e3f9b372a944}";
+    UUID "{04ef3fa9-f796-4c95-98d3-1d32cf2ce757}";
 ;
 
   END
-  UUID "{69fbf551-3681-45dd-b207-e766947b1b0b}";;
+  UUID "{e770abfa-7d8b-456e-ad9c-2f1687f7cb35}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14040,11 +14045,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{733ecd21-bc19-429b-bfee-211be2992ffe}";
+    UUID "{1239206a-f75e-47ff-ab96-58ac55607c71}";
 ;
 
   END
-  UUID "{00b1c380-3428-4344-b9a4-c8c85b8fc437}";;
+  UUID "{7005a280-d4c8-4ffc-81b8-2d11f7556768}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14055,11 +14060,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{968de2cd-233e-4371-8a06-97fada692371}";
+    UUID "{7635f1e7-fbb0-46ce-a19c-1fc2ccf6bbd9}";
 ;
 
   END
-  UUID "{bfb63a61-d510-46f6-9ff3-3ba56c1f67e8}";;
+  UUID "{977558d0-418d-4214-aec8-861363d1aec8}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
