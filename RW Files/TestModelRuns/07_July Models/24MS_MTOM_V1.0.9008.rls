@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 12:41 November 30, 2020
+# Created 14:50 December 1, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -616,7 +616,12 @@ BEGIN
  ELSE
   IF ( "IsDomesticOrQuantified"(  ) )
   THEN
-   ( "Max"( $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] ) + NVoffstream + NVICSDelivery ) COMMENTED_BY "SNWA diversion volume in surplus condition. ICS delivery is taken into consideration in the <br>calculation of the total annual schedule slot. SNWA demand variability does not occur in a surplus <br>scenario <br>"
+   ( "Max"( $ "Surplus Total Annual Schedules.SNWA" [@"24:00:00 December Max DayOfMonth, Current Year"], $ "ForecastUse.SNWPResetAnnualFC" [@"24:00:00 December Max DayOfMonth, Current Year"] ) + NVoffstream + IF ( "IsQuantifiedSurplus"(  ) )
+   THEN
+    0.00000000 "acre-ft"
+   ELSE
+    NVICSDelivery
+   ENDIF COMMENTED_BY "Potential delivery of Trib/Imp/DCP ICS is already included in the surplus total annual schedule <br>when in QS so it does not need to be taken into account a second time. <br>" ) COMMENTED_BY "SNWA diversion volume in surplus condition. ICS delivery is taken into consideration in the <br>calculation of the total annual schedule slot. SNWA demand variability does not occur in a surplus <br>scenario <br>"
   ELSE
    WITH NUMERIC AdditionalDCPReductionNV = ( $ "ICS Credits.AnnualSimultaneousCreationDCPICS_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) DO
     WITH NUMERIC shortageVolume = $ "Shortage.SNWP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
@@ -1431,8 +1436,7 @@ BEGIN
    { PotentialICS , 0.00000000 "acre-ft" } COMMENTED_BY "Second element is the adjustment value, and in an outyear that adjustment is 0. <br>"
   ENDIF
  ENDWITH) DO
-          DESCRIPTION          "If ICS <0> is negative, then ICS is being delivered <br>";
-      $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := "MinItem"( { IF ( "IsDomesticSurplus"(  ) )
+            WITH_STATEMENT (NUMERIC SNWPprelimDelivery = "MinItem"( { IF ( "IsDomesticSurplus"(  ) )
  THEN
   "SetNegativeToZero"( "Abs"( "Min"( GET @INDEX 0.00000000 FROM ICS, 0.00000000 "acre-ft" ) ) - $ "Surplus Volume Entitlements.SNWA Domestic" ["Dec31ofYear"( @"t" )] ) COMMENTED_BY "For domestic surplus, reduce ICS delivery by the amount of surplus entitlement for SNWP<br>"
  ELSE
@@ -1442,7 +1446,9 @@ BEGIN
   $ "ICS Credits.TotalICS_NV" [@"24:00:00 December 31, Previous Year"]
  ELSE
   $ "ICS Credits.TotalICS_NV" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.DCPICS_NV" [@"24:00:00 December 31, Previous Year"]
- ENDIF COMMENTED_BY "Total available ICS to take in delivery scenario <br>" } );
+ ENDIF COMMENTED_BY "Total available ICS to take in delivery scenario <br>" } )) DO
+          DESCRIPTION          "If ICS <0> is negative, then ICS is being delivered <br>";
+      $ "ICSProjectionData.AnnualICSDelivery_NV_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] := SNWPprelimDelivery;
 
             WITH_STATEMENT (NUMERIC NVavailBankPreTax = "SetNegativeToZero"( ( ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( $ "ICS Credits.Bank_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.TributaryICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.ImportedICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
             WITH_STATEMENT (NUMERIC MaxCreationBasedonCapacity = IF ( ( "Is24MonthStudy"(  ) OR NOT "IsMRM"(  ) ) COMMENTED_BY "Don't check against the bank in 24 MS or in an MTOM deterministic run <br>" )
@@ -1465,7 +1471,7 @@ BEGIN
       $ "ICS Credits.AnnualNevadaStoredOffstream" [@"24:00:00 December Max DayOfMonth, Current Year"] := "SetNegativeToZero"( GET @INDEX 0.00000000 FROM ICS ) - SNWPprelimCreation;
 
           DESCRIPTION          "This slot is the amount of bank space available to NV after the preliminary ICS creation. While  <br>logic exists for additional creation of ICS to meet a DCP contribution later on in the ruleset; it <br>is assumed that this will not occur in the near future due to the bank balance being so high.<br><br>The remaining bank balance is calculated and stored in this slot, which is used at a later point <br>to determine how much of the current years Tributary ICS needs to be delivered because it <br>won't fit into the bank upon Jan 1 conversion the following year. <br><br>Ex. If the slot's value is greater than the amount of Trib created, then all the trib will stay in <br>Mead. If the amount is < trib volume but > 0, some amount of tributary ICS will be stored in <br>Mead to be converted the following year and the rest will be diverted offstream. If the value <br>is 0, there is no bank space, thus the whole tributary ICS amount created during the current <br>year will be stored offstream. This math occurs in the ICS delivery rule which sets the Annual <br>Tributary ICS delivery slot.   <br>";
-      $ "ICS Credits.AnnualNevadaBankSpaceforTrib" [@"24:00:00 December Max DayOfMonth, Current Year"] := ( MaxCreationBasedonCapacity - SNWPprelimCreation ) * "SystemTaxAdjustment_DCP"(  );
+      $ "ICS Credits.AnnualNevadaBankSpaceforTrib" [@"24:00:00 December Max DayOfMonth, Current Year"] := ( MaxCreationBasedonCapacity - SNWPprelimCreation ) * "SystemTaxAdjustment_DCP"(  ) + SNWPprelimDelivery;
 
       END_WITH_STATEMENT;
 
@@ -1475,6 +1481,9 @@ BEGIN
 
       END_WITH_STATEMENT;
 
+      END_WITH_STATEMENT;
+
+    BREAKPOINT AFTER_EXEC TRUE;
     DESCRIPTION          "There is no demand variabiity logic in the 24 MS. This is MTOM only <br>";
       $ "LowerBasinDemandVariability.AbvHooverTriggerSet" [@"24:00:00 December Max DayOfMonth, Current Year"] := IF ( "MeadPumpingDemandVariabilityFactor"( @"24:00:00 December Max DayOfMonth, Current Year" ) == 1.00000000 )
  THEN
@@ -1788,7 +1797,6 @@ BEGIN
     NOTES                "APivarnik, 20201001: Changed run constraint to fire if RC > 3. Removed RC4 + condition changed constraint<br>";
     BEGIN
 
-    BREAKPOINT AFTER_EXEC TRUE;
       WITH_STATEMENT (NUMERIC SurplusType = NaNToZero ( $ "Surplus.Surplus Flag" [@"24:00:00 December 31, Current Year"] )) DO
             FOREACH (SLOT user IN "SurplusUsers_AllTypes"(  )) DO
             IF_STATEMENT (SurplusType == 0.00000000) THEN
@@ -4670,7 +4678,7 @@ BEGIN
     RULE                 "Havasu Rule Curve";
     DESCRIPTION          "DESCRIPTION: In any month except the Start Timestep, set the Havasu outflow such that the reservoir pool elevation target is met. For testbed hindcasts, this rule executes in the Start Timestep to solve for outflow which is not input using the slot HavasuOutflow.BHOPSParkerOutflow.<br><br>SLOTS SET: Havasu.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( ( $ "MTOMRunType.RunType" [] == 1.00000000 OR $ "MTOMRunType.RunType" [] == 2.00000000 AND @"t" >= @"Start Timestep" ) OR ( "Is24MonthStudy"(  ) AND @"t" > @"Start Timestep + 1" ) ) COMMENTED_BY "For testbed hindcasts or dev testing tool, this rule solves for Havasu.Outflow in Start Timestep  <br>" );
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( ( ( $ "MTOMRunType.RunType" [] == 1.00000000 OR $ "MTOMRunType.RunType" [] == 2.00000000 ) AND @"t" >= @"Start Timestep" ) OR ( "Is24MonthStudy"(  ) AND @"t" > @"Start Timestep + 1" ) ) COMMENTED_BY "For testbed hindcasts or dev testing tool, this rule solves for Havasu.Outflow in Start Timestep  <br>" );
     NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 0 (allows for no dependence on BHOPS during development testing). <br>A. Pivarnik, 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same. Added execution constraing to fire in 24 MS mode<br>A. Pivarnik, 20200731: Adjusted eecution constraints to fire correctly depending on model run type";
     BEGIN
 
@@ -13989,32 +13997,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8aee885b-d9de-4dac-bd73-9449796c32c3}";
+    UUID "{9f9959a2-8ec9-4599-92b3-a8bdfe9278f9}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ca3592b5-4b3e-49a3-b1f5-5b6be47414bd}";
+    UUID "{c996b987-344b-4093-bc29-68fdd764374f}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e3b422d6-9a6b-41cd-b832-c64b3a2ee8a2}";
+    UUID "{4452be60-17da-42a7-88e9-dddea04b7216}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c293ebb1-db19-4007-b3a8-d7c679b94de0}";
+    UUID "{1b74d11f-b0bc-4feb-b762-38c8e31b6c23}";
 ;
 
   END
-  UUID "{07f9f0fa-584a-443c-b087-891e0b306a65}";;
+  UUID "{a1570acb-8021-4806-b3f5-9176fb11a0ad}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14025,11 +14033,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bef1713d-0723-4b18-bd3c-e3f9b372a944}";
+    UUID "{d511265b-35ca-4045-a13d-0e488bd16fd9}";
 ;
 
   END
-  UUID "{69fbf551-3681-45dd-b207-e766947b1b0b}";;
+  UUID "{eeb21ee4-6052-4867-821e-188ac9931508}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14040,11 +14048,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{733ecd21-bc19-429b-bfee-211be2992ffe}";
+    UUID "{7b685788-26f5-418c-8a07-9fce085ed562}";
 ;
 
   END
-  UUID "{00b1c380-3428-4344-b9a4-c8c85b8fc437}";;
+  UUID "{9db390fd-fbe1-4926-9854-fa35cc7a8e81}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14055,11 +14063,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{968de2cd-233e-4371-8a06-97fada692371}";
+    UUID "{a0d99634-5bf7-4f29-9c36-11b4f84f4f26}";
 ;
 
   END
-  UUID "{bfb63a61-d510-46f6-9ff3-3ba56c1f67e8}";;
+  UUID "{02f24e4c-4e68-475d-b18f-7b2ea627bfd6}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
