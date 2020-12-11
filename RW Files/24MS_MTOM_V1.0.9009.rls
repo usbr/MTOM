@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 15:20 December 10, 2020
+# Created 10:41 December 11, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4641,7 +4641,7 @@ BEGIN
     NOTES                "AUTHOR, DATE: TP, 5/11/2015<br><br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200827: Removed execution constraint for rule to fire only in MTOM mode. ";
     BEGIN
 
-      $ "Fontenelle.Outflow" [] := "FontenelleMonthlyOutflow"(  );
+      $ "Fontenelle.Outflow" [] := "Min"( "FontenelleMonthlyOutflow"(  ), "AvailableWaterInStorage"( % "Fontenelle" ) );
 
     END
     UUID "{133be1ab-b7bd-4a13-9381-5453d74aaa1c}";;
@@ -6751,6 +6751,22 @@ BEGIN
 
     END
     UUID "{0286bad3-d3e6-44d6-9bd6-eb49a1778d9b}";;
+
+    FUNCTION       "AvailableWaterInStorage" ( OBJECT res )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "acre-feet";
+    DESCRIPTION    "DESCRIPTION: Simple computation of the total amount of water that is available to be released<br>taking the reservoir down to 0 storage<br><br>RETURNS: Flow <br><br>ARGUMENTS: <br>1. OBJECT res - the reservoir <br><br>CONSTRAINTS: 0 af/mo<br><br>";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG TRUE;
+    MIN_CONSTRAINT 0.00000000 "acre-ft/month";
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: Unknown";
+    BEGIN
+
+      res & "Inflow" [] + "VolumeToFlow"( res & "Storage" [@"t - 1"] - $ "UBRuleCurveData.ReservoirData" [STRINGIFY res, "DeadCapacity"], @"t" ) - "VolumeToFlow"( "EstimateEvaporation"( res, res & "Storage" [@"t - 1"], $ "UBRuleCurveData.ReservoirData" [STRINGIFY res, "DeadCapacity"], @"t - 1", @"t" ), @"t" );
+
+    END
+    UUID "{2cae728e-9a2b-4143-89e6-71ab87aac763}";;
 
     FUNCTION       "GetTargetStorage" ( OBJECT reservoir, DATETIME date )
     RETURN_TYPE    NUMERIC;
@@ -14238,32 +14254,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{25e2b3b6-49d5-4fc8-8eeb-22373d2fac44}";
+    UUID "{0e9a7472-a1fe-4787-bf28-4248df028ada}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7890c238-2bb6-4579-a1b5-b2117593354f}";
+    UUID "{da5dd683-569f-4847-9954-ae458d5423bf}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{70e25ad1-80fa-4c43-a862-b45c0753a64c}";
+    UUID "{a3caf917-81ef-48b9-8e25-4604b2448d2a}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7410de82-d6cf-40d4-9869-058deeb578cd}";
+    UUID "{1a33e070-b9f0-41a6-9746-9a812c5e9a5f}";
 ;
 
   END
-  UUID "{415c8636-d6cb-4510-bf04-131fedd3d24d}";;
+  UUID "{5e4e38de-2620-4c59-bb00-6894717ea140}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14274,11 +14290,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bb16e09f-20b4-43da-b7f1-3e4ad270b16f}";
+    UUID "{b71e358d-34d2-4044-95b5-94be14a004d8}";
 ;
 
   END
-  UUID "{d89cab38-c0ca-488c-86f0-46dc1251cc72}";;
+  UUID "{74a0d14e-ebb3-47a0-a1be-80cabae4c16a}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14289,11 +14305,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{577cf0da-e282-486c-81c1-1dc4a508ddea}";
+    UUID "{00ffbb7f-6b9e-4433-af5d-04f796a467ba}";
 ;
 
   END
-  UUID "{97e51d60-6a93-4e95-900d-825fca1ec347}";;
+  UUID "{63719dd2-43cd-4e4b-9ba6-77519386b21c}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14304,11 +14320,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c7085ad3-396d-4c32-8ffa-4b4ee02849d9}";
+    UUID "{8e9c4681-b663-4978-824e-3266879c4ea2}";
 ;
 
   END
-  UUID "{fa8a6fdb-630b-4d56-9f46-c9571c818553}";;
+  UUID "{0383162f-4312-47ba-999b-f876f5cce9b1}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
