@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.1
-# Created 10:41 December 11, 2020
+# Created 08:02 December 14, 2020
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -7547,7 +7547,8 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 5/11/2015<br><br>TP, 5/11/2015: This rule replaces a series of 11 other rules that made similar checks.<br><br>MC, 20160816: Corrected the date of the beginning pool elevations in the ElevationToStorage functions for April, September, and December from @&quot;t&quot; to @&quot;t-1&quot;, and changed the time periods in the denominators of those months' calculations from a number of months to a difference of dates, which more accurately calculates the periods in question since &quot;month&quot; in RW is 31 days. Other possible modifications discussed with Lee T. before she left are: 1) changing the recalculation of winter flows from December to October to better reflect actual operations; 2) changing the minimum elevation to 6,465 feet because 6,468 feet is not a hard boundary (leaving the target at 6,468 ft but changing the min elevation to 6,465 ft allows some flexibility in the model that reflects actual operations); 3) adding an estimate of evaporation to the above months' flow calculations (doesn't make much difference); 4) making the minimum flow values periodic and variable throughout the year<br><br>MC, 20170508: All of the changes discussed in the above comment were in place by the April 2017 MTOM run<br><br>S.Baker, 2018/11/26: There was a lower minimum elevation in Fontenelle from 1985-1989. To enable the testbed to simulate Fontenelle's operations closer to the historical operations, a new expression slot was added to account for a lower minimum elevation during this period. The expression slot would check the date to see if it falls in the 1985-1989 time frame and use the lower minimum elevation if it does. This would cause no changes to the current operation of Fontenelle.  Change - Replaced &quot;FontenelleData.MinElevation&quot; in the Max Constraint of the Post-Execution Checks to use the scalar slot ?FontenelleData.MinElevation_FullRecord?.  This new slot sets a lower minimum elevation for 1985-1989 when Fontenelle was drawn down. <br><br>20201210,CF: Fontenelle constraints changed to rules to make differencing runs easier. New rules match CRSS: Safe Channel Capacity, Min Elevation, Max Elevation, Min Flow. Removed from FontenelleMonthlyOutflow() but old function saved FontenelleMonthlyOutflow_Constrained()";
+    MAX_CONSTRAINT "SolveOutflow"( % "Fontenelle", $ "Fontenelle.Inflow" [], "ElevationToStorage"( % "Fontenelle", $ "FontenelleData.MaxElevation" [] ), $ "Fontenelle.Storage" [@"t - 1"], @"t" );
+    NOTES          "DEVELOPMENT NOTES<br>AUTHOR, DATE: TP, 5/11/2015<br><br>20201214,CF: One Max Constraint added back. MTOM updated their elevation-volume table to match 24MS which is different than CRSS. They changed the highest elevation to the true V rather than the 10000000 CRSS has. This would be something we could discuss in future MTOM meetings. I don't think it hurts to keep the rules in even though now one of them is redundant<br><br>20201210,CF: Fontenelle constraints changed to rules to make differencing runs easier. New rules match CRSS: Safe Channel Capacity, Min Elevation, Max Elevation, Min Flow. Removed from FontenelleMonthlyOutflow() but old function saved FontenelleMonthlyOutflow_Constrained()<br><br>TP, 5/11/2015: This rule replaces a series of 11 other rules that made similar checks.<br><br>MC, 20160816: Corrected the date of the beginning pool elevations in the ElevationToStorage functions for April, September, and December from @&quot;t&quot; to @&quot;t-1&quot;, and changed the time periods in the denominators of those months' calculations from a number of months to a difference of dates, which more accurately calculates the periods in question since &quot;month&quot; in RW is 31 days. Other possible modifications discussed with Lee T. before she left are: 1) changing the recalculation of winter flows from December to October to better reflect actual operations; 2) changing the minimum elevation to 6,465 feet because 6,468 feet is not a hard boundary (leaving the target at 6,468 ft but changing the min elevation to 6,465 ft allows some flexibility in the model that reflects actual operations); 3) adding an estimate of evaporation to the above months' flow calculations (doesn't make much difference); 4) making the minimum flow values periodic and variable throughout the year<br><br>MC, 20170508: All of the changes discussed in the above comment were in place by the April 2017 MTOM run<br><br>S.Baker, 2018/11/26: There was a lower minimum elevation in Fontenelle from 1985-1989. To enable the testbed to simulate Fontenelle's operations closer to the historical operations, a new expression slot was added to account for a lower minimum elevation during this period. The expression slot would check the date to see if it falls in the 1985-1989 time frame and use the lower minimum elevation if it does. This would cause no changes to the current operation of Fontenelle.  Change - Replaced &quot;FontenelleData.MinElevation&quot; in the Max Constraint of the Post-Execution Checks to use the scalar slot ?FontenelleData.MinElevation_FullRecord?.  This new slot sets a lower minimum elevation for 1985-1989 when Fontenelle was drawn down. <br><br>";
     BEGIN
 
       WITH NUMERIC June1Target = 6480.00000000 "feet" DO
@@ -14254,32 +14255,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0e9a7472-a1fe-4787-bf28-4248df028ada}";
+    UUID "{5f0d84a2-7495-4b67-a739-72993582d6a7}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{da5dd683-569f-4847-9954-ae458d5423bf}";
+    UUID "{cb590c69-ee00-44f0-b234-9c044613d3b7}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a3caf917-81ef-48b9-8e25-4604b2448d2a}";
+    UUID "{f195a855-160c-433d-926b-88f0d2bb9998}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1a33e070-b9f0-41a6-9746-9a812c5e9a5f}";
+    UUID "{ada58a84-70f9-4c3e-a027-a223cacd76ef}";
 ;
 
   END
-  UUID "{5e4e38de-2620-4c59-bb00-6894717ea140}";;
+  UUID "{eaa323ac-becf-413f-a70b-f3133b7401eb}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14290,11 +14291,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{b71e358d-34d2-4044-95b5-94be14a004d8}";
+    UUID "{2b485f81-d1c5-4c3a-8cb8-5293896d011f}";
 ;
 
   END
-  UUID "{74a0d14e-ebb3-47a0-a1be-80cabae4c16a}";;
+  UUID "{0e60f823-b6bc-4075-8d9a-0769e3cf059c}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14305,11 +14306,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{00ffbb7f-6b9e-4433-af5d-04f796a467ba}";
+    UUID "{fd9d624f-88c5-4486-9419-db6c58bf1664}";
 ;
 
   END
-  UUID "{63719dd2-43cd-4e4b-9ba6-77519386b21c}";;
+  UUID "{37d46588-8912-4b09-8bcc-f125bbca5024}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14320,11 +14321,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8e9c4681-b663-4978-824e-3266879c4ea2}";
+    UUID "{024ac0e8-d537-49eb-b6d0-21ce436beb6e}";
 ;
 
   END
-  UUID "{0383162f-4312-47ba-999b-f876f5cce9b1}";;
+  UUID "{9ad070e7-dc93-445b-9f41-7585edc27fb9}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
