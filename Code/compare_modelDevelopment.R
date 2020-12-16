@@ -3,40 +3,43 @@ library(RWDataPlyr)
 library(tidyverse)
 library(lubridate)
 
-# # TEST - function inputs - how to do this with RiverSMART ?
-# scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
-# base_scen_nm <- c("ModelBase_RulesBase", "Base")
-# dev_scen_nm <- c("ModelDev_RulesDev", "Dev")
-# slots <- c("Mead.Pool Elevation", "Powell.Pool Elevation")
-# slot_period <- c("eocy", "eocy")
-# data_files <- "ReservoirOutput.csv"
+# source helper functions
+source(paste0(Sys.getenv("MTOM_DIR"), "\\Code\\compare_plots_helperFuncs.R"))
+
+# # # TEST - function inputs - how to do this with RiverSMART ?
+scenario_dir <- paste0(Sys.getenv("MTOM_DIR"), "\\Scenario")
+base_scen_nm <- c("ModelBase,RulesBase", "Base")
+dev_scen_nm <- c("ModelDev,RulesDev", "Dev")
+slot_period_plot = c("PowellData.ReleaseTier;annualSlot;barchart",
+                     "Mead.Outflow;sumWY;boxplot")
+  # c("Powell.Pool Elevation;EOCY;boxplot",
+  #                    "Mead.Pool Elevation;EOCY;boxplot")
+# data_files <- "ReservoirOutput.csv" 
+data_files <- c("OpsUse.csv", "ReservoirOutput.csv")
+out_fl_nm = "test"
 
 
 compare_modelDev <- function(scenario_dir,
                              output_dir,
-                             base_scen_nm = c("ModelBase_RulesBase", "Base"),
-                             dev_scen_nm = c("ModelDev_RulesDev", "Dev"),
-                             # slots = c("Mead.Pool Elevation"),
-                             slot_period_plot = c("Powell.Pool Elevation;EOCY;boxplot",
-                                                  "Mead.Pool Elevation;EOCY;boxplot"),
+                             base_scen_nm, #= c("ModelBase,RulesBase", "Base"),
+                             dev_scen_nm, #= c("ModelDev,RulesDev", "Dev"),
+                             slot_period_plot,
                              data_files = "ReservoirOutput.csv",
                              out_fl_nm = "model_comparision") {
   hydroIC <- c("Wet", "Avg", "Dry")
   
-  # only geg scenarios for desired groups
+  # get scenarios for desired groups
   scenarios <- list.files(scenario_dir)
   base_scenarios <- scenarios[grep(base_scen_nm[1], scenarios)]
   dev_scenarios <- scenarios[grep(dev_scen_nm[1], scenarios)]
   all_scenarios <- c(base_scenarios, dev_scenarios)
   
   # extract slot_period_plot
-  slot_mat = matrix(unlist(strsplit(slot_period_plot, ";")), ncol = 3, byrow = T)
-  slots = unique(slot_mat[,1])
+  slot_mat <- process_PerSlotPlot_Input(slot_period_plot)
+  slots <- unique(slot_mat[,1])
   
-  # loop through scenarios
+  # get data and add scenario group
   df <- getScenarios(slots, all_scenarios, data_files, scenario_dir)
-  
-  # add scenario group
   df$ScenarioGroup <- NA
   df$ScenarioGroup[grep(base_scen_nm[1], df$scenario_i)] <- base_scen_nm[2]
   df$ScenarioGroup[grep(dev_scen_nm[1], df$scenario_i)] <- dev_scen_nm[2]
@@ -47,12 +50,12 @@ compare_modelDev <- function(scenario_dir,
     df$hydroGroup[grep(i, df$scenario_i)] <- i
   }
   
-  # filter by eocy data - may be a function in RWDataPlyr..
+  # reformat df
   df <- df %>% mutate(
     year = year(Timestep),
     month = month(Timestep),
     ScenarioGroup = factor(ScenarioGroup),
-    hydroGroup = factor(hydroGroup),
+    hydroGroup = factor(hydroGroup, levels = hydroIC),
     Timestep = as.Date(Timestep)
   ) 
   
@@ -63,40 +66,47 @@ compare_modelDev <- function(scenario_dir,
     period_i = slot_mat[i,2]
     plot_i = slot_mat[i,3]
     
+    # Check plotType is valid for timePeriod
+    plot_i = check_plotType(period_i, plot_i)
+
     # filter for slot
     df_i <- df %>%
       filter(ObjectSlot %in% slot_i | ObjectSlot %in% gsub(" ", "", slot_i))
     
-    # units for graph
-    unit_in = unique(df_i$Unit)
-    if (period_i %in% c("annualWY", "annualCY")) {
-      unit_in = paste(unit_in, "/ yr")
-    }
-    
-    # changes plot type for plot type that doesnt work with exceedance
-    if (period_i %in% c("12monthWY", "12monthCY") & plot_i %in% c("exceedance0", "exceedance10")) {
-      plot_i = 'boxplot'
-      print('Changing plot type exceednace to boxplot for 12monthWY time period!')
-    }
-    
     # agg/filter data based on slot time period type
-    df_plot <- processTimeperiodDF(df_i, period_i)
+    df_agg <- processTimeperiodDF(df_i, period_i)
+    
+    # units for graph
+    units_i <- unique(df_i$Unit)
+    df_ls <- unit_processing(df_agg, units_i, period_i)
     
     ## PLOT TYPE: boxplot,exceedance0,exceedance10
     if (plot_i == "boxplot") {
-      df_ploti <- df_plot %>% mutate(time = factor(time))
+      df_ploti <- df_ls$df %>% mutate(time = factor(time))
       
-      g <- ggplot(df_plot, aes(factor(time), Value, fill = ScenarioGroup)) +
+      g <- ggplot(df_ploti, aes(factor(time), Value, fill = ScenarioGroup)) +
         geom_boxplot() +
         theme_bw() +
-        labs(x = NULL, y = paste0(slot_i, " (", unit_in, ")")) +
+        labs(x = NULL, y = paste0(slot_i, " (", df_ls$units, ")")) +
+        facet_grid(hydroGroup ~ ., scales = "free_y")
+      
+    } else if(plot_i %in% c("barchart")) {
+      df_ploti <- df_ls$df %>% 
+        mutate(time = paste0(as.character(time), ' - ', as.character(ScenarioGroup))) %>%
+        mutate(time = factor(time))
+      
+      g <- ggplot(df_ploti, aes(time, fill = factor(Value))) +
+        geom_bar() +
+        theme_bw() +
+        theme(legend.title = element_blank()) +
+        labs(x = NULL, y = paste0(slot_i, " (trace count)")) +
         facet_grid(hydroGroup ~ ., scales = "free_y")
       
     } else if(plot_i %in% c("exceedance0", "exceedance10")) {
       # doesnt work for: 12monthWY or 12monthCY
       
       # Exceedance for Base vs. Dev
-      df_ploti <- df_plot %>%
+      df_ploti <- df_ls$df %>%
         group_by(ScenarioGroup, hydroGroup, time) %>% na.omit() %>%
         summarise(
           q0 = quantile(Value, 0),
@@ -139,7 +149,7 @@ compare_modelDev <- function(scenario_dir,
         geom_line(aes(time, q50, color = ScenarioGroup), 
                   linetype = 1, size = 0.5) +
         theme_bw() +
-        labs(x = NULL, y = paste0(slot_i, " (", unit_in, ")")) +
+        labs(x = NULL, y = paste0(slot_i, " (", df_ls$units, ")")) +
         facet_grid(hydroGroup ~ ., scales = "free_y")
     }
     print(g)
@@ -152,77 +162,8 @@ compare_modelDev <- function(scenario_dir,
 
 ### HELPER FUNCTIONS
 
-# get scenarios with only slots input
-getScenarios <- function(slots, 
-                         all_scenarios, 
-                         data_files, 
-                         scenario_dir) {
-  df <- NULL
-  for (scenario_i in all_scenarios) {
-    # read and append all data_files based on file type
-    for (data_j in unique(data_files)) {
-      fl_type_j <- last(unlist(strsplit(data_j, ".", fixed = TRUE)))
-      fl_nm_j <- paste0(scenario_dir, "\\", scenario_i, "\\", data_j)
-      if (fl_type_j == "rdf") {
-        df_j <- rdf_to_rwtbl2(fl_nm_j)
-      } else {
-        df_j <- read_rw_csv(fl_nm_j)
-      }
-      # filter for slots and add scenario name
-      df_j <- df_j %>%
-        filter(ObjectSlot %in% slots | ObjectSlot %in% gsub(" ", "", slots))
-      df <- rbind(df, cbind(scenario_i, df_j))
-    }
-  }
-  return(df)
-}
 
 
-## timeperiod function
-processTimeperiodDF <- function(df_i,
-                                period_i) {
-  
-  if (period_i %in% c("EOWY", "EOCY")) {
-    
-    # EOWY or EOCY
-    df_plot <- df_i %>% 
-      filter(month == ifelse(period_i == 'EOWY', 10, 12))  %>%
-      mutate(time = year)
-    
-  } else if (period_i %in% c("annualWY", "annualCY")) {
-    
-    # annual WY or CY sum with 12 values
-    if (period_i == "annualWY") {
-      df_i <- df_i %>% mutate(year = year + ifelse(month < 10, 0, 1)) 
-    }
-    df_plot <- df_i %>% 
-      group_by(scenario_i, TraceNumber, ScenarioGroup, hydroGroup, year) %>% 
-      filter(n() == 12) %>% #check groups have 12 values
-      summarize(Value = sum(Value)) %>% ungroup() %>%
-      mutate(time = year)
-    
-  } else if (period_i %in% c("12monthWY", "12monthCY")) {
-    
-    ## monthly distribution arrange by cy or wy
-    if (period_i == "12monthWY") {
-      levels_in = c(10:12, 1:9)
-    } else {
-      levels_in = 1:12
-    }
-    
-    df_plot <- df_i %>% 
-      mutate(time = factor(month, levels = levels_in, 
-                           labels = month.abb[levels_in]))
-    
-  } else if (period_i == 'month') {
-    
-    # show all months in run period
-    df_plot <- df_i %>% 
-      mutate(time = Timestep)
-    
-  } else {
-    stop('timeperiod must be one of the following: EOWY,EOCY,month,annualWY,annualCY,12monthWY,12monthCY.')
-  }
-  return(df_plot)
-}
+
+
 
