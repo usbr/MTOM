@@ -2,7 +2,8 @@
 rdfOutput/*
 !rdfOutput/ReadMe.txt
 !rdfOutput/output.control
-ReportFiles
+
+ReportFiles
 
 MTOM_Overview_Description.pdf
 MTOM_Stakeholder_User_Manual.pdf
@@ -72,3 +73,6 @@ Icon
 /Scenario
 /ScenarioSet
 /Working
+
+# Personal model directories
+/RW Files/TestbedFiles
