@@ -19,19 +19,19 @@ adjustDates <- function(inputFilePath, outputFilePath) {
   df = read.csv(inputFilePath, header = T)
   
   #change end date and run length
-  for (i in c(1:12)) {
-    #change finish timestep to September for Runs in February through September
-    df <- within(df, end_month[start_month == i] <- 12)
-    df <- within(df, end_day[start_month == i] <- 31)
-    df <- within(df, num_timesteps[start_month == i] <- (61 - start_month[start_month == i]))
-  }
-  
+  # for (i in c(1:8)) {
+  #   #change finish timestep to September for Runs in February through September
+  #   df <- within(df, end_month[start_month == i] <- 9)
+  #   df <- within(df, end_day[start_month == i] <- 30)
+  #   df <- within(df, num_timesteps[start_month == i] <- (34 - start_month[start_month == i]))
+  # }
+  # 
   # for (i in c(10:12)) {
   #   #change finish timestep to September for Runs in February through September
   #   df <- within(df, end_month[start_month == i] <- 9)
   #   df <- within(df, end_day[start_month == i] <- 30)
   #   df <- within(df, end_year[start_month == i] <- (end_year[start_month == i] + 1))
-  #   df <- within(df, num_timesteps[start_month == i] <- (70 - start_month[start_month == i]))
+  #   df <- within(df, num_timesteps[start_month == i] <- (46 - start_month[start_month == i]))
   # }
 
   
