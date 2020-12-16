@@ -74,5 +74,6 @@ Icon
 /ScenarioSet
 /Working
 
-# Personal model directories
+# Testbed Model Dir
 /RW Files/TestbedFiles
+*.zip
