@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.3
-# Created 12:08 January 4, 2021
+# Created 15:37 January 5, 2021
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -8325,7 +8325,7 @@ BEGIN
     ACTIVE         TRUE;
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG FALSE;
-    NOTES          "CF 20190125: Updated to use TargetHWGivenInflowOneMonth<br><br>HP, 20170714";
+    NOTES          "CF 20200105:  To determine the DaysAtBypass CRSS calls GetNumberOfDaysAtBypass() which interpolates to find the number of days at by pass capacity based on the spring flow percentage exceedence and the EIS mandated limits for the current hydrolocic classification. <br><br>MTOM calls GetDaysAtBypass() which calls GetNumberOfDaysAtBypass() but only IF the Yampa is above 10000 cfs for a length of time greater than or equal to the values in YampaDaysAbove10000ForBypass. Otherwise Flaming Gorge will not bypass.<br> <br>&quot;You're correct that the YampaDays is outdated because we've shifted from a hydrologic trigger to a biological one, but using that code with ESP volumes more closely relates to actual operations....The Yampa code lets the model know when the Yampa River is low and that keys the releases toward that hydrologic conditions. The model used to look at Yampa hclass and make releases, which the Yampa code replaced. If the Yampa is really low in average years, operators will release less because what the Yampa is doing matters. &quot; - Heather<br><br>So to be consistent with actual operations but have some degree of alignment with CRSS Heather proposes &quot;Have a toggle in MTOM to use the CRSS code if different hydrology is used. Operationally, the Yampa code makes more sense. The downstream demands and ESP unreg inflow differences are significant.&quot;  Proposed resolution: revert to the Yampa10k code in MTOM for now, I think we will want to revisit this in future development.<br><br>CF 20190125: Updated to use TargetHWGivenInflowOneMonth<br><br>HP, 20170714";
     BEGIN
 
       WITH LIST DateList = "GetDates"( @"24:00:00 April 1, Current Year", @"t" COMMENTED_BY "Only calculates daily schedule to the end of the current month for computation efficiency.", "1 days" ) DO
@@ -8350,7 +8350,7 @@ BEGIN
        ( $ "KNN_MTOM.BypassCapacity" COMMENTED_BY "CF: CRSS slot $ &quot;FlamingGorgeData.BypassCapacity&quot; <br>" [] - $ "FlamingGorge.Outflow" [@"24:00:00 Previous Month Max DayOfMonth, Current Year"] ) / ( $ "KNN_MTOM.RampUpRateNoUnits" [] * 1.00000000 "cfs" / 1.00000000 "day" )
       ENDIF, 0.00000000 "day" ) ) DO
        WITH NUMERIC DaysToDownRamp = "RoundToNearestDay"( ( $ "FlamingGorgeData.PowerPlantCapacity" [] - 2700.00000000 "cfs" ) / ( $ "KNN_MTOM.BaseFlowDownrampRateNoUnits" [$ "KNN_MTOM.BaseFlowHClass" [@"t"], 0.00000000] * 1.00000000 "cfs" ) * 1.00000000 "day" ) DO
-        WITH NUMERIC DaysAtBypass = "RoundToNearestDay"( "GetNumberOfDaysAtBypass"( $ "KNN_MTOM.SpringHClass" [] ) ) DO
+        WITH NUMERIC DaysAtBypass = "RoundToNearestDay"( "GetDaysAtBypass"( $ "KNN_MTOM.SpringHClass" [] ) COMMENTED_BY "CF: CRSS uses GetNumberOfDaysAtBypass() instead. <br>" ) DO
          WITH DATETIME FGSpringReleaseStartDate = "DateMax"( "DateMin"( "FGSpringReleaseStartDate"(  ), @"24:00:00 August 2, Current Year" - ( DaysAtPPC + RampUpDaysToPPC + DaysToDownRamp + DaysAtBypass / 2.00000000 ) COMMENTED_BY "Estimate total spring flow days...<br>" ), @"24:00:00 April 2, Current Year" ) COMMENTED_BY "Start ramping up using LTSP polynomial, but Apr 2 as a minimum to avoid breaking, and start early <br>enough to end by July 31" DO
           FOR ( DATETIME date IN DateList ) WITH LIST flows = {  } DO
            WITH NUMERIC i = ( date - @"24:00:00 April 1, Current Year" ) / 1.00000000 "day" DO
@@ -8449,6 +8449,38 @@ BEGIN
 
     END
     UUID "{391323d4-033d-4a07-8efa-8347e14cbd9d}";;
+
+    FUNCTION       "GetDaysAtBypass" ( NUMERIC Class )
+    RETURN_TYPE    NUMERIC;
+    SCALE_UNITS    "";
+    DESCRIPTION    "Arguments: None<br><br>Description: The function determines the number of days Flaming Gorge will bypass based on hydrologic class. <br><br>-In wet years Flaming Gorge will always bypass.  <br>-In dry years Flaming Gorge will never bypass.  <br>-In the other three year types, Flaming Gorge will bypass if conditions on the Yampa River warrant bypassing water to try and meet the wetter targets at Jensen (18600 cfs).   <br> <br>Yampa must be above 10000 (calculated by DaysAboveThreshold) for a length of time greater than or equal to the values in YampaDaysAbove10000ForBypass for Flaming Gorge to bypass water. If this is the case then GetNumberOfDaysAtBypass is used to determine the number of days at bypass. This is a function of both the year type on the Yampa and the year type on the Green/at Flaming Gorge as determined by the Compute Percent Exceedance rule.  <br><br>In previous versions of CRSS, Flaming Gorge would only bypass when the Yampa was flowing at 14000 cfs for enough days to meet the 22600 flow target at Jensen. The 22600 cfs flow target has a shorter duration than the 18600 cfs target, therefore under certain hydrologies this updated version will function differently than previous versions of CRSS. <br><br>Returns: the number of days Flaming Gorge will bypass.";
+    ACTIVE         TRUE;
+    PRE_EXEC_DIAG  FALSE;
+    POST_EXEC_DIAG FALSE;
+    NOTES          "CF 20200105: To determine the DaysAtBypass CRSS calls GetNumberOfDaysAtBypass() which interpolates to find the number of days at by pass capacity based on the spring flow percentage exceedence and the EIS mandated limits for the current hydrolocic classification. <br><br>MTOM calls GetDaysAtBypass() which calls GetNumberOfDaysAtBypass() but only IF the Yampa is above 10000 cfs for a length of time greater than or equal to the values in YampaDaysAbove10000ForBypass. Otherwise Flaming Gorge will not bypass.<br> <br>&quot;You're correct that the YampaDays is outdated because we've shifted from a hydrologic trigger to a biological one, but using that code with ESP volumes more closely relates to actual operations....The Yampa code lets the model know when the Yampa River is low and that keys the releases toward that hydrologic conditions. The model used to look at Yampa hclass and make releases, which the Yampa code replaced. If the Yampa is really low in average years, operators will release less because what the Yampa is doing matters. &quot; - Heather<br><br>So to be consistent with actual operations but have some degree of alignment with CRSS Heather proposes &quot;Have a toggle in MTOM to use the CRSS code if different hydrology is used. Operationally, the Yampa code makes more sense. The downstream demands and ESP unreg inflow differences are significant.&quot;  Proposed resolution: revert to the Yampa10k code in MTOM for now, I think we will want to revisit this in future development.<br>CF,20200124: GetDaysAtBypass() calculated MaxBypassDays using PredictedFGInflow(@t, @&quot;24:00:00 August Max DayOfMonth, Next Year&quot;). This was incorrect and should be @....Current Year&quot;. The issue caused FG to not calculate a Spring Release in the last year of the run (since no value for FlamingGorgeData.ProjectedInflow[@....Next Year&quot;]. Instead FG only releases baseflow. This does not effect calculations in earlier years. This is not an issue in CRSS. MTOM_Rules_V3.0.9000.rls fix this issue.<br><br><br>CF,20190204: Imported from CRSS. <br>";
+    BEGIN
+
+      WITH NUMERIC MaxBypassDays = "Max"( "RoundToNearestDay"( ( $ "FlamingGorge.Storage" [@"t - 1"] - "ElevationToStorage"( % "FlamingGorge", $ "FlamingGorgeData.MaxPE" [] ) + "PredictedFGInflow"( @"t", @"24:00:00 August Max DayOfMonth, Current Year" ) ) / "GetMaxOutflowGivenHW"( % "FlamingGorge", $ "FlamingGorge.Pool Elevation" [], @"t" ) ), 0.00000000 "day" ) DO
+  IF ( $ "KNN_MTOM.SpringHClass" [] < 4.00000000 AND $ "KNN_MTOM.SpringHClass" [] > 0.00000000 )
+  THEN
+   IF ( "DaysAboveThreshold"( "GetSlotVals"( $ "KNN_MTOM.YampaDailyDeerlodgeDepleted", @"24:00:00 April 1, Current Year", @"24:00:00 July 31, Current Year" ), 10000.00000000 "cfs" ) >= $ "FlamingGorgeData.YampaDaysAbove10000ForBypass" [$ "KNN_MTOM.SpringHClass" [], 0.00000000] )
+   THEN
+    "GetNumberOfDaysAtBypass"( $ "KNN_MTOM.SpringHClass" [] )
+   ELSE
+    0.00000000 "day"
+   ENDIF
+  ELSE
+   IF ( $ "KNN_MTOM.SpringHClass" [] == 0.00000000 )
+   THEN
+    0.00000000 "day" COMMENTED_BY "In Dry years never bypass"
+   ELSE
+    "Max"( "GetNumberOfDaysAtBypass"( $ "KNN_MTOM.SpringHClass" [] ), MaxBypassDays ) COMMENTED_BY "In wet years always bypass."
+   ENDIF
+  ENDIF
+ ENDWITH COMMENTED_BY "Are we in Mod Dry, Ave, or Mod Wet?";
+
+    END
+    UUID "{afe5a5aa-c06f-4d1f-979d-6fe7e2aa2d8d}";;
 
     FUNCTION       "GetNumberOfDaysAtBypass" ( NUMERIC Class )
     RETURN_TYPE    NUMERIC;
@@ -14220,32 +14252,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2ec6e393-0e11-4fe3-add0-cd2fe03559ac}";
+    UUID "{6e94264a-7a39-4a79-a67e-b3b74f9ef53b}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c01eab42-bd4f-4987-84e1-c8dd3138b0ec}";
+    UUID "{7bbe04ea-d14c-49ed-afda-007aa8f0dc9c}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{e1188a17-93dc-4048-b42a-1eab07544f8c}";
+    UUID "{a8280a22-a23c-446b-8ee0-fa3dd75edfdb}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{13d77604-b5c3-4117-8953-84553ee451a0}";
+    UUID "{c043b58e-98eb-4d0a-9861-6a2f02146aad}";
 ;
 
   END
-  UUID "{b5b10154-4064-4765-b660-94deeb5eac44}";;
+  UUID "{a40aa01a-e8a5-4875-b197-be29d01a1538}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14256,11 +14288,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{0bf79ef6-bdde-4a36-ae3c-63baf4dfb7f2}";
+    UUID "{88c5ca60-7166-422c-8312-154612fb2f1b}";
 ;
 
   END
-  UUID "{89c91e04-2fa8-476b-a9e5-6689cb782511}";;
+  UUID "{dbfca665-1ab2-4fe1-a56c-770b576a781e}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14271,11 +14303,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f4d47750-138c-46ad-bb37-940707320437}";
+    UUID "{8444488b-cc54-441d-ad1e-596a64ff16f7}";
 ;
 
   END
-  UUID "{3726b75e-92bd-4176-8ca2-764ded905692}";;
+  UUID "{b2ce609c-435d-4007-9de1-d96bff27d4fd}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14286,11 +14318,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{28a26ee1-d24f-44f2-b031-36eaf92a7fd5}";
+    UUID "{8714fa42-75f2-4157-b72a-cfd9e1723353}";
 ;
 
   END
-  UUID "{50525cec-2b15-4a42-b378-c5297e393456}";;
+  UUID "{edbed035-6353-40de-813a-7ec1c1de0132}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
