@@ -10,8 +10,10 @@ MTOM_Stakeholder_User_Manual.pdf
 # ignore other backup files of zipped rules, models, and RiverSMART files
 *.bak.gz
 *.bak
-*.rsm
-*bak.rms
+*.bak.rsm
+
+# ignore testbed study, but not dev testing tool
+MTOM_Testbed_*.rsm
 
 # generic files not to track
 #excel backup files
@@ -51,11 +53,16 @@ Icon
 
 #pass through sheets 
 /Output Data/EnsembleOutput.xlsx
+/Output Data/MTOMcsvOutput.csv
 
 # Testbed Forecasts and IC data
-Inflow Forecasts/Testbed_Historical_Forecasts
-Input Data/Historical_Diversions.xlsx
-Input Data/Observed_for_MTOM_IC.xlsx
+/Inflow Forecasts/Testbed_Historical_Forecasts
+/Input Data/Historical_Diversions.xlsx
+/Input Data/Observed_for_MTOM_IC.xlsx
+/Input Data/TestbedData
+
+# SCT folder
+/RW Files/SCTs
 
 # RiverSMART folders and files
 /Hydrology
