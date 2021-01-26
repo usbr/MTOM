@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.1.3
-# Created 15:18 January 15, 2021
+# Created 15:55 January 25, 2021
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -4711,7 +4711,7 @@ BEGIN
     RULE                 "Havasu Rule Curve";
     DESCRIPTION          "DESCRIPTION: In any month except the Start Timestep, set the Havasu outflow such that the reservoir pool elevation target is met. For testbed hindcasts, this rule executes in the Start Timestep to solve for outflow which is not input using the slot HavasuOutflow.BHOPSParkerOutflow.<br><br>SLOTS SET: Havasu.Outflow";
     ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( @"t" > @"Start Timestep" OR ( ( ( $ "MTOMRunType.RunType" [] == 1.00000000 OR $ "MTOMRunType.RunType" [] == 2.00000000 ) AND @"t" >= @"Start Timestep" ) OR ( "Is24MonthStudy"(  ) AND @"t" > @"Start Timestep + 1" ) ) COMMENTED_BY "For testbed hindcasts or dev testing tool, this rule solves for Havasu.Outflow in Start Timestep  <br>" );
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) >= 1.00000000 AND ( ( ( @"t" > @"Start Timestep" AND $ "MTOMRunType.RunType" [] == 0.00000000 AND "IsMRM"(  ) ) COMMENTED_BY "Operational MTOM MRM Mode <br>" ) OR ( ( ( $ "MTOMRunType.RunType" [] == 1.00000000 OR $ "MTOMRunType.RunType" [] == 2.00000000 ) AND @"t" >= @"Start Timestep" ) OR ( ( "Is24MonthStudy"(  ) OR NOT "IsMRM"(  ) ) AND @"t" > @"Start Timestep + 1" ) COMMENTED_BY "operational MTOM and 24MS mode <br>" ) COMMENTED_BY "For testbed hindcasts or dev testing tool, this rule solves for Havasu.Outflow in Start Timestep  <br>" );
     NOTES                "AUTHOR, DATE: Unknown<br>Unknown Commenter, Unknown Date: This rule could just as easily use a target elevation rather than a storage. It would probably be safer to do so.<br><br>S.Baker 06/20/2018: Added execution constraint to solve this rule at start timestep for Testbed simulations.<br>SB 07/08/2019: Updated constraints to have Run Type not equal to 0 (allows for no dependence on BHOPS during development testing). <br>A. Pivarnik, 20200706: There was no change to this rule in the integration effort. The rule in 24 MS and MTOM were the same. Added execution constraing to fire in 24 MS mode<br>A. Pivarnik, 20200731: Adjusted eecution constraints to fire correctly depending on model run type";
     BEGIN
 
@@ -14211,32 +14211,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{6263652e-f1b4-409e-a195-f486fbb561c1}";
+    UUID "{8ffcab83-9a84-4148-926d-a3f2b164b296}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7cf548bd-3d3d-44f9-a0c3-1da363a0c2a7}";
+    UUID "{9378e89c-48ce-4290-9e58-ac84514d41c5}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a0e25447-f415-40f5-9466-d4564520cb0b}";
+    UUID "{6544e7e1-d47c-4a23-8660-1277ea73f57b}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{092dd560-0a2c-4e95-ad38-dcc3f21931d5}";
+    UUID "{a5efdc23-2aae-4f9e-91e1-96b2006cfcf1}";
 ;
 
   END
-  UUID "{cd9c3f5d-cde9-4a1d-b63f-869ab6f128d1}";;
+  UUID "{95923c82-eb4c-4326-ab07-d850431f2ac1}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14247,11 +14247,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{340b0513-6957-4ba7-8cc8-2e7fbb8773a4}";
+    UUID "{77f99528-32d7-4151-b13d-eb2269a7b43f}";
 ;
 
   END
-  UUID "{e3dd2bb5-5a30-4665-9af9-26ba7ef90418}";;
+  UUID "{23289b75-3b51-4064-88eb-e3b975461b1d}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14262,11 +14262,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{72fe3f11-2325-4a2c-b5a2-689ff5e5f232}";
+    UUID "{43ef1af5-02ea-46de-b99e-5b53e32ea3e3}";
 ;
 
   END
-  UUID "{6923cee2-6ec2-46aa-9777-26b8c89e3cfc}";;
+  UUID "{b533ca98-9741-4a5c-a0ae-561ff41c8bcd}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14277,11 +14277,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8664c1f7-2b2a-4ada-9893-64f6067e4466}";
+    UUID "{f9d02d0f-fc82-49b0-b14f-e6861c8029f9}";
 ;
 
   END
-  UUID "{55e3f387-6477-42c9-97c3-29cddf4c2b52}";;
+  UUID "{0d1ecfea-9e77-4779-934c-c048d5b45e24}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
