@@ -1,4 +1,4 @@
-listOfPackages <- c("RWDataPlyr", "tidyverse", "lubridate", "RWcheck")
+listOfPackages <- c("RWDataPlyr", "rlang","validate","devtools","tidyverse", "lubridate", "RWcheck")
 
 for (i in listOfPackages){
   if( !(i %in% installed.packages()) )
