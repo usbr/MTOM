@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.2
-# Created 13:57 February 16, 2021
+# Created 08:29 February 18, 2021
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -9531,14 +9531,14 @@ BEGIN
          WITH NUMERIC PreviousVolConstrained = GET @INDEX 4.00000000 FROM GET @INDEX ( LENGTH result ) - 1.00000000 FROM result DO
           WITH NUMERIC AdjOutflow = IF ( PreviousVolConstrained > 0.00000000 "acre-ft" )
           THEN
-           IF ( "EstimatePowellPEGivenOutflow"( PreviousResultPE, CurrentEstRelease, CurrentDate ) <= 3500.00000000 "ft" )
+           IF ( "EstimatePowellPEGivenOutflow"( PreviousResultPE, CurrentEstRelease, CurrentDate ) <= $ "PowellData.PowellMinPowerPoolElevation" [] )
            THEN
             "Min"( "IterateBypassCapacity"( PreviousResultPE, CurrentEstRelease, CurrentDate ), "VolumeToFlow"( PreviousVolConstrained, CurrentDate ) + CurrentEstRelease )
            ELSE
-            "VolumeToFlow"( "Min"( "ElevationToStorage"( % "Powell", PreviousResultPE ) - "ElevationToStorage"( % "Powell", 3500.00000000 "ft" ) + "FlowToVolume"( $ "Powell.Inflow" [CurrentDate], CurrentDate ) - "PowellEvapEstimation"( CurrentDate, PreviousResultPE, 3500.00000000 "ft" ) - NaNToZero ( $ "Powell.Change in Bank Storage" [CurrentDate] ), PreviousVolConstrained + "FlowToVolume"( CurrentEstRelease, CurrentDate ) ), CurrentDate ) COMMENTED_BY "Try to release previously constrained volume if possible while trying to keep Powell above 3,500 <br>ft  <br>"
+            "VolumeToFlow"( "Min"( "ElevationToStorage"( % "Powell", PreviousResultPE ) - "ElevationToStorage"( % "Powell", $ "PowellData.PowellMinPowerPoolElevation" [] ) + "FlowToVolume"( $ "Powell.Inflow" [CurrentDate], CurrentDate ) - "PowellEvapEstimation"( CurrentDate, PreviousResultPE, $ "PowellData.PowellMinPowerPoolElevation" [] ) - NaNToZero ( $ "Powell.Change in Bank Storage" [CurrentDate] ), PreviousVolConstrained + "FlowToVolume"( CurrentEstRelease, CurrentDate ) ), CurrentDate ) COMMENTED_BY "Try to release previously constrained volume if possible while trying to keep Powell power pool <br>elevation <br>"
            ENDIF
           ELSE
-           IF ( "EstimatePowellPEGivenOutflow"( PreviousResultPE, CurrentEstRelease, CurrentDate ) <= 3500.00000000 "ft" )
+           IF ( "EstimatePowellPEGivenOutflow"( PreviousResultPE, CurrentEstRelease, CurrentDate ) <= $ "PowellData.PowellMinPowerPoolElevation" [] )
            THEN
             "Min"( "IterateBypassCapacity"( PreviousResultPE, CurrentEstRelease, CurrentDate ), CurrentEstRelease )
            ELSE
@@ -9557,7 +9557,7 @@ BEGIN
              ENDWITH
             ENDWITH
            ENDWITH
-          ENDWITH COMMENTED_BY "Adjust outflow when Powell falls below a buffered power pool elevation (assumed to be 3,500 ft) <br>or when the outflow was previously constrained by the bypass tubes <br>"
+          ENDWITH COMMENTED_BY "Adjust outflow when Powell falls below a buffered power pool elevation or when the outflow was <br>previously constrained by the bypass tubes  <br>"
          ENDWITH COMMENTED_BY "Retrieve the previous volume not released due to bypass constraints <br>"
         ENDWITH COMMENTED_BY "Retrieve the release passed into the function for the current date"
        ENDWITH COMMENTED_BY "Retrieve the carryover created from the previous month <br>"
@@ -14190,32 +14190,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7fb8a5c0-ef30-416e-a796-20ec4757e4f1}";
+    UUID "{e8a61b11-567b-4158-bc78-fdaa01cfd17a}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{c53e9fe5-54f0-4608-8191-dc8a3edcb44e}";
+    UUID "{c44cb327-e57f-40a8-80e3-77304e4399cf}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d5ff61e0-9666-4231-bacb-19476ee03538}";
+    UUID "{0d60480e-e54e-4eaf-925b-f3d957457832}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{44df1d48-3663-4adb-8877-6e63d57e7e7f}";
+    UUID "{6aae06a9-2972-4591-8360-70e4dc27eb02}";
 ;
 
   END
-  UUID "{9db546ef-e9f9-4d17-bd60-c865edc79e0b}";;
+  UUID "{237e31ef-eab7-4624-ba4b-914b6fb3d9b8}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14226,11 +14226,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{be3d1174-4154-4dcc-8906-8a1066c4efef}";
+    UUID "{aac89c3f-55c3-42e5-ba67-3a00358c2c2f}";
 ;
 
   END
-  UUID "{4e2e365c-59be-479c-8c58-bab189a094b0}";;
+  UUID "{02afd61a-af24-4d7f-81c4-d097f5d670eb}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14241,11 +14241,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{acce4225-1f39-46cf-ad4c-32b3deec2b3b}";
+    UUID "{abd2b475-b4d4-4978-b5f0-e0ac2b21be20}";
 ;
 
   END
-  UUID "{c083d9ad-c14d-4c61-9c8b-fe285ab5f653}";;
+  UUID "{411d3afb-9752-4165-839f-1b5aa7f001d5}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14256,11 +14256,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{20daf328-9512-4d52-a14d-d2161b68ac93}";
+    UUID "{8b01eddd-9a5e-49ee-9784-5225a171a86c}";
 ;
 
   END
-  UUID "{d6f3efc6-e121-435c-a984-5f8c258f7ddc}";;
+  UUID "{52933f69-8f31-47be-bbc3-fe6dfe6d088f}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
