@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.2.1 Patch
-# Created 12:46 February 20, 2021
+# Created 09:41 February 25, 2021
 # 
 RULESET
 NAME "MTOM_Rules";
@@ -3711,6 +3711,23 @@ BEGIN
     END
     UUID "{e9b9f76f-9ace-456e-a4dc-bc831a6b7283}";;
 
+    RULE                 "Min Flow in Extremely Dry Years with Low Storage";
+    DESCRIPTION          "Execution Constraint: NA <br>  <br>Description: Flaming Gorge releases 800 cfs to protect the remaining water in storage if Flaming Gorge pool elevation is below MinReleaseTrigger and there is extremely low hydrology (.98 exceedance). This is reduce this further via funcion constraint when FG can't release 800 cfs without draining the live storage. <br><br>The rule sets the LowReleaseFlag when FG is releasing max water in FG (second IF) or MinFlow in HClass = 0 and PE < MinReleaseTrigger (first IF). <br><br>Slots Set: FlamingGorge.Outflow, FlamingGorgeData.LowReleaseFlag Execution Constraint: Not May, June or July ";
+    ACTIVE               TRUE;
+    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
+    NOTES                "CF, 20210220: Change FGConstrainedOutflow() to UBConstrainedOutflow(). Change rule priority to highest. <br>HP: &quot;Leadership discussions would happen long before the reservoir dropped to those levels, but for a modeling exercise: yes, staying above 5890 ft would overrule spring or baseflow operations. &quot;<br><br>CF, 20181212: Exec Const removed, rule now fires in all timesteps. Rule moved earlier in priority than Sum Daily. Added a constraint on outflow via FGConstrainedOutflow() to MinFlow. AbsoluteMinRelease no longer needed since it was changed to MinFlow of 800 cfs based on the latest FEIS according to HP.  Rule sets the LowReleaseFlag when FG is releasing max water in FG or MinFlow in HClass = 0 and PE < MinReleaseTrigger. Fixes to allow running VIC. <br><br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200827: Removed execution constraint for rule to fire only in MTOM mode";
+    BEGIN
+
+      IF_STATEMENT ($ "FlamingGorge.Pool Elevation" [] < $ "FlamingGorgeData.MinReleaseTrigger" [] AND $ "KNN_MTOM.BaseFlowHClass" [] == 0.00000000 AND NOT "MonthIs"( { "May" , "June" , "July" } ) COMMENTED_BY "CF: Old Execution Constraint <br>") THEN
+            $ "FlamingGorge.Outflow" [] := "UBConstrainedOutflow"( % "FlamingGorge", $ "FlamingGorgeData.MinFlow" [] );
+
+            $ "FlamingGorgeData.LowReleaseFlag" [] := 1.00000000;
+
+      END_IF_STATEMENT;
+
+    END
+    UUID "{f7fdf711-46e9-4b08-8415-e511284ba19f}";;
+
     RULE                 "Fill Daily Flaming Gorge Releases for Months Outside of April-July";
     DESCRIPTION          "DESCRIPTION: Sets the daily FG releases and daily Yampa releases to the average monthly FG outflow and Yampa gaged outflow, respectively.<br><br>SLOTS SET: KNN_MTOM.FlamingGorgeDaily; KNN_MTOM.YampaDailyDeerlodgeDepleted<br><br>";
     ACTIVE               TRUE;
@@ -3747,23 +3764,6 @@ BEGIN
 
     END
     UUID "{7c3f5e96-c79a-44f0-a2d6-d715ed73c0f0}";;
-
-    RULE                 "Min Flow in Extremely Dry Years with Low Storage";
-    DESCRIPTION          "Execution Constraint: NA <br>  <br>Description: Flaming Gorge releases 800 cfs to protect the remaining water in storage if Flaming Gorge pool elevation is below MinReleaseTrigger and there is extremely low hydrology (.98 exceedance). This is reduce this further via funcion constraint when FG can't release 800 cfs without draining the live storage. <br><br>The rule sets the LowReleaseFlag when FG is releasing max water in FG (second IF) or MinFlow in HClass = 0 and PE < MinReleaseTrigger (first IF). <br><br>Slots Set: FlamingGorge.Outflow, FlamingGorgeData.LowReleaseFlag Execution Constraint: Not May, June or July ";
-    ACTIVE               TRUE;
-    RULE_EXEC_CONSTRAINT "GetRunCycleIndex"(  ) == 2.00000000;
-    NOTES                "CF, 20210220: Change FGConstrainedOutflow() to UBConstrainedOutflow()<br><br>CF, 20181212: Exec Const removed, rule now fires in all timesteps. Rule moved earlier in priority than Sum Daily. Added a constraint on outflow via FGConstrainedOutflow() to MinFlow. AbsoluteMinRelease no longer needed since it was changed to MinFlow of 800 cfs based on the latest FEIS according to HP.  Rule sets the LowReleaseFlag when FG is releasing max water in FG or MinFlow in HClass = 0 and PE < MinReleaseTrigger. Fixes to allow running VIC. <br><br>APivarnik 20200706: Added execution constraint for rule to fire only in MTOM mode. No other changes made to rule in the integration effort<br>APivarnik 20200827: Removed execution constraint for rule to fire only in MTOM mode";
-    BEGIN
-
-      IF_STATEMENT ($ "FlamingGorge.Pool Elevation" [] < $ "FlamingGorgeData.MinReleaseTrigger" [] AND $ "KNN_MTOM.BaseFlowHClass" [] == 0.00000000 AND NOT "MonthIs"( { "May" , "June" , "July" } ) COMMENTED_BY "CF: Old Execution Constraint <br>") THEN
-            $ "FlamingGorge.Outflow" [] := "UBConstrainedOutflow"( % "FlamingGorge", $ "FlamingGorgeData.MinFlow" [] );
-
-            $ "FlamingGorgeData.LowReleaseFlag" [] := 1.00000000;
-
-      END_IF_STATEMENT;
-
-    END
-    UUID "{f7fdf711-46e9-4b08-8415-e511284ba19f}";;
 
     RULE                 "Adjust Daily for August Base Flow";
     DESCRIPTION          "DESCRIPTION: Determines if July releases were at power plant or bypass capacity during moderately wet and wet hydrology and ramps down in August.  Rule sets August releases at steady base flows or downramps from high FG releases through July 31st to August base flows. August ramp down is contained in the Flow Recommendations. <br><br>SLOTS SET: KNN_MTOM.FlamingGorgeDaily; KNN_MTOM.YampaDailyDeerlodgeDepleted<br><br><br><br>";
@@ -14170,32 +14170,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f148782f-38f5-418d-a117-bd6cd811990c}";
+    UUID "{42f3b89a-71aa-4c7b-9588-7c7ee3f0341f}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{aba11b31-93fb-4a2f-80c7-560166c77c92}";
+    UUID "{9afcbbeb-84a9-4ea8-8a9d-1bde9c343c54}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7578ad66-6eee-4846-aba8-4b9bfb8dce99}";
+    UUID "{6dfc072b-932c-426d-acbd-03ee6c02cea4}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8715df1e-1ac8-4409-bce1-bf6cf3b91866}";
+    UUID "{a973296c-6d63-4e70-9902-2d0fa67d3553}";
 ;
 
   END
-  UUID "{8995697f-7c98-4bea-8444-cd17c5a522ac}";;
+  UUID "{0cbba388-21e9-4df1-b45c-ce279db84bb0}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14206,11 +14206,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8254f9b7-9463-41ad-a8a6-97277f18ad5c}";
+    UUID "{4017f97f-8700-44ad-a4f0-d3c2bca035cf}";
 ;
 
   END
-  UUID "{e460a0ff-09a5-40da-9dd3-6735ffbbfca4}";;
+  UUID "{1496b889-9ffd-440a-be68-8635459560f5}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14221,11 +14221,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5b133e12-1b66-4a4e-bdb8-380c75d7f6f9}";
+    UUID "{00ce95d3-79ea-4930-9a19-bd30a29d8984}";
 ;
 
   END
-  UUID "{cb808677-c739-4d54-87aa-03ca50a772cd}";;
+  UUID "{a93ccf46-291f-492a-b8db-bbcc1f2894cf}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14236,11 +14236,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{eaf2aee1-1512-472b-a3c2-804d2bdd25b2}";
+    UUID "{3c5ce506-1cbe-4e64-9b9c-0341b460e2e3}";
 ;
 
   END
-  UUID "{f5b9e0ea-c2d6-4b86-8df4-8b2430aafa77}";;
+  UUID "{112a707b-5203-4cb6-be7a-25d239c0227a}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
