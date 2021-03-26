@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.2
-# Created 11:56 March 26, 2021
+# Created 13:30 March 26, 2021
 # 
 RULESET
 NAME "CRMMS Ruleset";
@@ -829,9 +829,9 @@ BEGIN
       WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
           DESCRIPTION          "Shortage reduction volume <br>";
       WITH_STATEMENT (NUMERIC CAPShortageVolume = $ "Shortage.CAP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] COMMENTED_BY "Adjust CAP for shortage <br>") DO
-            WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.AnnualICSDelivery_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.AnnualICSDelivery_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICSProjectionData.AnnualCreationEC_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
           DESCRIPTION          "DCP reduction volume <br>";
-      WITH_STATEMENT (NUMERIC DCPreductionCAWCD = $ "ICS Credits.AnnualSimultaneousCreationDCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+      WITH_STATEMENT (NUMERIC DCPreductionCAWCD = $ "ICS Credits.AnnualSysWaterforDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
           DESCRIPTION          "If the LB is in Domestic or Quantified Surplus, use the total annual schedules slot. This is the base <br>diversion volume prior to any adjustments being made <br>";
       WITH_STATEMENT (NUMERIC CAPDivRequested = IF ( "IsDomesticOrQuantified"(  ) )
  THEN
@@ -11384,7 +11384,7 @@ BEGIN
            ENDWITH
           ENDWITH COMMENTED_BY "Annual Creation for AZ slots <br>"
          ENDWITH COMMENTED_BY "5. Calculate the amount of ec creation (pre tax/pre bank) <br>"
-        ENDWITH COMMENTED_BY "4. Calculate the amount of DCP contribution to be made as system water. <br><br>In year 1, the Conversion of Excess DCP ICS to ICS Provision function splits the DCP <br>contribution into 2 values, the DCP contribution required as DCP ICS, <1>, and the DCP <br>contribution required as EC ICS, <0>. This does not happen in outyears, it will pass 0 acre-ft <br>for <0> and the DCP creation required for the year as <1>, thus you do not need to worry <br>about a DCP Contribution as EC ICS in outyears.<br><br>So year 1, the system water calculation is: <1> + <0> - simultaneous creation - any EC ICS <br>creation calculated above.<br><br>In outyears the calculation is the following:  <1> - simultaneous creation<br><br>The logic is calculating system water contribution the following way : (<1> - simultaneous <br>creation) + (<0> - any EC ICS)<br><br>Using information calculated above, this calculates system water by the following:<br><br>1: Take <1>, the DCP contribution required as DCP ICS, and subtract any simultaneous <br>creation from it. This covers all outyear calculations for system water and a portion of the <br>equation for the year 1 calculation.<br><br>2: Second part of year 1:  If its the start year do 2A or 2B, otherwise its 0 acre-ft.<br><br>2A: If there is EC ICS creation in year 1, calculate the difference between the DCP ICS <br>contribution required as EC ICS, <0>, and any EC ICS that can be created that year. If there <br>is left over DCP Contribution, add it to the system water contribution.<br><br>2B. If there is no EC ICS creation happening in year 1, add the full amount of <0> to the <br>system water contribution.       <br>"
+        ENDWITH COMMENTED_BY "4. Calculate the amount of DCP contribution to be made as system water. <br><br>In year 1, the Conversion of Excess DCP ICS to ICS Provision function splits the DCP <br>contribution into 2 values, the DCP contribution based on actual EOY elevation, <1>, and the <br>difference between the DCP contribution based on the actual EOY elevation and projected <br>EOY elevation from the August 24 MS, <0>. This does not happen in outyears, it will pass 0 <br>acre-ft for <0> and the DCP creation required for the year as <1>.<br><br>So year 1, the system water calculation is: <1> + <0> - DCP ICS creation - EC ICS creation <br>calculated above.<br><br>In outyears the calculation is the following:  <1> - DCP ICS creation<br><br>The logic is calculating system water contribution the following way : (<1> - DCP ICS <br>creation) + (<0> - any EC ICS)<br><br>Using information calculated above, this calculates system water by the following:<br><br>1: Take <1>, the DCP contribution based on EOCY actual elevation, and subtract any DCP <br>ICS creation from it. This covers all outyear calculations for system water and a portion of the <br>equation for the year 1 calculation.<br><br>2: Second part of year 1:  If its the start year do 2A or 2B, otherwise its 0 acre-ft.<br>    <br>"
        ENDWITH COMMENTED_BY "3B. How much of the simultaneous creation above comes from the non taxed portion of the EC <br>ICS creation   <br>"
       ENDWITH COMMENTED_BY "3A. How much of the simultaneous creation above is coming from the taxed portion of the EC ICS <br>creation<br>"
      ENDWITH COMMENTED_BY "2. The amount simultaneous creation in a year based on the EC ICS creation which ends up in the <br>bank. This takes into account the Conversion of Excess DCP ICS to ICS provision in DCP exhibit. <br>This is a post tax value.    <br>"
@@ -14185,32 +14185,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{8528ac0e-0925-4a6b-b5a1-f85724a96a25}";
+    UUID "{5c223c3c-ad75-4d0a-87b1-62c28a870c02}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{652fc458-1070-440c-bc22-5919ceda08cf}";
+    UUID "{4d34d225-4b62-4773-b1cc-bee152debbee}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{bb8a1891-32fd-4172-aa2c-e6640242a666}";
+    UUID "{49050289-8d03-44b2-a733-8731fb83413d}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{4d90c003-a960-4c62-873f-9e53497114ee}";
+    UUID "{dc896fbf-fdae-4312-b414-167891eabb05}";
 ;
 
   END
-  UUID "{8e839a13-b055-4046-a665-3de40e6b1909}";;
+  UUID "{066a308a-fc4f-47b8-add4-210b4a92dce2}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14221,11 +14221,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{836211ac-a7c4-43cd-a709-18c601d2a114}";
+    UUID "{c233c6f2-94d3-4fc1-9f5b-3a12bad3cded}";
 ;
 
   END
-  UUID "{99631101-3248-40fe-8d2d-f9beffd78802}";;
+  UUID "{3f094dc4-5457-4928-ab50-e1a72840f81b}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14236,11 +14236,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{cb92d44e-9649-4d99-88fc-a802c33f50a1}";
+    UUID "{b46e16cb-b6cd-4f35-ad3e-2f76997df9cc}";
 ;
 
   END
-  UUID "{a2cdec1a-eef9-4246-afe0-4f97ad34de4b}";;
+  UUID "{b13ae065-3653-454e-9141-6519c67fa7ce}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14251,11 +14251,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a55167c7-25d7-4064-b478-043037077bc1}";
+    UUID "{66890c97-2a6f-49bb-8946-400ab0952673}";
 ;
 
   END
-  UUID "{d1c7d737-180e-4c44-a355-05c4cc554267}";;
+  UUID "{3a8b9fd2-f1e7-4245-af37-11291a14824c}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
