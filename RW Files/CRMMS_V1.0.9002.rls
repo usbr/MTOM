@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.2
-# Created 11:43 March 31, 2021
+# Created 12:33 March 31, 2021
 # 
 RULESET
 NAME "CRMMS Ruleset";
@@ -2069,6 +2069,7 @@ BEGIN
     NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.<br><br>A. Pivarnik, 20200709: Integration effort. This rule was streamlined for the MTOM ruleset when created. It was written differently than the 24 MS rule but accomplishes the same thing. General structure for the rule did not change in the integration effort because the 24 MS ruleset is being merged into MTOM, and the MTOM structure is what solves correctly within this ruleset. Added a start year dcp creation function call to for solve the DCP creation volume in year 1 if we end in a DCP tier that is lower than the one projected by the 24 MS in August.";
     BEGIN
 
+    BREAKPOINT AFTER_EXEC FALSE;
     DESCRIPTION          "This rule does part A in the description below.<br><br>Per SNWA's instructions,  DCP will be handled the following way:<br><br>(A) If available, convert existing EC ICS to meet the DCP contribution. <br><br>The value is stored in the AnnualConversionPreviousECtoDCP_NV slot. If the existing EC ICS <br>can not cover the full DCP amount, then the model will store any remaining DCP contribution <br>in the AnnualRemainingDCPContribution_NV slot.<br><br>(B) Reduce deliveries to simultaneously create DCP ICS until bank is filled. <br><br>Since the model  already has current year EC ICS creation which is solved for in a later rule, it <br>attempts to use this first prior to reducing the delivery further. This math happens in the <br>accounting rule using the AnnualRemainingDCPContribution_NV slot.<br><br>(C) Create system water if there is no bank space (handled in the NV accounting rule)                    <br>";
       WITH_STATEMENT (NUMERIC AnnualDCPContribution = GET @INDEX 1.00000000 FROM "Conversion of Excess DCP ICS to ICS Provision"( "NV" )) DO
           DESCRIPTION          "If a DCP contribution is needed for the year, detemine how much can be covered by previously <br>created EC ICS. If there is any left over, store it in the AnnualRemainingDCPContribution_NV slot <br>(Part A above).   <br>";
@@ -11330,7 +11331,7 @@ BEGIN
     END
     UUID "{7232ee59-42ea-44fa-804c-baab7f95b193}";;
 
-    BREAKPOINT AFTER_EXEC TRUE;
+    BREAKPOINT AFTER_EXEC FALSE;
     FUNCTION       "ICSAccountingForAZ" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -11461,6 +11462,7 @@ BEGIN
     END
     UUID "{fb667623-0553-452e-af24-8afa189a5714}";;
 
+    BREAKPOINT AFTER_EXEC TRUE;
     FUNCTION       "ICSAccountingForNV" (  )
     RETURN_TYPE    LIST;
     SCALE_UNITS    "";
@@ -11475,24 +11477,24 @@ BEGIN
   WITH NUMERIC BiNat = $ "ICS Credits.BiNationalICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliveryBiNat_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
    WITH NUMERIC Imported = $ "ICS Credits.AnnualCreationImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryImp_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
     WITH NUMERIC Tributary = $ "ICS Credits.AnnualCreationTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryTrib_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-     WITH NUMERIC currentECICStoDCPconversion = "Min"( $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"], IF ( "Is24MonthStudy"(  ) )
+     WITH NUMERIC currentECICStoDCPconversion = "Min"( $ "ICS Credits.AnnualRemainingDCPContribution_NV" [@"24:00:00 December Max DayOfMonth, Current Year"], IF ( "Is24MonthStudy"(  ) OR NOT "IsMRM"(  ) )
      THEN
       $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"]
      ELSE
-      "Max"( 0.00000000 "acre-ft", ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - ( ( BiNat + $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "No need to take into account DCP delivery since it wont happen if Lower basin is operating under <br>DCP, no need to take into account any conversion from EC to DCP ICS because it is just a paper <br>transfer, the water is already accounted for in the EC ICS balance from the previous year. <br><br>AP 11/19/19    <br>" ) ) COMMENTED_BY "Calculation of bank space for additional ICS creation to meet DCP calculation. could possibly be <br>negative depending on tributary conservation ICS and available space  <br>" )
+      "Max"( 0.00000000 "acre-ft", ( ( $ "ICS Credits.MeadBankParameters" ["Nevada", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December 31, Previous Year"] ) - ( ( BiNat + $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December 31, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "No need to take into account DCP delivery since it wont happen if Lower basin is operating under <br>DCP, no need to take into account any conversion from EC to DCP ICS because it is just a paper <br>transfer, the water is already accounted for in the EC ICS balance from the previous year. <br><br>AP 11/19/19    <br>" ) ) COMMENTED_BY "Calculation of bank space for additional ICS creation to meet DCP calculation. could possibly be <br>negative depending on tributary conservation ICS and available space  <br>" ) / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December 31, Previous Year"]
      ENDIF COMMENTED_BY "This decides whether to have the logic check against the bank. This is needed in MTOM mode <br>since everything is done via logic, but not in 24 MS mode since the ICS creation is checked <br>against the bank manually. The 24 MS mode passes the default value calculated by River Ops <br>through the logic as the preliminary value. The default value for SNWA is adjusted via <br>apportionment since the ICS creation/delivery is the NV state apportionment minus the demand. <br>Any current year EC ICS creation converted to DCP ICS in 24 MS mode should use the preliminary <br>value manually calculated.           <br>" ) COMMENTED_BY "This MIN covers part B above. The ruleset has already attempted to convert existing EC ICS to <br>cover the DCP contribution (part A). The MIN below takes the minimum of the remaining DCP <br>contribution after part A, or the bank space in MTOM/manually calculated value of ICS creation in <br>the 24 MS. Any value from this min statement is subtracted from the preliminary ICS value which <br>has already been calculated (see rest of part B further down in the function), thus will give <br>current year EC ICS creation after the DCP contribution is met. If the remaining DCP contribution <br>can not be covered after this statement, the delivery will be reduced further via system water to <br>meet the DCP contribution (part C).             <br>" DO
       WITH NUMERIC syswaterDCPcontribution = ( GET @INDEX 1.00000000 FROM "Conversion of Excess DCP ICS to ICS Provision"( "NV" ) ) - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - currentECICStoDCPconversion + IF ( "IsStartYear"(  ) )
       THEN
        IF ( $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] >= 0.00000000 "acre-ft" )
        THEN
-        "Max"( ( GET @INDEX 0.00000000 FROM "Conversion of Excess DCP ICS to ICS Provision"( "NV" ) ) - $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] * "SystemTaxAdjustment_DCP"(  ), 0.00000000 "acre-ft" )
+        "Max"( ( GET @INDEX 0.00000000 FROM "Conversion of Excess DCP ICS to ICS Provision"( "NV" ) ) - $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], 0.00000000 "acre-ft" )
        ELSE
         0.00000000 "acre-ft"
        ENDIF
       ELSE
        0.00000000 "acre-ft"
       ENDIF DO
-       WITH NUMERIC SNWPannualECICScreation = "Max"( 0.00000000 "acre-ft", $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] - currentECICStoDCPconversion / "SystemTaxAdjustment_DCP"(  ) ) COMMENTED_BY "This logic helps calculate part B above. This attempts to use the preliminary EC ICS solved in a <br>prior rule to cover the DCP contribution from simultaneous creation solved above. If there is more <br>simultaneous creation than the preliminray calc, it evaulautes to 0.  <br>" DO
+       WITH NUMERIC SNWPannualECICScreation = "Max"( 0.00000000 "acre-ft", $ "ICSProjectionData.AnnualCreationEC_SNWP_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] - currentECICStoDCPconversion ) COMMENTED_BY "This logic helps calculate part B above. This attempts to use the preliminary EC ICS solved in a <br>prior rule to cover the DCP contribution from simultaneous creation solved above. If there is more <br>simultaneous creation than the preliminray calc, it evaulautes to 0.  <br>" DO
         WITH NUMERIC ECICS = $ "ICS Credits.ExtraordinaryConservationICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + "Current Year ECICS into Bank"( SNWPannualECICScreation, $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"], "Nevada" ) - $ "ICS Credits.AnnualDeliveryEC_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
          WITH NUMERIC DCPICS = $ "ICS Credits.DCPICS_NV" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualConversionPreviousECtoDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliveryDCP_NV" [@"24:00:00 December Max DayOfMonth, Current Year"] + currentECICStoDCPconversion DO
           WITH NUMERIC MeadBank = BiNat + ECICS + DCPICS DO
