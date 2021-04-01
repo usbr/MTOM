@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.2
-# Created 20:09 March 31, 2021
+# Created 08:54 April 1, 2021
 # 
 RULESET
 NAME "CRMMS Ruleset";
@@ -829,7 +829,7 @@ BEGIN
       WITH_STATEMENT (LIST AZFirming = "AZ Firming Agreement"(  )) DO
           DESCRIPTION          "Shortage reduction volume <br>";
       WITH_STATEMENT (NUMERIC CAPShortageVolume = $ "Shortage.CAP Annual Shortage Volume" [@"24:00:00 December Max DayOfMonth, Current Year"] COMMENTED_BY "Adjust CAP for shortage <br>") DO
-            WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.DiversionAdjustment_ECandDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+            WITH_STATEMENT (NUMERIC CAWCDICSdiversionAdjustment = $ "ICS Credits.ICSDiversionAdjustment_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
           DESCRIPTION          "If the LB is in Domestic or Quantified Surplus, use the total annual schedules slot. This is the base <br>diversion volume prior to any adjustments being made <br>";
       WITH_STATEMENT (NUMERIC CAPDivRequested = IF ( "IsDomesticOrQuantified"(  ) )
  THEN
@@ -1177,7 +1177,7 @@ BEGIN
           DESCRIPTION          "Annual Creation EC CAWCD <br>";
       $ "ICS Credits.AnnualCreationEC_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 4.00000000 FROM azICSvalues;
 
-            $ "ICS Credits.DiversionAdjustment_ECandDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 11.00000000 FROM azICSvalues;
+            $ "ICS Credits.ICSDiversionAdjustment_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] := GET @INDEX 11.00000000 FROM azICSvalues;
 
       END_WITH_STATEMENT;
 
@@ -11381,8 +11381,8 @@ BEGIN
                         WITH NUMERIC DCP_CAWCD = $ "ICS Credits.DCPICS_CAWCD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryDCP_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] + SimultaneousCreationDCPICS_CAWCD DO
                          WITH NUMERIC Bank_CAWCD = DCP_CAWCD + BiNat_CAWCD + ECICS_CAWCD DO
                           WITH NUMERIC TotalICS_CAWCD = ECICS_CAWCD + BiNat_CAWCD + SysEff_CAWCD + DCP_CAWCD DO
-                           WITH NUMERIC ECandDCPICSDivAdjustment = $ "ICS Credits.AnnualDeliveryEC_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - AnnualCreationEC_CAWCD - CAWCDsyswaterDCPContribution - ( CAWCDdcpCONTRIBUTIONasDCPICSnontaxed + CAWCDdcpCONTRIBUTIONasDCPICStaxed ) DO
-                            { SysEff_CAWCD , BiNat_CAWCD , SimultaneousCreationDCPICS_CAWCD , CAWCDsyswaterDCPContribution , AnnualCreationEC_CAWCD , FirmingBalanceAZ , FirmingBalanceUS , ECICS_CAWCD , DCP_CAWCD , Bank_CAWCD , TotalICS_CAWCD , ECandDCPICSDivAdjustment }
+                           WITH NUMERIC ICSDivAdjustment = $ "ICS Credits.AnnualICSDelivery_CAWCD" [@"24:00:00 December Max DayOfMonth, Current Year"] - CAWCDsyswaterDCPContribution - ( CAWCDdcpCONTRIBUTIONasDCPICSnontaxed + CAWCDdcpCONTRIBUTIONasDCPICStaxed ) DO
+                            { SysEff_CAWCD , BiNat_CAWCD , SimultaneousCreationDCPICS_CAWCD , CAWCDsyswaterDCPContribution , AnnualCreationEC_CAWCD , FirmingBalanceAZ , FirmingBalanceUS , ECICS_CAWCD , DCP_CAWCD , Bank_CAWCD , TotalICS_CAWCD , ICSDivAdjustment }
                            ENDWITH
                           ENDWITH
                          ENDWITH
@@ -14197,32 +14197,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{2dc4ad2c-58e5-4a12-af39-df687d399c10}";
+    UUID "{d0a41458-85fe-4f40-a9c7-4e5eb1a690c7}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{a2356340-f2f8-4ef1-8b65-7e8ad110e91f}";
+    UUID "{7366762f-14c4-4b37-9ce5-aafe4ac31cf5}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d8539681-8ba2-43de-9c41-0d9cb345bfe2}";
+    UUID "{a3b2e7df-c37b-4ca8-8e64-7be3781272c6}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{20f18a72-0e8a-4cb1-83ad-cb1f56fb7ca1}";
+    UUID "{7c5c26df-22a3-4f92-a433-99cad1e6e32f}";
 ;
 
   END
-  UUID "{e67eecae-ad00-4810-8e9a-a0cac2084c10}";;
+  UUID "{d3b8f73b-aa27-48a9-9273-1fc960b54aec}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14233,11 +14233,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{7543af3c-89b7-41cf-8ad0-cffbff747d50}";
+    UUID "{d959826b-3f63-4b70-addb-a403c85f6201}";
 ;
 
   END
-  UUID "{7ce38fc2-d9d7-431d-ae43-8eb2d0c0a5a1}";;
+  UUID "{d0c90075-3669-4cee-b258-bf75f086db37}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14248,11 +14248,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{93e3b4af-c20f-4c46-abe3-0f18f15ea70d}";
+    UUID "{c41d5348-fbc4-412b-9cce-030eb2316e2b}";
 ;
 
   END
-  UUID "{b4f23bfb-60d6-4b68-9ac2-2631b74ccae1}";;
+  UUID "{b6e1cbf5-bf47-44fb-9b97-bd337be240ca}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14263,11 +14263,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{1ce3cbbd-69c9-4418-a4bf-8943f36eb325}";
+    UUID "{f3720555-3171-42c4-9807-0940dbf9db22}";
 ;
 
   END
-  UUID "{c17066c6-34c8-404f-813b-02303962a65c}";;
+  UUID "{140642a2-a5b7-4394-8d53-3391c38a829f}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
