@@ -1,5 +1,5 @@
 # RiverWare_Ruleset 8.2
-# Created 13:45 April 8, 2021
+# Created 13:28 April 12, 2021
 # 
 RULESET
 NAME "CRMMS Ruleset";
@@ -2031,11 +2031,11 @@ BEGIN
     NOTES                "AUTHOR: AP, 2020-01-01<br><br>EDITS: <br>S.Baker, 2020-03-05: edited comments and added description.<br><br>A. Pivarnik, 20200709: Integration effort. This rule was streamlined for the MTOM ruleset when created. It was written differently than the 24 MS rule but accomplishes the same thing. General structure for the rule did not change in the integration effort because the 24 MS ruleset is being merged into MTOM, and the MTOM structure is what solves correctly within this ruleset. Added a start year dcp creation function call to for solve the DCP creation volume in year 1 if we end in a DCP tier that is lower than the one projected by the 24 MS in August.";
     BEGIN
 
-    DESCRIPTION          "MWD will take on the full amount of DCP contribution for the state of California and all <br>accounting works under this assumption. Since MWD is taking the full DCP contribution for the <br>state, any DCP contribution required by Coachella Valley will be water left on the system for <br>MWD to take as delivery. Any potential DCP ICS created by Coachella is considered an <br>intrastate deal, and thus is in the MWD balance.<br><br>This rule solves for part A below. <br><br>Per MWD's instructions,  DCP will be handled the following way:<br><br>(A) If available, convert existing EC ICS to meet the DCP contribution.<br><br>The value is stored in the AnnualConversionPreviousECtoDCP_MWD slot. If the existing EC <br>ICS can not cover the full DCP amount, then the model will store any remaining DCP <br>contribution in the AnnualRemainingDCPContribution_MWD slot.<br><br>(B) Reduce deliveries to simultaneously create DCP ICS until bank is filled. <br><br>Since the model  already has current year EC ICS creation which is solved for in a later rule, it <br>attempts to use this first prior to reducing the delivery further. This math happens in the <br>accounting rule using the AnnualRemainingDCPContribution_MWD slot.<br><br>(C) Create system water if there is no bank space (handled in the CA accounting rule)                     <br>";
-      WITH_STATEMENT (NUMERIC AnnualDCPContribution = GET @INDEX 1.00000000 FROM "Conversion of Excess DCP ICS to ICS Provision"( "CA" )) DO
-          DESCRIPTION          "If a DCP contribution is needed for the year, detemine how much can be covered by previously <br>created EC ICS. If there is any left over, store it in the AnnualRemainingDCPContribution_MWD <br>slot (Part A above).   <br>";
-      IF_STATEMENT (AnnualDCPContribution > 0.00000000 "acre-ft") THEN
-            WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( AnnualDCPContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
+    DESCRIPTION          "MWD will take on the full amount of DCP contribution for the state of California and all <br>accounting works under this assumption. Since MWD is taking the full DCP contribution for the <br>state, any DCP contribution required by Coachella Valley will be water left on the system for <br>MWD to take as delivery. Any potential DCP ICS created by Coachella is considered an <br>intrastate deal, and thus is in the MWD balance.<br><br>This rule solves for part A below. <br><br>Per MWD's instructions,  DCP will be handled the following way:<br><br>(A) If available, convert existing EC ICS to meet the DCP contribution.<br><br>The value is stored in the AnnualConversionPreviousECtoDCP_MWD slot. If the existing EC <br>ICS can not cover the full DCP amount, then the model will store any remaining DCP <br>contribution in the AnnualRemainingDCPContribution_MWD slot.<br><br>(B) Reduce deliveries to simultaneously create DCP ICS until bank is filled. <br><br>Since the model  already has current year EC ICS creation which is solved for in a later rule, it <br>attempts to use this first prior to reducing the delivery further. This math happens in the <br>accounting rule using the AnnualRemainingDCPContribution_MWD slot.<br><br>(C) Create system water if there is no bank space (handled in the CA accounting rule)                      <br>";
+      IF_STATEMENT ($ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] > 0.00000000 "acre-ft") THEN
+            WITH_STATEMENT (NUMERIC AnnualDCPContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"]) DO
+          DESCRIPTION          "If a DCP contribution is needed for the year, detemine how much can be covered by previously <br>created EC ICS. If there is any left over, store it in the AnnualRemainingDCPContribution_MWD <br>slot (Part A above).    <br>";
+      WITH_STATEMENT (NUMERIC PreviousECtoDCP = "Min"( AnnualDCPContribution, $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] )) DO
             WITH_STATEMENT (NUMERIC RemainingContribution = IF ( AnnualDCPContribution == PreviousECtoDCP )
  THEN
   0.00000000 "acre-ft"
@@ -2050,14 +2050,14 @@ BEGIN
 
       END_WITH_STATEMENT;
 
+      END_WITH_STATEMENT;
+
       ELSE
             $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
 
             $ "ICS Credits.AnnualRemainingDCPContribution_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] := 0.00000000 "acre-ft";
 
       END_IF_STATEMENT;
-
-      END_WITH_STATEMENT;
 
     END
     UUID "{c862f2bd-77c9-4b9d-957d-8c1f3f2b3bfe}";;
@@ -11398,16 +11398,16 @@ BEGIN
                ENDWITH COMMENTED_BY "Store the list values as indivdual variables <br>"
               ENDWITH
              ENDWITH COMMENTED_BY "Pull out the individual lists <br>"
-            ENDWITH COMMENTED_BY "########################################  <br>5. Using the following FOR loop, categorize the ICS creation as either non taxed or taxed for the <br>ICS going into EC or DCP accounts. The result of this FOR loop is a list of lists, with the first list <br>being the nontaxed/taxed EC ICS values, and the second list being the nontaxed/taxed DCP ICS <br>values. These values are then taken out of the lists and stored in temporary variables to be used <br>in the following balance calculations.    <br>"
-           ENDWITH COMMENTED_BY "######################################## <br>4. Calculate the Annual Creation of EC ICS for CAWCD. The logic above converted as much of <br>the preliminary EC ICS creation as it needed to help meet the required DCP contribution, so <br>subtract that value (CAWCDcreationECICSforDCPcontribution) from the preliminary EC ICS <br>creation. Add back in any of the DCP contribution which can be made as EC ICS under the <br>provision previously discussed.    <br>"
-          ENDWITH COMMENTED_BY "In year 1, the Conversion of Excess DCP ICS to ICS Provision function splits the DCP <br>contribution into 2 values, the DCP contribution based on actual EOY elevation, <1>, and the <br>difference between the DCP contribution based on the actual EOY elevation and projected <br>EOY elevation from the August 24 MS, <0>. This does not happen in outyears, it will pass 0 <br>acre-ft for <0> and the DCP creation required for the year as <1>.<br><br>So year 1, the system water calculation is: <1> + <0> - DCP ICS creation - EC ICS creation <br>calculated above.<br><br>In outyears the calculation is the following:  <1> - DCP ICS creation<br><br>The logic is calculating system water contribution the following way : (<1> - DCP ICS <br>creation) + (<0> - any EC ICS)<br><br>         <br>"
+            ENDWITH COMMENTED_BY "########################################  <br>5. Using the following FOR loop, categorize the ICS creation as either non taxed or taxed for the <br>ICS going into EC or DCP accounts. The result of this FOR loop is a list of lists, with the first list <br>being the nontaxed/taxed EC ICS values, and the second list being the nontaxed/taxed DCP ICS <br>values. These values are then taken out of the lists and stored in temporary variables to be used <br>in the following balance calculations.     <br>"
+           ENDWITH COMMENTED_BY "######################################## <br>4. Calculate the Annual Creation of EC ICS for CAWCD. The logic above converted as much of <br>the preliminary EC ICS creation as it needed to help meet the required DCP contribution, so <br>subtract that value (CAWCDcreationECICSforDCPcontribution) from the preliminary EC ICS <br>creation. Add back in any of the DCP contribution which can be made as EC ICS under the <br>provision previously discussed.     <br>"
+          ENDWITH COMMENTED_BY "The system water is calculated by taking the full DCP contribution for the year and subtracting <br>any simulatneous conversion of EC ICS to DCP contribution<br>            <br>"
          ENDWITH
-        ENDWITH COMMENTED_BY "########################################<br>3. Categorize the DCP Contribution as either the Excess DCP ICS to ICS Conversion volume (DCP <br>contirbution as EC ICS) or  DCP ICS. By setting the DCP contribution as EC ICS first, it prioritizes <br>putting ICS into the EC ICS account. <br><br>This takes as much of the CAWCDcreationECICSforDCPcontribution creation volume as you can <br>and puts it into DCP contribution as EC ICS. The remaining is going to be placed in the DCP ICS <br>account. If there is no ConversionofExcessDCPICStoICSvolume then the contribution will solve as <br>0 acre-ft.    <br>"
-       ENDWITH COMMENTED_BY "########################################<br>2. EC to DCP Conversion (simultaneous creation)  <br>"
+        ENDWITH COMMENTED_BY "########################################<br>3. Categorize the DCP Contribution as either the Excess DCP ICS to ICS Conversion volume (DCP <br>contirbution as EC ICS) or  DCP ICS. By setting the DCP contribution as EC ICS first, it prioritizes <br>putting ICS into the EC ICS account. <br><br>This takes as much of the CAWCDcreationECICSforDCPcontribution creation volume as you can <br>and puts it into DCP contribution as EC ICS. The remaining is going to be placed in the DCP ICS <br>account. If there is no ConversionofExcessDCPICStoICSvolume then the contribution will solve as <br>0 acre-ft.     <br>"
+       ENDWITH COMMENTED_BY "########################################<br>2. EC to DCP Conversion (simultaneous creation)   <br>"
       ENDWITH
      ENDWITH
     ENDWITH
-   ENDWITH COMMENTED_BY "The following section of code calculates the DCP contribution and takes into account the <br>replinshment incentive and the Conversion of Excess DCP ICS to ICS provision in the DCP <br>exhibit.<br><br>Since the DCP assessment is post contribution, most of these calculations are pretax.<br><br>It does this by the following:<br><br>1. Defining the following key variables: nontaxableECICScreation, <br>CAWCDpreliminaryECICScreation, Conversion of ExcessDCPICStoICSprovision volume (only <br>needed in year 1). <br><br>2. Simultaneous creation. Looking at the remaining DCP contribution, convert as much of the <br>preliminary EC ICS to DCP ICS as needed. This value is stored as the <br>CAWCDcreationECICSforDCPcontribution. As of this point, this variable includes both the DCP <br>contribution as DCP ICS and the potential EC contribution under the Conversion of Excess <br>DCP ICS to ICS provision (III.E.3, bottom of page 6 of the DCP exhibit).<br><br>3. Categorize the DCP contrbution. This part splits the DCP contribution into either the <br>contribution being made as EC ICS (only an issue in year 1, III.E.3) or DCP ICS. After this is <br>done, calculate the system water needed to finish the DCP contribution.<br><br>4. Calculate the Annual EC ICS creation for CAWCD. This is a pretax value.<br><br>5. Calculate the post tax values for both EC ICS creation and DCP ICS. This part takes into <br>account the replenishment incentive (whether the creation gets taxed or not)<br><br><br>########################################<br>1. Definition of key variables              <br>"
+   ENDWITH COMMENTED_BY "The following section of code calculates the DCP contribution and takes into account the <br>replinshment incentive and the Conversion of Excess DCP ICS to ICS provision in the DCP <br>exhibit.<br><br>Since the DCP assessment is post contribution, most of these calculations are pretax.<br><br>It does this by the following:<br><br>1. Defining the following key variables: nontaxableECICScreation, <br>CAWCDpreliminaryECICScreation, Conversion of ExcessDCPICStoICSprovision volume (only <br>needed in year 1). <br><br>2. Simultaneous creation. Looking at the remaining DCP contribution, convert as much of the <br>preliminary EC ICS to DCP ICS as needed. This value is stored as the <br>CAWCDcreationECICSforDCPcontribution. As of this point, this variable includes both the DCP <br>contribution as DCP ICS and the potential EC contribution under the Conversion of Excess <br>DCP ICS to ICS provision (III.E.3, bottom of page 6 of the DCP exhibit).<br><br>3. Categorize the DCP contrbution. This part splits the DCP contribution into either the <br>contribution being made as EC ICS (only an issue in year 1, III.E.3) or DCP ICS. After this is <br>done, calculate the system water needed to finish the DCP contribution.<br><br>4. Calculate the Annual EC ICS creation for CAWCD. This is a pretax value.<br><br>5. Calculate the post tax values for both EC ICS creation and DCP ICS. This part takes into <br>account the replenishment incentive (whether the creation gets taxed or not)<br><br><br>########################################<br>1. Definition of key variables               <br>"
   ENDWITH COMMENTED_BY "CAWCD BiNat ICS Balance <br>"
  ENDWITH COMMENTED_BY "CAWCD SysEff ICS Balance <br>";
 
@@ -11426,38 +11426,69 @@ BEGIN
 
       WITH NUMERIC MWD_SysEffICS = $ "ICS Credits.SystemEfficiencyICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationSysEff_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliverySysEff_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
   WITH NUMERIC MWD_BiNatICS = $ "ICS Credits.BiNationalICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + $ "ICS Credits.AnnualCreationBiNat_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliveryBiNat_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-   WITH NUMERIC MWDcurrentECICStoDCPconversion = "Min"( $ "ICS Credits.AnnualRemainingDCPContribution_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"], IF ( "Is24MonthStudy"(  ) )
-   THEN
-    $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"]
-   ELSE
-    "Max"( 0.00000000 "acre-ft", ( ( ( $ "ICS Credits.MeadBankParameters" ["MWD", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( ( MWD_BiNatICS + $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "No need to take into account DCP delivery since it wont happen if Lower basin is operating under <br>DCP, no need to take into account any conversion from previous EC to DCP ICS because it is just <br>a paper transfer, the water is already accounted for in the EC ICS balance from the previous <br>year. <br><br>AP 11/19/19     <br>" ) ) / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) COMMENTED_BY "Calculation of bank space for additional ICS creation to meet DCP calculation <br>" )
-   ENDIF ) DO
-    WITH NUMERIC MWDsyswaterDCPcontribution = ( ( GET @INDEX 1.00000000 FROM "Conversion of Excess DCP ICS to ICS Provision"( "CA" ) ) - $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - MWDcurrentECICStoDCPconversion + IF ( "IsStartYear"(  ) )
-    THEN
-     IF ( $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] >= 0.00000000 "acre-ft" )
-     THEN
-      "Max"( ( GET @INDEX 0.00000000 FROM "Conversion of Excess DCP ICS to ICS Provision"( "CA" ) ) - $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"], 0.00000000 "acre-ft" )
-     ELSE
-      0.00000000 "acre-ft"
-     ENDIF
-    ELSE
-     0.00000000 "acre-ft"
-    ENDIF ) COMMENTED_BY "This is the state of CA system water requirement. MWD meets CA DCP requirement <br>" DO
-     WITH NUMERIC MWDannualECICScreation = "Max"( 0.00000000 "acre-ft", $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] - MWDcurrentECICStoDCPconversion ) DO
-      WITH NUMERIC MWD_ECICS = $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + "Current Year ECICS into Bank"( MWDannualECICScreation, $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"], "California" ) - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-       WITH NUMERIC MWD_DCPICS = $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] + MWDcurrentECICStoDCPconversion * "SystemTaxAdjustment_DCP"(  ) ) - $ "ICS Credits.AnnualDeliveryDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliveryDCP_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
-        WITH NUMERIC MWD_TotalICS = MWD_ECICS + MWD_SysEffICS + MWD_BiNatICS + MWD_DCPICS DO
-         WITH NUMERIC MWD_ICSBank = MWD_ECICS + MWD_BiNatICS + MWD_DCPICS DO
-          { MWD_SysEffICS , MWD_BiNatICS , MWDcurrentECICStoDCPconversion * "SystemTaxAdjustment_DCP"(  ) , MWDannualECICScreation , MWD_DCPICS , MWDsyswaterDCPcontribution , MWD_ECICS , MWD_TotalICS , MWD_ICSBank }
-         ENDWITH
-        ENDWITH
+   WITH NUMERIC ConversionofExistingECICSforDCPcontribution = $ "ICS Credits.AnnualConversionPreviousECtoDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
+    WITH NUMERIC MWDnontaxeableICScreation = $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] DO
+     WITH NUMERIC MWDpreliminaryECICScreation = $ "ICSProjectionData.AnnualCreationEC_CAWCD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
+      WITH NUMERIC ConversionofExcessDCPICStoICSprovisionVolume = ( GET @INDEX 0.00000000 FROM "Conversion of Excess DCP ICS to ICS Provision"( "CA" ) ) DO
+       WITH NUMERIC AnnualDCPContribution = $ "ICS Credits.AnnualDCPContribution_CA" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
+        WITH NUMERIC MWDcurrentECICStoDCPconversion = "Min"( $ "ICS Credits.AnnualRemainingDCPContribution_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"], IF ( "Is24MonthStudy"(  ) )
+        THEN
+         $ "ICSProjectionData.AnnualCreationEC_MWD_Preliminary" [@"24:00:00 December Max DayOfMonth, Current Year"]
+        ELSE
+         "Max"( 0.00000000 "acre-ft", ( ( ( $ "ICS Credits.MeadBankParameters" ["MWD", "Max Capacity"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) - ( ( MWD_BiNatICS + $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ( $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] ) ) COMMENTED_BY "No need to take into account DCP delivery since it wont happen if Lower basin is operating under <br>DCP, no need to take into account any conversion from previous EC to DCP ICS because it is just <br>a paper transfer, the water is already accounted for in the EC ICS balance from the previous <br>year. <br><br>AP 11/19/19     <br>" ) ) / "SystemTaxAdjustment_DCP"(  ) + $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] ) COMMENTED_BY "Calculation of bank space for additional ICS creation to meet DCP calculation <br>" )
+        ENDIF ) DO
+         WITH NUMERIC MWDdcpCONTRIBUTIONasECIS = "Min"( ConversionofExcessDCPICStoICSprovisionVolume, MWDcurrentECICStoDCPconversion ) DO
+          WITH NUMERIC MWDdcpCONTRIBUTIONasDCPICS = MWDcurrentECICStoDCPconversion - MWDdcpCONTRIBUTIONasECIS DO
+           WITH NUMERIC MWDsyswaterDCPcontribution = ( AnnualDCPContribution - ConversionofExistingECICSforDCPcontribution - MWDdcpCONTRIBUTIONasECIS - MWDdcpCONTRIBUTIONasDCPICS ) COMMENTED_BY "This is the state of CA system water requirement. MWD meets CA DCP requirement <br>" DO
+            WITH NUMERIC MWDannualECICScreation = "SetNegativeToZero"( MWDpreliminaryECICScreation - MWDcurrentECICStoDCPconversion ) + MWDdcpCONTRIBUTIONasECIS DO
+             WITH LIST EC_DCP_accounting = FOR ( NUMERIC account IN { MWDannualECICScreation , MWDdcpCONTRIBUTIONasECIS } ) WITH LIST result = {  } DO
+              WITH NUMERIC remainingNONTAXABLEics = IF ( ( LENGTH result ) == 0.00000000 )
+              THEN
+               MWDnontaxeableICScreation
+              ELSE
+               MWDnontaxeableICScreation - "SumByIndex"( result, 0.00000000 )
+              ENDIF DO
+               WITH NUMERIC nontaxedICS = "Min"( account, remainingNONTAXABLEics ) DO
+                WITH NUMERIC taxedICS = account - nontaxedICS DO
+                 APPEND { nontaxedICS , taxedICS } ONTO result
+                ENDWITH
+               ENDWITH
+              ENDWITH
+             ENDFOR DO
+              WITH LIST AnnualCreationEC_MWDlist = GET @INDEX 0.00000000 FROM EC_DCP_accounting DO
+               WITH LIST MWDdcpCONTRIBUTIONasDCPICSlist = GET @INDEX 1.00000000 FROM EC_DCP_accounting DO
+                WITH NUMERIC AnnualCreationEC_MWDnontaxed = GET @INDEX 0.00000000 FROM AnnualCreationEC_MWDlist DO
+                 WITH NUMERIC AnnualCreationEC_MWDtaxed = GET @INDEX 1.00000000 FROM AnnualCreationEC_MWDlist DO
+                  WITH NUMERIC MWDdcpCONTRIBUTIONasDCPICSnontaxed = GET @INDEX 0.00000000 FROM MWDdcpCONTRIBUTIONasDCPICSlist DO
+                   WITH NUMERIC MWDdcpCONTRIBUTIONasDCPICStaxed = GET @INDEX 1.00000000 FROM MWDdcpCONTRIBUTIONasDCPICSlist DO
+                    WITH NUMERIC MWD_ECICS = $ "ICS Credits.ExtraordinaryConservationICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + AnnualCreationEC_MWDnontaxed + AnnualCreationEC_MWDtaxed * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryEC_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - ConversionofExistingECICSforDCPcontribution DO
+                     WITH NUMERIC MWD_DCPICS = $ "ICS Credits.DCPICS_MWD" [@"24:00:00 December Max DayOfMonth, Previous Year"] + ConversionofExistingECICSforDCPcontribution + MWDdcpCONTRIBUTIONasDCPICSnontaxed + MWDdcpCONTRIBUTIONasDCPICStaxed * "SystemTaxAdjustment_DCP"(  ) - $ "ICS Credits.AnnualDeliveryDCP_MWD" [@"24:00:00 December Max DayOfMonth, Current Year"] - $ "ICS Credits.AnnualDeliveryDCP_Coachella" [@"24:00:00 December Max DayOfMonth, Current Year"] DO
+                      WITH NUMERIC MWD_TotalICS = MWD_ECICS + MWD_SysEffICS + MWD_BiNatICS + MWD_DCPICS DO
+                       WITH NUMERIC MWD_ICSBank = MWD_ECICS + MWD_BiNatICS + MWD_DCPICS DO
+                        { MWD_SysEffICS , MWD_BiNatICS , MWDcurrentECICStoDCPconversion , MWDannualECICScreation , MWD_DCPICS , MWDsyswaterDCPcontribution , MWD_ECICS , MWD_TotalICS , MWD_ICSBank }
+                       ENDWITH
+                      ENDWITH
+                     ENDWITH
+                    ENDWITH COMMENTED_BY "Calculate the remaining balances <br>"
+                   ENDWITH
+                  ENDWITH
+                 ENDWITH
+                ENDWITH COMMENTED_BY "Store list values as individual variables <br>"
+               ENDWITH
+              ENDWITH COMMENTED_BY "Pull out indvidual lists <br>"
+             ENDWITH COMMENTED_BY "########################################  <br>5. Using the following FOR loop, categorize the ICS creation as either non taxed or taxed for the <br>ICS going into EC or DCP accounts. The result of this FOR loop is a list of lists, with the first list <br>being the nontaxed/taxed EC ICS values, and the second list being the nontaxed/taxed DCP ICS <br>values. These values are then taken out of the lists and stored in temporary variables to be used <br>in the following balance calculations.     <br>"
+            ENDWITH COMMENTED_BY "######################################## <br>4. Calculate the Annual Creation of EC ICS for MWD. The logic above converted as much of the <br>preliminary EC ICS creation as it needed to help meet the required DCP contribution, so subtract <br>that value (MWDcreationECICSforDCPcontribution) from the preliminary EC ICS creation. Add <br>back in any of the DCP contribution which can be made as EC ICS under the provision previously <br>discussed.     <br>"
+           ENDWITH COMMENTED_BY "The system water is calculated by taking the full DCP contribution for the year and subtracting <br>any EC ICS converted from their existing balance, then subtracting any simulatneous conversion <br>of EC ICS to DCP contribution <br>"
+          ENDWITH
+         ENDWITH COMMENTED_BY "########################################<br>3. Categorize the DCP Contribution as either the Excess DCP ICS to ICS Conversion volume (DCP <br>contirbution as EC ICS) or  DCP ICS. By setting the DCP contribution as EC ICS first, it prioritizes <br>putting ICS into the EC ICS account. <br><br>This takes as much of the MWDcreationECICSforDCPcontribution creation volume as you can and <br>puts it into DCP contribution as EC ICS. The remaining is going to be placed in the DCP ICS <br>account. If there is no ConversionofExcessDCPICStoICSvolume then the contribution will solve as <br>0 acre-ft.      <br>"
+        ENDWITH COMMENTED_BY "########################################<br>2. EC to DCP Conversion (simultaneous creation)   <br>"
        ENDWITH
       ENDWITH
      ENDWITH
     ENDWITH
-   ENDWITH COMMENTED_BY "Since MWD's DCP contribution is meeting the state of CA full amount, this covers MWD and <br>CVWD's DCP contribution.<br><br>DCP Contributions will be made by converting EC ICS, then simultaneous creation, then system <br>water  <br>"
+   ENDWITH COMMENTED_BY "Since MWD's DCP contribution is meeting the state of CA full amount, this covers MWD and <br>CVWD's DCP contribution.<br><br>DCP Contributions will be made by converting EC ICS, then simultaneous creation, then <br>system water  <br><br>########################################<br><br>The following section of code calculates the DCP contribution and takes into account the <br>replinshment incentive and the Conversion of Excess DCP ICS to ICS provision in the DCP <br>exhibit.<br><br>Since the DCP assessment is post contribution, most of these calculations are pretax.<br><br>It does this by the following:<br><br>1. Defining the following key variables: ConversionofExistingECICSforDCPcontribution, <br>MWDnontaxableECICScreation, MWDpreliminaryECICScreation, Conversion of <br>ExcessDCPICStoICSprovision volume (only needed in year 1), AnnualDCP contribution. <br><br>2. Simultaneous creation. Looking at the remaining DCP contribution, convert as much of the <br>preliminary EC ICS to DCP ICS as needed. This value is stored as the <br>MWDcreationECICSforDCPcontribution. As of this point, this variable includes both the DCP <br>contribution as DCP ICS and the potential EC contribution under the Conversion of Excess <br>DCP ICS to ICS provision (III.E.3, bottom of page 6 of the DCP exhibit).<br><br>3. Categorize the DCP contrbution. This part splits the DCP contribution into either the <br>contribution being made as EC ICS (only an issue in year 1, III.E.3) or DCP ICS. After this is <br>done, calculate the system water needed to finish the DCP contribution.<br><br>4. Calculate the Annual EC ICS creation for MWD. This is a pretax value.<br><br>5. Calculate the post tax values for both EC ICS creation and DCP ICS. This part takes into <br>account the replenishment incentive (whether the creation gets taxed or not)<br><br>########################################<br>1. Definition of key variables                  <br>"
   ENDWITH COMMENTED_BY "BiNat Calculation <br>"
- ENDWITH COMMENTED_BY "CVWD DCP ICS accounting takes place under ICS Accounting for MWD. This is because CVWD is <br>storing their ICS under MWD's account. MWD meets the state of CA contribution<br><br>AP 11/19/19<br><br>Sys Eff Calculation   <br>";
+ ENDWITH COMMENTED_BY "CVWD DCP ICS accounting takes place under ICS Accounting for MWD. This is because CVWD is <br>storing their ICS under MWD's account. MWD meets the state of CA contribution<br><br>Sys Eff Calculation    <br>";
 
     END
     UUID "{fb667623-0553-452e-af24-8afa189a5714}";;
@@ -14197,32 +14228,32 @@ BEGIN
     SCALE_UNITS    "1000 acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{f16ea1e4-2024-4bf2-b9c2-d201c0530794}";
+    UUID "{8d3aec7c-5ff2-451b-8934-ed1e5799cbf9}";
 ;
 
     PREDEFINED_FUNCTION "Min" ( NUMERIC arg1, NUMERIC arg2 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ea2eed14-5831-4642-ba61-bc217940e0c1}";
+    UUID "{6bf79a32-1468-452c-8f65-e94d5ebca238}";
 ;
 
     PREDEFINED_FUNCTION "MinItem" ( LIST arg1 )
     SCALE_UNITS    "acre-ft";
     PRE_EXEC_DIAG  FALSE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d16160a6-e246-4355-875f-42041adebb09}";
+    UUID "{905f469a-d76e-4f4d-9383-528397ca5e90}";
 ;
 
     PREDEFINED_FUNCTION "Sum" ( LIST arg1 )
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{5a141766-07cc-46b4-bd00-953a0a5771a1}";
+    UUID "{28f163b4-487f-4cc1-9c9a-4316e61a78f5}";
 ;
 
   END
-  UUID "{d5f6b3ec-d721-4dba-84ec-6ad2bc10e308}";;
+  UUID "{0932f3fb-9d60-4a56-bf67-10d1878cb58a}";;
 
   PREDEFINED_GROUP "Date / Time";
   DESCRIPTION   "Predefined functions which access and manipulate date/times.";
@@ -14233,11 +14264,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{ba00629b-190f-4e95-b3ae-132e5df607ab}";
+    UUID "{ff341d37-7850-4b05-b461-d8901ab298fb}";
 ;
 
   END
-  UUID "{8b4f5c6c-b82e-41c6-9c78-abd1d62d0499}";;
+  UUID "{61486314-ce28-4c86-a5ea-d04407c9ae39}";;
 
   PREDEFINED_GROUP "Engineering";
   DESCRIPTION   "Predefined functions similar to methods on objects.";
@@ -14248,11 +14279,11 @@ BEGIN
     SCALE_UNITS    "acre-ft/month";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{fe13539c-7abb-4a2f-8de7-13494a07a861}";
+    UUID "{824288ac-36d8-4ab3-8d56-3e3de254cd08}";
 ;
 
   END
-  UUID "{bdac2216-759b-42ba-8826-45b750b43f13}";;
+  UUID "{9d26ef96-2e53-4cf4-852b-318336853412}";;
 
   PREDEFINED_GROUP "Workspace";
   DESCRIPTION   "Predefined functions which access information on slots and objects.";
@@ -14263,11 +14294,11 @@ BEGIN
     SCALE_UNITS    "";
     PRE_EXEC_DIAG  TRUE;
     POST_EXEC_DIAG TRUE;
-    UUID "{d7e80d17-54d8-4913-bfd9-a821260d2b40}";
+    UUID "{00915629-279a-48f9-ae26-fd332841e297}";
 ;
 
   END
-  UUID "{92097d56-7a11-4625-b95c-32a0a6135139}";;
+  UUID "{dcca447b-dd87-47db-9f1c-84689443a1ff}";;
 
   REPORT_GROUP "Report Group";
   DESCRIPTION  "";
